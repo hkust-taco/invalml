@@ -1,0 +1,338 @@
+:js
+
+import "../../mlscript-compile/Stack.mls"
+import "../../mlscript-compile/Str.mls"
+import "../../mlscript-compile/Option.mls"
+
+open Stack
+open Str
+open Option
+
+declare fun parseInt(str: Str, radix: Int): Int
+
+object
+  Round
+  Square
+  Curly
+
+type BracketKind = Round | Square | Curly
+
+module LiteralKind with
+  object
+    Integer
+    Decimal
+    String
+    Boolean
+
+module Token with
+  object
+    Space
+    Comma
+    Semicolon
+    Error
+  
+  class
+    Open(kind: BracketKind)
+    Close(kind: BracketKind)
+    Comment(content: Str)
+    Identifier(name: Str, symbolic: Bool)
+    Literal(kind: LiteralKind, literal: Str)
+  
+  fun display(token) = if token is
+    Space then "Space"
+    Comma then "Comma"
+    Semicolon then "Semicolon"
+    Error then "Error"
+    Open(kind) then "Open(" ~ display(kind) ~ ")"
+    Close(kind) then "Close(" ~ display(kind) ~ ")"
+    Comment(content) then "Comment(" ~ content ~ ")"
+    Identifier(name, symbolic) then "Identifier(" ~ name ~ ", " ~ symbolic ~ ")"
+    Literal(kind, literal) then "Literal(" ~ display(kind) ~ ", " ~ literal ~ ")"
+    Round then "Round"
+    Square then "Square"
+    Curly then "Curly"
+    LiteralKind.Integer then "Integer"
+    LiteralKind.Decimal then "Decimal"
+    LiteralKind.String then "String"
+    LiteralKind.Boolean then "Boolean"
+
+class Location(start: Int, end: Int)
+
+class Message(description: Str, location: Location)
+
+class Report(messages: Stack[Message])
+
+module Char with
+  pattern Operator = "!" | "#" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<" | "=" | ">" | "?" | "@" | "\\" | "^" | "|" | "~" | "."
+  pattern Letter = "a" ..= "z" | "A" ..= "Z"
+  pattern Digit = "0" ..= "9"
+  fun isDigit(ch: Str) = ch is Digit
+  pattern HexDigit = Digit | "a" ..= "f" | "A" ..= "F"
+  fun isHexDigit(ch: Str) = ch is HexDigit
+  pattern OctDigit = "0" ..= "7"
+  fun isOctDigit(ch: Str) = ch is OctDigit
+  pattern BinDigit = "0" | "1"
+  fun isBinDigit(ch: Str) = ch is BinDigit
+  pattern IdentifierStart = Letter | "_"
+  pattern IdentifierBody = IdentifierStart | Digit
+  pattern Space = " " | "\t" | "\n" | "\r"
+  pattern Zero = "0"
+
+:e
+// It would be decent if we allow pattern parameters in functions.
+fun take(pattern P, idx: Str, acc: Str) =
+  while idx < str.length and str.charAt(idx) is ch and ch is P
+    then
+      set idx = idx + 1
+      set acc = acc + ch
+    else [acc, idx]
+//│ ╔══[ERROR] Name not found: str
+//│ ║  l.84: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ╙──      	              ^^^
+//│ ╔══[ERROR] Name not found: str
+//│ ║  l.84: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ╙──      	                             ^^^
+//│ ╔══[ERROR] Cannot use this identifier as a pattern
+//│ ║  l.84: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ╙──      	                                                             ^
+
+:e
+// We can mitigate the boilerplate if we support split around `of`.
+fun foobar(x) = if x is
+  None then "hello"
+  Some of
+    a then a
+//│ ╔══[ERROR] Unrecognized pattern split.
+//│ ║  l.103: 	  Some of
+//│ ║         	  ^^^^^^^
+//│ ║  l.104: 	    a then a
+//│ ╙──       	^^^^^^^^^^^^
+
+fun lex(str: Str) =
+  fun char(idx: Int) = if idx < str.length
+    then (Some of str.charAt of idx) else None
+  
+  // Consume a sequence of characters that satisfy a predicate.
+  // The function returns the accumulated string and the following index.
+  fun take(pred: Str -> Bool, idx: Int, acc: Str): [Str, Int] =
+    while (char of idx) is Some(ch) and pred(ch)
+      then
+        set idx = idx + 1
+        set acc = acc + ch
+      else [acc, idx]
+  
+  fun whitespace(idx: Int): Int =
+    while char(idx) is Some(Char.Space)
+      then set idx = idx + 1
+      else idx
+  
+  fun digits(idx: Int, acc: Str) =
+    while char(idx) is Some(Char.Digit as ch)
+      then
+        set idx = idx + 1
+        set acc = acc + ch
+      else [idx, acc]
+  
+  fun hex(idx: Int, acc: Str) =
+    while char(idx) is Some(Char.Digit as ch)
+      then
+        set idx = idx + 1
+        set acc = acc + ch
+      else [idx, acc]
+  
+  fun identifier(idx: Int, acc: Str) =
+    while char(idx) is Some(Char.IdentifierBody as ch)
+      then
+        set idx = idx + 1
+        set acc = acc + ch
+      else [idx, Token.Identifier(acc, false)]
+  
+  fun operator(idx: Int, acc: Str) =
+    while char(idx) is Some(Char.Operator as ch)
+      then
+        set idx = idx + 1
+        set acc = acc + ch
+      else [idx, Token.Identifier(acc, true)]
+      
+  fun comment(idx: Int) =
+    let content = ""
+    if char(idx) is
+      Some("/") then
+        set idx = idx + 1
+        while char(idx) is Some(ch)
+          and ch !== "\n" then
+            set idx = idx + 1
+            set content = content + ch
+          else [idx, Token.Comment(content)]
+      Some("*") then
+        let terminated = false
+        set idx = idx + 1
+        while terminated is false and char(idx) is
+          Some("*") and char(idx + 1) is Some("/") then
+            set idx = idx + 2
+            set terminated = true
+          Some(ch) then
+            set idx = idx + 1
+            set content = content + ch
+          else
+            if terminated then
+              [idx, Token.Comment(content)]
+            else
+              [idx, Token.Error]
+      Some(Char.IdentifierStart as ch) then operator("/" ~ ch, idx + 1)
+      else [idx, Token.Error]
+  
+  fun string(idx: Int) =
+    let content = ""
+    let terminated = false
+    fun dummy(ch) = true
+    
+    while terminated is false and char(idx) is Some(ch) and
+      ch == "\"" then
+        set terminated = true
+        set idx = idx + 1
+      dummy(ch) then // If I use wildcard, then the loop will not continue.
+        set idx = idx + 1
+        set content = content + ch
+    else ()
+    
+    if terminated then
+      [idx, Token.Literal(LiteralKind.String, content)]
+    else
+      [idx, Token.Error]
+  
+  fun number(idx: Int) = if (char of idx) is
+    None then None
+    (Some of Char.Zero) and (char of idx + 1) is
+      None then Some of [Token.Literal(0), idx + 1]
+      (Some of "b") then Some of take(Char.isBinDigit, idx + 2, "")
+      (Some of "o") then Some of take(Char.isOctDigit, idx + 2, "")
+      (Some of "x") then Some of take(Char.isHexDigit, idx + 2, "")
+      (Some of ".") and digits(idx + 2) is [ds, idx'] then Some of ["0." ~ ds, idx']
+      _ and digits(idx) is [ds, idx'] then
+        print(ds)
+        Some of [ds, idx']
+        // and (char of idx') is
+        // (Some of ".") and digits(idx' + 1) is [ds', idx''] then Some of [ds ~ "." ~ ds', idx'']
+        // else 
+      else None
+  
+  
+  fun scan(idx: Int, acc: Stack[Token]): Stack[Token] =
+    fun go(idx: Int, tok: Token) = scan(idx, tok :: acc)
+    
+    // print("Progress: " ~ idx ~ " / Last token: " ~ if acc is Cons(h, _) then Token.display(h) else "None")
+    
+    if char(idx) is
+      None then toReverseArray of reverse of acc
+      Some(Char.Space) then go(whitespace(idx + 1), Token.Space)
+      Some(",") then go(idx + 1, Token.Comma)
+      Some(";") then go(idx + 1, Token.Semicolon)
+      Some("\"") then go(..string(idx + 1))
+      Some("(") then go(idx + 1, Token.Open(Round))
+      Some("[") then go(idx + 1, Token.Open(Square))
+      Some("{") then go(idx + 1, Token.Open(Curly))
+      Some(")") then go(idx + 1, Token.Close(Round))
+      Some("]") then go(idx + 1, Token.Close(Square))
+      Some("}") then go(idx + 1, Token.Close(Curly))
+      Some("/") then go(..comment(idx + 1))
+      Some(Char.IdentifierStart as ch) then go(..identifier(idx + 1, ch))
+      Some(Char.Operator as ch) then go(..operator(idx + 1, ch))
+      Some(Char.Digit as ch) and digits(idx + 1, ch) is [idx', literal] then
+        go(idx', Token.Literal(LiteralKind.Integer, literal))
+      Some(other) then
+        print("Unrecognized character: '" ~ other ~ "'")
+        go(idx + 1, Token.Error)
+  
+  scan(0, Nil)
+
+fun lines(...strs) = strs.join("\n")
+
+(lex of lines of
+  "let rec factorial x = // a simple factorial function",
+  "  if x <= 1 then 1 else x * factorial (x - 1)",
+  "",
+  "let bool_of_string = function",
+  "  | \"true\" -> true",
+  "  | \"false\" -> false",
+  "  | _ -> raise (Invalid_argument \"bool_of_string\")",
+).map of (x, i, a) => Token.display(x)
+//│ > [
+//│ >   'Identifier(let, false)',
+//│ >   'Space',
+//│ >   'Identifier(rec, false)',
+//│ >   'Space',
+//│ >   'Identifier(factorial, false)',
+//│ >   'Space',
+//│ >   'Identifier(x, false)',
+//│ >   'Space',
+//│ >   'Identifier(=, true)',
+//│ >   'Space',
+//│ >   'Comment( a simple factorial function)',
+//│ >   'Space',
+//│ >   'Identifier(if, false)',
+//│ >   'Space',
+//│ >   'Identifier(x, false)',
+//│ >   'Space',
+//│ >   'Identifier(<=, true)',
+//│ >   'Space',
+//│ >   'Literal(Integer, 1)',
+//│ >   'Space',
+//│ >   'Identifier(then, false)',
+//│ >   'Space',
+//│ >   'Literal(Integer, 1)',
+//│ >   'Space',
+//│ >   'Identifier(else, false)',
+//│ >   'Space',
+//│ >   'Identifier(x, false)',
+//│ >   'Space',
+//│ >   'Identifier(*, true)',
+//│ >   'Space',
+//│ >   'Identifier(factorial, false)',
+//│ >   'Space',
+//│ >   'Open(Round)',
+//│ >   'Identifier(x, false)',
+//│ >   'Space',
+//│ >   'Identifier(-, true)',
+//│ >   'Space',
+//│ >   'Literal(Integer, 1)',
+//│ >   'Close(Round)',
+//│ >   'Space',
+//│ >   'Identifier(let, false)',
+//│ >   'Space',
+//│ >   'Identifier(bool_of_string, false)',
+//│ >   'Space',
+//│ >   'Identifier(=, true)',
+//│ >   'Space',
+//│ >   'Identifier(function, false)',
+//│ >   'Space',
+//│ >   'Identifier(|, true)',
+//│ >   'Space',
+//│ >   'Literal(String, true)',
+//│ >   'Space',
+//│ >   'Identifier(->, true)',
+//│ >   'Space',
+//│ >   'Identifier(true, false)',
+//│ >   'Space',
+//│ >   'Identifier(|, true)',
+//│ >   'Space',
+//│ >   'Literal(String, false)',
+//│ >   'Space',
+//│ >   'Identifier(->, true)',
+//│ >   'Space',
+//│ >   'Identifier(false, false)',
+//│ >   'Space',
+//│ >   'Identifier(|, true)',
+//│ >   'Space',
+//│ >   'Identifier(_, false)',
+//│ >   'Space',
+//│ >   'Identifier(->, true)',
+//│ >   'Space',
+//│ >   'Identifier(raise, false)',
+//│ >   'Space',
+//│ >   'Open(Round)',
+//│ >   'Identifier(Invalid_argument, false)',
+//│ >   'Space',
+//│ >   'Literal(String, bool_of_string)',
+//│ >   'Close(Round)'
+//│ = ]
