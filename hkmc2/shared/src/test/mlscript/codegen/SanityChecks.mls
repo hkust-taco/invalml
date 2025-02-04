@@ -12,7 +12,7 @@ f(2, 3)
 //│   let y = args[1];
 //│   return x + y
 //│ };
-//│ block$res1 = f(2, 3);
+//│ block$res1 = runtime.checkCall(f(2, 3));
 //│ undefined
 //│ = 5
 
@@ -30,7 +30,7 @@ f2(2)
 :re
 f(2)
 //│ JS:
-//│ block$res3 = f(2); undefined
+//│ block$res3 = runtime.checkCall(f(2)); undefined
 //│ ═══[RUNTIME ERROR] Error: Function 'f' expected 2 arguments but got 1
 
 
@@ -51,8 +51,8 @@ f(3)(4)
 //│     return tmp1 + z
 //│   }
 //│ };
-//│ tmp = f1(3);
-//│ block$res4 = tmp(4) ?? null;
+//│ tmp = runtime.checkCall(f1(3));
+//│ block$res4 = runtime.safeCall(tmp(4));
 //│ undefined
 //│ ═══[RUNTIME ERROR] Error: Function expected 2 arguments but got 1
 
@@ -62,7 +62,7 @@ f(3)(4)
 :noSanityCheck
 let f = (x, y) => x + y in f(2)
 //│ JS:
-//│ f3 = (x, y) => { return x + y }; block$res5 = f3(2) ?? null; undefined
+//│ f3 = (x, y) => { return x + y }; block$res5 = runtime.safeCall(f3(2)); undefined
 //│ = NaN
 
 :ssjs
@@ -76,7 +76,7 @@ f(2)
 //│   let y = args[1];
 //│   return x + y
 //│ };
-//│ block$res6 = f4(2) ?? null;
+//│ block$res6 = runtime.safeCall(f4(2));
 //│ undefined
 //│ ═══[RUNTIME ERROR] Error: Function expected 2 arguments but got 1
 //│ f = [function f4]
@@ -104,7 +104,7 @@ Cls(1, 2).f(3)
 //│   toString() { return "Cls(" + globalThis.Predef.render(this.x) + ", " + globalThis.Predef.render(this.y) + ")"; }
 //│ };
 //│ tmp1 = Cls1(1, 2);
-//│ block$res7 = tmp1.f(3) ?? null;
+//│ block$res7 = runtime.safeCall(tmp1.f(3));
 //│ undefined
 //│ = NaN
 
@@ -131,8 +131,8 @@ Cls(1, 2).f(3)
 //│   }
 //│   toString() { return "Cls(" + globalThis.Predef.render(this.x) + ", " + globalThis.Predef.render(this.y) + ")"; }
 //│ };
-//│ tmp2 = Cls3(1, 2);
-//│ block$res8 = tmp2.f(3) ?? null;
+//│ tmp2 = runtime.checkCall(Cls3(1, 2));
+//│ block$res8 = runtime.safeCall(tmp2.f(3));
 //│ undefined
 //│ ═══[RUNTIME ERROR] Error: Function 'f' expected 2 arguments but got 1
 
@@ -167,9 +167,9 @@ Cls(1, 2).f(3, 4)(5)
 //│   }
 //│   toString() { return "Cls(" + globalThis.Predef.render(this.x) + ", " + globalThis.Predef.render(this.y) + ")"; }
 //│ };
-//│ tmp3 = Cls5(1, 2);
+//│ tmp3 = runtime.checkCall(Cls5(1, 2));
 //│ tmp4 = tmp3.f(3, 4);
-//│ block$res9 = tmp4(5) ?? null;
+//│ block$res9 = runtime.safeCall(tmp4(5));
 //│ undefined
 //│ ═══[RUNTIME ERROR] Error: Function expected 2 arguments but got 1
 
@@ -183,7 +183,7 @@ console.log(1)
 //│ } else {
 //│   tmp5 = selRes;
 //│ }
-//│ block$res10 = tmp5.log(1) ?? null;
+//│ block$res10 = runtime.safeCall(tmp5.log(1));
 //│ undefined
 //│ > 1
 
@@ -205,7 +205,7 @@ globalThis.x
 :ssjs
 globalThis.x()
 //│ JS:
-//│ block$res12 = this.x() ?? null; undefined
+//│ block$res12 = runtime.safeCall(this.x()); undefined
 //│ ═══[RUNTIME ERROR] TypeError: this.x is not a function
 
 
@@ -237,7 +237,7 @@ if M.A(1).y is
 //│   }
 //│   static toString() { return "M"; }
 //│ };
-//│ tmp6 = M1.A(1);
+//│ tmp6 = runtime.checkCall(M1.A(1));
 //│ selRes2 = tmp6.y;
 //│ if (selRes2 === undefined) {
 //│   throw new this.Error("Access to required field 'y' yielded 'undefined'");
@@ -269,14 +269,14 @@ M.A(1).y
 //│ } else {
 //│   tmp8 = selRes3;
 //│ }
-//│ tmp9 = M1.A(1);
+//│ tmp9 = runtime.checkCall(M1.A(1));
 //│ selRes4 = tmp9.y;
 //│ if (selRes4 === undefined) {
 //│   throw new this.Error("Access to required field 'y' yielded 'undefined'");
 //│ } else {
 //│   tmp10 = selRes4;
 //│ }
-//│ block$res14 = tmp8.log(tmp10) ?? null;
+//│ block$res14 = runtime.safeCall(tmp8.log(tmp10));
 //│ undefined
 //│ ═══[RUNTIME ERROR] Error: Access to required field 'y' yielded 'undefined'
 
@@ -287,7 +287,7 @@ M.A(1).y
 M.A(1).y
   console.log()
 //│ JS:
-//│ tmp11 = M1.A(1); block$res15 = this.console.log(tmp11.y) ?? null; undefined
+//│ tmp11 = M1.A(1); block$res15 = runtime.safeCall(this.console.log(tmp11.y)); undefined
 //│ > undefined
 
 :noSanityCheck
@@ -303,7 +303,7 @@ M.A(2).y > 1
 :ssjs
 M.A(1).g(0)
 //│ JS:
-//│ tmp15 = M1.A(1); block$res18 = tmp15.g(0) ?? null; undefined
+//│ tmp15 = runtime.checkCall(M1.A(1)); block$res18 = runtime.safeCall(tmp15.g(0)); undefined
 //│ ═══[RUNTIME ERROR] TypeError: tmp15.g is not a function
 
 
@@ -311,7 +311,7 @@ M.A(1).g(0)
 :ssjs
 M.A(1).f(0)
 //│ JS:
-//│ tmp16 = M1.A(1); block$res19 = tmp16.f(0) ?? null; undefined
+//│ tmp16 = runtime.checkCall(M1.A(1)); block$res19 = runtime.safeCall(tmp16.f(0)); undefined
 //│ = 1
 
 

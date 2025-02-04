@@ -14,7 +14,7 @@ empty.0
 :sjs
 let single = [1]
 //│ JS (unsanitized):
-//│ let single; single = [ 1 ]; null
+//│ let single; single = [ 1 ];
 //│ single = [1]
 
 single.0
@@ -24,7 +24,7 @@ single.0
 :sjs
 val single = [1]
 //│ JS (unsanitized):
-//│ let single1; single1 = [ 1 ]; null
+//│ let single1; single1 = [ 1 ];
 //│ single = [1]
 
 single.0

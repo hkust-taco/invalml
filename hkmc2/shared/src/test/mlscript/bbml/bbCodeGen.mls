@@ -69,7 +69,6 @@ class Foo(x: Int)
 //│   }
 //│   toString() { return "Foo(" + globalThis.Predef.render(this.x) + ")"; }
 //│ };
-//│ null
 //│ Type: ⊤
 
 
@@ -92,7 +91,7 @@ let foo = new Foo(42) in foo.Foo#x
 :sjs
 fun inc(x) = x + 1
 //│ JS (unsanitized):
-//│ let inc; inc = function inc(x1) { return x1 + 1 }; null
+//│ let inc; inc = function inc(x1) { return x1 + 1 };
 //│ Type: ⊤
 
 
@@ -157,12 +156,11 @@ fun pow(x) = case
 //│       n = caseScrut;
 //│       tmp2 = pow(x1);
 //│       tmp3 = n - 1;
-//│       tmp4 = tmp2(tmp3) ?? null;
+//│       tmp4 = runtime.safeCall(tmp2(tmp3));
 //│       return x1 * tmp4
 //│     }
 //│   }
 //│ };
-//│ null
 //│ Type: ⊤
 
 
@@ -185,7 +183,6 @@ fun not = case
 //│     }
 //│   }
 //│ };
-//│ null
 //│ Type: ⊤
 
 
@@ -218,7 +215,6 @@ fun fact = case
 //│     }
 //│   }
 //│ };
-//│ null
 //│ Type: ⊤
 
 

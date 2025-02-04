@@ -1,3 +1,4 @@
+import runtime from "./Runtime.mjs";
 import Predef from "./Predef.mjs";
 let Option1;
 Option1 = class Option {
@@ -40,5 +41,4 @@ Option1 = class Option {
   }
   static toString() { return "Option"; }
 };
-null
 let Option = Option1; export default Option;

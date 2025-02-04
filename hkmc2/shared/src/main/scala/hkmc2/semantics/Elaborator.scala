@@ -65,12 +65,20 @@ object Elaborator:
     // * and that built-in symbols like Int and Str be imported into another nested context on top of it.
     // * It should not be possible to shadow these built-in symbols, so user code should always be compiled
     // * in further nested contexts.
+    lazy val preludeCtx: Ctx =
+      parent match
+      case N => lastWords("Cannot find prelude context.")
+      case S(par) => if par.parent.isEmpty then this else par.preludeCtx
+    
     // * Method `getBuiltin` is used to look up built-in symbols in the context of builtin symbols.
     def getBuiltin(nme: Str): Opt[Ctx.Elem] =
-      parent.filter(_.parent.nonEmpty).fold(env.get(nme))(_.getBuiltin(nme))
+      preludeCtx.env.get(nme)
     
-    // TODO only store this in the top-level context!
-    object Builtins:
+    lazy val builtins: Ctx#MkBuiltins = preludeCtx.MkBuiltins
+    private object MkBuiltins extends MkBuiltins
+    
+    class MkBuiltins:
+      assert(Ctx.this is preludeCtx)
       private def assumeBuiltin(nme: Str): Symbol =
         getBuiltin(nme)
           .getOrElse(throw new NoSuchElementException(s"builtin $nme not in ${parent.map(_.env.keySet)}"))
@@ -84,6 +92,7 @@ object Elaborator:
       private def assumeBuiltinMod(nme: Str): ModuleSymbol =
         assumeBuiltin(nme).asMod.getOrElse(throw new NoSuchElementException(
           s"builtin module symbol $nme"))
+      val Unit = assumeBuiltinCls("Unit")
       val Int = assumeBuiltinCls("Int")
       val Num = assumeBuiltinCls("Num")
       val Str = assumeBuiltinCls("Str")
@@ -123,9 +132,10 @@ object Elaborator:
   transparent inline def ctx(using Ctx): Ctx = summon
   
   class State:
-    given State = this
     val suid = new Uid.Symbol.State
+    given State = this
     val globalThisSymbol = TopLevelSymbol("globalThis")
+    val runtimeSymbol = TempSymbol(N, "runtime")
     val builtinOpsMap =
       val baseBuiltins = builtins.map: op =>
           op -> BuiltinSymbol(op,
@@ -201,7 +211,7 @@ extends Importer:
         trm.symbol match
         case S(sym) =>
           sym.asTpe match
-          case S(ctx.Builtins.untyped) =>
+          case S(ctx.builtins.untyped) =>
             return S(Annot.Untyped)
           case _ => ()
         case _ => ()
@@ -210,6 +220,7 @@ extends Importer:
   def term(tree: Tree, inAppPrefix: Bool = false): Ctxl[Term] =
   trace[Term](s"Elab term ${tree.showDbg}", r => s"~> $r"):
     tree.desugared match
+    case unt @ Unt() => unit.withLocOf(unt)
     case Bra(k, e) =>
       k match
       case BracketKind.Round =>
@@ -219,18 +230,18 @@ extends Importer:
     case Block(s :: Nil) =>
       term(s)
     case b: Block =>
-      block(b)._1
+      block(b, hasResult = true)._1
     case lit: Literal =>
       Term.Lit(lit)
     case d: Def =>
-      term(Block(d :: UnitLit(true) :: Nil))
+      term(Block(d :: Unt() :: Nil))
     case LetLike(`let`, lhs, rhso, S(bod)) =>
       term(Block(LetLike(`let`, lhs, rhso, N) :: bod :: Nil))
     case LetLike(`let`, lhs, S(rhs), N) =>
       raise(ErrorReport(
         msg"Expected a body for let bindings in expression position" ->
           tree.toLoc :: Nil))
-      block(LetLike(`let`, lhs, S(rhs), N) :: Nil)._1
+      block(LetLike(`let`, lhs, S(rhs), N) :: Nil, hasResult = true)._1
     case LetLike(`set`, lhs, S(rhs), N) =>
       Term.Assgn(term(lhs), term(rhs))
     case LetLike(`set`, lhs, S(rhs), S(bod)) =>
@@ -254,14 +265,14 @@ extends Importer:
       derivedClsSym.defn = S(ClassDef(
         N, syntax.Cls, derivedClsSym,
         BlockMemberSymbol(derivedClsSym.name, Nil),
-        Nil, N, N, ObjBody(Term.Blk(Nil, Term.Lit(Tree.UnitLit(true)))), List()))
+        Nil, N, N, ObjBody(Term.Blk(Nil, Term.Lit(Tree.UnitLit(false)))), List()))
       
       val elabed = ctx.nest(S(derivedClsSym)).givenIn:
-        block(sts_)._1
+        block(sts_, hasResult = false)._1
       
       elabed.res match
-        case Term.Lit(UnitLit(true)) => 
-        case trm => raise(WarningReport(msg"Terms in handler block do nothing" -> trm.toLoc :: Nil))
+      case Term.Lit(UnitLit(false)) => 
+      case trm => raise(WarningReport(msg"Terms in handler block do nothing" -> trm.toLoc :: Nil))
       
       val tds = elabed.stats.map {
           case td @ TermDefinition(owner, Fun, sym, params, sign, body, resSym, flags, annotations) =>
@@ -500,14 +511,14 @@ extends Importer:
           clsSym ->
             // TODO integrate context inherited from cls
             // TODO make context with var symbols for class parameters
-            ObjBody(block(rft)._1)
+            ObjBody(block(rft, hasResult = false)._1)
       body match
       case S(App(c, Tup(params))) =>
         Term.New(cls(c, inAppPrefix = true), params.map(term(_)), bodo).withLocOf(tree)
       case S(c) => // * We'll catch bad `new` targets during type checking
         Term.New(cls(c, inAppPrefix = false), Nil, bodo).withLocOf(tree)
       case N =>
-        Term.New(State.globalThisSymbol.ref().sel(Ident("Object"), S(ctx.Builtins.Object)),
+        Term.New(State.globalThisSymbol.ref().sel(Ident("Object"), S(ctx.builtins.Object)),
           Nil, bodo).withLocOf(tree)
       // case _ =>
       //   raise(ErrorReport(msg"Illegal new expression." -> tree.toLoc :: Nil))
@@ -629,14 +640,19 @@ extends Importer:
         then flags = flags.copy(mod = true)
       Fld(flags, t, N)
   
-  def unit: Term.Lit = Term.Lit(UnitLit(true))
+  def unit: Term.UnitVal = Term.UnitVal()
   
   
   
-  def block(sts: Ls[Tree])(using c: Ctx): (Term.Blk, Ctx) =
-    block(new Tree.Block(sts))
+  def block(sts: Ls[Tree], hasResult: Bool)(using c: Ctx): (Term.Blk, Ctx) =
+    block(new Tree.Block(sts), hasResult)
   
-  def block(blk: Tree.Block)(using c: Ctx): (Term.Blk, Ctx) = trace[(Term.Blk, Ctx)](
+  // * Some blocks do not have a meaningful result,
+  // * e.g., constructor blocks or top-level blocks (in MLscript files and diff-tests);
+  // * for these, elaborate with `hasResult = false`, which uses `undefined` as the result
+  // * when there is no other result available. This is fine since the value is never used.
+  // * These useless trailing `undefined`s are then removed by `Lowering`.
+  def block(blk: Tree.Block, hasResult: Bool)(using c: Ctx): (Term.Blk, Ctx) = trace[(Term.Blk, Ctx)](
     pre = s"Elab block ${blk.desugStmts.toString.truncate(100, "[...]")} ${ctx.outer}", r => s"~> ${r._1}"
   ):
     
@@ -684,7 +700,9 @@ extends Importer:
       sts match
       case Nil =>
         reportUnusedAnnotations
-        val res = unit
+        val res = if hasResult
+          then unit
+          else Term.Lit(UnitLit(false))
         (Term.Blk(funs reverse_::: acc.reverse, res), ctx)
       case Open(bod) :: sts =>
         reportUnusedAnnotations
@@ -936,7 +954,7 @@ extends Importer:
               Nil, // ps.map(_.params).getOrElse(Nil), // TODO[Luyu]: remove pattern parameters
               td.rhs.getOrElse(die))
             val pd = PatternDef(owner, patSym, sym, tps, ps,
-              ObjBody(Term.Blk(bod, Term.Lit(UnitLit(true)))), annotations)
+              ObjBody(Term.Blk(bod, Term.Lit(UnitLit(false)))), annotations)
             patSym.defn = S(pd)
             pd
         case k: (Mod.type | Obj.type) =>
@@ -946,10 +964,10 @@ extends Importer:
             log(s"Processing type definition $nme")
             val cd =
               val (bod, c) = body match
-                case S(b: Tree.Block) => block(b)
+                case S(b: Tree.Block) => block(b, hasResult = false)
                 // case S(t) => block(t :: Nil)
                 case S(t) => ???
-                case N => (new Term.Blk(Nil, Term.Lit(UnitLit(true))), ctx)
+                case N => (new Term.Blk(Nil, Term.Lit(UnitLit(false))), ctx)
               ModuleDef(owner, clsSym, sym, tps, ps, newOf(td), k, ObjBody(bod), annotations)
             clsSym.defn = S(cd)
             cd
@@ -960,10 +978,10 @@ extends Importer:
             log(s"Processing type definition $nme")
             val cd =
               val (bod, c) = body match
-                case S(b: Tree.Block) => block(b)
+                case S(b: Tree.Block) => block(b, hasResult = false)
                 // case S(t) => block(t :: Nil)
                 case S(t) => ???
-                case N => (new Term.Blk(Nil, Term.Lit(UnitLit(true))), ctx)
+                case N => (new Term.Blk(Nil, Term.Lit(UnitLit(false))), ctx)
               ClassDef(owner, Cls, clsSym, sym, tps, ps, newOf(td), ObjBody(bod), annotations)
             clsSym.defn = S(cd)
             cd
@@ -1048,13 +1066,13 @@ extends Importer:
       (vs, ctx ++ vs.map(p => p.sym.name -> p.sym))
   
   def importFrom(sts: Tree.Block)(using c: Ctx): (Term.Blk, Ctx) =
-    val (res, newCtx) = block(sts)
+    val (res, newCtx) = block(sts, hasResult = false)
     // TODO handle name clashes
     (res, newCtx)
   
   
   def topLevel(sts: Tree.Block)(using c: Ctx): (Term.Blk, Ctx) =
-    val (res, ctx) = block(sts)
+    val (res, ctx) = block(sts, hasResult = false)
     computeVariances(res)
     (res, ctx)
   
@@ -1162,7 +1180,7 @@ extends Importer:
       case _ => super.traverseType(pol)(trm)
   abstract class Traverser:
     def traverseType(pol: Pol)(trm: Term): Unit = trm match
-      case Term.Lit(_) | Term.Error =>
+      case Term.Lit(_) | Term.UnitVal() | Term.Error =>
       case Term.TyApp(lhs, targs) =>
         // lhs.resolveSymbol
         // targs.foreach(traverseType(pol))

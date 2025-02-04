@@ -139,7 +139,6 @@ fun f(x) = if x is
 //│     }
 //│   }
 //│ };
-//│ null
 
 f(Some(0))
 //│ > oops
@@ -181,7 +180,6 @@ fun f(x) = if x is
 //│     }
 //│   }
 //│ };
-//│ null
 
 f(Some(123))
 //│ = 123
@@ -216,7 +214,6 @@ fun f(x) = log of if x is
 //│   }
 //│   return log(tmp11)
 //│ };
-//│ null
 
 f(Some(0))
 //│ > 0

@@ -22,7 +22,10 @@ abstract class TailOp extends (Result => Block)
 object Ret extends TailOp:
   def apply(r: Result): Block = Return(r, implct = false)
 object ImplctRet extends TailOp:
-  def apply(r: Result): Block = Return(r, implct = true)
+  def apply(r: Result): Block =
+    r match
+    case Value.Lit(Tree.UnitLit(false)) => End()
+    case _ => Return(r, implct = true)
 object Thrw extends TailOp:
   def apply(r: Result): Block = Throw(r)
 
@@ -54,6 +57,9 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
   private lazy val unreachableFn =
     Select(Select(Value.Ref(State.globalThisSymbol), Tree.Ident("Predef"))(N), Tree.Ident("unreachable"))(N)
   
+  def unit: Path =
+    Select(Value.Ref(State.runtimeSymbol), Tree.Ident("Unit"))(S(summon[Ctx].builtins.Unit))
+  
   def returnedTerm(t: st)(using Subst): Block = term(t)(Ret)
   
   // * Used to work around Scala's @tailrec annotation for those few calls that are not in tail position.
@@ -69,8 +75,9 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
       raise(WarningReport:
         msg"Pure expression in statement position" -> t.toLoc :: Nil)
     t match
+    case st.UnitVal() => k(unit)
     case st.Lit(lit) =>
-      if lit =/= Tree.UnitLit(true) then warnStmt
+      warnStmt
       k(Value.Lit(lit))
     case st.Ret(res) =>
       returnedTerm(res)
@@ -295,20 +302,20 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
       lhs match
       case Ref(sym) =>
         subTerm(rhs): r =>
-          Assign(sym, r, k(Value.Lit(syntax.Tree.UnitLit(true))))
+          Assign(sym, r, k(unit))
       case sel @ SynthSel(prefix, nme) =>
         subTerm(prefix): p =>
           subTerm_nonTail(rhs): r =>
-            AssignField(p, nme, r, k(Value.Lit(syntax.Tree.UnitLit(true))))(sel.sym)
+            AssignField(p, nme, r, k(unit))(sel.sym)
       case sel @ Sel(prefix, nme) =>
         subTerm(prefix): p =>
           subTerm_nonTail(rhs): r =>
-            AssignField(p, nme, r, k(Value.Lit(syntax.Tree.UnitLit(true))))(sel.sym)
+            AssignField(p, nme, r, k(unit))(sel.sym)
       case sel @ DynSel(prefix, fld, ai) =>
         subTerm(prefix): p =>
           subTerm_nonTail(fld): f =>
             subTerm_nonTail(rhs): r =>
-              AssignDynField(p, f, ai, r, k(Value.Lit(syntax.Tree.UnitLit(true))))
+              AssignDynField(p, f, ai, r, k(unit))
       
     case st.Blk((imp @ Import(sym, path)) :: stats, res) =>
       raise(ErrorReport(
@@ -395,7 +402,7 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
               case Pattern.Lit(lit) => mkMatch(Case.Lit(lit) -> go(tail, topLevel = false))
               case Pattern.ClassLike(cls: ClassSymbol, _trm, _args0, _refined)
                   // Do not elaborate `_trm` when the `cls` is virtual.
-                  if Elaborator.ctx.Builtins.virtualClasses contains cls =>
+                  if Elaborator.ctx.builtins.virtualClasses contains cls =>
                 // [invariant:0] Some classes (e.g., `Int`) from `Prelude` do
                 // not exist at runtime. If we do lowering on `trm`, backends
                 // (e.g., `JSBuilder`) will not be able to handle the corresponding selections.
@@ -437,7 +444,7 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
         Begin(
           body,
           if usesResTmp then k(Value.Ref(l))
-          else k(Value.Lit(syntax.Tree.UnitLit(true))) // * it seems this currently never happens
+          else k(unit) // * it seems this currently never happens
         )
       
     case sel @ Sel(prefix, nme) =>

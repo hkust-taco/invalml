@@ -30,6 +30,7 @@ enum Annot extends AutoLocated:
 
 enum Term extends Statement:
   case Error
+  case UnitVal()
   case Lit(lit: Literal)
   case Builtin(id: Tree.Ident, nme: Str)
   case Ref(sym: Symbol)(val tree: Tree.Ident, val refNum: Int)
@@ -127,7 +128,7 @@ sealed trait Statement extends AutoLocated with ProductWithExtraInfo:
     case Blk(stats, res) => stats ::: res :: Nil
     case _ => subTerms
   def subTerms: Ls[Term] = this match
-    case Error | _: Lit | _: Ref | _: Builtin => Nil
+    case Error | _: Lit | _: Ref | _: Builtin | _: UnitVal => Nil
     case App(lhs, rhs) => lhs :: rhs :: Nil
     case FunTy(lhs, rhs, eff) => lhs :: rhs :: eff.toList
     case TyApp(pre, tarsg) => pre :: tarsg
@@ -194,6 +195,7 @@ sealed trait Statement extends AutoLocated with ProductWithExtraInfo:
     case _ =>
       showPlain
   def showPlain: Str = this match
+    case Term.UnitVal() => "()"
     case Lit(lit) => lit.idStr
     case r @ Ref(symbol) => symbol.toString+"#"+r.refNum
     case App(lhs, tup: Tup) => s"${lhs.showDbg}(${tup.fields.map(_.showDbg).mkString(", ")})"
@@ -211,7 +213,7 @@ sealed trait Statement extends AutoLocated with ProductWithExtraInfo:
     case IfLike(kw, body) => s"${kw.name} { ${body.showDbg} }"
     case Lam(params, body) => s"λ${params.showDbg}. ${body.showDbg}"
     case Blk(stats, res) =>
-      (stats.map(_.showDbg + "; ") :+ (res match { case Lit(Tree.UnitLit(true)) => "" case x => x.showDbg + " " }))
+      (stats.map(_.showDbg + "; ") :+ (res match { case Lit(Tree.UnitLit(false)) => "" case x => x.showDbg + " " }))
       .mkString("{ ", "", "}")
     case Quoted(term) => s"""code"${term.showDbg}""""
     case Unquoted(term) => s"$${${term.showDbg}}"
@@ -295,7 +297,7 @@ case class ObjBody(blk: Term.Blk):
   override def toString: String = blk.showDbg
 
 
-case class Import(sym: MemberSymbol[?], file: Str) extends Statement
+case class Import(sym: Symbol, file: Str) extends Statement
 
 
 sealed abstract class Declaration:

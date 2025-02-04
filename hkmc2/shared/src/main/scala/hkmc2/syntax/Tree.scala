@@ -31,7 +31,7 @@ sealed trait Literal extends AutoLocated:
       case _: IntLit => "integer"
       case _: DecLit => "decimal"
       case _: StrLit => "string"
-      case _: UnitLit => "unit"
+      case UnitLit(isNull) => if isNull then "null" else "undefined"
       case _: BoolLit => "boolean"
     + " literal"
   
@@ -43,13 +43,14 @@ enum Tree extends AutoLocated:
   case Error()
   case Dummy // TODO change the places where this is used
   case Under()
+  case Unt()
   case Ident(name: Str)
   case Keywrd(kw: Keyword)
-  case IntLit(value: BigInt)          extends Tree with Literal
-  case DecLit(value: BigDecimal)      extends Tree with Literal
-  case StrLit(value: Str)             extends Tree with Literal
+  case IntLit(value: BigInt)             extends Tree with Literal
+  case DecLit(value: BigDecimal)         extends Tree with Literal
+  case StrLit(value: Str)                extends Tree with Literal
   case UnitLit(isNullNotUndefined: Bool) extends Tree with Literal
-  case BoolLit(value: Bool)           extends Tree with Literal
+  case BoolLit(value: Bool)              extends Tree with Literal
   case Bra(k: BracketKind, inner: Tree)
   case Block(stmts: Ls[Tree])(using State) extends Tree with semantics.BlockImpl
   case OpBlock(items: Ls[Tree -> Tree])
@@ -86,7 +87,7 @@ enum Tree extends AutoLocated:
   case Annotated(annotation: Tree, target: Tree)
 
   def children: Ls[Tree] = this match
-    case _: Empty | _: Error | _: Ident | _: Literal | _: Under => Nil
+    case _: Empty | _: Error | _: Ident | _: Literal | _: Under | _: Unt => Nil
     case Bra(_, e) => e :: Nil
     case Block(stmts) => stmts
     case OpBlock(items) => items.flatMap:
@@ -213,7 +214,7 @@ object Tree:
     Tree.TypeDef(syntax.Cls, Tree.Dummy, N, N)
   object Block:
     def mk(stmts: Ls[Tree])(using State): Tree = stmts match
-      case Nil => UnitLit(true)
+      case Nil => UnitLit(false)
       case e :: Nil => e
       case es => Block(es)
   object TyApp:

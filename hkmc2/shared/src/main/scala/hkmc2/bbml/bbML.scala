@@ -204,6 +204,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
   private def typeCode(code: Term)(using ctx: BbCtx, scope: Scope): (Type, Type, Type) =
     given CCtx = CCtx.init(code, N)
     code match
+    case UnitVal() => (Top, Bot, Bot)
     case Lit(lit) => ((lit match
       case _: IntLit => BbCtx.intTy
       case _: DecLit => BbCtx.numTy
@@ -462,6 +463,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
         goStats(stats)
         val (ty, eff) = typeCheck(res)
         (ty, effBuff.foldLeft(eff)((res, e) => res | e))
+      case UnitVal() => (Top, Bot)
       case Lit(lit) => ((lit match
         case _: IntLit => BbCtx.intTy
         case _: DecLit => BbCtx.numTy

@@ -91,7 +91,6 @@ fun test2() =
 //│   tmp1 = funny();
 //│   return tmp1
 //│ };
-//│ null
 //│ ═══[WARNING] Pure expression in statement position
 //│ ╔══[ERROR] Function definition shape not yet supported for funny
 //│ ║  l.74: 	    case n then funny(n - 1) + 1
@@ -106,7 +105,7 @@ fun test2() =
 fun test3 =
   log("Hi")
 //│ ╔══[ERROR] Function definition shape not yet supported for test3
-//│ ║  l.107: 	  log("Hi")
+//│ ║  l.106: 	  log("Hi")
 //│ ╙──       	  ^^^^^^^^^
 //│ Type: ⊤
 

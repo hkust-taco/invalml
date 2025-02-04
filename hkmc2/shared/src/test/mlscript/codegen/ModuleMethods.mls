@@ -21,7 +21,6 @@ object Example with
 //│   toString() { return "Example"; }
 //│ }; Example1 = new Example$class;
 //│ Example1.class = Example$class;
-//│ null
 
 let s = Example.f
 //│ s = [function f]

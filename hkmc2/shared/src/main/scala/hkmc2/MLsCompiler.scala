@@ -37,6 +37,8 @@ class ParserSetup(file: os.Path, dbgParsing: Bool)(using Elaborator.State, Raise
 
 class MLsCompiler(preludeFile: os.Path):
   
+  val runtimeFile: os.Path = preludeFile/os.up/os.up/os.up/"mlscript-compile"/"Runtime.mjs"
+  
   
   val report = ReportFormatter: str =>
     System.out.println(fansi.Color.Red(str))
@@ -72,7 +74,8 @@ class MLsCompiler(preludeFile: os.Path):
     newCtx.nest(N).givenIn:
       
       val parsed = mainParse.resultBlk
-      val (blk, newCtx) = elab.importFrom(parsed)
+      val (blk0, newCtx) = elab.importFrom(parsed)
+      val blk = blk0.copy(stats = semantics.Import(State.runtimeSymbol, runtimeFile.toString) :: blk0.stats)
       val low = ltl.givenIn:
         codegen.Lowering(lowerHandlers = false, stackLimit = None) // TODO: properly hook up stack limit
       val jsb = ltl.givenIn:

@@ -15,6 +15,7 @@ abstract class MLsDiffMaker extends DiffMaker:
   val rootPath: Str // * Absolute path to the root of the project
   val preludeFile: os.Path // * Contains declarations of JS builtins
   val predefFile: os.Path // * Contains MLscript standard library definitions
+  val runtimeFile: os.Path = predefFile/os.up/"Runtime.mjs" // * Contains MLscript runtime definitions
   
   val wd = file / os.up
   

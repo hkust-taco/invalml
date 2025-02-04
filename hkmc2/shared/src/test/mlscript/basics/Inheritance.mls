@@ -66,7 +66,6 @@ class Baz(z) extends Bar(z * 1) with
 //│   }
 //│   toString() { return "Baz(" + globalThis.Predef.render(this.z) + ")"; }
 //│ };
-//│ null
 
 :fixme
 let b = Baz(42)
