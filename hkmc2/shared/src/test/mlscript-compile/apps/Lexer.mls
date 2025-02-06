@@ -1,14 +1,17 @@
-:js
 
-import "../../mlscript-compile/Stack.mls"
-import "../../mlscript-compile/Str.mls"
-import "../../mlscript-compile/Option.mls"
+import "../Predef.mls"
+
+open Predef
+
+import "../Stack.mls"
+import "../Str.mls"
+import "../Option.mls"
 
 open Stack
 open Str
 open Option
 
-declare fun parseInt(str: Str, radix: Int): Int
+module Lexer with ...
 
 object
   Round
@@ -77,36 +80,6 @@ module Char with
   pattern IdentifierBody = IdentifierStart | Digit
   pattern Space = " " | "\t" | "\n" | "\r"
   pattern Zero = "0"
-
-:e
-// It would be decent if we allow pattern parameters in functions.
-fun take(pattern P, idx: Str, acc: Str) =
-  while idx < str.length and str.charAt(idx) is ch and ch is P
-    then
-      set idx = idx + 1
-      set acc = acc + ch
-    else [acc, idx]
-//│ ╔══[ERROR] Name not found: str
-//│ ║  l.84: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
-//│ ╙──      	              ^^^
-//│ ╔══[ERROR] Name not found: str
-//│ ║  l.84: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
-//│ ╙──      	                             ^^^
-//│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.84: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
-//│ ╙──      	                                                             ^
-
-:e
-// We can mitigate the boilerplate if we support split around `of`.
-fun foobar(x) = if x is
-  None then "hello"
-  Some of
-    a then a
-//│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.103: 	  Some of
-//│ ║         	  ^^^^^^^
-//│ ║  l.104: 	    a then a
-//│ ╙──       	^^^^^^^^^^^^
 
 fun lex(str: Str) =
   fun char(idx: Int) = if idx < str.length
@@ -224,7 +197,7 @@ fun lex(str: Str) =
     // print("Progress: " ~ idx ~ " / Last token: " ~ if acc is Cons(h, _) then Token.display(h) else "None")
     
     if char(idx) is
-      None then toReverseArray of reverse of acc
+      None then reverse of acc
       Some(Char.Space) then go(whitespace(idx + 1), Token.Space)
       Some(",") then go(idx + 1, Token.Comma)
       Some(";") then go(idx + 1, Token.Semicolon)
@@ -245,94 +218,3 @@ fun lex(str: Str) =
         go(idx + 1, Token.Error)
   
   scan(0, Nil)
-
-fun lines(...strs) = strs.join("\n")
-
-(lex of lines of
-  "let rec factorial x = // a simple factorial function",
-  "  if x <= 1 then 1 else x * factorial (x - 1)",
-  "",
-  "let bool_of_string = function",
-  "  | \"true\" -> true",
-  "  | \"false\" -> false",
-  "  | _ -> raise (Invalid_argument \"bool_of_string\")",
-).map of (x, i, a) => Token.display(x)
-//│ > [
-//│ >   'Identifier(let, false)',
-//│ >   'Space',
-//│ >   'Identifier(rec, false)',
-//│ >   'Space',
-//│ >   'Identifier(factorial, false)',
-//│ >   'Space',
-//│ >   'Identifier(x, false)',
-//│ >   'Space',
-//│ >   'Identifier(=, true)',
-//│ >   'Space',
-//│ >   'Comment( a simple factorial function)',
-//│ >   'Space',
-//│ >   'Identifier(if, false)',
-//│ >   'Space',
-//│ >   'Identifier(x, false)',
-//│ >   'Space',
-//│ >   'Identifier(<=, true)',
-//│ >   'Space',
-//│ >   'Literal(Integer, 1)',
-//│ >   'Space',
-//│ >   'Identifier(then, false)',
-//│ >   'Space',
-//│ >   'Literal(Integer, 1)',
-//│ >   'Space',
-//│ >   'Identifier(else, false)',
-//│ >   'Space',
-//│ >   'Identifier(x, false)',
-//│ >   'Space',
-//│ >   'Identifier(*, true)',
-//│ >   'Space',
-//│ >   'Identifier(factorial, false)',
-//│ >   'Space',
-//│ >   'Open(Round)',
-//│ >   'Identifier(x, false)',
-//│ >   'Space',
-//│ >   'Identifier(-, true)',
-//│ >   'Space',
-//│ >   'Literal(Integer, 1)',
-//│ >   'Close(Round)',
-//│ >   'Space',
-//│ >   'Identifier(let, false)',
-//│ >   'Space',
-//│ >   'Identifier(bool_of_string, false)',
-//│ >   'Space',
-//│ >   'Identifier(=, true)',
-//│ >   'Space',
-//│ >   'Identifier(function, false)',
-//│ >   'Space',
-//│ >   'Identifier(|, true)',
-//│ >   'Space',
-//│ >   'Literal(String, true)',
-//│ >   'Space',
-//│ >   'Identifier(->, true)',
-//│ >   'Space',
-//│ >   'Identifier(true, false)',
-//│ >   'Space',
-//│ >   'Identifier(|, true)',
-//│ >   'Space',
-//│ >   'Literal(String, false)',
-//│ >   'Space',
-//│ >   'Identifier(->, true)',
-//│ >   'Space',
-//│ >   'Identifier(false, false)',
-//│ >   'Space',
-//│ >   'Identifier(|, true)',
-//│ >   'Space',
-//│ >   'Identifier(_, false)',
-//│ >   'Space',
-//│ >   'Identifier(->, true)',
-//│ >   'Space',
-//│ >   'Identifier(raise, false)',
-//│ >   'Space',
-//│ >   'Open(Round)',
-//│ >   'Identifier(Invalid_argument, false)',
-//│ >   'Space',
-//│ >   'Literal(String, bool_of_string)',
-//│ >   'Close(Round)'
-//│ = ]

@@ -36,6 +36,8 @@ declare val Infinity
 
 // declare fun typeof: (Any) -> Str
 
+fun parseInt(str: Str, radix: Int): Int
+fun parseFloat(str: Str): Num
 
 declare module Predef with
   class Test with

@@ -7,5 +7,29 @@
 :global
 :d
 
+import "../mlscript-compile/Option.mls"
+//│ Elab: { import member:Option‹207› from /Users/chengluyu/Developer/hkmc/hkmc2/shared/src/test/mlscript-compile/Option.mjs; }
 
+open Option
+//│ Elab: { }
 
+fun get(x) = Some(x)
+//│ Elab: { ‹› fun member:get‹212›(Param(‹›,x‹213›,None), ) = (member:Option‹207›#666.)Some‹member:Some‹205››(x‹213›#666); }
+
+:ucs normalized
+fun work(x) = if x is
+  Some(y) and get(y) is
+    Some(z) then 8
+    None then 42
+  None then 0
+//│ Normalized:
+//│ >  if
+//│ >    x‹220› is Some($param0‹225›) and
+//│ >      let y‹226› = $param0‹225›#0
+//│ >      let $scrut‹228› = member:get‹212›#666(y‹226›#666)
+//│ >      $scrut‹228› is Some($param0‹229›) and
+//│ >        let z‹230› = $param0‹229›#0
+//│ >        else 8
+//│ >      $scrut‹228› is None then 42
+//│ >    x‹220› is None then 0
+//│ Elab: { ‹› fun member:work‹219›(Param(‹›,x‹220›,None), ) = if { x is Some($param0‹225›) -> { let y‹226› = $param0‹225›#0; let $scrut‹228› = member:get‹212›#666(y‹226›#666); scrut is Some($param0‹229›) -> { let z‹230› = $param0‹229›#0; else 8 }; scrut is None -> { else 42 };  }; x is None -> { else 0 };  }; }

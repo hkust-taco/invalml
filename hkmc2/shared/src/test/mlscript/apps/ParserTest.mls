@@ -1,0 +1,476 @@
+:js
+
+import "../../mlscript-compile/Option.mls"
+import "../../mlscript-compile/Stack.mls"
+import "../../mlscript-compile/apps/Lexer.mls"
+
+open Option
+open Stack
+
+import "../../mlscript-compile/Str.mls"
+
+open Str
+
+//  _     _     _
+// | |   (_)___| |_
+// | |   | / __| __|
+// | |___| \__ \ |_
+// |_____|_|___/\__|
+// 
+// =================
+
+fun at(target, index) = target.at(index)
+
+fun list(...args) = if args is
+  [] then Nil
+  [x, ...xs] then x :: list(...xs)
+  
+fun filter(xs, f) = if xs is
+  head :: tail and
+    f(head) then head :: filter(tail, f)
+    else filter(tail, f)
+  Nil then Nil
+
+//  __  __
+// |  \/  |  __ _  _ __
+// | |\/| | / _` || '_ \
+// | |  | || (_| || |_) |
+// |_|  |_| \__,_|| .__/
+//                |_|
+// ======================
+
+class Map with
+  val storage = new globalThis.Map()
+  
+  fun get(key) =
+    if storage.has(key)
+    then Some of storage.get(key)
+    else None
+  
+  fun insert(key, value) =
+    storage.set(key, value)
+    ()
+    
+  fun values = globalThis.Array.from of storage.values()
+
+fun toMap(...entries) =
+  let
+    m = new Map
+    i = 0
+    length = entries.length
+  while i < length do
+    m.insert of ...entries.at(i)
+    set i += 1
+  m
+  
+
+//  _  __                                _
+// | |/ /___ _   ___      _____  _ __ __| |
+// | ' // _ \ | | \ \ /\ / / _ \| '__/ _` |
+// | . \  __/ |_| |\ V  V / (_) | | | (_| |
+// |_|\_\___|\__, | \_/\_/ \___/|_|  \__,_|
+//           |___/
+// ========================================
+
+let keywords = new Map()
+//│ keywords = Map
+
+class Keyword(val name: Str, val leftPrec: Option[Int], val rightPrec: Option[Int]) with
+  keywords.insert(name, this)
+  
+  fun toString() =
+    "Keyword(" ~ name ~ ", " ~
+    (if leftPrec is Some(prec) then prec.toString() else "N/A") ~ ", " ~
+    (if rightPrec is Some(prec) then prec.toString() else "N/A") ~ ")"
+
+module Keywords with
+  let prec = 0 
+  fun currPrec = Some(prec)
+  fun nextPrec =
+    set prec = prec + 1
+    Some(prec)
+  val _class = Keyword("class", None, currPrec)
+  let eqPrec = nextPrec
+  let ascPrec = nextPrec
+  val _equal = Keyword("=", eqPrec, eqPrec)
+  val _colon = Keyword(":", ascPrec, eqPrec)
+  val _semicolon = Keyword(";", ascPrec, eqPrec)
+  val _case = Keyword("case", None, currPrec)
+  let thenPrec = nextPrec
+  val _then = Keyword("then", thenPrec, thenPrec)
+  val _do = Keyword("do", thenPrec, thenPrec)
+  val _else = Keyword("else", nextPrec, currPrec)
+  val _fun = Keyword("fun", None, None)
+  val _let = Keyword("let", nextPrec, currPrec)
+  val _in = Keyword("in", thenPrec, thenPrec)
+  val _true = Keyword("true", None, None)
+  val _false = Keyword("false", None, None)
+  val _fatArrow = Keyword of "=>", nextPrec, eqPrec
+  val _thinArrow = Keyword of "->", currPrec, eqPrec
+  val _underscore = Keyword of "_", None, None
+  val maxPrec = prec
+  
+Keywords.maxPrec
+//│ = 6
+
+print of keywords.values.join("\n")
+//│ > Keyword(class, N/A, 0)
+//│ > Keyword(=, 1, 1)
+//│ > Keyword(:, 2, 1)
+//│ > Keyword(;, 2, 1)
+//│ > Keyword(case, N/A, 2)
+//│ > Keyword(then, 3, 3)
+//│ > Keyword(do, 3, 3)
+//│ > Keyword(else, 4, 4)
+//│ > Keyword(fun, N/A, N/A)
+//│ > Keyword(let, 5, 5)
+//│ > Keyword(in, 3, 3)
+//│ > Keyword(true, N/A, N/A)
+//│ > Keyword(false, N/A, N/A)
+//│ > Keyword(=>, 6, 1)
+//│ > Keyword(->, 6, 1)
+//│ > Keyword(_, N/A, N/A)
+
+fun makePrecMap(...ops) =
+  let
+    m = new Map
+    i = 0
+  while i < ops.length do
+    ops.at(i).split(" ").forEach of (op, _, _) =>
+      m.insert of op, i + Keywords.maxPrec
+    set i += 1
+  m
+
+let precMap = makePrecMap(
+  ","
+  "@",
+  ":",
+  "|",
+  "&",
+  "=",
+  "/ \\",
+  "^",
+  "!",
+  "< >",
+  "+ -",
+  "* %",
+  "~",
+  "", // perfix operators
+  "", // applications
+  ".",
+)
+fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else 2147483647
+//│ precMap = Map
+
+pattern Letter = "a" ..= "z" | "A" ..= "Z"
+
+fun hasLetter(s) = [..s].some((ch, _, _) => ch is Letter)
+
+pattern FloatOperator = "+." | "-." | "*." | "/."
+
+pattern RightAssociative = "@" | "/" | "," | ":"
+
+fun opPrec(opStr) = if
+  opStr is FloatOperator then [charPrec(opStr.at(0)), charPrec(opStr.at(1))]
+  opStr hasLetter() then [Keywords.maxPrec, Keywords.maxPrec]
+  let leftPrec = charPrec of opStr.at(0)
+  let rightOp = opStr.at(-1)
+  let rightPrec = charPrec of rightOp
+  rightOp is RightAssociative then [leftPrec, rightPrec - 1]
+  else [leftPrec, rightPrec]
+
+opPrec("|>")
+//│ = [9, 15]
+
+module Tree with
+  class
+    Empty()
+    Error()
+    Ident(name: Str)
+    Modified(modifier, subject)
+    Literal(kind, value)
+    Case(branches: Stack[Tree])
+    App(callee: Tree, arguments: Stack[Tree])
+    Infix(op: Keyword, lhs: Tree, rhs: Tree)
+    LetLike(keyword: Keyword, lhs: Tree, rhs: Tree, body: Tree)
+
+fun indented(text) = text.split("\n").join("\n  ")
+
+fun showAsTree(thing) =
+  fun go(something) =
+    let fields = []
+    let prologue = if something is
+      Some(content) then "Some of " ~ go(content)
+      None then "None"
+      head :: tail then
+        let
+          items = [go(head)]
+          remaining = tail
+        while remaining is
+          head' :: tail' do
+            items.push(go of head')
+            set remaining = tail'
+        "Ls of \n" ~ "  " ~ indented of items.join("\n")
+      Nil then "Nil"
+      Str then JSON.stringify(something) // TODO: This doesn't work.
+      Int then something.toString()
+      Tree.Empty then "Empty"
+      Tree.Error then "Error"
+      Tree.Ident(name) then
+        fields.push of ["name", go of name]
+        "Ident"
+      Tree.Modified(modifier, subject) then
+        fields.push of ["modifier", go of modifier]
+        fields.push of ["subject", go of subject]
+        "Modified"
+      Tree.Literal(kind, value) then
+        "Literal(" ~ go(kind) ~ ") of " ~ go of value
+      Tree.Case(branches) then
+        fields.push of ["branches", go of branches]
+        "Case"
+      Tree.App(callee, arguments) then
+        fields.push of ["callee", go of callee]
+        fields.push of ["arguments", go of arguments]
+        "App"
+      Tree.Infix(op, lhs, rhs) then
+        fields.push of ["op", go of op]
+        fields.push of ["lhs", go of lhs]
+        fields.push of ["rhs", go of rhs]
+        "Infix"
+      Tree.LetLike(name, lhs, rhs, body) then
+        fields.push of ["name", go of name]
+        fields.push of ["lhs", go of lhs]
+        fields.push of ["rhs", go of rhs]
+        fields.push of ["body", go of body]
+        "LetLike"
+      Keyword(name, leftPrec, rightPrec) then
+        fields.push of ["name", go of name]
+        fields.push of ["leftPrec", go of leftPrec]
+        fields.push of ["rightPrec", go of rightPrec]
+        "Keyword"
+      Lexer.LiteralKind.Integer then "Integer"
+      Lexer.LiteralKind.Decimal then "Decimal"
+      Lexer.LiteralKind.String then "String"
+      Lexer.LiteralKind.Boolean then "Boolean"
+      else JSON.stringify(something)
+    prologue ~ if fields.length ==
+      0 then ""
+      1 then " of " ~ fields at(0) at(1)
+      else
+        let dialogue = fields.map of (field, _, _) =>
+          field.at(0) ~ " = " ~ field.at(1)
+        ":\n  " ~ indented of dialogue.join("\n")
+  go(thing)
+
+print of showAsTree(Tree.App(Tree.App(Tree.Ident("f"), Tree.Error()), Tree.Error()))
+//│ > App:
+//│ >   callee = App:
+//│ >     callee = Ident of "f"
+//│ >     arguments = Error
+//│ >   arguments = Error
+
+print of showAsTree(Tree.App(Tree.Ident("f"), Stack.Cons(Tree.Ident("x"), Stack.Nil)))
+//│ > App:
+//│ >   callee = Ident of "f"
+//│ >   arguments = Ls of 
+//│ >     Ident of "x"
+
+class ParseRule(val name: Str, val choices: Stack[Choice]) with
+  fun emptyChoices = choices 
+// Shorthands for constructing parse rules.
+fun rule(name, ...choices) = ParseRule(name, list(...choices))
+module Choice with
+  class Keyword(keyword: Keyword, rest: ParseRule)
+  class Expr(process: Tree -> Tree, rest: ParseRule)
+  class End(value: Tree)
+  // Shorthands for constructing rule choices.
+  fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
+  fun expr(process, name, ...choices) = Expr(process, rule(name, ...choices))
+  fun end(value) = End(value)
+
+// Display parse rules as a tree in a BNF-like format.
+fun display(rule) =
+  fun go(rule) =
+    let
+      choices = rule.choices
+      lines = []
+    while choices is head :: tail do
+      lines.push of (if head is
+        Choice.Keyword(keyword, rest) and
+          let prefix = "`" ~ keyword.name ~ "` "
+          go(rest) is
+            [name, [line]] then [prefix ~ line]
+            [name, lines] then [prefix, ..lines.map((line, _, _) => "  " ~ line)]
+        Choice.Expr(k, rest) and
+          let prefix = "<expression> "
+          go(rest) is
+            [name, [line]] then [prefix ~ line]
+            [name, lines] then [prefix, ..lines.map((line, _, _) => "  " ~ line)]
+        Choice.End(value) then ["<end>"])
+      set choices = tail
+    [rule.name, lines.flat()]
+  if go(rule) is [name, lines] then
+    "<" ~ name ~ "> ::= " ~ if lines is
+      [line] then line
+      [head, ..tail] then head ~ "\n" ~ tail.join("\n")
+
+fun letLike(keyword: Keyword) =
+  let letTail = Choice.keyword of
+    Keywords._equal,
+    "binding equal sign",
+    Choice.expr of
+      (expr, body) => [Some(expr), body],
+      "binding right-hand side",
+      Choice.keyword of
+        Keywords._in,
+        "binding `in` keyword",
+        Choice.expr of
+          (body, _) => Some(body),
+          "binding body", 
+          Choice.end of ()
+      Choice.end of Tree.Empty()
+  Choice.keyword of
+    keyword,
+    keyword.name ~ " binding keyword",
+    Choice.expr of
+      (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
+        Tree.LetLike(keyword, lhs, rhs, body),
+      "binding head",
+      letTail,
+      Choice.end of [None, None]
+
+let letChoice = letLike(Keywords._let)
+//│ letChoice = Keyword(Keyword(let, 5, 5), ParseRule("let binding keyword", Cons(Expr([function tmp27], ParseRule("binding head", Cons(Keyword(Keyword(=, 1, 1), ParseRule("binding equal sign", Cons(Expr([function], ParseRule("binding right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("binding `in` keyword", Cons(Expr([function], ParseRule("binding body", Cons(End(null), Nil))), Nil))), Cons(End(Empty()), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+
+print of display of ParseRule("let binding", list(letChoice))
+//│ > <let binding> ::= `let` 
+//│ >   <expression> 
+//│ >     `=` 
+//│ >       <expression> 
+//│ >         `in` <expression> <end>
+//│ >         <end>
+//│ >     <end>
+
+let prefixRules = rule("start of the statement", letChoice)
+//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(let, 5, 5), ParseRule("let binding keyword", Cons(Expr([function tmp27], ParseRule("binding head", Cons(Keyword(Keyword(=, 1, 1), ParseRule("binding equal sign", Cons(Expr([function], ParseRule("binding right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("binding `in` keyword", Cons(Expr([function], ParseRule("binding body", Cons(End(null), Nil))), Nil))), Cons(End(Empty()), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Nil))
+
+fun parse(tokens) =
+  let current = tokens
+  let counter = 0
+  
+  fun yeetSpace =
+    while current is Lexer.Token.Space :: tail do
+      print("yeetSpace: " ~ counter)
+      set current = tail
+      set counter = counter + 1
+    current
+    
+  fun consume =
+    let token = current
+    if current is _ :: tail do
+      set current = tail
+      set counter = counter + 1
+    token
+    
+  fun simpleExpr(prec: Int, bracket: Option[Lexer.BracketKind]) = if yeetSpace is
+    Lexer.Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
+      Some(keyword) then
+        Tree.Error()
+      None then
+        consume
+        exprCont(Tree.Ident(name), prec, bracket)
+    Lexer.Token.Literal(kind, literal) :: _ then
+      consume
+      exprCont(Tree.Literal(kind, literal), prec, bracket)
+    Lexer.Token.Open(kind) :: _ then
+      consume
+      exprCont(simpleExpr(prec, Some(kind)), prec, bracket)
+    Lexer.Token.Close(kind) :: _ and bracket is
+      Some(kind') and
+        kind == kind' then
+          consume
+          Tree.Empty()
+        else Tree.Error() // mismatched brackets
+      None then Tree.Error() // missing close bracket
+    token :: _ then Tree.Error() // unrecognized token
+    Nil then Tree.Error() // unexpected EOF
+  
+  fun exprCont(acc: Tree, prec: Int, bracket: Option[Lexer.BracketKind]) = if yeetSpace is
+    Lexer.Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
+      keyword.leftPrec is Some(leftPrec) and leftPrec > prec then
+        print of "infix keyword: " ~ name
+        consume
+        let rhs = simpleExpr(leftPrec, bracket)
+        exprCont(Tree.Infix(keyword, acc, rhs), prec, bracket)
+    Lexer.Token.Identifier(name, true) :: _ and
+      opPrec(name) is [leftPrec, rightPrec] and leftPrec > prec then
+        consume
+        let op = Tree.Ident(name)
+        let rhs = simpleExpr(rightPrec, bracket)
+        exprCont(Tree.App(op, acc :: rhs :: Nil), prec, bracket)
+    Lexer.Token.Close(kind) :: _ and bracket is
+      Some(kind') and
+        kind == kind' then
+          consume
+          Tree.Empty() // bracket is closed
+        else Tree.Error() // mismatched brackets
+      None then Tree.Error() // missing close bracket
+    token :: _ then Tree.Error()
+    Nil and bracket is
+      Some then Tree.Error()
+      None then acc
+  
+  simpleExpr(0, None)
+  
+fun printParsed(source) =
+  let tokens = Lexer.lex(source)
+  let tree = parse(tokens)
+  print of showAsTree(tree)
+
+printParsed of "(x) => x"
+//│ > yeetSpace: 3
+//│ > infix keyword: =>
+//│ > yeetSpace: 5
+//│ > Infix:
+//│ >   op = Keyword:
+//│ >     name = "=>"
+//│ >     leftPrec = Some of 6
+//│ >     rightPrec = Some of 1
+//│ >   lhs = Empty
+//│ >   rhs = Ident of "x"
+
+printParsed of "1 + 2 * 3"
+//│ > yeetSpace: 1
+//│ > yeetSpace: 3
+//│ > yeetSpace: 5
+//│ > yeetSpace: 7
+//│ > App:
+//│ >   callee = Ident of "+"
+//│ >   arguments = Ls of 
+//│ >     Literal(Integer) of "1"
+//│ >     App:
+//│ >       callee = Ident of "*"
+//│ >       arguments = Ls of 
+//│ >         Literal(Integer) of "2"
+//│ >         Literal(Integer) of "3"
+
+printParsed of "1 + 2 ** 5 * 4"
+//│ > yeetSpace: 1
+//│ > yeetSpace: 3
+//│ > yeetSpace: 5
+//│ > yeetSpace: 7
+//│ > yeetSpace: 9
+//│ > yeetSpace: 11
+//│ > App:
+//│ >   callee = Ident of "+"
+//│ >   arguments = Ls of 
+//│ >     Literal(Integer) of "1"
+//│ >     App:
+//│ >       callee = Ident of "*"
+//│ >       arguments = Ls of 
+//│ >         App:
+//│ >           callee = Ident of "**"
+//│ >           arguments = Ls of 
+//│ >             Literal(Integer) of "2"
+//│ >             Error
+//│ >         Literal(Integer) of "4"
