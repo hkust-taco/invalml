@@ -132,3 +132,29 @@ fun f(x, y, z) = x + y + z
 0 f (2, 3)
 //│ Elab: { member:f‹295›#666(0, 2, 3) }
 //│ = 5
+
+let x = 0
+//│ Elab: { let x‹309›; x‹309› = 0; }
+//│ x = 0
+
+:sjs
+set x += 1 in
+  print(x)
+//│ Elab: { { let $old‹312›; $old‹312› = x‹309›#666; try { x‹309›#666 := builtin:+‹17›#3(x‹309›#666, 1); (member:Predef‹199›#666.)print‹member:print‹163››(x‹309›#666) } finally x‹309›#666 := $old‹312›#0 } }
+//│ JS (unsanitized):
+//│ let old, tmp1, tmp2, tmp3;
+//│ old = x;
+//│ try {
+//│   tmp2 = x + 1;
+//│   x = tmp2;
+//│   tmp3 = Predef.print(x);
+//│   tmp1 = tmp3;
+//│ } finally {
+//│   x = old;
+//│ }
+//│ tmp1
+//│ > 1
+
+x
+//│ Elab: { x‹309›#666 }
+//│ = 0

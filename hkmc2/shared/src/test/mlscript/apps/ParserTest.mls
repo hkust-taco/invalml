@@ -6,6 +6,7 @@ import "../../mlscript-compile/apps/Lexer.mls"
 
 open Option
 open Stack
+open Lexer { Token, LiteralKind, BracketKind }
 
 //  _     _     _
 // | |   (_)___| |_
@@ -402,14 +403,14 @@ fun showAsTree(thing) =
     Tree.LetLike(n, l, r, b) then tuple of
       "LetLike", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
     Keyword(_, _, _) as keyword then [keyword.toString(), []]
-    Lexer.LiteralKind.Integer then tuple of "Integer", []
-    Lexer.LiteralKind.Decimal then tuple of "Decimal", []
-    Lexer.LiteralKind.String then tuple of "String", []
-    Lexer.LiteralKind.Boolean then tuple of "Boolean", []
+    LiteralKind.Integer then tuple of "Integer", []
+    LiteralKind.Decimal then tuple of "Decimal", []
+    LiteralKind.String then tuple of "String", []
+    LiteralKind.Boolean then tuple of "Boolean", []
     else tuple of "Unknown", [["JSON.stringify(_)", JSON.stringify(something)]]
   fun go(something) = if itemize(something) is
     [intro, []] then intro
-    [intro, [field]] then intro + " of " + second of field
+    [intro, [field]] and intro != "Unknown" then intro + " of " + second of field
     [intro, fields] then
       let dialogue = fields.map of (field, _, _) =>
         field first() + " = " + field second()
@@ -465,15 +466,13 @@ prefixRules.keywordChoices.get("let")
 prefixRules.exprChoice
 //│ = None
 
-open Lexer { Token }
-
 fun parse(tokens) =
   let
     current = tokens
     counter = 0
   
   fun yeetSpaces =
-    while current is Lexer.Token.Space :: tail do
+    while current is Token.Space :: tail do
       tracer.print of "skipped a space at " + counter
       set
         current = tail
@@ -488,12 +487,12 @@ fun parse(tokens) =
     else
       tracer.print of "consumed: EOF"
   
-  fun parseRule(prec: Int, rule: ParseRule, opened: Option[Lexer.BracketKind]) = tracer.trace of
+  fun parseRule(prec: Int, rule: ParseRule, opened: Option[BracketKind]) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
     result => "parsed: " + result Tree.summary()
     () => ...
     if yeetSpaces is
-      Lexer.Token.Close(encountered) :: _ and opened is
+      Token.Close(encountered) :: _ and opened is
         do tracer.print of "the case of closing brackets"
         Some(expected) and
           encountered == expected and rule.endChoice is
@@ -530,11 +529,11 @@ fun parse(tokens) =
         Some(value) then value
         None then Tree.error("unexpected EOF")
   
-  fun simpleExpr(prec: Int, bracket: Option[Lexer.BracketKind]) = tracer.trace of
+  fun simpleExpr(prec: Int, bracket: Option[BracketKind]) = tracer.trace of
     "simple expression with precedence " + prec
     result => "simple expression: " + result Tree.summary()
     () => if yeetSpaces is
-      Lexer.Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
+      Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
         Some(keyword) and prefixRules.keywordChoices.get(name) is
           Some(rule) then
             consume
@@ -543,22 +542,22 @@ fun parse(tokens) =
         None then
           consume
           exprCont(Tree.Ident(name, symbolic), prec, bracket)
-      Lexer.Token.Literal(kind, literal) :: _ then
+      Token.Literal(kind, literal) :: _ then
         consume
         exprCont(Tree.Literal(kind, literal), prec, bracket)
-      Lexer.Token.Open(kind) :: _ then
+      Token.Open(kind) :: _ then
         consume
         let content = if
           // TODO: should the prec be 0?
           let content = simpleExpr(0, Some(kind))
-          yeetSpaces is Lexer.Token.Close(kind') :: _ and
+          yeetSpaces is Token.Close(kind') :: _ and
             kind == kind' then
               consume
               content
             else content Tree.Error("mismatched brackets")
           else content Tree.Error("missing close bracket")
         exprCont(content, prec, bracket)
-      Lexer.Token.Close(kind) :: _ and bracket is
+      Token.Close(kind) :: _ and bracket is
         Some(kind') and
           kind == kind' then
             consume
@@ -568,8 +567,8 @@ fun parse(tokens) =
       token :: _ then Tree.error("unrecognized token: " + token)
       Nil then Tree.error("unexpected EOF")
   
-  fun exprCont(acc: Tree, prec: Int, bracket: Option[Lexer.BracketKind]) = if yeetSpaces is
-    Lexer.Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
+  fun exprCont(acc: Tree, prec: Int, bracket: Option[BracketKind]) = if yeetSpaces is
+    Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
       do tracer.print of "found an infix keyword: " + name
       keyword.leftPrec is Some(leftPrec) and
         leftPrec > prec then
@@ -578,7 +577,7 @@ fun parse(tokens) =
           exprCont(Tree.Infix(keyword, acc, rhs), prec, bracket)
         else
           acc
-    Lexer.Token.Identifier(name, true) :: _ and
+    Token.Identifier(name, true) :: _ and
       do tracer.print of "found an operator \"" + name + "\""
       opPrec(name) is [leftPrec, rightPrec] and
         leftPrec > prec then
@@ -588,7 +587,7 @@ fun parse(tokens) =
           exprCont(Tree.App(op, acc :: rhs :: Nil), prec, bracket)
         else
           acc
-    Lexer.Token.Close(kind) :: _ and bracket is
+    Token.Close(kind) :: _ and bracket is
       do tracer.print of "found a close bracket of " + kind
       Some(kind') and
         kind == kind' then acc
