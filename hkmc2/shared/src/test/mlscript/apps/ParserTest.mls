@@ -318,6 +318,32 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
   val exprChoice = choices collectFirst of case
     Choice.Expr(process, rest) then Some([process, rest])
     else None
+  // Display parse rules as a tree in a BNF-like format.
+  fun display =
+    fun go(rule) =
+      let
+        choices = rule.choices
+        lines = []
+      while choices is head :: tail do
+        lines.push of (if head is
+          Choice.Keyword(keyword, rest) and
+            let prefix = "`" + keyword.name + "` "
+            go(rest) is
+              [name, [line]] then [prefix + line]
+              [name, [head', ..tail']] then [prefix + head', ..tail']
+          Choice.Expr(_, rest) and
+            let prefix = "<expression> "
+            go(rest) is
+              [name, [line]] then [prefix + line]
+              [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
+          Choice.End(_) then ["<end>"])
+        set choices = tail
+      [rule.name, lines.flat()]
+    if go(this) is [name, lines] then
+      "<" + name + "> ::= " + if lines is
+        [line] then line
+        [head, ..tail] then head + "\n" + tail.join("\n")
+  
 // Shorthands for constructing parse rules.
 fun rule(name, ...choices) = ParseRule(name, toStack(choices))
 module Choice with
@@ -329,32 +355,6 @@ module Choice with
   fun expr(process, name, ...choices) = Expr(process, rule(name, ...choices))
   fun end(value) = End(value)
 
-// Display parse rules as a tree in a BNF-like format.
-fun display(rule) =
-  fun go(rule) =
-    let
-      choices = rule.choices
-      lines = []
-    while choices is head :: tail do
-      lines.push of (if head is
-        Choice.Keyword(keyword, rest) and
-          let prefix = "`" + keyword.name + "` "
-          go(rest) is
-            [name, [line]] then [prefix + line]
-            [name, [head', ..tail']] then [prefix + head', ..tail']
-        Choice.Expr(_, rest) and
-          let prefix = "<expression> "
-          go(rest) is
-            [name, [line]] then [prefix + line]
-            [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
-        Choice.End(_) then ["<end>"])
-      set choices = tail
-    [rule.name, lines.flat()]
-  if go(rule) is [name, lines] then
-    "<" + name + "> ::= " + if lines is
-      [line] then line
-      [head, ..tail] then head + "\n" + tail.join("\n")
-
 //  ____       _
 // |  _ \  ___| |__  _   _  __ _
 // | | | |/ _ \ '_ \| | | |/ _` |
@@ -363,43 +363,12 @@ fun display(rule) =
 //                         |___/
 // ==============================
 
-module Tracer with
-  mut val steps = 0
-  let output = console.log
-  fun indentPrefix = if steps == 0 then "" else "│ ".repeat(steps - 1)
-  fun enter(...pieces) =
-    let message = fold (+) of ...pieces
-    let indent = if steps ==
-      0 then "┍ "
-      else   "├─┮ "
-    output(indentPrefix + indent + message)
-    set steps += 1
-  fun print(...pieces) =
-    let message = fold (+) of ...pieces
-    if steps == 0 then
-      output(message)
-    else
-      output(indentPrefix + "├ " + message)
-  fun leave(result, conclude) =
-    set steps -= 1
-    let indent = if steps ==
-      0 then "┕ "
-      else   "│ ┕ "
-    output(indentPrefix + indent + conclude(result))
-    result
+import "../../mlscript-compile/TreeTracer.mls"
 
-fun previewTokens(tokens: Stack[Lexer.Token]) =
-  let
-    i = 0
-    limit = 5
-    values = []
-  while i < limit and tokens is head :: tail do
-    values.push of head Lexer.Token.summary()
-    set tokens = tail
-    set i += 1
-  fold(+) of
-    "┃", values.join("│"),
-    if tokens is _ :: _ then "├┈┄╌" else "┃"
+open TreeTracer { TreeTracer }
+
+let tracer = new TreeTracer
+//│ tracer = TreeTracer
 
 fun indented(text) = text.split("\n").join("\n  ")
 
@@ -475,9 +444,9 @@ fun letLike(keyword: Keyword) =
       Choice.end of [None, None]
 
 let letChoice = letLike(Keywords._let)
-//│ letChoice = Keyword(Keyword(let, 5, 5), ParseRule("let binding: keyword", Cons(Expr([function tmp7], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+//│ letChoice = Keyword(Keyword(let, 5, 5), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
 
-print of display of ParseRule("let binding", stack(letChoice))
+print of rule("let binding", letChoice).display
 //│ > <let binding> ::= `let` <expression> 
 //│ >   `=` <expression> 
 //│ >     `in` <expression> <end>
@@ -485,13 +454,13 @@ print of display of ParseRule("let binding", stack(letChoice))
 //│ >   <end>
 
 let prefixRules = rule("start of the statement", letChoice)
-//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(let, 5, 5), ParseRule("let binding: keyword", Cons(Expr([function tmp7], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Nil))
+//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(let, 5, 5), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Nil))
 
 prefixRules.endChoice
 //│ = None
 
 prefixRules.keywordChoices.get("let")
-//│ = Some(ParseRule("let binding: keyword", Cons(Expr([function tmp7], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+//│ = Some(ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
 
 prefixRules.exprChoice
 //│ = None
@@ -505,7 +474,7 @@ fun parse(tokens) =
   
   fun yeetSpaces =
     while current is Lexer.Token.Space :: tail do
-      Tracer.print of "skipped a space at " + counter
+      tracer.print of "skipped a space at " + counter
       set
         current = tail
         counter = counter + 1
@@ -513,96 +482,95 @@ fun parse(tokens) =
     
   fun consume =
     if current is head :: tail then
-      Tracer.print of "consumed " + head + " at " + counter
+      tracer.print of "consumed " + head + " at " + counter
       set current = tail
       set counter = counter + 1
     else
-      Tracer.print of "consumed: EOF"
+      tracer.print of "consumed: EOF"
   
-  fun parseRule(prec: Int, rule: ParseRule, opened: Option[Lexer.BracketKind]) =
-    Tracer.enter of "parsing rule \"" + rule.name + "\" with precedence " + prec
-    Tracer.leave of
-      if yeetSpaces is
-        Lexer.Token.Close(encountered) :: _ and opened is
-          do Tracer.print of "the case of closing brackets"
-          Some(expected) and
-            encountered == expected and rule.endChoice is
-              Some(value) then
-                consume
-                value
-              None then
-                // The rule doesn't allow an end here.
-                Tree.error("unexpected close bracket `" + encountered + "`")
-            else
-              // The rule expects a different close bracket.
-              Tree.error("mismatched brackets")
-          None then Tree.error("unexpected bracket: " + encountered)
-        Token.Identifier(name, _) :: _ and
-          do Tracer.print of "check if \"" + name + "\" is a keyword or not"
-          keywords.get(name) is
-            Some(keyword) and rule.keywordChoices.get(name) is
-              Some(rule) then
-                consume
-                parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
-              None then Tree.error("unexpected keyword `" + name + "`")
-          do Tracer.print of "\"" + name + "\" is not a keyword"
-        other :: _ and
-          do Tracer.print of "try parse an expression from " + previewTokens(current)
-          let reserve = simpleExpr(prec, opened)
-          rule.exprChoice is
-            Some([process, rest]) then 
-              let rhs = parseRule(prec, rest, opened)
-              Tracer.print of "the result from sub-rule: " + rhs Tree.summary()
-              Tracer.print of "the reserved expression: " + reserve Tree.summary()
-              process(reserve, rhs)
-            None then Tree.error("unexpected expression")
-        Nil and rule.endChoice is
-          Some(value) then value
-          None then Tree.error("unexpected EOF")
-      result => "parsed: " + result Tree.summary()
-  
-  fun simpleExpr(prec: Int, bracket: Option[Lexer.BracketKind]) =
-    Tracer.enter of "simple expression with precedence " + prec
-    Tracer.leave of
-      if yeetSpaces is
-        Lexer.Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
-          Some(keyword) and prefixRules.keywordChoices.get(name) is
+  fun parseRule(prec: Int, rule: ParseRule, opened: Option[Lexer.BracketKind]) = tracer.trace of
+    "parsing rule \"" + rule.name + "\" with precedence " + prec
+    result => "parsed: " + result Tree.summary()
+    () => ...
+    if yeetSpaces is
+      Lexer.Token.Close(encountered) :: _ and opened is
+        do tracer.print of "the case of closing brackets"
+        Some(expected) and
+          encountered == expected and rule.endChoice is
+            Some(value) then
+              consume
+              value
+            None then
+              // The rule doesn't allow an end here.
+              Tree.error("unexpected close bracket `" + encountered + "`")
+          else
+            // The rule expects a different close bracket.
+            Tree.error("mismatched brackets")
+        None then Tree.error("unexpected bracket: " + encountered)
+      Token.Identifier(name, _) :: _ and
+        do tracer.print of "check if \"" + name + "\" is a keyword or not"
+        keywords.get(name) is
+          Some(keyword) and rule.keywordChoices.get(name) is
             Some(rule) then
               consume
-              parseRule(keyword.rightPrec orMaxPrec(), rule, bracket)
-            None then Tree.error("unexpected keyword `" + name + "` without any prefix rules")
-          None then
+              parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
+            None then Tree.error("unexpected keyword `" + name + "`")
+        do tracer.print of "\"" + name + "\" is not a keyword"
+      other :: _ and
+        do tracer.print of "try parse an expression from " + Token.preview(current)
+        let reserve = simpleExpr(prec, opened)
+        rule.exprChoice is
+          Some([process, rest]) then 
+            let rhs = parseRule(prec, rest, opened)
+            tracer.print of "the result from sub-rule: " + rhs Tree.summary()
+            tracer.print of "the reserved expression: " + reserve Tree.summary()
+            process(reserve, rhs)
+          None then Tree.error("unexpected expression")
+      Nil and rule.endChoice is
+        Some(value) then value
+        None then Tree.error("unexpected EOF")
+  
+  fun simpleExpr(prec: Int, bracket: Option[Lexer.BracketKind]) = tracer.trace of
+    "simple expression with precedence " + prec
+    result => "simple expression: " + result Tree.summary()
+    () => if yeetSpaces is
+      Lexer.Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
+        Some(keyword) and prefixRules.keywordChoices.get(name) is
+          Some(rule) then
             consume
-            exprCont(Tree.Ident(name, symbolic), prec, bracket)
-        Lexer.Token.Literal(kind, literal) :: _ then
+            parseRule(keyword.rightPrec orMaxPrec(), rule, bracket)
+          None then Tree.error("unexpected keyword `" + name + "` without any prefix rules")
+        None then
           consume
-          exprCont(Tree.Literal(kind, literal), prec, bracket)
-        Lexer.Token.Open(kind) :: _ then
-          consume
-          let content = if
-            // TODO: should the prec be 0?
-            let content = simpleExpr(0, Some(kind))
-            yeetSpaces is Lexer.Token.Close(kind') :: _ and
-              kind == kind' then
-                consume
-                content
-              else content Tree.Error("mismatched brackets")
-            else content Tree.Error("missing close bracket")
-          exprCont(content, prec, bracket)
-        Lexer.Token.Close(kind) :: _ and bracket is
-          Some(kind') and
+          exprCont(Tree.Ident(name, symbolic), prec, bracket)
+      Lexer.Token.Literal(kind, literal) :: _ then
+        consume
+        exprCont(Tree.Literal(kind, literal), prec, bracket)
+      Lexer.Token.Open(kind) :: _ then
+        consume
+        let content = if
+          // TODO: should the prec be 0?
+          let content = simpleExpr(0, Some(kind))
+          yeetSpaces is Lexer.Token.Close(kind') :: _ and
             kind == kind' then
               consume
-              Tree.Empty()
-            else Tree.error("mismatched brackets")
-          None then Tree.error("missing close bracket")
-        token :: _ then Tree.error("unrecognized token: " + token)
-        Nil then Tree.error("unexpected EOF")
-      result => "simple expression: " + result Tree.summary()
+              content
+            else content Tree.Error("mismatched brackets")
+          else content Tree.Error("missing close bracket")
+        exprCont(content, prec, bracket)
+      Lexer.Token.Close(kind) :: _ and bracket is
+        Some(kind') and
+          kind == kind' then
+            consume
+            Tree.Empty()
+          else Tree.error("mismatched brackets")
+        None then Tree.error("missing close bracket")
+      token :: _ then Tree.error("unrecognized token: " + token)
+      Nil then Tree.error("unexpected EOF")
   
   fun exprCont(acc: Tree, prec: Int, bracket: Option[Lexer.BracketKind]) = if yeetSpaces is
     Lexer.Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
-      do Tracer.print of "found an infix keyword: " + name
+      do tracer.print of "found an infix keyword: " + name
       keyword.leftPrec is Some(leftPrec) and
         leftPrec > prec then
           consume
@@ -611,7 +579,7 @@ fun parse(tokens) =
         else
           acc
     Lexer.Token.Identifier(name, true) :: _ and
-      do Tracer.print of "found an operator \"" + name + "\""
+      do tracer.print of "found an operator \"" + name + "\""
       opPrec(name) is [leftPrec, rightPrec] and
         leftPrec > prec then
           consume
@@ -621,14 +589,14 @@ fun parse(tokens) =
         else
           acc
     Lexer.Token.Close(kind) :: _ and bracket is
-      do Tracer.print of "found a close bracket of " + kind
+      do tracer.print of "found a close bracket of " + kind
       Some(kind') and
         kind == kind' then acc
         else acc Tree.Error("mismatched brackets")
       None then acc Tree.Error("missing close bracket")
     token :: _ then acc Tree.Error("unrecognized token " + token)
     Nil and bracket is
-      do Tracer.print of "found an EOF"
+      do tracer.print of "found an EOF"
       Some then acc Tree.Error("expect a close bracket instead of EOF")
       None then acc
   
@@ -794,66 +762,69 @@ printParsed of
 //│ >     rhs = Ident of "zero"
 //│ >   body = None
 
-printParsed of
-  "let one = 1 in"
-  "let zero = 0 in"
-  "one + zero"
+printParsed of """
+let one = 1 in
+let zero = 0 in
+one + zero
+"""
 //│ > ┍ simple expression with precedence 0
-//│ > ├ consumed Identifier("let", false) at 0
+//│ > ├ skipped a space at 0
+//│ > ├ consumed Identifier("let", false) at 1
 //│ > ├─┮ parsing rule "let binding: keyword" with precedence 5
-//│ > │ ├ skipped a space at 1
+//│ > │ ├ skipped a space at 2
 //│ > │ ├ check if "one" is a keyword or not
 //│ > │ ├ "one" is not a keyword
 //│ > │ ├ try parse an expression from ┃one│␠│=│␠│1├┈┄╌
 //│ > │ ├─┮ simple expression with precedence 5
-//│ > │ │ ├ consumed Identifier("one", false) at 2
-//│ > │ │ ├ skipped a space at 3
+//│ > │ │ ├ consumed Identifier("one", false) at 3
+//│ > │ │ ├ skipped a space at 4
 //│ > │ │ ├ found an infix keyword: =
 //│ > │ │ ┕ simple expression: one
 //│ > │ ├─┮ parsing rule "let binding: left-hand side" with precedence 5
 //│ > │ │ ├ check if "=" is a keyword or not
-//│ > │ │ ├ consumed Identifier("=", true) at 4
+//│ > │ │ ├ consumed Identifier("=", true) at 5
 //│ > │ │ ├─┮ parsing rule "let binding: equal sign" with precedence 1
-//│ > │ │ │ ├ skipped a space at 5
+//│ > │ │ │ ├ skipped a space at 6
 //│ > │ │ │ ├ try parse an expression from ┃1│␠│in│␠│let├┈┄╌
 //│ > │ │ │ ├─┮ simple expression with precedence 1
-//│ > │ │ │ │ ├ consumed Literal(Integer, "1") at 6
-//│ > │ │ │ │ ├ skipped a space at 7
+//│ > │ │ │ │ ├ consumed Literal(Integer, "1") at 7
+//│ > │ │ │ │ ├ skipped a space at 8
 //│ > │ │ │ │ ├ found an infix keyword: in
-//│ > │ │ │ │ ├ consumed Identifier("in", false) at 8
+//│ > │ │ │ │ ├ consumed Identifier("in", false) at 9
 //│ > │ │ │ │ ├─┮ simple expression with precedence 3
-//│ > │ │ │ │ │ ├ skipped a space at 9
-//│ > │ │ │ │ │ ├ consumed Identifier("let", false) at 10
+//│ > │ │ │ │ │ ├ skipped a space at 10
+//│ > │ │ │ │ │ ├ consumed Identifier("let", false) at 11
 //│ > │ │ │ │ │ ├─┮ parsing rule "let binding: keyword" with precedence 5
-//│ > │ │ │ │ │ │ ├ skipped a space at 11
+//│ > │ │ │ │ │ │ ├ skipped a space at 12
 //│ > │ │ │ │ │ │ ├ check if "zero" is a keyword or not
 //│ > │ │ │ │ │ │ ├ "zero" is not a keyword
 //│ > │ │ │ │ │ │ ├ try parse an expression from ┃zero│␠│=│␠│0├┈┄╌
 //│ > │ │ │ │ │ │ ├─┮ simple expression with precedence 5
-//│ > │ │ │ │ │ │ │ ├ consumed Identifier("zero", false) at 12
-//│ > │ │ │ │ │ │ │ ├ skipped a space at 13
+//│ > │ │ │ │ │ │ │ ├ consumed Identifier("zero", false) at 13
+//│ > │ │ │ │ │ │ │ ├ skipped a space at 14
 //│ > │ │ │ │ │ │ │ ├ found an infix keyword: =
 //│ > │ │ │ │ │ │ │ ┕ simple expression: zero
 //│ > │ │ │ │ │ │ ├─┮ parsing rule "let binding: left-hand side" with precedence 5
 //│ > │ │ │ │ │ │ │ ├ check if "=" is a keyword or not
-//│ > │ │ │ │ │ │ │ ├ consumed Identifier("=", true) at 14
+//│ > │ │ │ │ │ │ │ ├ consumed Identifier("=", true) at 15
 //│ > │ │ │ │ │ │ │ ├─┮ parsing rule "let binding: equal sign" with precedence 1
-//│ > │ │ │ │ │ │ │ │ ├ skipped a space at 15
+//│ > │ │ │ │ │ │ │ │ ├ skipped a space at 16
 //│ > │ │ │ │ │ │ │ │ ├ try parse an expression from ┃0│␠│in│␠│one├┈┄╌
 //│ > │ │ │ │ │ │ │ │ ├─┮ simple expression with precedence 1
-//│ > │ │ │ │ │ │ │ │ │ ├ consumed Literal(Integer, "0") at 16
-//│ > │ │ │ │ │ │ │ │ │ ├ skipped a space at 17
+//│ > │ │ │ │ │ │ │ │ │ ├ consumed Literal(Integer, "0") at 17
+//│ > │ │ │ │ │ │ │ │ │ ├ skipped a space at 18
 //│ > │ │ │ │ │ │ │ │ │ ├ found an infix keyword: in
-//│ > │ │ │ │ │ │ │ │ │ ├ consumed Identifier("in", false) at 18
+//│ > │ │ │ │ │ │ │ │ │ ├ consumed Identifier("in", false) at 19
 //│ > │ │ │ │ │ │ │ │ │ ├─┮ simple expression with precedence 3
-//│ > │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 19
-//│ > │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("one", false) at 20
-//│ > │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 21
+//│ > │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 20
+//│ > │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("one", false) at 21
+//│ > │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 22
 //│ > │ │ │ │ │ │ │ │ │ │ ├ found an operator "+"
-//│ > │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("+", true) at 22
+//│ > │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("+", true) at 23
 //│ > │ │ │ │ │ │ │ │ │ │ ├─┮ simple expression with precedence 16
-//│ > │ │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 23
-//│ > │ │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("zero", false) at 24
+//│ > │ │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 24
+//│ > │ │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("zero", false) at 25
+//│ > │ │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 26
 //│ > │ │ │ │ │ │ │ │ │ │ │ ├ found an EOF
 //│ > │ │ │ │ │ │ │ │ │ │ │ ┕ simple expression: zero
 //│ > │ │ │ │ │ │ │ │ │ │ ├ found an EOF

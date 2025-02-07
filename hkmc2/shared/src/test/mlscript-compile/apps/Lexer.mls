@@ -58,6 +58,19 @@ module Token with
     Identifier(name, _) then name
     Literal(_, literal) then literal
   
+  fun preview(tokens: Stack[Lexer.Token]): Str =
+    let
+      i = 0
+      limit = 5
+      values = []
+    while i < limit and tokens is head :: tail do
+      values.push of head Lexer.Token.summary()
+      set tokens = tail
+      set i += 1
+    fold(+) of
+      "┃", values.join("│"),
+      if tokens is _ :: _ then "├┈┄╌" else "┃"
+  
   fun display(token) = if token is
     Space then "Space"
     Comma then "Comma"

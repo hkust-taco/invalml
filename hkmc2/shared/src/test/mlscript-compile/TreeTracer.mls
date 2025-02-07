@@ -1,0 +1,31 @@
+import "./Predef.mls"
+
+open Predef { fold }
+
+module TreeTracer with ...
+
+class TreeTracer with
+  mut val steps = 0
+  let output = console.log
+  fun indentPrefix = if steps == 0 then "" else "│ ".repeat(steps - 1)
+  fun enter(...pieces) =
+    output of fold (+) of
+      if steps > 0 then "│ ".repeat(steps - 1) + "├─┮ " else "┍ "
+      ...pieces
+    set steps += 1
+  fun print(...pieces) =
+    let message = fold (+) of ...pieces
+    if steps == 0 then
+      output(message)
+    else
+      output(indentPrefix + "├ " + message)
+  fun leave(...pieces) =
+    set steps -= 1
+    output of fold(+) of
+      if steps > 0 then "│ ".repeat(steps - 1) + "│ ┕ " else "┕ "
+      ...pieces
+  fun trace[A](intro: Str, makeOutro: A -> Str, thunk: () -> A): A =
+    enter of intro
+    val result = thunk()
+    leave of makeOutro of result
+    result

@@ -191,6 +191,47 @@ Lexer1 = class Lexer {
           }
         }
       } 
+      static preview(tokens) {
+        let i, limit, values, scrut, param0, param1, head, tail, param01, param11, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+        i = 0;
+        limit = 5;
+        values = [];
+        tmp7: while (true) {
+          scrut = i < limit;
+          if (scrut === true) {
+            if (tokens instanceof Stack.Cons.class) {
+              param0 = tokens.head;
+              param1 = tokens.tail;
+              head = param0;
+              tail = param1;
+              tmp = Lexer1.Token.summary(head);
+              tmp1 = values.push(tmp) ?? null;
+              tokens = tail;
+              tmp2 = i + 1;
+              i = tmp2;
+              tmp3 = null;
+              continue tmp7;
+            } else {
+              tmp3 = null;
+            }
+          } else {
+            tmp3 = null;
+          }
+          break;
+        }
+        tmp4 = Predef.fold((arg1, arg2) => {
+          return arg1 + arg2;
+        });
+        tmp5 = values.join("\u2502") ?? null;
+        if (tokens instanceof Stack.Cons.class) {
+          param01 = tokens.head;
+          param11 = tokens.tail;
+          tmp6 = "\u251C\u2508\u2504\u254C";
+        } else {
+          tmp6 = "\u2503";
+        }
+        return tmp4("\u2503", tmp5, tmp6) ?? null;
+      } 
       static display(token1) {
         let param0, param1, kind, literal, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
         if (token1 instanceof Token.Space.class) {

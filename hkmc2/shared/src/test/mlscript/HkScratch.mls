@@ -81,4 +81,54 @@ fun foo(tr) =
 //│ ╙──      	^^
 //│ Elab: { ‹› fun member:foo‹284›(Param(‹›,tr‹285›,None), ) = { tr‹285›#666.trace(42); <error>; <error> }; }
 
+fun foo(tracer) =
+  tracer.print of "foo <<<"
+  set tracer.level += 1 in ...
+  tracer.print of "working"
+  0
+//│ FAILURE: Unexpected parse error
+//│ ╔══[PARSE ERROR] Unexpected literal here
+//│ ║  l.88: 	  0
+//│ ╙──      	  ^
+//│ FAILURE: Unexpected exception
+//│ /!!!\ Uncaught error: scala.MatchError: LetLike(keyword 'set',App(Ident(+=),Tup(List(Sel(Ident(tracer),Ident(level)), IntLit(1)))),None,Some(App(Sel(Ident(tracer),Ident(print)),Tup(List(StrLit(working)))))) (of class hkmc2.syntax.Tree$LetLike)
+//│ 	at: hkmc2.semantics.Elaborator.term$$anonfun$3(Elaborator.scala:604)
+//│ 	at: hkmc2.MLsDiffMaker$$anon$1.trace(MLsDiffMaker.scala:70)
+//│ 	at: hkmc2.semantics.Elaborator.term(Elaborator.scala:604)
+//│ 	at: hkmc2.semantics.Elaborator.go$4(Elaborator.scala:965)
+//│ 	at: hkmc2.semantics.Elaborator.block$$anonfun$3(Elaborator.scala:973)
+//│ 	at: hkmc2.MLsDiffMaker$$anon$1.trace(MLsDiffMaker.scala:70)
+//│ 	at: hkmc2.semantics.Elaborator.block(Elaborator.scala:973)
+//│ 	at: hkmc2.semantics.Elaborator.term$$anonfun$3(Elaborator.scala:222)
+//│ 	at: hkmc2.MLsDiffMaker$$anon$1.trace(MLsDiffMaker.scala:70)
+//│ 	at: hkmc2.semantics.Elaborator.term(Elaborator.scala:604)
+//│ 	at: hkmc2.semantics.Elaborator.$anonfun$25(Elaborator.scala:801)
+//│ 	at: scala.Option.map(Option.scala:242)
+//│ 	at: hkmc2.semantics.Elaborator.go$4(Elaborator.scala:801)
+//│ 	at: hkmc2.semantics.Elaborator.block$$anonfun$3(Elaborator.scala:973)
+//│ 	at: hkmc2.MLsDiffMaker$$anon$1.trace(MLsDiffMaker.scala:70)
+//│ 	at: hkmc2.semantics.Elaborator.block(Elaborator.scala:973)
+//│ 	at: hkmc2.semantics.Elaborator.topLevel(Elaborator.scala:1032)
+//│ 	at: hkmc2.MLsDiffMaker.processTrees(MLsDiffMaker.scala:182)
+//│ 	at: hkmc2.MLsDiffMaker.processOrigin(MLsDiffMaker.scala:163)
+//│ 	at: hkmc2.DiffMaker.processBlock(DiffMaker.scala:209)
+//│ 	at: hkmc2.DiffMaker.rec(DiffMaker.scala:312)
+//│ 	at: hkmc2.DiffMaker.run(DiffMaker.scala:335)
+//│ 	at: hkmc2.MLsDiffMaker.run(MLsDiffMaker.scala:78)
+//│ 	at: hkmc2.JSBackendDiffMaker.run(JSBackendDiffMaker.scala:53)
+//│ 	at: hkmc2.Watcher.go(Watcher.scala:103)
+//│ 	at: hkmc2.Watcher.onModify(Watcher.scala:118)
+//│ 	at: hkmc2.Watcher$$anon$1.onEvent(Watcher.scala:67)
+//│ 	at: io.methvin.watcher.DirectoryWatcher.onEvent(DirectoryWatcher.java:425)
+//│ 	at: io.methvin.watcher.DirectoryWatcher.runEventLoop(DirectoryWatcher.java:356)
+//│ 	at: io.methvin.watcher.DirectoryWatcher.watch(DirectoryWatcher.java:250)
+//│ 	at: hkmc2.Watcher.run(Watcher.scala:79)
+//│ 	at: hkmc2.MainWatcher$.main(Watcher.scala:18)
+//│ 	at: hkmc2.MainWatcher.main(Watcher.scala)
 
+fun f(x, y, z) = x + y + z
+//│ Elab: { ‹› fun member:f‹295›(Param(‹›,x‹296›,None), Param(‹›,y‹297›,None), Param(‹›,z‹298›,None), ) = builtin:+‹17›#1(builtin:+‹17›#2(x‹296›#666, y‹297›#666), z‹298›#666); }
+
+0 f (2, 3)
+//│ Elab: { member:f‹295›#666(0, 2, 3) }
+//│ = 5
