@@ -96,6 +96,7 @@ object Elaborator:
       val Int = assumeBuiltinCls("Int")
       val Num = assumeBuiltinCls("Num")
       val Str = assumeBuiltinCls("Str")
+      val Function = assumeBuiltinCls("Function")
       val Bool = assumeBuiltinCls("Bool")
       val Object = assumeBuiltinCls("Object")
       val untyped = assumeBuiltinTpe("untyped")
@@ -471,6 +472,14 @@ extends Importer:
     case Sel(pre, nme) =>
       val preTrm = term(pre)
       val sym = resolveField(nme, preTrm.symbol, nme)
+      sym match
+      // * Enforcing [invariant:1]
+      case S(ms: BlockMemberSymbol)
+        if !inAppPrefix && ms.isParameterizedMethod && !preTrm.symbol.exists(_.isModule) =>
+        raise:
+          ErrorReport(
+            msg"[debinding error] Method '${nme.name}' cannot be accessed without being called." -> nme.toLoc :: Nil)
+      case S(_) | N => ()
       Term.Sel(preTrm, nme)(sym)
     case MemberProj(ct, nme) =>
       val c = cls(ct, inAppPrefix = false)

@@ -208,7 +208,7 @@ enum Tree extends AutoLocated:
     case _ => false
 
 object Tree:
-  val DummyApp: App = App(Dummy, Dummy)
+  val DummyApp: App = App(Dummy, Dummy) // TODO change the places where this is used
   val DummyTup: Tup = Tup(Dummy :: Nil)
   def DummyTypeDef(k: TypeDefKind)(using State): TypeDef =
     Tree.TypeDef(syntax.Cls, Tree.Dummy, N, N)
@@ -284,6 +284,9 @@ case object Pat extends TypeDefKind("pattern") with ClsLikeKind
 
 trait TermDefImpl extends TypeOrTermDef:
   this: TermDef =>
+  
+  def sParameterizedMethod: Bool =
+    (k is Fun) && paramLists.length > 0
   
 
 trait TypeOrTermDef:

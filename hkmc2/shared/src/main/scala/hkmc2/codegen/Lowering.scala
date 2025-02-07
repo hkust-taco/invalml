@@ -13,7 +13,7 @@ import semantics.*
 import hkmc2.{semantics => sem}
 import semantics.{Term => st}
 import semantics.Term.{Throw => _, *}
-import semantics.Elaborator.{State, Ctx}
+import semantics.Elaborator.{State, Ctx, ctx}
 
 import syntax.{Literal, Tree}
 
@@ -451,6 +451,7 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
       setupSelection(prefix, nme, sel.sym)(k)
         
     case sel @ SynthSel(prefix, nme) =>
+      // * Not using `setupSelection` as these selections are not meant to be sanity-checked
       subTerm(prefix): p =>
         k(Select(p, nme)(sel.sym))
         
@@ -584,6 +585,7 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
   
   def setupSelection(prefix: Term, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
     subTerm(prefix): p =>
+      val selRes = TempSymbol(N, "selRes")
       k(Select(p, nme)(sym))
   
   final def setupFunctionOrByNameDef(paramLists: List[ParamList], bodyTerm: Term, name: Option[Str])
@@ -609,26 +611,25 @@ class Lowering(lowerHandlers: Bool, stackLimit: Option[Int])(using TL, Raise, St
 trait LoweringSelSanityChecks
         (instrument: Bool)(using TL, Raise, State)
     extends Lowering:
-  
   override def setupSelection(prefix: st, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
-    if instrument then
-      subTerm(prefix): p =>
-        val selRes = TempSymbol(N, "selRes")
-        val split = Split.Cons(
-            Branch(
-              selRes.ref(),
-              Pattern.Lit(syntax.Tree.UnitLit(false)),
-              Split.Else(
-                Term.Throw(Term.New(SynthSel(State.globalThisSymbol.ref(), Tree.Ident("Error"))(N),
-                  Term.Lit(syntax.Tree.StrLit(s"Access to required field '${nme.name}' yielded 'undefined'")) :: Nil, N)
-                ))),
-            Split.Else(selRes.ref()))
-        Assign(
-          selRes,
-          Select(p, nme)(sym),
-          term(IfLike(syntax.Keyword.`if`, split)(split))(k))
-    else
-      super.setupSelection(prefix, nme, sym)(k)
+    if !instrument then return super.setupSelection(prefix, nme, sym)(k)
+    subTerm(prefix): p =>
+      val selRes = TempSymbol(N, "selRes")
+      // * We are careful to access `x.f` before `x.f$__checkNotMethod` in case `x` is, eg, `undefined` and
+      // * the access should throw an error like `TypeError: Cannot read property 'f' of undefined`.
+      val b0 = blockBuilder
+        .assign(selRes, Select(p, nme)(sym))
+      (if sym.isDefined then
+        // * If the symbol is known, the elaborator will have already checked the access [invariant:1]
+        b0
+      else b0
+        .assign(TempSymbol(N, "discarded"), Select(p, Tree.Ident(nme.name+"$__checkNotMethod"))(N)))
+        .ifthen(selRes.asPath,
+          Case.Lit(syntax.Tree.UnitLit(false)),
+          Throw(Instantiate(Select(Value.Ref(State.globalThisSymbol), Tree.Ident("Error"))(N),
+            Value.Lit(syntax.Tree.StrLit(s"Access to required field '${nme.name}' yielded 'undefined'")) :: Nil))
+        )
+        .rest(k(selRes.asPath))
 
 
 

@@ -28,6 +28,8 @@ abstract class Symbol(using State) extends Located:
     res
   def refsNumber: Int = directRefs.size
   
+  def isModule: Bool = asMod.nonEmpty
+  
   def asCls: Opt[ClassSymbol] = this match
     case cls: ClassSymbol => S(cls)
     case mem: BlockMemberSymbol => mem.clsTree.flatMap(_.symbol.asCls)
@@ -146,6 +148,8 @@ class BlockMemberSymbol(val nme: Str, val trees: Ls[Tree])(using State)
   def trmImplTree: Opt[Tree.TermDef] = trees.collectFirst:
     case t: Tree.TermDef if t.rhs.isDefined => t
   
+  def isParameterizedMethod: Bool = trmTree.exists(_.sParameterizedMethod)
+  
   lazy val hasLiftedClass: Bool =
     objTree.isDefined || trmTree.isDefined || clsTree.exists(_.paramLists.nonEmpty)
   
@@ -193,7 +197,7 @@ case class TupSymbol(arity: Opt[Int])(using State) extends CtorSymbol:
 
 type TypeSymbol = ClassSymbol | TypeAliasSymbol
 
-type FieldSymbol = TermSymbol | MemberSymbol[?]
+type FieldSymbol = MemberSymbol[?]
 
 sealed trait ClassLikeSymbol extends Symbol:
   self: MemberSymbol[? <: ClassDef | ModuleDef] =>

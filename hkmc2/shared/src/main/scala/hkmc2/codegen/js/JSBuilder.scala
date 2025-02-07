@@ -25,6 +25,7 @@ abstract class CodeBuilder:
 class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
   
   def checkMLsCalls: Bool = false
+  def checkSelections: Bool = false
   
   val builtinOpsBase: Ls[Str] = Ls(
     "+", "-", "*", "/", "%",
@@ -207,6 +208,19 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
               } { #{ ${
                 privs
               } # $ctorOrStatic ${ braced(ctorCode) }${
+                if checkSelections && !isModule
+                then mtds
+                  .flatMap:
+                    case td @ FunDefn(_, _, ps :: pss, bod) => S:
+                      doc" # get ${td.sym.nme}$$__checkNotMethod() { ${
+                        getVar(State.runtimeSymbol)
+                      }.deboundMethod(${JSBuilder.makeStringLiteral(td.sym.nme)}, ${
+                        JSBuilder.makeStringLiteral(sym.nme)
+                      }); }"
+                    case _ => N
+                  .mkDocument(" ")
+                else doc""
+              }${
                 mtds.map: 
                   case td @ FunDefn(_, _, ps :: pss, bod) =>
                     val result = pss.foldRight(bod):
@@ -526,6 +540,7 @@ trait JSBuilderArgNumSanityChecks
     extends JSBuilder:
   
   override def checkMLsCalls: Bool = instrument
+  override def checkSelections: Bool = instrument
   
   val functionParamVarargSymbol = semantics.TempSymbol(N, "args")
   

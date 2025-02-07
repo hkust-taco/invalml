@@ -74,8 +74,11 @@ enum Term extends Statement:
   
   def sel(id: Tree.Ident, sym: Opt[FieldSymbol]) =
     Sel(this, id)(sym)
-  def selNoSym(nme: Str) =
-    sel(Tree.Ident(nme), N)
+  def selNoSym(nme: Str, synth: Bool = false) =
+    val id = new Tree.Ident(nme)
+    if synth
+    then SynthSel(this, id)(N)
+    else sel(id, N)
   
   def app(args: Term*)(using State) =
     App(this, Tup(args.toList.map(PlainFld(_)))(Tree.DummyTup))(Tree.App(Tree.Dummy, Tree.Dummy),

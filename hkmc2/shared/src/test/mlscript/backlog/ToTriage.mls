@@ -80,8 +80,8 @@ set g.0 += 1 // FIXME
 
 :fixme
 set g.0 = g.0 + 1
-//│ > let selRes, tmp1, tmp2;try { selRes = g[0]; if (selRes === undefined) {   throw new this.Error("Access to required field '0' yielded 'undefined'"); } else {   tmp1 = selRes; } tmp2 = tmp1 + 1; g.0 = tmp2; block$res8 = runtime.Unit; undefined } catch (e) { console.log('\u200B' + e + '\u200B'); }
-//│ >                                                                                                                                                                                                   ^^
+//│ > let selRes, discarded, tmp1;try { selRes = g[0]; discarded = g["0$__checkNotMethod"]; if (selRes === undefined) {   throw new this.Error("Access to required field '0' yielded 'undefined'"); } tmp1 = selRes + 1; g.0 = tmp1; block$res8 = runtime.Unit; undefined } catch (e) { console.log('\u200B' + e + '\u200B'); }
+//│ >                                                                                                                                                                                                                     ^^
 //│ ═══[COMPILATION ERROR] [Uncaught SyntaxError] Unexpected number
 
 // ——— ——— ———
