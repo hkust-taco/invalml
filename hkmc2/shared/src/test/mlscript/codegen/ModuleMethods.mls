@@ -33,3 +33,36 @@ Example |>. s(123)
 //│ = [123, 456]
 
 
+:sjs
+module Test with
+  let s = 1
+  print(s)
+  fun foo() = print(s)
+  fun bar() = foo()
+//│ JS (unsanitized):
+//│ let Test1;
+//│ Test1 = class Test {
+//│   static #s;
+//│   static {
+//│     let tmp1;
+//│     Test.#s = 1;
+//│     tmp1 = Predef.print(Test.#s);
+//│   }
+//│   static foo() {
+//│     return Predef.print(Test.#s)
+//│   } 
+//│   static bar() {
+//│     return Test.foo()
+//│   }
+//│   static toString() { return "Test"; }
+//│ };
+//│ > 1
+
+let f = Test.foo
+//│ f = [function foo]
+
+// :fixme
+f()
+//│ > 1
+
+

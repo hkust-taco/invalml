@@ -35,13 +35,16 @@ class ParserSetup(file: os.Path, dbgParsing: Bool)(using Elaborator.State, Raise
   
 
 
-class MLsCompiler(preludeFile: os.Path):
+// * The weird type of `mkOutput` is to allow wrapping the reporting of diagnostics in synchronized blocks
+class MLsCompiler(preludeFile: os.Path, mkOutput: ((Str => Unit) => Unit) => Unit):
   
   val runtimeFile: os.Path = preludeFile/os.up/os.up/os.up/"mlscript-compile"/"Runtime.mjs"
   
   
-  val report = ReportFormatter: str =>
-    System.out.println(fansi.Color.Red(str))
+  val report = ReportFormatter: outputConsumer =>
+    mkOutput: output =>
+      outputConsumer: str =>
+        output(fansi.Color.Red(str).toString)
   
   
   // TODO adapt logic
@@ -57,7 +60,8 @@ class MLsCompiler(preludeFile: os.Path):
     val wd = file / os.up
     
     given raise: Raise = d =>
-      System.out.println(fansi.Color.LightRed(s"/!!!\\ Error in ${file.relativeTo(wd/os.up)} /!!!\\"))
+      mkOutput:
+        _(fansi.Color.LightRed(s"/!!!\\ Error in ${file.relativeTo(wd/os.up)} /!!!\\").toString)
       report(0, d :: Nil, showRelativeLineNums = false)
     
     given Elaborator.State = new Elaborator.State

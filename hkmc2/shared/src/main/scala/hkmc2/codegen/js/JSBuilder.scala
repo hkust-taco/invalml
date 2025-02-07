@@ -62,7 +62,7 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
     case ts: semantics.TermSymbol =>
       ts.owner match
       case S(owner) =>
-        doc"${result(Value.This(owner))}.${
+        doc"${getVar(owner)}.${
           if (ts.k is syntax.LetBind) && !owner.isInstanceOf[semantics.TopLevelSymbol]
           then "#" + owner.privatesScope.lookup_!(ts)
           else ts.id.name
@@ -160,8 +160,10 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
       def mkThis(sym: InnerSymbol): Document =
         result(Value.This(sym))
       val resJS = defn match
-      case ValDefn(own, k: syntax.Val, sym, p) =>
+      case ValDefn(own, k, sym, p) =>
         val sym = defn.sym
+        // * Currently we allow `val` outside of object/module scopes,
+        // * in which case it has no owner and is just a glorified local variable rather than a field.
         own match
         case N =>
           doc"${getVar(sym)} = ${result(p)};${returningTerm(rst, endSemi)}"
