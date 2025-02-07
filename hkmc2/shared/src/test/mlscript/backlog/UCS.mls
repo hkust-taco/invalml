@@ -37,7 +37,7 @@ if
   true and
   true do
     print("ok")
-//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing
+//│ /!!!\ Uncaught error: scala.NotImplementedError: infix on newline at Ln 2 Col 11:Ln 2 Col 11
 
 if
   true and
@@ -51,7 +51,7 @@ if
   and
   true do
     print("ok")
-//│ /!!!\ Uncaught error: scala.NotImplementedError: an implementation is missing
+//│ /!!!\ Uncaught error: scala.NotImplementedError: infix on newline at Ln 3 Col 6:Ln 3 Col 6
 
 if
   true
@@ -107,6 +107,17 @@ if 1 + 1
     * 2 == 1 then "A"
     |> id is r then r
 //│ = 2
+
+// ——— ——— ———
+
+class Some(v)
+
+Some(1) is
+  Some of [process, rest] do "hi"
+//│ ╔══[ERROR] Unrecognized pattern (infix operation)
+//│ ║  l.116: 	  Some of [process, rest] do "hi"
+//│ ╙──       	          ^^^^^^^^^^^^^^^^^^^^^^^
+//│ = false
 
 // ——— ——— ———
 

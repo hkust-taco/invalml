@@ -33,3 +33,52 @@ fun work(x) = if x is
 //│ >      $scrut‹228› is None then 42
 //│ >    x‹220› is None then 0
 //│ Elab: { ‹› fun member:work‹219›(Param(‹›,x‹220›,None), ) = if { x is Some($param0‹225›) -> { let y‹226› = $param0‹225›#0; let $scrut‹228› = member:get‹212›#666(y‹226›#666); scrut is Some($param0‹229›) -> { let z‹230› = $param0‹229›#0; else 8 }; scrut is None -> { else 42 };  }; x is None -> { else 0 };  }; }
+
+
+class Tracer(ind) with
+  fun trace(x) = print(ind, x)
+  fun nest = new Tracer(ind + 1)
+//│ Elab: { Cls TracerParamList(‹›,List(Param(‹›,class:Tracer‹239›.ind,None)),None) { ‹› fun member:trace‹236›(Param(‹›,x‹242›,None), ) = (member:Predef‹199›#666.)print‹member:print‹163››(class:Tracer‹239›.ind#666, x‹242›#666); ‹› fun member:nest‹237› = new SynthSel(Ref(member:Tracer‹238›),Ident(class))(App(Ref(builtin:+‹17›),Tup(List(Fld(‹›,Ref(class:Tracer‹239›.ind),None), Fld(‹›,Lit(IntLit(1)),None))))); }; }
+
+fun foo(tr) =
+  tr.trace(42)
+  set tr = tr.nest in
+    tr.trace(42)
+  tr.trace(1)
+//│ Elab: { ‹› fun member:foo‹251›(Param(‹›,tr‹252›,None), ) = { tr‹252›#666.trace(42); { let $old‹254›; $old‹254› = tr‹252›#666; try { tr‹252›#666 := tr‹252›#666.nest; tr‹252›#666.trace(42) } finally tr‹252›#666 := $old‹254›#0 }; tr‹252›#666.trace(1) }; }
+
+foo(new Tracer(0))
+//│ Elab: { member:foo‹251›#666(new SynthSel(Ref(member:Tracer‹238›),Ident(class))(Lit(IntLit(0)))) }
+//│ > 0 42
+//│ > 1 42
+//│ > 0 1
+
+class Tracer(ind) with
+  fun trace(x) = print(ind, x)
+//│ Elab: { Cls TracerParamList(‹›,List(Param(‹›,class:Tracer‹275›.ind,None)),None) { ‹› fun member:trace‹273›(Param(‹›,x‹278›,None), ) = (member:Predef‹199›#666.)print‹member:print‹163››(class:Tracer‹275›.ind#666, x‹278›#666); }; }
+
+fun foo(tr) =
+  tr.trace(42)
+  set tr.ind += 1 in
+  // set tr.ind = tr.ind + 1 in
+    tr.trace(42)
+  tr.trace(1)
+//│ FAILURE: Unexpected parse error
+//│ ╔══[PARSE ERROR] Expected expression after 'set' binding `in` clause; found newline instead
+//│ ║  l.62: 	  set tr.ind += 1 in
+//│ ║        	                    ^
+//│ ║  l.63: 	  // set tr.ind = tr.ind + 1 in
+//│ ╙──      	^^
+//│ FAILURE: Unexpected parse error
+//│ ╔══[PARSE ERROR] Expected an expression; found block instead
+//│ ║  l.65: 	  tr.trace(1)
+//│ ╙──      	             ^
+//│ FAILURE: Unexpected parse error
+//│ ╔══[PARSE ERROR] Unexpected indented block here
+//│ ║  l.64: 	    tr.trace(42)
+//│ ║        	^^^^^^^^^^^^^^^^
+//│ ║  l.65: 	  tr.trace(1)
+//│ ╙──      	^^
+//│ Elab: { ‹› fun member:foo‹284›(Param(‹›,tr‹285›,None), ) = { tr‹285›#666.trace(42); <error>; <error> }; }
+
+

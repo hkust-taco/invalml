@@ -977,7 +977,7 @@ abstract class Parser(
                 yeetSpaces match
                   case (NEWLINE, l0) :: _ =>
                     consume
-                    ???
+                    throw new NotImplementedError(s"infix on newline at ${l0.showStart}:${l0.showEnd}")
                   case _ =>
                 if verbose then printDbg("$ parsing the right-hand side")
                 val rhs = expr(kw.rightPrecOrMin)

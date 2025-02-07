@@ -40,6 +40,23 @@ module Token with
     Comment(content: Str)
     Identifier(name: Str, symbolic: Bool)
     Literal(kind: LiteralKind, literal: Str)
+    
+  fun summary(token) = if token is
+    Space then "␠"
+    Comma then ","
+    Semicolon then ";"
+    Error then "⚠"
+    Open(kind) and kind is
+      Round then "("
+      Square then "["
+      Curly then "{"
+    Close(kind) and kind is
+      Round then ")"
+      Square then "]"
+      Curly then "}"
+    Comment(_) then "\uD83D\uDCAC" // The text ballon emoji.
+    Identifier(name, _) then name
+    Literal(_, literal) then literal
   
   fun display(token) = if token is
     Space then "Space"

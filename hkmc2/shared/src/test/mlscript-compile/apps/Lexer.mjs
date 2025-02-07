@@ -116,43 +116,118 @@ Lexer1 = class Lexer {
           toString() { return "Literal(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.literal) + ")"; }
         };
       }
-      static display(token) {
-        let param0, param1, kind, literal, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+      static summary(token) {
+        let param0, param1, literal, param01, param11, name, param02, param03, kind, param04, kind1;
         if (token instanceof Token.Space.class) {
-          return "Space";
+          return "\u2420";
         } else {
           if (token instanceof Token.Comma.class) {
-            return "Comma";
+            return ",";
           } else {
             if (token instanceof Token.Semicolon.class) {
-              return "Semicolon";
+              return ";";
             } else {
               if (token instanceof Token.Error.class) {
-                return "Error";
+                return "\u26A0";
               } else {
                 if (token instanceof Token.Open.class) {
                   param04 = token.kind;
+                  kind1 = param04;
+                  if (kind1 instanceof Lexer.Round.class) {
+                    return "(";
+                  } else {
+                    if (kind1 instanceof Lexer.Square.class) {
+                      return "[";
+                    } else {
+                      if (kind1 instanceof Lexer.Curly.class) {
+                        return "{";
+                      } else {
+                        throw new globalThis.Error("match error");
+                      }
+                    }
+                  }
+                } else {
+                  if (token instanceof Token.Close.class) {
+                    param03 = token.kind;
+                    kind = param03;
+                    if (kind instanceof Lexer.Round.class) {
+                      return ")";
+                    } else {
+                      if (kind instanceof Lexer.Square.class) {
+                        return "]";
+                      } else {
+                        if (kind instanceof Lexer.Curly.class) {
+                          return "}";
+                        } else {
+                          throw new globalThis.Error("match error");
+                        }
+                      }
+                    }
+                  } else {
+                    if (token instanceof Token.Comment.class) {
+                      param02 = token.content;
+                      return "\uD83D\uDCAC";
+                    } else {
+                      if (token instanceof Token.Identifier.class) {
+                        param01 = token.name;
+                        param11 = token.symbolic;
+                        name = param01;
+                        return name;
+                      } else {
+                        if (token instanceof Token.Literal.class) {
+                          param0 = token.kind;
+                          param1 = token.literal;
+                          literal = param1;
+                          return literal;
+                        } else {
+                          throw new globalThis.Error("match error");
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } 
+      static display(token1) {
+        let param0, param1, kind, literal, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+        if (token1 instanceof Token.Space.class) {
+          return "Space";
+        } else {
+          if (token1 instanceof Token.Comma.class) {
+            return "Comma";
+          } else {
+            if (token1 instanceof Token.Semicolon.class) {
+              return "Semicolon";
+            } else {
+              if (token1 instanceof Token.Error.class) {
+                return "Error";
+              } else {
+                if (token1 instanceof Token.Open.class) {
+                  param04 = token1.kind;
                   kind2 = param04;
                   tmp = Token.display(kind2);
                   tmp1 = Str.concat2("Open(", tmp);
                   return Str.concat2(tmp1, ")");
                 } else {
-                  if (token instanceof Token.Close.class) {
-                    param03 = token.kind;
+                  if (token1 instanceof Token.Close.class) {
+                    param03 = token1.kind;
                     kind1 = param03;
                     tmp2 = Token.display(kind1);
                     tmp3 = Str.concat2("Close(", tmp2);
                     return Str.concat2(tmp3, ")");
                   } else {
-                    if (token instanceof Token.Comment.class) {
-                      param02 = token.content;
+                    if (token1 instanceof Token.Comment.class) {
+                      param02 = token1.content;
                       content = param02;
                       tmp4 = Str.concat2("Comment(", content);
                       return Str.concat2(tmp4, ")");
                     } else {
-                      if (token instanceof Token.Identifier.class) {
-                        param01 = token.name;
-                        param11 = token.symbolic;
+                      if (token1 instanceof Token.Identifier.class) {
+                        param01 = token1.name;
+                        param11 = token1.symbolic;
                         name = param01;
                         symbolic = param11;
                         tmp5 = Str.concat2("Identifier(", name);
@@ -160,9 +235,9 @@ Lexer1 = class Lexer {
                         tmp7 = Str.concat2(tmp6, symbolic);
                         return Str.concat2(tmp7, ")");
                       } else {
-                        if (token instanceof Token.Literal.class) {
-                          param0 = token.kind;
-                          param1 = token.literal;
+                        if (token1 instanceof Token.Literal.class) {
+                          param0 = token1.kind;
+                          param1 = token1.literal;
                           kind = param0;
                           literal = param1;
                           tmp8 = Token.display(kind);
@@ -171,25 +246,25 @@ Lexer1 = class Lexer {
                           tmp11 = Str.concat2(tmp10, literal);
                           return Str.concat2(tmp11, ")");
                         } else {
-                          if (token instanceof Lexer.Round.class) {
+                          if (token1 instanceof Lexer.Round.class) {
                             return "Round";
                           } else {
-                            if (token instanceof Lexer.Square.class) {
+                            if (token1 instanceof Lexer.Square.class) {
                               return "Square";
                             } else {
-                              if (token instanceof Lexer.Curly.class) {
+                              if (token1 instanceof Lexer.Curly.class) {
                                 return "Curly";
                               } else {
-                                if (token instanceof Lexer.LiteralKind.Integer.class) {
+                                if (token1 instanceof Lexer.LiteralKind.Integer.class) {
                                   return "Integer";
                                 } else {
-                                  if (token instanceof Lexer.LiteralKind.Decimal.class) {
+                                  if (token1 instanceof Lexer.LiteralKind.Decimal.class) {
                                     return "Decimal";
                                   } else {
-                                    if (token instanceof Lexer.LiteralKind.String.class) {
+                                    if (token1 instanceof Lexer.LiteralKind.String.class) {
                                       return "String";
                                     } else {
-                                      if (token instanceof Lexer.LiteralKind.Boolean.class) {
+                                      if (token1 instanceof Lexer.LiteralKind.Boolean.class) {
                                         return "Boolean";
                                       } else {
                                         throw new globalThis.Error("match error");
