@@ -17,8 +17,9 @@ object
   Round
   Square
   Curly
+  BeginEnd
 
-type BracketKind = Round | Square | Curly
+type BracketKind = Round | Square | Curly | BeginEnd
 
 module LiteralKind with
   object
@@ -40,6 +41,11 @@ module Token with
     Comment(content: Str)
     Identifier(name: Str, symbolic: Bool)
     Literal(kind: LiteralKind, literal: Str)
+  
+  fun integer(literal) = Token.Literal(LiteralKind.Integer, literal)
+  fun decimal(literal) = Token.Literal(LiteralKind.Decimal, literal)
+  fun string(literal) = Token.Literal(LiteralKind.String, literal)
+  fun boolean(literal) = Token.Literal(LiteralKind.Boolean, literal)
     
   fun summary(token) = if token is
     Space then "␠"
@@ -50,10 +56,12 @@ module Token with
       Round then "("
       Square then "["
       Curly then "{"
+      BeginEnd then "begin"
     Close(kind) and kind is
       Round then ")"
       Square then "]"
       Curly then "}"
+      BeginEnd then "end"
     Comment(_) then "\uD83D\uDCAC" // The text ballon emoji.
     Identifier(name, _) then name
     Literal(_, literal) then literal
@@ -69,7 +77,7 @@ module Token with
       set i += 1
     fold(+) of
       "┃", values.join("│"),
-      if tokens is _ :: _ then "├┈┄╌" else "┃"
+      if tokens is _ :: _ then "│⋯" else "┃"
   
   fun display(token) = if token is
     Space then "Space"
@@ -117,12 +125,12 @@ fun lex(str: Str) =
   
   // Consume a sequence of characters that satisfy a predicate.
   // The function returns the accumulated string and the following index.
-  fun take(pred: Str -> Bool, idx: Int, acc: Str): [Str, Int] =
+  fun take(pred: Str -> Bool, idx: Int, acc: Str): [Int, Str] =
     while (char of idx) is Some(ch) and pred(ch)
       then
         set idx = idx + 1
         set acc = acc + ch
-      else [acc, idx]
+      else [idx, acc]
   
   fun whitespace(idx: Int): Int =
     while char(idx) is Some(Char.Space)
@@ -148,7 +156,14 @@ fun lex(str: Str) =
       then
         set idx = idx + 1
         set acc = acc + ch
-      else [idx, Token.Identifier(acc, false)]
+      else tuple of
+        idx
+        if acc is
+          "begin" then Token.Open(BeginEnd)
+          "end" then Token.Close(BeginEnd)
+          "true" then Token.boolean("true")
+          "false" then Token.boolean("false")
+          else Token.Identifier(acc, false)
   
   fun operator(idx: Int, acc: Str) =
     while char(idx) is Some(Char.Operator as ch)
@@ -204,22 +219,25 @@ fun lex(str: Str) =
     else
       [idx, Token.Error]
   
-  fun number(idx: Int) = if (char of idx) is
-    None then None
-    (Some of Char.Zero) and (char of idx + 1) is
-      None then Some of [Token.Literal(0), idx + 1]
-      (Some of "b") then Some of take(Char.isBinDigit, idx + 2, "")
-      (Some of "o") then Some of take(Char.isOctDigit, idx + 2, "")
-      (Some of "x") then Some of take(Char.isHexDigit, idx + 2, "")
-      (Some of ".") and digits(idx + 2) is [ds, idx'] then Some of ["0." ~ ds, idx']
-      _ and digits(idx) is [ds, idx'] then
-        print(ds)
-        Some of [ds, idx']
-        // and (char of idx') is
-        // (Some of ".") and digits(idx' + 1) is [ds', idx''] then Some of [ds ~ "." ~ ds', idx'']
-        // else 
-      else None
-  
+  fun number(idx: Int, head: Str) =
+    if head is "0" and char(idx) is
+      None then [idx, Token.integer("0")]
+      Some("b") and take(Char.isBinDigit, idx + 1, "") is [idx', bs] then
+        [idx', Token.integer("0b" ~ bs)]
+      Some("o") and take(Char.isOctDigit, idx + 1, "") is [idx', os] then
+        [idx', Token.integer("0o" ~ os)]
+      Some("x") and take(Char.isHexDigit, idx + 1, "") is [idx', xs] then
+        [idx', Token.integer("0x" ~ xs)]
+      Some(".") and digits(idx + 1) is [idx', ds] then
+        [idx', Token.decimal("0." ~ ds)]
+      Some(_) and digits(idx, head) is [idx', integer] then
+        [idx', Token.integer(integer)]
+    else
+      if digits(idx, head) is [idx', integer] then ...
+      if char(idx') is Some(".") and digits(idx' + 1, "") is [idx'', fraction] then
+        [idx'', Token.decimal(integer ~ "." ~ fraction)]
+      else
+        [idx', Token.integer(integer)]
   
   fun scan(idx: Int, acc: Stack[Token]): Stack[Token] =
     fun go(idx: Int, tok: Token) = scan(idx, tok :: acc)
@@ -241,8 +259,7 @@ fun lex(str: Str) =
       Some("/") then go(..comment(idx + 1))
       Some(Char.IdentifierStart as ch) then go(..identifier(idx + 1, ch))
       Some(Char.Operator as ch) then go(..operator(idx + 1, ch))
-      Some(Char.Digit as ch) and digits(idx + 1, ch) is [idx', literal] then
-        go(idx', Token.Literal(LiteralKind.Integer, literal))
+      Some(Char.Digit as ch) then go(..number(idx + 1, ch))
       Some(other) then
         print("Unrecognized character: '" ~ other ~ "'")
         go(idx + 1, Token.Error)

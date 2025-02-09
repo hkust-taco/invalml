@@ -75,42 +75,42 @@ NaN
 :w
 "\uFE&&"
 //│ ╔══[WARNING] Invalid Unicode escape sequence: expected 4 hexadecimal digits but got 2
-//│ ║  l.75: 	"\uFE&&"
+//│ ║  l.76: 	"\uFE&&"
 //│ ╙──      	   ^^
 //│ = "&&"
 
 :w
 "\u{}"
 //│ ╔══[WARNING] Expected at least one hexadecimal digit in Unicode escape sequence
-//│ ║  l.82: 	"\u{}"
+//│ ║  l.83: 	"\u{}"
 //│ ╙──      	   ^
 //│ = ""
 
 :w
 "\u{ffffffff}"
 //│ ╔══[WARNING] Too many hexadecimal digits in Unicode escape sequence
-//│ ║  l.89: 	"\u{ffffffff}"
+//│ ║  l.90: 	"\u{ffffffff}"
 //│ ╙──      	          ^^
 //│ = ""
 
 :w
 "\u{efefef}"
 //│ ╔══[WARNING] Unicode code point out of range: 0xefefef
-//│ ║  l.96: 	"\u{efefef}"
+//│ ║  l.97: 	"\u{efefef}"
 //│ ╙──      	    ^^^^^^
 //│ = ""
 
 :w
 "\u{55"
 //│ ╔══[WARNING] Unterminated Unicode escape sequence: missing '}'
-//│ ║  l.103: 	"\u{55"
+//│ ║  l.104: 	"\u{55"
 //│ ╙──       	      ^
 //│ = "U"
 
 :w
 "\u{41****"
 //│ ╔══[WARNING] Unterminated Unicode escape sequence: missing '}'
-//│ ║  l.110: 	"\u{41****"
+//│ ║  l.111: 	"\u{41****"
 //│ ╙──       	      ^
 //│ = "A****"
 

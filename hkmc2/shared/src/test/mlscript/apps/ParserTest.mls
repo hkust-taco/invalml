@@ -39,7 +39,27 @@ fun filter(xs, f) = if xs is
     f(head) then head :: filter(tail, f)
     else filter(tail, f)
   Nil then Nil
-  
+
+// Non-recursive yet mutable list concatenation.
+fun (:::) concat(xs, ys) = if
+  ys is Nil then xs
+  xs is
+    Nil then ys
+    head' :: tail' then
+      let
+        result = head' :: ys
+        current = result // the insertion point
+        rest = tail' // the remaining of `xs`
+      while rest is head :: tail do
+        let next = head :: ys
+        set
+          current.tail = next
+          current = next
+          rest = tail
+      result
+
+fun (:+) append(xs, y) = xs ::: y :: Nil
+
 fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
   let buffer = ""
   while stack is head :: tail do
@@ -49,7 +69,7 @@ fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
     set stack = tail
   buffer
 
-fun collectFirst[A, B](stack: Stack[A], op: A -> Option[B]) =
+fun collectFirst[A, B](stack: Stack[A], op) =
   let lastResult = None
   while stack is head :: tail and
     do set lastResult = op(head)
@@ -57,7 +77,7 @@ fun collectFirst[A, B](stack: Stack[A], op: A -> Option[B]) =
       set stack = tail
   lastResult
 
-fun collectToArray[A, B](stack: Stack[A], p: A -> Option[B]) =
+fun collectToArray[A, B](stack: Stack[A], p) =
   let elements = []
   while stack is head :: tail do
     if p(head) is Some(value) do
@@ -109,11 +129,11 @@ fun toMap(...entries) =
 let keywords = new Map()
 //│ keywords = Map
 
-class Keyword(val name: Str, val leftPrec: Option[Int], val rightPrec: Option[Int]) with
+class Keyword(val name: Str, val leftPrec, val rightPrec) with
   keywords.insert(name, this)
   
   fun toString() = fold(+) of
-    "Keyword(", name, ", "
+    "Keyword(`", name, "`, "
     (if leftPrec is Some(prec) then prec.toString() else "N/A"), ", ",
     (if rightPrec is Some(prec) then prec.toString() else "N/A"), ")"
 
@@ -123,47 +143,67 @@ module Keywords with
   fun nextPrec =
     set prec = prec + 1
     Some(prec)
-  val _class = Keyword("class", None, currPrec)
+  let basePrec = currPrec // the lowest precedence
+  val _class = Keyword("class", None, basePrec)
+  val _begin = Keyword("begin", None, basePrec)
+  val _end = Keyword("end", basePrec, None)
+  let semiPrec = nextPrec
+  let commaPrec = nextPrec
+  val _semicolon = Keyword(";", semiPrec, basePrec)
+  val _comma = Keyword(",", commaPrec, semiPrec)
   let eqPrec = nextPrec
   let ascPrec = nextPrec
   val _equal = Keyword("=", eqPrec, eqPrec)
   val _colon = Keyword(":", ascPrec, eqPrec)
-  val _semicolon = Keyword(";", ascPrec, eqPrec)
+  val _match = Keyword("match", None, currPrec)
+  val _if = Keyword("if", None, currPrec)
+  val _with = Keyword("with", None, currPrec)
+  val _bar = Keyword("|", None, currPrec)
   val _case = Keyword("case", None, currPrec)
   let thenPrec = nextPrec
   val _then = Keyword("then", thenPrec, thenPrec)
   val _do = Keyword("do", thenPrec, thenPrec)
   val _else = Keyword("else", nextPrec, currPrec)
-  val _fun = Keyword("fun", None, None)
   val _let = Keyword("let", nextPrec, currPrec)
   val _in = Keyword("in", thenPrec, thenPrec)
   val _true = Keyword("true", None, None)
   val _false = Keyword("false", None, None)
-  val _fatArrow = Keyword of "=>", nextPrec, eqPrec
+  // val _fatArrow = Keyword of "=>", nextPrec, eqPrec
   val _thinArrow = Keyword of "->", currPrec, eqPrec
+  val _fun = Keyword("fun", currPrec, None)
+  val _function = Keyword("function", currPrec, None)
+  val _rec = Keyword("rec", None, None)
   val _underscore = Keyword of "_", None, None
   val maxPrec = prec
 
 Keywords.maxPrec
-//│ = 6
+//│ = 7
 
 print of keywords.values.join("\n")
-//│ > Keyword(class, N/A, 0)
-//│ > Keyword(=, 1, 1)
-//│ > Keyword(:, 2, 1)
-//│ > Keyword(;, 2, 1)
-//│ > Keyword(case, N/A, 2)
-//│ > Keyword(then, 3, 3)
-//│ > Keyword(do, 3, 3)
-//│ > Keyword(else, 4, 4)
-//│ > Keyword(fun, N/A, N/A)
-//│ > Keyword(let, 5, 5)
-//│ > Keyword(in, 3, 3)
-//│ > Keyword(true, N/A, N/A)
-//│ > Keyword(false, N/A, N/A)
-//│ > Keyword(=>, 6, 1)
-//│ > Keyword(->, 6, 1)
-//│ > Keyword(_, N/A, N/A)
+//│ > Keyword(`class`, N/A, 0)
+//│ > Keyword(`begin`, N/A, 0)
+//│ > Keyword(`end`, 0, N/A)
+//│ > Keyword(`;`, 1, 0)
+//│ > Keyword(`,`, 2, 1)
+//│ > Keyword(`=`, 3, 3)
+//│ > Keyword(`:`, 4, 3)
+//│ > Keyword(`match`, N/A, 4)
+//│ > Keyword(`if`, N/A, 4)
+//│ > Keyword(`with`, N/A, 4)
+//│ > Keyword(`|`, N/A, 4)
+//│ > Keyword(`case`, N/A, 4)
+//│ > Keyword(`then`, 5, 5)
+//│ > Keyword(`do`, 5, 5)
+//│ > Keyword(`else`, 6, 6)
+//│ > Keyword(`let`, 7, 7)
+//│ > Keyword(`in`, 5, 5)
+//│ > Keyword(`true`, N/A, N/A)
+//│ > Keyword(`false`, N/A, N/A)
+//│ > Keyword(`->`, 7, 3)
+//│ > Keyword(`fun`, 7, N/A)
+//│ > Keyword(`function`, 7, N/A)
+//│ > Keyword(`rec`, N/A, N/A)
+//│ > Keyword(`_`, N/A, N/A)
 
 //  ____                        _
 // |  _ \ _ __ ___  ___ ___  __| | ___ _ __   ___ ___
@@ -179,7 +219,8 @@ fun makePrecMap(...ops) =
     i = 0
   while i < ops.length do
     ops.at(i).split(" ").forEach of (op, _, _) =>
-      m.insert of op, i + Keywords.maxPrec
+      if op.length > 0 do
+        m.insert of op, i + Keywords.maxPrec
     set i += 1
   m
 
@@ -203,14 +244,19 @@ let precMap = makePrecMap(
 )
 //│ precMap = Map
 
-let largestPrec = 2147483647
-//│ largestPrec = 2147483647
+let appPrec = if precMap.get(".") is Some(prec) then prec - 1
+let prefixPrec = appPrec - 1
+//│ appPrec = 21
+//│ prefixPrec = 20
+
+let LARGEST_PREC = 2147483647
+//│ LARGEST_PREC = 2147483647
 
 fun orMaxPrec(precOpt) = if precOpt is
   Some(prec) then prec
-  None then largestPrec
+  None then LARGEST_PREC
 
-fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else largestPrec
+fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else LARGEST_PREC
 
 pattern Letter = "a" ..= "z" | "A" ..= "Z"
 
@@ -221,7 +267,7 @@ pattern FloatOperator = "+." | "-." | "*." | "/."
 pattern RightAssociative = "@" | "/" | "," | ":"
 
 fun opPrec(opStr) = if
-  opStr is FloatOperator then [charPrec(opStr.at(0)), charPrec(opStr.at(1))]
+  opStr is FloatOperator then [charPrec(opStr.at(0)), charPrec(opStr.at(0))]
   opStr hasLetter() then [Keywords.maxPrec, Keywords.maxPrec]
   let leftPrec = charPrec of opStr.at(0)
   let rightOp = opStr.at(-1)
@@ -229,8 +275,11 @@ fun opPrec(opStr) = if
   rightOp is RightAssociative then [leftPrec, rightPrec - 1]
   else [leftPrec, rightPrec]
 
+opPrec(";")
+//│ = [2147483647, 2147483647]
+
 opPrec("|>")
-//│ = [9, 15]
+//│ = [10, 16]
 
 //  _____
 // |_   _| __ ___  ___
@@ -241,46 +290,71 @@ opPrec("|>")
 // ====================
 
 module Tree with
+  abstract class Tree
+  
   class
-    Empty()
-    Error(tree: Tree, message: Str)
-    Ident(name: Str, symbolic: Bool)
-    Modified(modifier, subject)
-    Literal(kind, value)
-    Case(scrutinee: Tree, branches: Stack[Tree])
-    App(callee: Tree, arguments: Stack[Tree])
-    Infix(op: Keyword, lhs: Tree, rhs: Tree)
-    LetLike(keyword: Keyword, lhs: Tree, rhs: Tree, body: Option[Tree])
+    Empty() extends Tree
+    Error(tree: Tree, message: Str) extends Tree
+    Ident(name: Str, symbolic: Bool) extends Tree
+    Underscore() extends Tree
+    Modified(modifier, subject) extends Tree
+    Tuple(trees: Stack[Tree]) extends Tree
+    Sequence(trees: Stack[Tree]) extends Tree
+    Literal(kind, value) extends Tree
+    Match(scrutinee: Tree, branches: Stack[Tree]) extends Tree
+    Lambda(params: Stack[Tree], body: Tree) extends Tree
+    App(callee: Tree, arguments: Stack[Tree]) extends Tree
+    Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
+    // For `let` bindings and `if`-`then`-`else`. The last part is optional.
+    Ternary(keyword: Keyword, lhs: Tree, rhs: Tree, body) extends Tree
   
   fun empty = Empty()
   fun error(message: Str) = empty Error(message)
   fun summary(tree) =
     fun par(text: Str, cond: Bool) = if cond then "(" + text + ")" else text
     fun prec(tree: Tree, side: Bool) = if tree is
-      Empty(_) then largestPrec
+      Empty(_) then LARGEST_PREC
       Error(tree, _) then prec(tree, side)
-      Ident(_, _) then largestPrec
+      Ident(_, _) then LARGEST_PREC
+      Underscore() then LARGEST_PREC
       Modified(_, _) then 1
-      Literal(_, _) then largestPrec
-      Case(_, _) then 2
+      Tuple(_) then LARGEST_PREC
+      Sequence(_) then 1
+      Literal(_, _) then LARGEST_PREC
+      Match(_, _) then 2
       App(callee, _) and callee is
-        Ident(op, _) and opPrec(op) is [leftPrec, rightPrec] and
+        Ident(op, true) and opPrec(op) is [leftPrec, rightPrec] and
           side then rightPrec
           else leftPrec
-        else largestPrec
+        else appPrec
       Infix(op, _, _) and
         side then op.rightPrec orMaxPrec()
         else op.leftPrec orMaxPrec()
-      LetLike(_, _, _, _) then 3
+      Ternary(_, _, _, _) then 3
+    fun wrap(something) = if something is
+      Tree then "{" + go(something) + "}"
+      else go(something)
     fun go(tree) = if tree is
       Empty(_) then ""
+      Error(Empty, _) then "⚠"
       Error(tree, _) then "<⚠:" + go(tree) + ">"
       Ident(name, _) then name
+      Underscore() then "_"
       Modified(modifier, subject) then go(modifier) + " " + go(subject)
+      Tuple(trees) then "(" + trees mapJoin(go, ", ") + ")"
+      Sequence(trees) then trees mapJoin(go, "; ")
+      Literal(LiteralKind.String, value) and
+        value.length > 5 then JSON.stringify(value.slice(0, 5)).slice(0, -1) + "…\""
+        else JSON.stringify(value)
       Literal(_, value) then value
-      Case(scrutinee, branches) then fold(+) of
-        "case ", go(scrutinee)
-        ...branches.map((branch, _, _) => "| " + go(branch))
+      Match(scrutinee, branches) then fold(+) of
+        "match ", go(scrutinee), " with "
+        branches mapJoin of go, " | "
+      // Selection
+      App(Ident(".", _), target :: Ident(field) :: Nil) then
+        if opPrec(".") is [leftPrec, _] then fold(+) of
+          par of go(target), prec(target, false) < leftPrec
+          ".", field
       App(Ident(op, true), lhs :: rhs :: Nil) then
         if opPrec(op) is [leftPrec, rightPrec] then fold(+) of
           par of go(lhs), prec(lhs, false) < leftPrec
@@ -290,17 +364,21 @@ module Tree with
         go(callee), "(", arguments mapJoin(go, ","), ")"
       Infix(op, lhs, rhs) then fold(+) of
         go(lhs), " ", go(op), " ", go(rhs)
-      LetLike(keyword, lhs, rhs, body) then fold(+) of
+      Ternary(keyword, lhs, rhs, body) then fold(+) of
         keyword.name, " ", go(lhs), " = "
         if rhs is Some(rhs) then go(rhs) else ""
         " in "
         if body is Some(body) then go(body) else ""
+      Lambda(params, body) then fold(+) of
+        "fun ", params mapJoin(go, " "), " -> ", go(body)
       Keyword(name, _, _) then name
-      Some(tree) then "<some:" + go(tree) + ">"
-      None then "<none>"
-      [..trees] then "<tuple:" + trees.map((tree, _, _) => go(tree)).join(";") + ">"
+      Some(tree) then "Some(" + wrap(tree) + ")"
+      None then "None"
+      _ :: _ then tree mapJoin(wrap, " :: ") + " :: Nil"
+      Nil then "Nil"
+      [..trees] then "[" + trees.map((tree, _, _) => wrap(tree)).join(", ") + "]"
       else "<unexpected:" + tree + ">"
-    go(tree)
+    wrap(tree)
 
 //  ____                     ____        _
 // |  _ \ __ _ _ __ ___  ___|  _ \ _   _| | ___
@@ -311,33 +389,39 @@ module Tree with
 // =============================================
 
 class ParseRule(val name: Str, val choices: Stack[Choice]) with
-  val endChoice = choices collectFirst of case
+  fun endChoice = choices collectFirst of choice => if choice Choice.forced() is
     Choice.End(value) then Some(value)
     else None
-  val keywordChoices = toMap of ...(choices collectToArray of choice =>
-      if choice is Choice.Keyword(keyword, rest) then Some([keyword.name, rest]) else None)
-  val exprChoice = choices collectFirst of case
+  fun keywordChoices = toMap of ...(choices collectToArray of choice =>
+      if choice Choice.forced() is Choice.Keyword(keyword, rest) then Some([keyword.name, rest]) else None)
+  fun exprChoice = choices collectFirst of choice => if choice Choice.forced() is
     Choice.Expr(process, rest) then Some([process, rest])
     else None
   // Display parse rules as a tree in a BNF-like format.
   fun display =
+    object Knot
+    fun displayChoice(choice) = if choice is
+      Choice.Keyword(keyword, rest) and
+        let prefix = "`" + keyword.name + "` "
+        go(rest) is
+          [name, [line]] then [prefix + line]
+          [name, [head, ..tail']] then [prefix + head, ..tail']
+      Choice.Expr(_, rest) and
+        let prefix = "<expression> "
+        go(rest) is
+          [name, [line]] then [prefix + line]
+          [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
+      Choice.End(_) then ["<end>"]
+      Choice.Lazy(get, make) and
+        get() is Knot then ["<rec>"]
+        else displayChoice(make(() => Knot))
+      other then ["<unknown>" + JSON.stringify(other)]
     fun go(rule) =
       let
         choices = rule.choices
         lines = []
       while choices is head :: tail do
-        lines.push of (if head is
-          Choice.Keyword(keyword, rest) and
-            let prefix = "`" + keyword.name + "` "
-            go(rest) is
-              [name, [line]] then [prefix + line]
-              [name, [head', ..tail']] then [prefix + head', ..tail']
-          Choice.Expr(_, rest) and
-            let prefix = "<expression> "
-            go(rest) is
-              [name, [line]] then [prefix + line]
-              [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
-          Choice.End(_) then ["<end>"])
+        lines.push of displayChoice(head)
         set choices = tail
       [rule.name, lines.flat()]
     if go(this) is [name, lines] then
@@ -351,10 +435,19 @@ module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
   class Expr(process: Tree -> Tree, rest: ParseRule)
   class End(value: Tree)
+  class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
+  fun forced(choice) = if choice is Lazy(get) then get() else choice
   // Shorthands for constructing rule choices.
   fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
   fun expr(process, name, ...choices) = Expr(process, rule(name, ...choices))
   fun end(value) = End(value)
+  fun lazy(makeChoice) =
+    let cache = None
+    fun getChoice() =
+      if cache is Some(choice) then choice else ...
+      set cache = makeChoice(getChoice)
+      cache
+    Lazy(getChoice, makeChoice)
 
 //  ____       _
 // |  _ \  ___| |__  _   _  __ _
@@ -393,15 +486,20 @@ fun showAsTree(thing) =
     Tree.Error(Tree.Empty, m) then tuple of "Error", [["message", go(m)]]
     Tree.Error(t, m) then tuple of "Error", [["tree", go(t)], ["message", go(m)]]
     Tree.Ident(n, _) then tuple of "Ident", [["name", go(n)]]
+    Tree.Underscore() then tuple of "Underscore", []
     Tree.Modified(m, s) then
       tuple of "Modified", [["modifier", go(m)], ["subject", go(s)]]
+    Tree.Tuple(t) then tuple of "Tuple", [["items", go(t)]]
+    Tree.Sequence(t) then tuple of "Sequence", [["items", go(t)]]
     Tree.Literal(k, v) then tuple of ("Literal#" + go(k) + " of " + go(v)), []
-    Tree.Case(branches) then tuple of "Case", [["branches", go(branches)]]
+    Tree.Match(scrutinee, branches) then tuple of
+      "Match", [["scrutinee", scrutinee], ["branches", go(branches)]]
     Tree.App(c, a) then tuple of "App", [["callee", go(c)], ["arguments", go(a)]]
     Tree.Infix(op, lhs, rhs) then tuple of
       "Infix", [["op", go(op)], ["lhs", go(lhs)], ["rhs", go(rhs)]]
-    Tree.LetLike(n, l, r, b) then tuple of
-      "LetLike", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
+    Tree.Ternary(n, l, r, b) then tuple of
+      "Ternary", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
+    Tree.Lambda(p, b) then tuple of "Lambda", [["params", go(p)], ["body", go(b)]]
     Keyword(_, _, _) as keyword then [keyword.toString(), []]
     LiteralKind.Integer then tuple of "Integer", []
     LiteralKind.Decimal then tuple of "Decimal", []
@@ -417,14 +515,14 @@ fun showAsTree(thing) =
       intro + ":\n  " + indented of dialogue.join("\n")
   go(thing)
 
-fun letLike(keyword: Keyword) =
+fun letBinding(keyword: Keyword) =
   let intro = keyword.name + " binding: "
   Choice.keyword of
     keyword
     intro + "keyword"
     Choice.expr of
       (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
-        Tree.LetLike(keyword, lhs, rhs, body)
+        Tree.Ternary(keyword, lhs, rhs, body)
       intro + "left-hand side"
       Choice.keyword of
         Keywords._equal
@@ -436,35 +534,157 @@ fun letLike(keyword: Keyword) =
             Keywords._in
             intro + "`in` keyword"
             Choice.expr of
-              (body, something) =>
-                print("wooooo" + something)
-                Some(body)
+              (body, _) => Some(body)
               intro + "body"
               Choice.end of None
           Choice.end of None
       Choice.end of [None, None]
 
-let letChoice = letLike(Keywords._let)
-//│ letChoice = Keyword(Keyword(let, 5, 5), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+fun ifThenElse() =
+  let intro = "if-then-else: "
+  Choice.keyword of
+    Keywords._if
+    intro + "`if` keyword"
+    Choice.expr of
+      (tst, conAndAlt) => if conAndAlt is [con, alt] then
+        Tree.Ternary(Keywords._if, tst, con, alt)
+      intro + "condition"
+      Choice.keyword of
+        Keywords._then
+        intro + "`then` keyword"
+        Choice.expr of
+          (con, optAlt) => [con, optAlt]
+          intro + "consequent"
+          Choice.keyword of
+            Keywords._else
+            intro + "`else` keyword"
+            Choice.expr of
+              (alt, _) => Some(alt)
+              intro + "alternative"
+              Choice.end of None
+          Choice.end of None
 
-print of rule("let binding", letChoice).display
-//│ > <let binding> ::= `let` <expression> 
+let letChoice = letBinding(Keywords._let)
+//│ letChoice = Keyword(Keyword(`let`, 7, 7), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(`in`, 5, 5), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+
+fun funChoice() =
+  let intro = "function expression: "
+  Choice.keyword of
+    Keywords._fun
+    intro + "keyword"
+    Choice.expr of
+      (params, body) => Tree.Lambda(params :: Nil, body)
+      intro + "parameters"
+      Choice.keyword of
+        Keywords._thinArrow
+        intro + "arrow"
+        Choice.expr of
+          (body, _) => body
+          intro + "body"
+          Choice.end of None
+
+fun patternMatchingBody(intro, cons, nil) =
+  fun makeMatchArms(get) = Choice.expr of
+    (pat, rhsAndRest) => if rhsAndRest is [rhs, rest] then
+      cons of Tree.Infix(Keywords._thinArrow, pat, rhs), rest
+    intro + "pattern"
+    Choice.keyword of
+      Keywords._thinArrow
+      intro + "arrow"
+      Choice.expr of
+        (curr, next) => [curr, next]
+        intro + "body"
+        Choice.end of nil
+        Choice.keyword of
+          Keywords._bar
+          intro + "leading bar"
+          Choice.Lazy(get, makeMatchArms)
+  let matchArms = Choice.lazy of makeMatchArms
+  tuple of
+    Choice.keyword of
+      Keywords._bar
+      intro + "leading bar"
+      matchArms
+    matchArms
+
+fun matchWithChoice() =
+  let intro = "`match`-`with` expression: "
+  Choice.keyword of
+    Keywords._match
+    intro + "keyword"
+    Choice.expr of
+      (scrutinee, branches) => Tree.Match(scrutinee, branches)
+      intro + "scrutinee"
+      Choice.keyword of
+        Keywords._with
+        intro + "with"
+        ...patternMatchingBody(intro, (x, xs) => x :: xs, Nil)
+
+fun matchFunctionChoice() =
+  let intro = "`match` function: "
+  Choice.keyword of
+    Keywords._function
+    intro + "`function` keyword"
+    ...patternMatchingBody of
+      intro
+      (x, xs) => if xs is
+        Tree.Match(scrut, arms) then Tree.Match(scrut, x :: arms)
+      Tree.Match(Tree.empty, Nil)
+
+let prefixRules = rule of
+  "start of the statement"
+  letChoice
+  funChoice()
+  matchWithChoice()
+  matchFunctionChoice()
+  ifThenElse()
+  Choice.keyword of
+    Keywords._underscore
+    "wildcard pattern"
+    Choice.end of Tree.Underscore()
+//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(`let`, 7, 7), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(`in`, 5, 5), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Cons(Keyword(Keyword(`fun`, 7, N/A), ParseRule("function expression: keyword", Cons(Expr([function], ParseRule("function expression: parameters", Cons(Keyword(Keyword(`->`, 7, 3), ParseRule("function expression: arrow", Cons(Expr([function], ParseRule("function expression: body", Cons(End(None), Nil))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`match`, N/A, 4), ParseRule("`match`-`with` expression: keyword", Cons(Expr([function], ParseRule("`match`-`with` expression: scrutinee", Cons(Keyword(Keyword(`with`, N/A, 4), ParseRule("`match`-`with` expression: with", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("`match`-`with` expression: leading bar", Cons(Lazy([function getChoice], [function makeMatchArms]), Nil))), Cons(Lazy([function getChoice], [function makeMatchArms]), Nil)))), Nil))), Nil))), Cons(Keyword(Keyword(`function`, 7, N/A), ParseRule("`match` function: `function` keyword", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("`match` function: leading bar", Cons(Lazy([function getChoice], [function makeMatchArms]), Nil))), Cons(Lazy([function getChoice], [function makeMatchArms]), Nil)))), Cons(Keyword(Keyword(`if`, N/A, 4), ParseRule("if-then-else: `if` keyword", Cons(Expr([function tmp7], ParseRule("if-then-else: condition", Cons(Keyword(Keyword(`then`, 5, 5), ParseRule("if-then-else: `then` keyword", Cons(Expr([function], ParseRule("if-then-else: consequent", Cons(Keyword(Keyword(`else`, 6, 6), ParseRule("if-then-else: `else` keyword", Cons(Expr([function], ParseRule("if-then-else: alternative", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`_`, N/A, N/A), ParseRule("wildcard pattern", Cons(End(Underscore()), Nil))), Nil)))))))
+
+print of prefixRules.display
+//│ > <start of the statement> ::= `let` <expression> 
 //│ >   `=` <expression> 
 //│ >     `in` <expression> <end>
 //│ >     <end>
 //│ >   <end>
-
-let prefixRules = rule("start of the statement", letChoice)
-//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(let, 5, 5), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Nil))
+//│ > `fun` <expression> `->` <expression> <end>
+//│ > `match` <expression> 
+//│ >   `with` `|` <expression> 
+//│ >     `->` <expression> 
+//│ >       <end>
+//│ >       `|` <rec>
+//│ >   <expression> 
+//│ >     `->` <expression> 
+//│ >       <end>
+//│ >       `|` <rec>
+//│ > `function` `|` <expression> 
+//│ >   `->` <expression> 
+//│ >     <end>
+//│ >     `|` <rec>
+//│ > <expression> 
+//│ >   `->` <expression> 
+//│ >     <end>
+//│ >     `|` <rec>
+//│ > `if` <expression> 
+//│ >   `then` <expression> 
+//│ >     `else` <expression> <end>
+//│ >     <end>
+//│ > `_` <end>
 
 prefixRules.endChoice
 //│ = None
 
-prefixRules.keywordChoices.get("let")
-//│ = Some(ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(=, 1, 1), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(in, 3, 3), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+prefixRules.keywordChoices.get("fun")
+//│ = Some(ParseRule("function expression: keyword", Cons(Expr([function], ParseRule("function expression: parameters", Cons(Keyword(Keyword(`->`, 7, 3), ParseRule("function expression: arrow", Cons(Expr([function], ParseRule("function expression: body", Cons(End(None), Nil))), Nil))), Nil))), Nil)))
 
 prefixRules.exprChoice
 //│ = None
+
+let infixRules = rule of "the continuation of expressions"
+//│ infixRules = ParseRule("the continuation of expressions", Nil)
 
 fun parse(tokens) =
   let
@@ -481,13 +701,13 @@ fun parse(tokens) =
     
   fun consume =
     if current is head :: tail then
-      tracer.print of "consumed " + head + " at " + counter
+      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter
       set current = tail
       set counter = counter + 1
     else
       tracer.print of "consumed: EOF"
   
-  fun parseRule(prec: Int, rule: ParseRule, opened: Option[BracketKind]) = tracer.trace of
+  fun parseRule(prec: Int, rule: ParseRule, opened) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
     result => "parsed: " + result Tree.summary()
     () => ...
@@ -496,9 +716,7 @@ fun parse(tokens) =
         do tracer.print of "the case of closing brackets"
         Some(expected) and
           encountered == expected and rule.endChoice is
-            Some(value) then
-              consume
-              value
+            Some(value) then value
             None then
               // The rule doesn't allow an end here.
               Tree.error("unexpected close bracket `" + encountered + "`")
@@ -508,37 +726,53 @@ fun parse(tokens) =
         None then Tree.error("unexpected bracket: " + encountered)
       Token.Identifier(name, _) :: _ and
         do tracer.print of "check if \"" + name + "\" is a keyword or not"
-        keywords.get(name) is
-          Some(keyword) and rule.keywordChoices.get(name) is
-            Some(rule) then
-              consume
-              parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
-            None then Tree.error("unexpected keyword `" + name + "`")
+        keywords.get(name) is Some(keyword) and
+          rule.keywordChoices.get(name) is Some(rule) then
+            tracer.print of "found a rule starting with " + name
+            consume
+            parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
+          None then
+            tracer.print of "no rule starting with " + name + " was found"
+            val expr = simpleExpr(prec, opened)
+            if rule.exprChoice is
+              Some([process, rest]) then
+                let rhs = parseRule(prec, rest, opened)
+                process(expr, rhs)
+              None then expr Tree.error("unexpected expfression")
         do tracer.print of "\"" + name + "\" is not a keyword"
       other :: _ and
         do tracer.print of "try parse an expression from " + Token.preview(current)
-        let reserve = simpleExpr(prec, opened)
-        rule.exprChoice is
-          Some([process, rest]) then 
-            let rhs = parseRule(prec, rest, opened)
-            tracer.print of "the result from sub-rule: " + rhs Tree.summary()
-            tracer.print of "the reserved expression: " + reserve Tree.summary()
-            process(reserve, rhs)
-          None then Tree.error("unexpected expression")
+        simpleExpr(prec, opened) is
+          Tree.Error(Tree.Empty(), _) and rule.endChoice is
+            Some(value) then value
+          reserve and rule.exprChoice is
+            Some([process, rest]) then 
+              let rhs = parseRule(prec, rest, opened)
+              tracer.print of "the result from sub-rule: " + rhs Tree.summary()
+              tracer.print of "the reserved expression: " + reserve Tree.summary()
+              process(reserve, rhs)
+            None then
+              tracer.print of "the rule doesn't have a choice starting with expressions"
+              tracer.print of rule.display
+              Tree.error("unexpected expression")
       Nil and rule.endChoice is
         Some(value) then value
         None then Tree.error("unexpected EOF")
   
-  fun simpleExpr(prec: Int, bracket: Option[BracketKind]) = tracer.trace of
-    "simple expression with precedence " + prec
-    result => "simple expression: " + result Tree.summary()
-    () => if yeetSpaces is
+  fun simpleExpr(prec: Int, bracket) = tracer.trace of
+    "simple expression <<< " + prec + " " + Token.preview(current)
+    result => "simple expression >>> " + result Tree.summary()
+    () => ...
+    if yeetSpaces is
       Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
         Some(keyword) and prefixRules.keywordChoices.get(name) is
           Some(rule) then
             consume
-            parseRule(keyword.rightPrec orMaxPrec(), rule, bracket)
-          None then Tree.error("unexpected keyword `" + name + "` without any prefix rules")
+            let acc = parseRule(keyword.rightPrec orMaxPrec(), rule, bracket)
+            exprCont(acc, prec, bracket)
+          None then
+            tracer.print("no rule starting with " + name)
+            Tree.empty
         None then
           consume
           exprCont(Tree.Ident(name, symbolic), prec, bracket)
@@ -550,12 +784,19 @@ fun parse(tokens) =
         let content = if
           // TODO: should the prec be 0?
           let content = simpleExpr(0, Some(kind))
-          yeetSpaces is Token.Close(kind') :: _ and
-            kind == kind' then
-              consume
-              content
-            else content Tree.Error("mismatched brackets")
-          else content Tree.Error("missing close bracket")
+          yeetSpaces is
+            Token.Close(kind') :: _ and
+              kind == kind' then
+                consume
+                content
+              else content Tree.Error("mismatched brackets")
+            token :: _ then
+              let message = "expect a close bracket instead of " + token
+              tracer.print of message
+              content Tree.Error(message)
+            Nil then
+              tracer.print("expect a close bracket instead of EOF")
+              content Tree.Error("expect a close bracket instead of EOF")
         exprCont(content, prec, bracket)
       Token.Close(kind) :: _ and bracket is
         Some(kind') and
@@ -563,23 +804,29 @@ fun parse(tokens) =
             consume
             Tree.Empty()
           else Tree.error("mismatched brackets")
-        None then Tree.error("missing close bracket")
+        None then
+          tracer.print("missing close bracket")
+          Tree.error("missing close bracket")
       token :: _ then Tree.error("unrecognized token: " + token)
       Nil then Tree.error("unexpected EOF")
   
-  fun exprCont(acc: Tree, prec: Int, bracket: Option[BracketKind]) = if yeetSpaces is
+  fun exprCont(acc: Tree, prec: Int, bracket) = if yeetSpaces is
+    do tracer.print(">>> exprCont " + prec + " " + acc Tree.summary() + " <<<")
     Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
-      do tracer.print of "found an infix keyword: " + name
-      keyword.leftPrec is Some(leftPrec) and
-        leftPrec > prec then
-          consume
-          let rhs = simpleExpr(leftPrec, bracket)
-          exprCont(Tree.Infix(keyword, acc, rhs), prec, bracket)
-        else
-          acc
-    Token.Identifier(name, true) :: _ and
+      do tracer.print of "found a keyword: " + name
+      infixRules.keywordChoices.get(name) is Some(rule) and
+        do tracer.print of "found an infix keyword: " + name
+        keyword.leftPrec is Some(leftPrec) and
+          do tracer.print of "its left precedence is " + leftPrec
+          leftPrec > prec then
+            consume
+            let rhs = simpleExpr(leftPrec, bracket)
+            let acc' = Tree.Infix(keyword, acc, rhs)
+            exprCont(acc', prec, bracket)
+    Token.Identifier(name, true) :: _ and keywords.get(name) is None and
       do tracer.print of "found an operator \"" + name + "\""
       opPrec(name) is [leftPrec, rightPrec] and
+        do tracer.print of "its precedence is " + leftPrec
         leftPrec > prec then
           consume
           let op = Tree.Ident(name, true)
@@ -593,7 +840,44 @@ fun parse(tokens) =
         kind == kind' then acc
         else acc Tree.Error("mismatched brackets")
       None then acc Tree.Error("missing close bracket")
-    token :: _ then acc Tree.Error("unrecognized token " + token)
+    Token.Semicolon :: _ then
+      tracer.print of "found a semicolon"
+      if keywords.get(";") is Some(keyword) and
+        keyword.leftPrec is Some(leftPrec) and
+          leftPrec > prec then
+            consume
+            if keyword.rightPrec is Some(rightPrec) then ...
+            let acc' = if simpleExpr(rightPrec, bracket) is
+              Tree.Sequence(trees) then Tree.Sequence(acc :: trees)
+              tree then Tree.Sequence(acc :: tree :: Nil)
+            exprCont(acc', prec, bracket)
+          else
+            tracer.print of "cannot consume " + keyword
+            acc
+    Token.Comma :: _ then
+      tracer.print of "found a comma"
+      if keywords.get(",") is Some(keyword) and
+        keyword.leftPrec is Some(leftPrec) and
+          leftPrec > prec then
+            consume
+            if keyword.rightPrec is Some(rightPrec) then ...
+            let acc' = if simpleExpr(rightPrec, bracket) is
+              Tree.Tuple(trees) then Tree.Tuple(acc :: trees)
+              tree then Tree.Tuple(acc :: tree :: Nil)
+            exprCont(acc', prec, bracket)
+          else
+            tracer.print of "cannot consume " + keyword
+            acc
+    token :: _ and
+      appPrec > prec then
+        do tracer.print of "found an application"
+        if simpleExpr(appPrec, bracket) is
+          Tree.Empty then acc
+          Tree.Error then acc
+          rhs then exprCont(Tree.App(acc, rhs :: Nil), prec, bracket)
+      else
+        tracer.print of "cannot consume " + token
+        acc
     Nil and bracket is
       do tracer.print of "found an EOF"
       Some then acc Tree.Error("expect a close bracket instead of EOF")
@@ -602,61 +886,27 @@ fun parse(tokens) =
   simpleExpr(0, None)
 
 fun printParsed(...lines) =
+  tracer.reset()
   let
     source = lines.join("\n")
     tokens = Lexer.lex(source)
     tree = parse(tokens)
   print of showAsTree(tree)
+  
+fun debugParsed(...lines) =
+  set tracer.enabled = true
+  let result = printParsed of ...lines
+  set tracer.enabled = false
+  result
 
 printParsed of "(x) => x"
-//│ > ┍ simple expression with precedence 0
-//│ > ├ consumed Open(Round) at 0
-//│ > ├─┮ simple expression with precedence 0
-//│ > │ ├ consumed Identifier("x", false) at 1
-//│ > │ ├ found a close bracket of Round
-//│ > │ ┕ simple expression: x
-//│ > ├ consumed Close(Round) at 2
-//│ > ├ skipped a space at 3
-//│ > ├ found an infix keyword: =>
-//│ > ├ consumed Identifier("=>", true) at 4
-//│ > ├─┮ simple expression with precedence 6
-//│ > │ ├ skipped a space at 5
-//│ > │ ├ consumed Identifier("x", false) at 6
-//│ > │ ├ found an EOF
-//│ > │ ┕ simple expression: x
-//│ > ├ found an EOF
-//│ > ┕ simple expression: x => x
-//│ > Infix:
-//│ >   op = Keyword(=>, 6, 1)
-//│ >   lhs = Ident of "x"
-//│ >   rhs = Ident of "x"
+//│ > App:
+//│ >   callee = Ident of "=>"
+//│ >   arguments = Stack of 
+//│ >     Ident of "x"
+//│ >     Ident of "x"
 
 printParsed of "(1 + 2) * 3"
-//│ > ┍ simple expression with precedence 0
-//│ > ├ consumed Open(Round) at 0
-//│ > ├─┮ simple expression with precedence 0
-//│ > │ ├ consumed Literal(Integer, "1") at 1
-//│ > │ ├ skipped a space at 2
-//│ > │ ├ found an operator "+"
-//│ > │ ├ consumed Identifier("+", true) at 3
-//│ > │ ├─┮ simple expression with precedence 16
-//│ > │ │ ├ skipped a space at 4
-//│ > │ │ ├ consumed Literal(Integer, "2") at 5
-//│ > │ │ ├ found a close bracket of Round
-//│ > │ │ ┕ simple expression: 2
-//│ > │ ├ found a close bracket of Round
-//│ > │ ┕ simple expression: 1 + 2
-//│ > ├ consumed Close(Round) at 6
-//│ > ├ skipped a space at 7
-//│ > ├ found an operator "*"
-//│ > ├ consumed Identifier("*", true) at 8
-//│ > ├─┮ simple expression with precedence 17
-//│ > │ ├ skipped a space at 9
-//│ > │ ├ consumed Literal(Integer, "3") at 10
-//│ > │ ├ found an EOF
-//│ > │ ┕ simple expression: 3
-//│ > ├ found an EOF
-//│ > ┕ simple expression: (1 + 2) * 3
 //│ > App:
 //│ >   callee = Ident of "*"
 //│ >   arguments = Stack of 
@@ -668,34 +918,6 @@ printParsed of "(1 + 2) * 3"
 //│ >     Literal#Integer of "3"
 
 printParsed of "1 + 2 ** 5 * 4"
-//│ > ┍ simple expression with precedence 0
-//│ > ├ consumed Literal(Integer, "1") at 0
-//│ > ├ skipped a space at 1
-//│ > ├ found an operator "+"
-//│ > ├ consumed Identifier("+", true) at 2
-//│ > ├─┮ simple expression with precedence 16
-//│ > │ ├ skipped a space at 3
-//│ > │ ├ consumed Literal(Integer, "2") at 4
-//│ > │ ├ skipped a space at 5
-//│ > │ ├ found an operator "**"
-//│ > │ ├ consumed Identifier("**", true) at 6
-//│ > │ ├─┮ simple expression with precedence 17
-//│ > │ │ ├ skipped a space at 7
-//│ > │ │ ├ consumed Literal(Integer, "5") at 8
-//│ > │ │ ├ skipped a space at 9
-//│ > │ │ ├ found an operator "*"
-//│ > │ │ ┕ simple expression: 5
-//│ > │ ├ found an operator "*"
-//│ > │ ├ consumed Identifier("*", true) at 10
-//│ > │ ├─┮ simple expression with precedence 17
-//│ > │ │ ├ skipped a space at 11
-//│ > │ │ ├ consumed Literal(Integer, "4") at 12
-//│ > │ │ ├ found an EOF
-//│ > │ │ ┕ simple expression: 4
-//│ > │ ├ found an EOF
-//│ > │ ┕ simple expression: 2 ** 5 * 4
-//│ > ├ found an EOF
-//│ > ┕ simple expression: 1 + 2 ** 5 * 4
 //│ > App:
 //│ >   callee = Ident of "+"
 //│ >   arguments = Stack of 
@@ -710,164 +932,379 @@ printParsed of "1 + 2 ** 5 * 4"
 //│ >             Literal#Integer of "5"
 //│ >         Literal#Integer of "4"
 
-printParsed of
-  "let zero = 0 in zero"
-//│ > ┍ simple expression with precedence 0
-//│ > ├ consumed Identifier("let", false) at 0
-//│ > ├─┮ parsing rule "let binding: keyword" with precedence 5
-//│ > │ ├ skipped a space at 1
-//│ > │ ├ check if "zero" is a keyword or not
-//│ > │ ├ "zero" is not a keyword
-//│ > │ ├ try parse an expression from ┃zero│␠│=│␠│0├┈┄╌
-//│ > │ ├─┮ simple expression with precedence 5
-//│ > │ │ ├ consumed Identifier("zero", false) at 2
-//│ > │ │ ├ skipped a space at 3
-//│ > │ │ ├ found an infix keyword: =
-//│ > │ │ ┕ simple expression: zero
-//│ > │ ├─┮ parsing rule "let binding: left-hand side" with precedence 5
-//│ > │ │ ├ check if "=" is a keyword or not
-//│ > │ │ ├ consumed Identifier("=", true) at 4
-//│ > │ │ ├─┮ parsing rule "let binding: equal sign" with precedence 1
-//│ > │ │ │ ├ skipped a space at 5
-//│ > │ │ │ ├ try parse an expression from ┃0│␠│in│␠│zero┃
-//│ > │ │ │ ├─┮ simple expression with precedence 1
-//│ > │ │ │ │ ├ consumed Literal(Integer, "0") at 6
-//│ > │ │ │ │ ├ skipped a space at 7
-//│ > │ │ │ │ ├ found an infix keyword: in
-//│ > │ │ │ │ ├ consumed Identifier("in", false) at 8
-//│ > │ │ │ │ ├─┮ simple expression with precedence 3
-//│ > │ │ │ │ │ ├ skipped a space at 9
-//│ > │ │ │ │ │ ├ consumed Identifier("zero", false) at 10
-//│ > │ │ │ │ │ ├ found an EOF
-//│ > │ │ │ │ │ ┕ simple expression: zero
-//│ > │ │ │ │ ├ found an EOF
-//│ > │ │ │ │ ┕ simple expression: 0 in zero
-//│ > │ │ │ ├─┮ parsing rule "let binding: right-hand side" with precedence 1
-//│ > │ │ │ │ ┕ parsed: <none>
-//│ > │ │ │ ├ the result from sub-rule: <none>
-//│ > │ │ │ ├ the reserved expression: 0 in zero
-//│ > │ │ │ ┕ parsed: <tuple:<some:0 in zero>;<none>>
-//│ > │ │ ┕ parsed: <tuple:<some:0 in zero>;<none>>
-//│ > │ ├ the result from sub-rule: <tuple:<some:0 in zero>;<none>>
-//│ > │ ├ the reserved expression: zero
-//│ > │ ┕ parsed: let zero = 0 in zero in 
-//│ > ┕ simple expression: let zero = 0 in zero in 
-//│ > LetLike:
-//│ >   name = Keyword(let, 5, 5)
+printParsed of "let zero = 0 in zero"
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
 //│ >   lhs = Ident of "zero"
-//│ >   rhs = Some of Infix:
-//│ >     op = Keyword(in, 3, 3)
-//│ >     lhs = Literal#Integer of "0"
-//│ >     rhs = Ident of "zero"
-//│ >   body = None
+//│ >   rhs = Some of Literal#Integer of "0"
+//│ >   body = Some of Ident of "zero"
 
 printParsed of """
 let one = 1 in
 let zero = 0 in
 one + zero
 """
-//│ > ┍ simple expression with precedence 0
-//│ > ├ skipped a space at 0
-//│ > ├ consumed Identifier("let", false) at 1
-//│ > ├─┮ parsing rule "let binding: keyword" with precedence 5
-//│ > │ ├ skipped a space at 2
-//│ > │ ├ check if "one" is a keyword or not
-//│ > │ ├ "one" is not a keyword
-//│ > │ ├ try parse an expression from ┃one│␠│=│␠│1├┈┄╌
-//│ > │ ├─┮ simple expression with precedence 5
-//│ > │ │ ├ consumed Identifier("one", false) at 3
-//│ > │ │ ├ skipped a space at 4
-//│ > │ │ ├ found an infix keyword: =
-//│ > │ │ ┕ simple expression: one
-//│ > │ ├─┮ parsing rule "let binding: left-hand side" with precedence 5
-//│ > │ │ ├ check if "=" is a keyword or not
-//│ > │ │ ├ consumed Identifier("=", true) at 5
-//│ > │ │ ├─┮ parsing rule "let binding: equal sign" with precedence 1
-//│ > │ │ │ ├ skipped a space at 6
-//│ > │ │ │ ├ try parse an expression from ┃1│␠│in│␠│let├┈┄╌
-//│ > │ │ │ ├─┮ simple expression with precedence 1
-//│ > │ │ │ │ ├ consumed Literal(Integer, "1") at 7
-//│ > │ │ │ │ ├ skipped a space at 8
-//│ > │ │ │ │ ├ found an infix keyword: in
-//│ > │ │ │ │ ├ consumed Identifier("in", false) at 9
-//│ > │ │ │ │ ├─┮ simple expression with precedence 3
-//│ > │ │ │ │ │ ├ skipped a space at 10
-//│ > │ │ │ │ │ ├ consumed Identifier("let", false) at 11
-//│ > │ │ │ │ │ ├─┮ parsing rule "let binding: keyword" with precedence 5
-//│ > │ │ │ │ │ │ ├ skipped a space at 12
-//│ > │ │ │ │ │ │ ├ check if "zero" is a keyword or not
-//│ > │ │ │ │ │ │ ├ "zero" is not a keyword
-//│ > │ │ │ │ │ │ ├ try parse an expression from ┃zero│␠│=│␠│0├┈┄╌
-//│ > │ │ │ │ │ │ ├─┮ simple expression with precedence 5
-//│ > │ │ │ │ │ │ │ ├ consumed Identifier("zero", false) at 13
-//│ > │ │ │ │ │ │ │ ├ skipped a space at 14
-//│ > │ │ │ │ │ │ │ ├ found an infix keyword: =
-//│ > │ │ │ │ │ │ │ ┕ simple expression: zero
-//│ > │ │ │ │ │ │ ├─┮ parsing rule "let binding: left-hand side" with precedence 5
-//│ > │ │ │ │ │ │ │ ├ check if "=" is a keyword or not
-//│ > │ │ │ │ │ │ │ ├ consumed Identifier("=", true) at 15
-//│ > │ │ │ │ │ │ │ ├─┮ parsing rule "let binding: equal sign" with precedence 1
-//│ > │ │ │ │ │ │ │ │ ├ skipped a space at 16
-//│ > │ │ │ │ │ │ │ │ ├ try parse an expression from ┃0│␠│in│␠│one├┈┄╌
-//│ > │ │ │ │ │ │ │ │ ├─┮ simple expression with precedence 1
-//│ > │ │ │ │ │ │ │ │ │ ├ consumed Literal(Integer, "0") at 17
-//│ > │ │ │ │ │ │ │ │ │ ├ skipped a space at 18
-//│ > │ │ │ │ │ │ │ │ │ ├ found an infix keyword: in
-//│ > │ │ │ │ │ │ │ │ │ ├ consumed Identifier("in", false) at 19
-//│ > │ │ │ │ │ │ │ │ │ ├─┮ simple expression with precedence 3
-//│ > │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 20
-//│ > │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("one", false) at 21
-//│ > │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 22
-//│ > │ │ │ │ │ │ │ │ │ │ ├ found an operator "+"
-//│ > │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("+", true) at 23
-//│ > │ │ │ │ │ │ │ │ │ │ ├─┮ simple expression with precedence 16
-//│ > │ │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 24
-//│ > │ │ │ │ │ │ │ │ │ │ │ ├ consumed Identifier("zero", false) at 25
-//│ > │ │ │ │ │ │ │ │ │ │ │ ├ skipped a space at 26
-//│ > │ │ │ │ │ │ │ │ │ │ │ ├ found an EOF
-//│ > │ │ │ │ │ │ │ │ │ │ │ ┕ simple expression: zero
-//│ > │ │ │ │ │ │ │ │ │ │ ├ found an EOF
-//│ > │ │ │ │ │ │ │ │ │ │ ┕ simple expression: one + zero
-//│ > │ │ │ │ │ │ │ │ │ ├ found an EOF
-//│ > │ │ │ │ │ │ │ │ │ ┕ simple expression: 0 in one + zero
-//│ > │ │ │ │ │ │ │ │ ├─┮ parsing rule "let binding: right-hand side" with precedence 1
-//│ > │ │ │ │ │ │ │ │ │ ┕ parsed: <none>
-//│ > │ │ │ │ │ │ │ │ ├ the result from sub-rule: <none>
-//│ > │ │ │ │ │ │ │ │ ├ the reserved expression: 0 in one + zero
-//│ > │ │ │ │ │ │ │ │ ┕ parsed: <tuple:<some:0 in one + zero>;<none>>
-//│ > │ │ │ │ │ │ │ ┕ parsed: <tuple:<some:0 in one + zero>;<none>>
-//│ > │ │ │ │ │ │ ├ the result from sub-rule: <tuple:<some:0 in one + zero>;<none>>
-//│ > │ │ │ │ │ │ ├ the reserved expression: zero
-//│ > │ │ │ │ │ │ ┕ parsed: let zero = 0 in one + zero in 
-//│ > │ │ │ │ │ ┕ simple expression: let zero = 0 in one + zero in 
-//│ > │ │ │ │ ├ found an EOF
-//│ > │ │ │ │ ┕ simple expression: 1 in let zero = 0 in one + zero in 
-//│ > │ │ │ ├─┮ parsing rule "let binding: right-hand side" with precedence 1
-//│ > │ │ │ │ ┕ parsed: <none>
-//│ > │ │ │ ├ the result from sub-rule: <none>
-//│ > │ │ │ ├ the reserved expression: 1 in let zero = 0 in one + zero in 
-//│ > │ │ │ ┕ parsed: <tuple:<some:1 in let zero = 0 in one + zero in >;<none>>
-//│ > │ │ ┕ parsed: <tuple:<some:1 in let zero = 0 in one + zero in >;<none>>
-//│ > │ ├ the result from sub-rule: <tuple:<some:1 in let zero = 0 in one + zero in >;<none>>
-//│ > │ ├ the reserved expression: one
-//│ > │ ┕ parsed: let one = 1 in let zero = 0 in one + zero in  in 
-//│ > ┕ simple expression: let one = 1 in let zero = 0 in one + zero in  in 
-//│ > LetLike:
-//│ >   name = Keyword(let, 5, 5)
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
 //│ >   lhs = Ident of "one"
-//│ >   rhs = Some of Infix:
-//│ >     op = Keyword(in, 3, 3)
-//│ >     lhs = Literal#Integer of "1"
-//│ >     rhs = LetLike:
-//│ >       name = Keyword(let, 5, 5)
-//│ >       lhs = Ident of "zero"
-//│ >       rhs = Some of Infix:
-//│ >         op = Keyword(in, 3, 3)
-//│ >         lhs = Literal#Integer of "0"
-//│ >         rhs = App:
-//│ >           callee = Ident of "+"
-//│ >           arguments = Stack of 
-//│ >             Ident of "one"
-//│ >             Ident of "zero"
-//│ >       body = None
+//│ >   rhs = Some of Literal#Integer of "1"
+//│ >   body = Some of Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Ident of "zero"
+//│ >     rhs = Some of Literal#Integer of "0"
+//│ >     body = Some of App:
+//│ >       callee = Ident of "+"
+//│ >       arguments = Stack of 
+//│ >         Ident of "one"
+//│ >         Ident of "zero"
+
+printParsed of """
+f x y
+"""
+//│ > App:
+//│ >   callee = App:
+//│ >     callee = Ident of "f"
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
+//│ >   arguments = Stack of 
+//│ >     Ident of "y"
+
+printParsed of """
+let pi = 4.0 *. atan 1.0
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = Ident of "pi"
+//│ >   rhs = Some of App:
+//│ >     callee = Ident of "*."
+//│ >     arguments = Stack of 
+//│ >       Literal#Decimal of "4.0"
+//│ >       App:
+//│ >         callee = Ident of "atan"
+//│ >         arguments = Stack of 
+//│ >           Literal#Decimal of "1.0"
 //│ >   body = None
+
+printParsed of "let square x = x *. x"
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = App:
+//│ >     callee = Ident of "square"
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
+//│ >   rhs = Some of App:
+//│ >     callee = Ident of "*."
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
+//│ >       Ident of "x"
+//│ >   body = None
+
+printParsed of "square (sin pi) +. square (cos pi)"
+//│ > App:
+//│ >   callee = Ident of "+."
+//│ >   arguments = Stack of 
+//│ >     App:
+//│ >       callee = Ident of "square"
+//│ >       arguments = Stack of 
+//│ >         App:
+//│ >           callee = Ident of "sin"
+//│ >           arguments = Stack of 
+//│ >             Ident of "pi"
+//│ >     App:
+//│ >       callee = Ident of "square"
+//│ >       arguments = Stack of 
+//│ >         App:
+//│ >           callee = Ident of "cos"
+//│ >           arguments = Stack of 
+//│ >             Ident of "pi"
+
+:todo
+printParsed of "(1 < 2) = false"
+//│ > App:
+//│ >   callee = Ident of "<"
+//│ >   arguments = Stack of 
+//│ >     Literal#Integer of "1"
+//│ >     Literal#Integer of "2"
+
+printParsed of "let cat s1 s2 = s1 ^ \" \" ^ s2"
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = App:
+//│ >     callee = App:
+//│ >       callee = Ident of "cat"
+//│ >       arguments = Stack of 
+//│ >         Ident of "s1"
+//│ >     arguments = Stack of 
+//│ >       Ident of "s2"
+//│ >   rhs = Some of App:
+//│ >     callee = Ident of "^"
+//│ >     arguments = Stack of 
+//│ >       App:
+//│ >         callee = Ident of "^"
+//│ >         arguments = Stack of 
+//│ >           Ident of "s1"
+//│ >           Literal#String of " "
+//│ >       Ident of "s2"
+//│ >   body = None
+
+printParsed of "fun x -> x"
+//│ > Lambda:
+//│ >   params = Stack of 
+//│ >     Ident of "x"
+//│ >   body = Ident of "x"
+
+printParsed of """
+let compose f g = fun x -> f (g x) in
+let cos2 = compose square cos
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = App:
+//│ >     callee = App:
+//│ >       callee = Ident of "compose"
+//│ >       arguments = Stack of 
+//│ >         Ident of "f"
+//│ >     arguments = Stack of 
+//│ >       Ident of "g"
+//│ >   rhs = Some of Lambda:
+//│ >     params = Stack of 
+//│ >       Ident of "x"
+//│ >     body = App:
+//│ >       callee = Ident of "f"
+//│ >       arguments = Stack of 
+//│ >         App:
+//│ >           callee = Ident of "g"
+//│ >           arguments = Stack of 
+//│ >             Ident of "x"
+//│ >   body = Some of Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Ident of "cos2"
+//│ >     rhs = Some of App:
+//│ >       callee = App:
+//│ >         callee = Ident of "compose"
+//│ >         arguments = Stack of 
+//│ >           Ident of "square"
+//│ >       arguments = Stack of 
+//│ >         Ident of "cos"
+//│ >     body = None
+
+:todo
+debugParsed of "type sign = Positive | Negative"
+//│ > ┍ simple expression <<< 0 ┃type│␠│sign│␠│=│⋯
+//│ > ├ consumed `type` at 0
+//│ > ├ skipped a space at 1
+//│ > ├ >>> exprCont 0 {type} <<<
+//│ > ├ found an application
+//│ > ├─┮ simple expression <<< 21 ┃sign│␠│=│␠│Positive│⋯
+//│ > │ ├ consumed `sign` at 2
+//│ > │ ├ skipped a space at 3
+//│ > │ ├ >>> exprCont 21 {sign} <<<
+//│ > │ ├ found a keyword: =
+//│ > │ ├ cannot consume Identifier("=", true)
+//│ > │ ┕ simple expression >>> {sign}
+//│ > ├ >>> exprCont 0 {type(sign)} <<<
+//│ > ├ found a keyword: =
+//│ > ├ found an application
+//│ > ├─┮ simple expression <<< 21 ┃=│␠│Positive│␠│|│⋯
+//│ > │ ├ no rule starting with =
+//│ > │ ┕ simple expression >>> {}
+//│ > ┕ simple expression >>> {type(sign)}
+//│ > App:
+//│ >   callee = Ident of "type"
+//│ >   arguments = Stack of 
+//│ >     Ident of "sign"
+
+printParsed of "true"
+//│ > Literal#Boolean of "true"
+
+printParsed of "match x with true -> 1 | false -> 0"
+//│ > Match:
+//│ >   scrutinee = Ident("x", false)
+//│ >   branches = Stack of 
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Literal#Boolean of "true"
+//│ >       rhs = Literal#Integer of "1"
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Literal#Boolean of "false"
+//│ >       rhs = Literal#Integer of "0"
+
+printParsed of """
+function (0, 0) -> "both zero"
+       | (0, _) -> "first only zero"
+       | (_, 0) -> "second only zero"
+       | (_, _) -> "neither zero"
+"""
+//│ > Match:
+//│ >   scrutinee = Empty()
+//│ >   branches = Stack of 
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Tuple of Stack of 
+//│ >         Literal#Integer of "0"
+//│ >         Literal#Integer of "0"
+//│ >       rhs = Literal#String of "both zero"
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Tuple of Stack of 
+//│ >         Literal#Integer of "0"
+//│ >         Underscore
+//│ >       rhs = Literal#String of "first only zero"
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Tuple of Stack of 
+//│ >         Underscore
+//│ >         Literal#Integer of "0"
+//│ >       rhs = Literal#String of "second only zero"
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Tuple of Stack of 
+//│ >         Underscore
+//│ >         Underscore
+//│ >       rhs = Literal#String of "neither zero"
+
+set tracer.enabled = false
+
+printParsed of "if f x then y else z"
+//│ > Ternary:
+//│ >   name = Keyword(`if`, N/A, 4)
+//│ >   lhs = App:
+//│ >     callee = Ident of "f"
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
+//│ >   rhs = Ident of "y"
+//│ >   body = Some of Ident of "z"
+
+printParsed of "if f x then if g x then z else w else if h x then y else w"
+//│ > Ternary:
+//│ >   name = Keyword(`if`, N/A, 4)
+//│ >   lhs = App:
+//│ >     callee = Ident of "f"
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
+//│ >   rhs = Ternary:
+//│ >     name = Keyword(`if`, N/A, 4)
+//│ >     lhs = App:
+//│ >       callee = Ident of "g"
+//│ >       arguments = Stack of 
+//│ >         Ident of "x"
+//│ >     rhs = Ident of "z"
+//│ >     body = Some of Ident of "w"
+//│ >   body = Some of Ternary:
+//│ >     name = Keyword(`if`, N/A, 4)
+//│ >     lhs = App:
+//│ >       callee = Ident of "h"
+//│ >       arguments = Stack of 
+//│ >         Ident of "x"
+//│ >     rhs = Ident of "y"
+//│ >     body = Some of Ident of "w"
+
+printParsed of "1, 2, 3"
+//│ > Tuple of Stack of 
+//│ >   Literal#Integer of "1"
+//│ >   Literal#Integer of "2"
+//│ >   Literal#Integer of "3"
+
+printParsed of "1; 2; 3"
+//│ > Sequence of Stack of 
+//│ >   Literal#Integer of "1"
+//│ >   Literal#Integer of "2"
+//│ >   Literal#Integer of "3"
+
+printParsed of "1, 2; 3, 4; 5"
+//│ > Sequence of Stack of 
+//│ >   Tuple of Stack of 
+//│ >     Literal#Integer of "1"
+//│ >     Literal#Integer of "2"
+//│ >   Tuple of Stack of 
+//│ >     Literal#Integer of "3"
+//│ >     Literal#Integer of "4"
+//│ >   Literal#Integer of "5"
+
+// > The expressions `( expr )` and `begin expr end` have the same value as `expr`.
+// > The two constructs are semantically equivalent, but it is good style to use
+// > `begin … end` inside control structures.
+printParsed of """
+begin
+  print_string "hello";
+  print_string "world"
+end
+"""
+//│ > Sequence of Stack of 
+//│ >   App:
+//│ >     callee = Ident of "print_string"
+//│ >     arguments = Stack of 
+//│ >       Literal#String of "hello"
+//│ >   App:
+//│ >     callee = Ident of "print_string"
+//│ >     arguments = Stack of 
+//│ >       Literal#String of "world"
+
+:todo
+printParsed of """
+let f a b =
+  if a = b then
+    print_endline "Equal"
+  else begin
+    print_string "Not Equal: ";
+    print_int a;
+    print_string " and ";
+    print_int b;
+    print_newline ()
+  end
+"""
+//│ ═══[RUNTIME ERROR] Error: match error
+
+printParsed of """
+let translate p dx dy =
+    p.x <- p.x +. dx; p.y <- p.y +. dy
+"""
+//│ > Sequence of Stack of 
+//│ >   Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = App:
+//│ >       callee = App:
+//│ >         callee = App:
+//│ >           callee = Ident of "translate"
+//│ >           arguments = Stack of 
+//│ >             Ident of "p"
+//│ >         arguments = Stack of 
+//│ >           Ident of "dx"
+//│ >       arguments = Stack of 
+//│ >         Ident of "dy"
+//│ >     rhs = Some of App:
+//│ >       callee = Ident of "+."
+//│ >       arguments = Stack of 
+//│ >         App:
+//│ >           callee = Ident of "<-"
+//│ >           arguments = Stack of 
+//│ >             App:
+//│ >               callee = Ident of "."
+//│ >               arguments = Stack of 
+//│ >                 Ident of "p"
+//│ >                 Ident of "x"
+//│ >             App:
+//│ >               callee = Ident of "."
+//│ >               arguments = Stack of 
+//│ >                 Ident of "p"
+//│ >                 Ident of "x"
+//│ >         Ident of "dx"
+//│ >     body = None
+//│ >   App:
+//│ >     callee = Ident of "+."
+//│ >     arguments = Stack of 
+//│ >       App:
+//│ >         callee = Ident of "<-"
+//│ >         arguments = Stack of 
+//│ >           App:
+//│ >             callee = Ident of "."
+//│ >             arguments = Stack of 
+//│ >               Ident of "p"
+//│ >               Ident of "y"
+//│ >           App:
+//│ >             callee = Ident of "."
+//│ >             arguments = Stack of 
+//│ >               Ident of "p"
+//│ >               Ident of "y"
+//│ >       Ident of "dy"

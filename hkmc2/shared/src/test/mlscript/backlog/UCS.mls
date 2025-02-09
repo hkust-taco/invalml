@@ -121,3 +121,37 @@ Some(1) is
 
 // ——— ——— ———
 
+object None
+
+// :ucs normalized
+// Uncomment the line above to see the explosion: ~1200 lines of code.
+// If the number of branches continues to increase, the time duration of
+// compilation will noticeably slow down.
+fun parse(text: Str): [Int, Str] =
+  fun char(idx: Int) = if idx < text.length then
+    Some of text.charAt of idx
+  else
+    None
+  
+  // Some helper parsing utilities.
+  fun a(idx: Int): [Int, Str] = ???
+  fun b(idx: Int): [Int, Str] = ???
+  fun c(idx: Int): [Int, Str] = ???
+  fun d(idx: Int): [Int, Str] = ???
+  fun e(idx: Int): [Int, Str] = ???
+  fun f(idx: Int): [Int, Str] = ???
+  fun g(idx: Int): [Int, Str] = ???
+  
+  // Note: Use `is` instead `==` can mitigate the explosion. Because the
+  // specialization knows those literal string patterns are disjoint.
+  fun launch(idx: Int) = if char(idx) is Some(ch) and ch ==
+    "a" and a(idx + 1) is [idx', res] then ???
+    "b" and b(idx + 1) is [idx', res'] then ???
+    "c" and c(idx + 1) is [idx', res''] then ???
+    "d" and d(idx + 1) is [idx', res'''] then ???
+    "e" and e(idx + 1) is [idx', res''''] then ???
+    "f" and f(idx + 1) is [idx', res'''''] then ???
+    "g" and g(idx + 1) is [idx', res'''''''] then ???
+    else [idx, ""]
+  
+  launch(0)

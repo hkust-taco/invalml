@@ -1,89 +1,127 @@
+import runtime from "./Runtime.mjs";
 import Predef from "./Predef.mjs";
 let TreeTracer2;
 TreeTracer2 = class TreeTracer {
   static {
     this.TreeTracer = class TreeTracer1 {
-      #output;
       constructor() {
         this.steps = 0;
-        this.#output = globalThis.console.log;
+        this.enabled = false;
       }
-      get indentPrefix() {
-        let scrut, tmp;
-        scrut = this.steps == 0;
+      output(outie, innie, innieAlt, message) {
+        let scrut, lines, tmp, tmp1;
+        scrut = this.enabled;
         if (scrut === true) {
-          return "";
+          tmp = runtime.safeCall(message.split("\n"));
+          lines = tmp;
+          tmp1 = (line, i, xs) => {
+            let postfix, scrut1, scrut2, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+            scrut1 = lines.length > 1;
+            if (scrut1 === true) {
+              tmp2 = " \u21B5";
+            } else {
+              tmp2 = "";
+            }
+            postfix = tmp2;
+            if (i === 0) {
+              tmp3 = outie + innie;
+              tmp4 = tmp3 + line;
+              tmp5 = tmp4 + postfix;
+              return runtime.safeCall(globalThis.console.log(tmp5))
+            } else {
+              tmp6 = i + 1;
+              scrut2 = tmp6 == lines.length;
+              if (scrut2 === true) {
+                tmp7 = outie + innieAlt;
+                tmp8 = tmp7 + line;
+                return runtime.safeCall(globalThis.console.log(tmp8))
+              } else {
+                tmp9 = outie + innieAlt;
+                tmp10 = tmp9 + line;
+                tmp11 = tmp10 + postfix;
+                return runtime.safeCall(globalThis.console.log(tmp11))
+              }
+            }
+          };
+          return runtime.safeCall(lines.forEach(tmp1))
         } else {
-          tmp = this.steps - 1;
-          return "\u2502 ".repeat(tmp) ?? null;
+          return runtime.Unit
         }
       } 
       enter(...pieces) {
-        let scrut, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
-        tmp = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2;
-        });
+        let scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
         scrut = this.steps > 0;
         if (scrut === true) {
-          tmp1 = this.steps - 1;
-          tmp2 = "\u2502 ".repeat(tmp1) ?? null;
-          tmp3 = tmp2 + "\u251C\u2500\u252E ";
+          tmp = this.steps - 1;
+          tmp1 = runtime.safeCall("\u2502 ".repeat(tmp));
+          tmp2 = tmp1 + "\u251C\u2500";
+        } else {
+          tmp2 = "";
+        }
+        scrut1 = this.steps > 0;
+        if (scrut1 === true) {
+          tmp3 = "\u252E ";
         } else {
           tmp3 = "\u250D ";
         }
-        tmp4 = tmp(tmp3, ...pieces) ?? null;
-        tmp5 = this.#output(tmp4) ?? null;
-        tmp6 = this.steps + 1;
-        this.steps = tmp6;
-        return null;
+        tmp4 = Predef.fold((arg1, arg2) => {
+          return arg1 + arg2
+        });
+        tmp5 = runtime.safeCall(tmp4(...pieces));
+        tmp6 = this.output(tmp2, tmp3, "\u2502 ", tmp5);
+        tmp7 = this.steps + 1;
+        this.steps = tmp7;
+        return runtime.Unit
       } 
       print(...pieces1) {
-        let message, scrut, tmp, tmp1, tmp2, tmp3;
+        let message1, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4;
         tmp = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2;
+          return arg1 + arg2
         });
-        tmp1 = tmp(...pieces1) ?? null;
-        message = tmp1;
-        scrut = this.steps == 0;
-        if (scrut === true) {
-          return this.#output(message) ?? null;
-        } else {
-          tmp2 = this.indentPrefix + "\u251C ";
-          tmp3 = tmp2 + message;
-          return this.#output(tmp3) ?? null;
-        }
-      } 
-      leave(...pieces2) {
-        let scrut, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
-        tmp = this.steps - 1;
-        this.steps = tmp;
-        tmp1 = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2;
-        });
+        tmp1 = runtime.safeCall(tmp(...pieces1));
+        message1 = tmp1;
         scrut = this.steps > 0;
         if (scrut === true) {
           tmp2 = this.steps - 1;
-          tmp3 = "\u2502 ".repeat(tmp2) ?? null;
-          tmp4 = tmp3 + "\u2502 \u2515 ";
+          tmp3 = runtime.safeCall("\u2502 ".repeat(tmp2));
         } else {
-          tmp4 = "\u2515 ";
+          tmp3 = "";
         }
-        tmp5 = tmp1(tmp4, ...pieces2) ?? null;
-        return this.#output(tmp5) ?? null;
+        scrut1 = this.steps > 0;
+        if (scrut1 === true) {
+          tmp4 = "\u251C ";
+        } else {
+          tmp4 = "";
+        }
+        return this.output(tmp3, tmp4, "\u2502 ", message1)
+      } 
+      leave(...pieces2) {
+        let tmp, tmp1, tmp2, tmp3;
+        tmp = this.steps - 1;
+        this.steps = tmp;
+        tmp1 = runtime.safeCall("\u2502 ".repeat(this.steps));
+        tmp2 = Predef.fold((arg1, arg2) => {
+          return arg1 + arg2
+        });
+        tmp3 = runtime.safeCall(tmp2(...pieces2));
+        return this.output(tmp1, "\u2515 ", "  ", tmp3)
       } 
       trace(intro, makeOutro, thunk) {
         let result, tmp, tmp1, tmp2, tmp3;
         tmp = this.enter(intro);
-        tmp1 = thunk() ?? null;
+        tmp1 = runtime.safeCall(thunk());
         result = tmp1;
-        tmp2 = makeOutro(result) ?? null;
+        tmp2 = runtime.safeCall(makeOutro(result));
         tmp3 = this.leave(tmp2);
-        return result;
+        return result
+      } 
+      reset() {
+        this.steps = 0;
+        return runtime.Unit
       }
       toString() { return "TreeTracer"; }
     };
   }
   static toString() { return "TreeTracer"; }
 };
-null
 let TreeTracer = TreeTracer2; export default TreeTracer;

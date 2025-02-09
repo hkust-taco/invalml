@@ -1,21 +1,126 @@
 :js
 
 import "../../mlscript-compile/apps/Lexer.mls"
+import "../../mlscript-compile/Stack.mls"
 
 fun lines(...strs) = strs.join("\n")
 
-open Lexer
+open Lexer { lex, Token }
+open Stack
 
-(lex of lines of
-  "let rec factorial x = // a simple factorial function",
-  "  if x <= 1 then 1 else x * factorial (x - 1)",
-  "",
-  "let bool_of_string = function",
-  "  | \"true\" -> true",
-  "  | \"false\" -> false",
-  "  | _ -> raise (Invalid_argument \"bool_of_string\")",
-).map of (x, i, a) => Token.display(x)
-//│ = ["Identifier(let, false)", "Space", "Identifier(rec, false)", "Space", "Identifier(factorial, false)", "Space", "Identifier(x, false)", "Space", "Identifier(=, true)", "Space", "Comment( a simple factorial function)", "Space", "Identifier(if, false)", "Space", "Identifier(x, false)", "Space", "Identifier(<=, true)", "Space", "Literal(Integer, 1)", "Space", "Identifier(then, false)", "Space", "Literal(Integer, 1)", "Space", "Identifier(else, false)", "Space", "Identifier(x, false)", "Space", "Identifier(*, true)", "Space", "Identifier(factorial, false)", "Space", "Open(Round)", "Identifier(x, false)", "Space", "Identifier(-, true)", "Space", "Literal(Integer, 1)", "Close(Round)", "Space", "Identifier(let, false)", "Space", "Identifier(bool_of_string, false)", "Space", "Identifier(=, true)", "Space", "Identifier(function, false)", "Space", "Identifier(|, true)", "Space", "Literal(String, true)", "Space", "Identifier(->, true)", "Space", "Identifier(true, false)", "Space", "Identifier(|, true)", "Space", "Literal(String, false)", "Space", "Identifier(->, true)", "Space", "Identifier(false, false)", "Space", "Identifier(|, true)", "Space", "Identifier(_, false)", "Space", "Identifier(->, true)", "Space", "Identifier(raise, false)", "Space", "Open(Round)", "Identifier(Invalid_argument, false)", "Space", "Literal(String, bool_of_string)", "Close(Round)"]
+fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
+  let buffer = ""
+  while stack is head :: tail do
+    set buffer = buffer + op(head)
+    if tail is _ :: _ do
+      set buffer = buffer + sep
+    set stack = tail
+  buffer
+
+fun printLexed(text) = print of
+  (lex of text) mapJoin(Token.display, "\n")
+
+lex of "0 1"
+//│ = Cons(Literal(Integer, "0"), Cons(Space, Cons(Literal(Integer, "1"), Nil)))
+
+printLexed of "0 1  0xDEADCAFE 0b1101 0o755     3.1415926535"
+//│ > Literal(Integer, 0)
+//│ > Space
+//│ > Literal(Integer, 1)
+//│ > Space
+//│ > Literal(Integer, 0xDEADCAFE)
+//│ > Space
+//│ > Literal(Integer, 0b1101)
+//│ > Space
+//│ > Literal(Integer, 0o755)
+//│ > Space
+//│ > Literal(Decimal, 3.1415926535)
+
+printLexed of lines of
+  "let rec factorial x = // a simple factorial function"
+  "  if x <= 1 then 1 else x * factorial (x - 1)"
+  ""
+  "let bool_of_string = function"
+  "  | \"true\" -> true"
+  "  | \"false\" -> false"
+  "  | _ -> raise (Invalid_argument \"bool_of_string\")"
+//│ > Identifier(let, false)
+//│ > Space
+//│ > Identifier(rec, false)
+//│ > Space
+//│ > Identifier(factorial, false)
+//│ > Space
+//│ > Identifier(x, false)
+//│ > Space
+//│ > Identifier(=, true)
+//│ > Space
+//│ > Comment( a simple factorial function)
+//│ > Space
+//│ > Identifier(if, false)
+//│ > Space
+//│ > Identifier(x, false)
+//│ > Space
+//│ > Identifier(<=, true)
+//│ > Space
+//│ > Literal(Integer, 1)
+//│ > Space
+//│ > Identifier(then, false)
+//│ > Space
+//│ > Literal(Integer, 1)
+//│ > Space
+//│ > Identifier(else, false)
+//│ > Space
+//│ > Identifier(x, false)
+//│ > Space
+//│ > Identifier(*, true)
+//│ > Space
+//│ > Identifier(factorial, false)
+//│ > Space
+//│ > Open(Round)
+//│ > Identifier(x, false)
+//│ > Space
+//│ > Identifier(-, true)
+//│ > Space
+//│ > Literal(Integer, 1)
+//│ > Close(Round)
+//│ > Space
+//│ > Identifier(let, false)
+//│ > Space
+//│ > Identifier(bool_of_string, false)
+//│ > Space
+//│ > Identifier(=, true)
+//│ > Space
+//│ > Identifier(function, false)
+//│ > Space
+//│ > Identifier(|, true)
+//│ > Space
+//│ > Literal(String, true)
+//│ > Space
+//│ > Identifier(->, true)
+//│ > Space
+//│ > Identifier(true, false)
+//│ > Space
+//│ > Identifier(|, true)
+//│ > Space
+//│ > Literal(String, false)
+//│ > Space
+//│ > Identifier(->, true)
+//│ > Space
+//│ > Identifier(false, false)
+//│ > Space
+//│ > Identifier(|, true)
+//│ > Space
+//│ > Identifier(_, false)
+//│ > Space
+//│ > Identifier(->, true)
+//│ > Space
+//│ > Identifier(raise, false)
+//│ > Space
+//│ > Open(Round)
+//│ > Identifier(Invalid_argument, false)
+//│ > Space
+//│ > Literal(String, bool_of_string)
+//│ > Close(Round)
 
 :e
 // It would be decent if we allow pattern parameters in functions.
@@ -26,14 +131,14 @@ fun take(pattern P, idx: Str, acc: Str) =
       set acc = acc + ch
     else [acc, idx]
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.23: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
-//│ ╙──      	              ^^^
+//│ ║  l.128: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ╙──       	              ^^^
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.23: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
-//│ ╙──      	                             ^^^
+//│ ║  l.128: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ╙──       	                             ^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.23: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
-//│ ╙──      	                                                             ^
+//│ ║  l.128: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ╙──       	                                                             ^
 
 :e
 // We can mitigate the boilerplate if we support split around `of`.
@@ -42,13 +147,13 @@ fun foobar(x) = if x is
   Some of
     a then a
 //│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.42: 	  Some of
-//│ ║        	  ^^^^^^^
-//│ ║  l.43: 	    a then a
-//│ ╙──      	^^^^^^^^^^^^
+//│ ║  l.147: 	  Some of
+//│ ║         	  ^^^^^^^
+//│ ║  l.148: 	    a then a
+//│ ╙──       	^^^^^^^^^^^^
 //│ ╔══[ERROR] Name not found: None
-//│ ║  l.41: 	  None then "hello"
-//│ ╙──      	  ^^^^
+//│ ║  l.146: 	  None then "hello"
+//│ ╙──       	  ^^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.41: 	  None then "hello"
-//│ ╙──      	  ^^^^
+//│ ║  l.146: 	  None then "hello"
+//│ ╙──       	  ^^^^
