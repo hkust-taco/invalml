@@ -1,0 +1,804 @@
+import "../Predef.mls"
+import "../Option.mls"
+import "../Stack.mls"
+import "../Map.mls"
+import "../TreeTracer.mls"
+import "../apps/Lexer.mls"
+
+open Predef
+open Option
+open Stack
+open Map
+open TreeTracer { TreeTracer }
+open Lexer { Token, LiteralKind, BracketKind }
+
+module Parser with ...
+
+//  _     _     _
+// | |   (_)___| |_
+// | |   | / __| __|
+// | |___| \__ \ |_
+// |_____|_|___/\__|
+// 
+// =================
+
+fun at(target, index) = target.at(index)
+
+fun first(array) = if array is [first, ...] then first
+
+fun second(array) = if array is [_, second, ...] then second
+
+fun toStack(array) =
+  let
+    length = array.length
+    i = length - 1
+    reserve = Nil
+  while i >= 0 do
+    set reserve = array.at(i) :: reserve
+    set i = i - 1
+  reserve
+
+fun stack(...args) = args toStack()
+
+fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
+  let buffer = ""
+  while stack is head :: tail do
+    set buffer = buffer + op(head)
+    if tail is _ :: _ do
+      set buffer = buffer + sep
+    set stack = tail
+  buffer
+
+fun collectFirst[A, B](stack: Stack[A], op) =
+  let lastResult = None
+  while stack is head :: tail and
+    do set lastResult = op(head)
+    lastResult is None do
+      set stack = tail
+  lastResult
+
+fun collectToArray[A, B](stack: Stack[A], p) =
+  let elements = []
+  while stack is head :: tail do
+    if p(head) is Some(value) do
+      elements.push of value
+    set stack = tail
+  elements
+
+//  _  __                                _
+// | |/ /___ _   ___      _____  _ __ __| |
+// | ' // _ \ | | \ \ /\ / / _ \| '__/ _` |
+// | . \  __/ |_| |\ V  V / (_) | | | (_| |
+// |_|\_\___|\__, | \_/\_/ \___/|_|  \__,_|
+//           |___/
+// ========================================
+
+// https://v8.dev/blog/pointer-compression
+// The maximal and minimal values of V8's Smi on 64-bit platforms.
+let INT_MIN = -2147483648
+let INT_MAX = 2147483647
+
+val keywords = new Map()
+
+class Keyword(val name: Str, val leftPrec, val rightPrec) with
+  keywords.insert(name, this)
+  
+  fun leftPrecOrMin = if leftPrec is Some(prec) then prec else INT_MIN
+  fun rightPrecOrMin = if rightPrec is Some(prec) then prec else INT_MIN
+  
+  fun toString() = fold(+) of
+    "Keyword(`", name, "`, "
+    (if leftPrec is Some(prec) then prec.toString() else "N/A"), ", ",
+    (if rightPrec is Some(prec) then prec.toString() else "N/A"), ")"
+
+module Keywords with
+  let prec = 0 
+  fun currPrec = Some(prec)
+  fun nextPrec =
+    set prec = prec + 1
+    Some(prec)
+  let basePrec = currPrec // the lowest precedence
+  val _class = Keyword("class", None, basePrec)
+  val _begin = Keyword("begin", None, basePrec)
+  val _end = Keyword("end", basePrec, None)
+  let semiPrec = nextPrec
+  let commaPrec = nextPrec
+  val _semicolon = Keyword(";", semiPrec, basePrec)
+  val _comma = Keyword(",", commaPrec, semiPrec)
+  let eqPrec = nextPrec
+  let ascPrec = nextPrec
+  val _equal = Keyword("=", eqPrec, eqPrec)
+  val _bar = Keyword("|", None, currPrec)
+  val _colon = Keyword(":", ascPrec, eqPrec)
+  val _match = Keyword("match", None, currPrec)
+  val _if = Keyword("if", None, currPrec)
+  val _with = Keyword("with", None, currPrec)
+  val _case = Keyword("case", None, currPrec)
+  let thenPrec = nextPrec
+  val _then = Keyword("then", thenPrec, thenPrec)
+  val _do = Keyword("do", thenPrec, thenPrec)
+  val _else = Keyword("else", nextPrec, currPrec)
+  val _let = Keyword("let", nextPrec, currPrec)
+  val _in = Keyword("in", thenPrec, thenPrec)
+  val _true = Keyword("true", None, None)
+  val _false = Keyword("false", None, None)
+  // val _fatArrow = Keyword of "=>", nextPrec, eqPrec
+  val _thinArrow = Keyword of "->", currPrec, eqPrec
+  val _fun = Keyword("fun", currPrec, None)
+  val _function = Keyword("function", currPrec, None)
+  val _type = Keyword("type", currPrec, None)
+  val _rec = Keyword("rec", None, None)
+  val _underscore = Keyword of "_", None, None
+  val maxPrec = prec
+
+Keywords.maxPrec
+
+
+
+//  ____                        _
+// |  _ \ _ __ ___  ___ ___  __| | ___ _ __   ___ ___
+// | |_) | '__/ _ \/ __/ _ \/ _` |/ _ \ '_ \ / __/ _ \
+// |  __/| | |  __/ (_|  __/ (_| |  __/ | | | (_|  __/
+// |_|   |_|  \___|\___\___|\__,_|\___|_| |_|\___\___|
+//
+// ===================================================
+
+fun makePrecMap(...ops) =
+  let
+    m = new Map
+    i = 0
+  while i < ops.length do
+    ops.at(i).split(" ").forEach of (op, _, _) =>
+      if op.length > 0 do
+        m.insert of op, i + Keywords.maxPrec
+    set i += 1
+  m
+
+let precMap = makePrecMap(
+  ","
+  "@",
+  ":",
+  "|",
+  "&",
+  "=",
+  "/ \\",
+  "^",
+  "!",
+  "< >",
+  "+ -",
+  "* %",
+  "~",
+  "", // perfix operators
+  "", // applications
+  ".",
+)
+
+let appPrec = if precMap.get(".") is Some(prec) then prec - 1
+let prefixPrec = appPrec - 1
+
+fun orMaxPrec(precOpt) = if precOpt is
+  Some(prec) then prec
+  None then INT_MAX
+
+fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else INT_MAX
+
+pattern Letter = "a" ..= "z" | "A" ..= "Z"
+
+fun hasLetter(s) = [..s].some((ch, _, _) => ch is Letter)
+
+pattern FloatOperator = "+." | "-." | "*." | "/."
+
+pattern RightAssociative = "@" | "/" | "," | ":"
+
+fun opPrec(opStr) = if
+  opStr is FloatOperator then [charPrec(opStr.at(0)), charPrec(opStr.at(0))]
+  opStr hasLetter() then [Keywords.maxPrec, Keywords.maxPrec]
+  let leftPrec = charPrec of opStr.at(0)
+  let rightOp = opStr.at(-1)
+  let rightPrec = charPrec of rightOp
+  rightOp is RightAssociative then [leftPrec, rightPrec - 1]
+  else [leftPrec, rightPrec]
+
+opPrec(";")
+
+opPrec("|>")
+
+//  _____
+// |_   _| __ ___  ___
+//   | || '__/ _ \/ _ \
+//   | || | |  __/  __/
+//   |_||_|  \___|\___|
+//
+// ====================
+
+module Tree with
+  abstract class Tree
+  
+  class
+    Empty() extends Tree
+    Error(tree: Tree, message: Str) extends Tree
+    Ident(name: Str, symbolic: Bool) extends Tree
+    Underscore() extends Tree
+    Modified(modifier, subject) extends Tree
+    Tuple(trees: Stack[Tree]) extends Tree
+    Sequence(trees: Stack[Tree]) extends Tree
+    Literal(kind, value) extends Tree
+    Match(scrutinee: Tree, branches: Stack[Tree]) extends Tree
+    Lambda(params: Stack[Tree], body: Tree) extends Tree
+    App(callee: Tree, arguments: Stack[Tree]) extends Tree
+    Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
+    // For `let` bindings and `if`-`then`-`else`. The last part is optional.
+    Ternary(keyword: Keyword, lhs: Tree, rhs: Tree, body) extends Tree
+  
+  fun empty = Empty()
+  fun error(message: Str) = empty Error(message)
+  fun summary(tree) =
+    fun par(text: Str, cond: Bool) = if cond then "(" + text + ")" else text
+    fun prec(tree: Tree, side: Bool) = if tree is
+      Empty(_) then INT_MAX
+      Error(tree, _) then prec(tree, side)
+      Ident(_, _) then INT_MAX
+      Underscore() then INT_MAX
+      Modified(_, _) then 1
+      Tuple(_) then INT_MAX
+      Sequence(_) then 1
+      Literal(_, _) then INT_MAX
+      Match(_, _) then 2
+      App(callee, _) and callee is
+        Ident(op, true) and opPrec(op) is [leftPrec, rightPrec] and
+          side then rightPrec
+          else leftPrec
+        else appPrec
+      Infix(op, _, _) and
+        side then op.rightPrec orMaxPrec()
+        else op.leftPrec orMaxPrec()
+      Ternary(_, _, _, _) then 3
+    fun wrap(something) = if something is
+      Tree then "{" + go(something) + "}"
+      else go(something)
+    fun go(tree) = if tree is
+      Empty(_) then ""
+      Error(Empty, _) then "⚠"
+      Error(tree, _) then "<⚠:" + go(tree) + ">"
+      Ident(name, _) then name
+      Underscore() then "_"
+      Modified(modifier, subject) then go(modifier) + " " + go(subject)
+      Tuple(trees) then "(" + trees mapJoin(go, ", ") + ")"
+      Sequence(trees) then trees mapJoin(go, "; ")
+      Literal(LiteralKind.String, value) and
+        value.length > 5 then JSON.stringify(value.slice(0, 5)).slice(0, -1) + "…\""
+        else JSON.stringify(value)
+      Literal(_, value) then value
+      Match(scrutinee, branches) then fold(+) of
+        "match ", go(scrutinee), " with "
+        branches mapJoin of go, " | "
+      // Selection
+      App(Ident(".", _), target :: Ident(field) :: Nil) then
+        if opPrec(".") is [leftPrec, _] then fold(+) of
+          par of go(target), prec(target, false) < leftPrec
+          ".", field
+      App(Ident(op, true), lhs :: rhs :: Nil) then
+        if opPrec(op) is [leftPrec, rightPrec] then fold(+) of
+          par of go(lhs), prec(lhs, false) < leftPrec
+          " ", op, " "
+          par of go(rhs), prec(rhs, true) < rightPrec
+      App(callee, arguments) then fold(+) of
+        go(callee), "(", arguments mapJoin(go, ","), ")"
+      Infix(op, lhs, rhs) then fold(+) of
+        go(lhs), " ", go(op), " ", go(rhs)
+      Ternary(keyword, lhs, rhs, body) then fold(+) of
+        keyword.name, " ", go(lhs),
+        if keyword.name is
+          "if" then " then "
+          "type" then " = "
+          "let" then " = "
+        if rhs is Some(rhs') then go(rhs') else go(rhs)
+        if keyword.name is
+          "if" then " then "
+          "type" then ""
+          "let" then " in "
+        if body is Some(body) then go(body) else ""
+      Lambda(params, body) then fold(+) of
+        "fun ", params mapJoin(go, " "), " -> ", go(body)
+      Keyword(name, _, _) then name
+      Some(tree) then "Some(" + wrap(tree) + ")"
+      None then "None"
+      _ :: _ then tree mapJoin(wrap, " :: ") + " :: Nil"
+      Nil then "Nil"
+      [..trees] then "[" + trees.map((tree, _, _) => wrap(tree)).join(", ") + "]"
+      else "<unexpected:" + tree + ">"
+    wrap(tree)
+
+//  ____                     ____        _
+// |  _ \ __ _ _ __ ___  ___|  _ \ _   _| | ___
+// | |_) / _` | '__/ __|/ _ \ |_) | | | | |/ _ \
+// |  __/ (_| | |  \__ \  __/  _ <| |_| | |  __/
+// |_|   \__,_|_|  |___/\___|_| \_\\__,_|_|\___|
+//
+// =============================================
+
+class ParseRule(val name: Str, val choices: Stack[Choice]) with
+  fun endChoice = choices collectFirst of choice => if choice Choice.forced() is
+    Choice.End(value) then Some(value)
+    else None
+  fun keywordChoices = toMap of ...(choices collectToArray of choice =>
+      if choice Choice.forced() is Choice.Keyword(keyword, rest) then Some([keyword.name, rest]) else None)
+  fun exprChoice = choices collectFirst of choice => if choice Choice.forced() is
+    Choice.Expr(process, rest) then Some([process, rest])
+    else None
+  // Display parse rules as a tree in a BNF-like format.
+  fun display =
+    object Knot
+    fun displayChoice(choice) = if choice is
+      Choice.Keyword(keyword, rest) and
+        let prefix = "`" + keyword.name + "` "
+        go(rest) is
+          [name, [line]] then [prefix + line]
+          [name, [head, ..tail']] then [prefix + head, ..tail']
+      Choice.Expr(_, rest) and
+        let prefix = "<expression> "
+        go(rest) is
+          [name, [line]] then [prefix + line]
+          [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
+      Choice.End(_) then ["<end>"]
+      Choice.Lazy(get, make) and
+        get() is Knot then ["<rec>"]
+        else displayChoice(make(() => Knot))
+      other then ["<unknown>" + JSON.stringify(other)]
+    fun go(rule) =
+      let
+        choices = rule.choices
+        lines = []
+      while choices is head :: tail do
+        lines.push of displayChoice(head)
+        set choices = tail
+      [rule.name, lines.flat()]
+    if go(this) is [name, lines] then
+      "<" + name + "> ::= " + if lines is
+        [line] then line
+        [head, ..tail] then head + "\n" + tail.join("\n")
+  
+// Shorthands for constructing parse rules.
+fun rule(name, ...choices) = ParseRule(name, toStack(choices))
+module Choice with
+  class Keyword(keyword: Keyword, rest: ParseRule)
+  class Expr(process: Tree -> Tree, rest: ParseRule)
+  class End(value: Tree)
+  class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
+  fun forced(choice) = if choice is Lazy(get) then get() else choice
+  // Shorthands for constructing rule choices.
+  fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
+  fun expr(process, name, ...choices) = Expr(process, rule(name, ...choices))
+  fun end(value) = End(value)
+  fun lazy(makeChoice) =
+    let cache = None
+    fun getChoice() =
+      if cache is Some(choice) then choice else ...
+      set cache = makeChoice(getChoice)
+      cache
+    Lazy(getChoice, makeChoice)
+
+//  ____       _
+// |  _ \  ___| |__  _   _  __ _
+// | | | |/ _ \ '_ \| | | |/ _` |
+// | |_| |  __/ |_) | |_| | (_| |
+// |____/ \___|_.__/ \__,_|\__, |
+//                         |___/
+// ==============================
+
+val tracer = new TreeTracer
+
+fun indented(text) = text.split("\n").join("\n  ")
+
+fun showAsTree(thing) =
+  fun itemize(something) = if something is
+    Some(content) then tuple of ["Some of " + go(content)], []
+    None then tuple of "None", []
+    head :: tail then
+      let
+        items = [go(head)]
+        remaining = tail
+      while remaining is
+        head' :: tail' do
+          items.push(go of head')
+          set remaining = tail'
+      tuple of ("Stack of \n" + "  " + indented of items.join("\n")), []
+    Nil then ["Nil", []]
+    Str then [JSON.stringify(something), []] // TODO: This doesn't work.
+    Int then [something.toString(), []]
+    Tree.Empty then ["Empty", []]
+    Tree.Error(Tree.Empty, m) then tuple of "Error", [["message", go(m)]]
+    Tree.Error(t, m) then tuple of "Error", [["tree", go(t)], ["message", go(m)]]
+    Tree.Ident(n, _) then tuple of "Ident", [["name", go(n)]]
+    Tree.Underscore() then tuple of "Underscore", []
+    Tree.Modified(m, s) then
+      tuple of "Modified", [["modifier", go(m)], ["subject", go(s)]]
+    Tree.Tuple(t) then tuple of "Tuple", [["items", go(t)]]
+    Tree.Sequence(t) then tuple of "Sequence", [["items", go(t)]]
+    Tree.Literal(k, v) then tuple of ("Literal#" + go(k) + " of " + go(v)), []
+    Tree.Match(scrutinee, branches) then tuple of
+      "Match", [["scrutinee", scrutinee], ["branches", go(branches)]]
+    Tree.App(c, a) then tuple of "App", [["callee", go(c)], ["arguments", go(a)]]
+    Tree.Infix(op, lhs, rhs) then tuple of
+      "Infix", [["op", go(op)], ["lhs", go(lhs)], ["rhs", go(rhs)]]
+    Tree.Ternary(n, l, r, b) then tuple of
+      "Ternary", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
+    Tree.Lambda(p, b) then tuple of "Lambda", [["params", go(p)], ["body", go(b)]]
+    Keyword(_, _, _) as keyword then [keyword.toString(), []]
+    LiteralKind.Integer then tuple of "Integer", []
+    LiteralKind.Decimal then tuple of "Decimal", []
+    LiteralKind.String then tuple of "String", []
+    LiteralKind.Boolean then tuple of "Boolean", []
+    else tuple of "Unknown", [["JSON.stringify(_)", JSON.stringify(something)]]
+  fun go(something) = if itemize(something) is
+    [intro, []] then intro
+    [intro, [field]] and intro != "Unknown" then intro + " of " + second of field
+    [intro, fields] then
+      let dialogue = fields.map of (field, _, _) =>
+        field first() + " = " + field second()
+      intro + ":\n  " + indented of dialogue.join("\n")
+  go(thing)
+
+fun letBinding(keyword: Keyword) =
+  let intro = keyword.name + " binding: "
+  Choice.keyword of
+    keyword
+    intro + "keyword"
+    Choice.expr of
+      (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
+        Tree.Ternary(keyword, lhs, rhs, body)
+      intro + "left-hand side"
+      Choice.keyword of
+        Keywords._equal
+        intro + "equal sign"
+        Choice.expr of
+          (expr, body) => [Some(expr), body]
+          intro + "right-hand side"
+          Choice.keyword of
+            Keywords._in
+            intro + "`in` keyword"
+            Choice.expr of
+              (body, _) => Some(body)
+              intro + "body"
+              Choice.end of None
+          Choice.end of None
+      Choice.end of [None, None]
+
+fun typeDefinition() =
+  let intro = "type definition: "
+  Choice.keyword of
+    Keywords._type
+    intro + "`type` keyword"
+    Choice.expr of
+      (name, body) => Tree.Ternary(Keywords._type, name, body, None)
+      intro + "name"
+      Choice.keyword of
+        Keywords._equal
+        intro + "equal sign"
+        Choice.expr of
+          (body, _) => body
+          intro + "body"
+          Choice.end of ()
+
+fun ifThenElse() =
+  let intro = "if-then-else: "
+  Choice.keyword of
+    Keywords._if
+    intro + "`if` keyword"
+    Choice.expr of
+      (tst, conAndAlt) => if conAndAlt is [con, alt] then
+        Tree.Ternary(Keywords._if, tst, con, alt)
+      intro + "condition"
+      Choice.keyword of
+        Keywords._then
+        intro + "`then` keyword"
+        Choice.expr of
+          (con, optAlt) => [con, optAlt]
+          intro + "consequent"
+          Choice.keyword of
+            Keywords._else
+            intro + "`else` keyword"
+            Choice.expr of
+              (alt, _) => Some(alt)
+              intro + "alternative"
+              Choice.end of None
+          Choice.end of None
+
+let letChoice = letBinding(Keywords._let)
+
+fun funChoice() =
+  let intro = "function expression: "
+  Choice.keyword of
+    Keywords._fun
+    intro + "keyword"
+    Choice.expr of
+      (params, body) => Tree.Lambda(params :: Nil, body)
+      intro + "parameters"
+      Choice.keyword of
+        Keywords._thinArrow
+        intro + "arrow"
+        Choice.expr of
+          (body, _) => body
+          intro + "body"
+          Choice.end of None
+
+fun patternMatchingBody(intro, cons, nil) =
+  fun makeMatchArms(get) = Choice.expr of
+    (pat, rhsAndRest) => if rhsAndRest is [rhs, rest] then
+      cons of Tree.Infix(Keywords._thinArrow, pat, rhs), rest
+    intro + "pattern"
+    Choice.keyword of
+      Keywords._thinArrow
+      intro + "arrow"
+      Choice.expr of
+        (curr, next) => [curr, next]
+        intro + "body"
+        Choice.end of nil
+        Choice.keyword of
+          Keywords._bar
+          intro + "leading bar"
+          Choice.Lazy(get, makeMatchArms)
+  let matchArms = Choice.lazy of makeMatchArms
+  tuple of
+    Choice.keyword of
+      Keywords._bar
+      intro + "leading bar"
+      matchArms
+    matchArms
+
+fun matchWithChoice() =
+  let intro = "`match`-`with` expression: "
+  Choice.keyword of
+    Keywords._match
+    intro + "keyword"
+    Choice.expr of
+      (scrutinee, branches) => Tree.Match(scrutinee, branches)
+      intro + "scrutinee"
+      Choice.keyword of
+        Keywords._with
+        intro + "with"
+        ...patternMatchingBody(intro, (x, xs) => x :: xs, Nil)
+
+fun matchFunctionChoice() =
+  let intro = "`match` function: "
+  Choice.keyword of
+    Keywords._function
+    intro + "`function` keyword"
+    ...patternMatchingBody of
+      intro
+      (x, xs) => if xs is
+        Tree.Match(scrut, arms) then Tree.Match(scrut, x :: arms)
+      Tree.Match(Tree.empty, Nil)
+
+val prefixRules = rule of
+  "start of the statement"
+  letChoice
+  funChoice()
+  typeDefinition()
+  matchWithChoice()
+  matchFunctionChoice()
+  ifThenElse()
+  Choice.keyword of
+    Keywords._underscore
+    "wildcard pattern"
+    Choice.end of Tree.Underscore()
+
+prefixRules.endChoice
+
+prefixRules.keywordChoices.get("fun")
+
+prefixRules.exprChoice
+
+fun makeInfixChoice(keyword) =
+  Choice.keyword of
+    keyword
+    "operator `" + keyword.name + "`"
+    Choice.expr of
+      (rhs, _) => lhs => Tree.Infix(keyword, lhs, rhs)
+      "operator `" + keyword.name + "` right-hand side"
+      Choice.end of ()
+
+val infixRules = rule of
+  "the continuation of expressions"
+  makeInfixChoice(Keywords._bar)
+
+fun parse(tokens) =
+  let
+    current = tokens
+    counter = 0
+  
+  fun yeetSpaces =
+    while current is Token.Space :: tail do
+      tracer.print of "skipped a space at " + counter, source.line
+      set
+        current = tail
+        counter = counter + 1
+    current
+    
+  fun consume =
+    if current is head :: tail then
+      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter, source.line
+      set current = tail
+      set counter = counter + 1
+    else
+      tracer.print of "consumed: EOF", source.line
+  
+  fun parseRule(prec: Int, rule: ParseRule, opened) = tracer.trace of
+    "parsing rule \"" + rule.name + "\" with precedence " + prec
+    result => "parsed: " + result Tree.summary()
+    () => ...
+    if yeetSpaces is
+      Token.Close(encountered) :: _ and opened is
+        do tracer.print of "the case of closing brackets", source.line
+        Some(expected) and
+          encountered == expected and rule.endChoice is
+            Some(value) then value
+            None then
+              // The rule doesn't allow an end here.
+              Tree.error("unexpected close bracket `" + encountered + "`")
+          else
+            // The rule expects a different close bracket.
+            Tree.error("mismatched brackets")
+        None then Tree.error("unexpected bracket: " + encountered)
+      Token.Identifier(name, _) :: _ and
+        do tracer.print of "check if \"" + name + "\" is a keyword or not", source.line
+        keywords.get(name) is Some(keyword) and
+          rule.keywordChoices.get(name) is
+            Some(rule) then
+              tracer.print of "found a rule starting with " + name, source.line
+              consume
+              parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
+            None then
+              tracer.print of "no rule starting with " + name + " was found", source.line
+              val expr = simpleExpr(prec, opened)
+              if rule.exprChoice is
+                Some([process, rest]) then
+                  let rhs = parseRule(prec, rest, opened)
+                  process(expr, rhs)
+                None then expr Tree.Error("unexpected expression")
+        do tracer.print of "\"" + name + "\" is not a keyword", source.line
+      other :: _ and
+        do tracer.print of "try parse an expression from " + Token.preview(current), source.line
+        simpleExpr(prec, opened) is
+          Tree.Error(Tree.Empty(), _) and rule.endChoice is
+            Some(value) then value
+          reserve and rule.exprChoice is
+            Some([process, rest]) then 
+              let rhs = parseRule(prec, rest, opened)
+              tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
+              tracer.print of "the reserved expression: " + reserve Tree.summary(), source.line
+              process(reserve, rhs)
+            None then
+              tracer.print of "the rule doesn't have a choice starting with expressions", source.line
+              tracer.print of rule.display, source.line
+              Tree.error("unexpected expression")
+      Nil and rule.endChoice is
+        Some(value) then value
+        None then Tree.error("unexpected EOF")
+  
+  fun simpleExpr(prec: Int, bracket) = tracer.trace of
+    "simple expression <<< " + prec + " " + Token.preview(current)
+    result => "simple expression >>> " + result Tree.summary()
+    () => ...
+    if yeetSpaces is
+      Token.Identifier(name, symbolic) :: _ and keywords.get(name) is
+        Some(keyword) and prefixRules.keywordChoices.get(name) is
+          Some(rule) then
+            consume
+            let acc = parseRule(keyword.rightPrec orMaxPrec(), rule, bracket)
+            exprCont(acc, prec, bracket)
+          None then
+            tracer.print("no rule starting with " + name, source.line)
+            Tree.empty
+        None then
+          consume
+          exprCont(Tree.Ident(name, symbolic), prec, bracket)
+      Token.Literal(kind, literal) :: _ then
+        consume
+        exprCont(Tree.Literal(kind, literal), prec, bracket)
+      Token.Open(kind) :: _ then
+        consume
+        let content = if
+          // TODO: should the prec be 0?
+          let content = simpleExpr(0, Some(kind))
+          yeetSpaces is
+            Token.Close(kind') :: _ and
+              kind == kind' then
+                consume
+                content
+              else content Tree.Error("mismatched brackets")
+            token :: _ then
+              let message = "expect a close bracket instead of " + token
+              tracer.print of message, source.line
+              content Tree.Error(message)
+            Nil then
+              tracer.print("expect a close bracket instead of EOF", source.line)
+              content Tree.Error("expect a close bracket instead of EOF")
+        exprCont(content, prec, bracket)
+      Token.Close(kind) :: _ and bracket is
+        Some(kind') and
+          kind == kind' then
+            consume
+            Tree.Empty()
+          else Tree.error("mismatched brackets")
+        None then
+          tracer.print("missing close bracket", source.line)
+          Tree.error("missing close bracket")
+      token :: _ then Tree.error("unrecognized token: " + token)
+      Nil then Tree.error("unexpected EOF")
+  
+  fun exprCont(acc: Tree, prec: Int, bracket) = if yeetSpaces is
+    do tracer.print(">>> exprCont " + prec + " " + acc Tree.summary() + " <<<", source.line)
+    Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
+      do tracer.print of "found a keyword: " + name, source.line
+      infixRules.keywordChoices.get(name) is Some(rule) and
+        do tracer.print of "found an infix keyword " + name, source.line
+        keyword.leftPrecOrMin > prec and rule.exprChoice is
+          Some([process, rest]) then
+            consume
+            let rhs = simpleExpr(keyword.rightPrecOrMin, bracket)
+            let acc' = Tree.Infix(keyword, acc, rhs)
+            exprCont(acc', prec, bracket)
+          None then acc
+      do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
+    Token.Identifier(name, true) :: _ and keywords.get(name) is None and
+      do tracer.print of "found an operator \"" + name + "\"", source.line
+      opPrec(name) is [leftPrec, rightPrec] and
+        do tracer.print of "its precedence is " + leftPrec, source.line
+        leftPrec > prec then
+          consume
+          let op = Tree.Ident(name, true)
+          let rhs = simpleExpr(rightPrec, bracket)
+          exprCont(Tree.App(op, acc :: rhs :: Nil), prec, bracket)
+        else
+          acc
+    Token.Close(kind) :: _ and bracket is
+      do tracer.print of "found a close bracket of " + kind, source.line
+      Some(kind') and
+        kind == kind' then acc
+        else acc Tree.Error("mismatched brackets")
+      None then acc Tree.Error("missing close bracket")
+    Token.Semicolon :: _ then
+      tracer.print of "found a semicolon", source.line
+      if keywords.get(";") is Some(keyword) and
+        keyword.leftPrec is Some(leftPrec) and
+          leftPrec > prec then
+            consume
+            if keyword.rightPrec is Some(rightPrec) then ...
+            let acc' = if simpleExpr(rightPrec, bracket) is
+              Tree.Sequence(trees) then Tree.Sequence(acc :: trees)
+              tree then Tree.Sequence(acc :: tree :: Nil)
+            exprCont(acc', prec, bracket)
+          else
+            tracer.print of "cannot consume " + keyword, source.line
+            acc
+    Token.Comma :: _ then
+      tracer.print of "found a comma", source.line
+      if keywords.get(",") is Some(keyword) and
+        keyword.leftPrec is Some(leftPrec) and
+          leftPrec > prec then
+            consume
+            if keyword.rightPrec is Some(rightPrec) then ...
+            let acc' = if simpleExpr(rightPrec, bracket) is
+              Tree.Tuple(trees) then Tree.Tuple(acc :: trees)
+              tree then Tree.Tuple(acc :: tree :: Nil)
+            exprCont(acc', prec, bracket)
+          else
+            tracer.print of "cannot consume " + keyword, source.line
+            acc
+    token :: _ and
+      appPrec > prec then
+        do tracer.print of "found an application", source.line
+        if simpleExpr(appPrec, bracket) is
+          Tree.Empty then acc
+          Tree.Error then acc
+          rhs then exprCont(Tree.App(acc, rhs :: Nil), prec, bracket)
+      else
+        tracer.print of "cannot consume " + token, source.line
+        acc
+    Nil and bracket is
+      do tracer.print of "found an EOF", source.line
+      Some then acc Tree.Error("expect a close bracket instead of EOF")
+      None then acc
+  
+  simpleExpr(0, None)

@@ -1,0 +1,29 @@
+import "./Option.mls"
+
+open Option { Some, None }
+
+module Map with ...
+
+class Map with
+  let storage = new globalThis.Map()
+  
+  fun get(key) =
+    if storage.has(key)
+    then Some of storage.get(key)
+    else None
+  
+  fun insert(key, value) =
+    storage.set(key, value)
+    ()
+    
+  fun values = globalThis.Array.from of storage.values()
+
+fun toMap(...entries) =
+  let
+    m = new Map
+    i = 0
+    length = entries.length
+  while i < length do
+    m.insert of ...entries.at(i)
+    set i += 1
+  m
