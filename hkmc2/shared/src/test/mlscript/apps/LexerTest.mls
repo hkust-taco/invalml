@@ -98,7 +98,7 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier(->, true)
 //│ > Space
-//│ > Identifier(true, false)
+//│ > Literal(Boolean, true)
 //│ > Space
 //│ > Identifier(|, true)
 //│ > Space
@@ -106,7 +106,7 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier(->, true)
 //│ > Space
-//│ > Identifier(false, false)
+//│ > Literal(Boolean, false)
 //│ > Space
 //│ > Identifier(|, true)
 //│ > Space

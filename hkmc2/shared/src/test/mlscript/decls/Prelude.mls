@@ -50,4 +50,8 @@ declare module Predef with
   abstract class __StackDelay with
     fun perform()
 
-
+declare module source with
+  object
+    line
+    name
+    file

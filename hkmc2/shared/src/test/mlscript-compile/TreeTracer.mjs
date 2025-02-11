@@ -74,26 +74,46 @@ TreeTracer2 = class TreeTracer {
         return runtime.Unit
       } 
       print(...pieces1) {
-        let message1, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4;
-        tmp = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2
-        });
-        tmp1 = runtime.safeCall(tmp(...pieces1));
-        message1 = tmp1;
+        let message1, last0, rest, line, pieces2, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
+        if (globalThis.Array.isArray(pieces1) && pieces1.length >= 1) {
+          rest = runtime.safeCall(globalThis.Predef.tupleSlice(pieces1, 0, 1));
+          last0 = globalThis.Predef.tupleGet(pieces1, -1);
+          pieces2 = rest;
+          if (globalThis.Number.isInteger(last0)) {
+            line = last0;
+            tmp = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp1 = " [Ln " + line;
+            tmp2 = tmp1 + "]";
+            tmp3 = runtime.safeCall(tmp(...pieces2, tmp2));
+          } else {
+            tmp4 = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp3 = runtime.safeCall(tmp4(...pieces1));
+          }
+        } else {
+          tmp5 = Predef.fold((arg1, arg2) => {
+            return arg1 + arg2
+          });
+          tmp3 = runtime.safeCall(tmp5(...pieces1));
+        }
+        message1 = tmp3;
         scrut = this.steps > 0;
         if (scrut === true) {
-          tmp2 = this.steps - 1;
-          tmp3 = runtime.safeCall("\u2502 ".repeat(tmp2));
+          tmp6 = this.steps - 1;
+          tmp7 = runtime.safeCall("\u2502 ".repeat(tmp6));
         } else {
-          tmp3 = "";
+          tmp7 = "";
         }
         scrut1 = this.steps > 0;
         if (scrut1 === true) {
-          tmp4 = "\u251C ";
+          tmp8 = "\u251C ";
         } else {
-          tmp4 = "";
+          tmp8 = "";
         }
-        return this.output(tmp3, tmp4, "\u2502 ", message1)
+        return this.output(tmp7, tmp8, "\u2502 ", message1)
       } 
       leave(...pieces2) {
         let tmp, tmp1, tmp2, tmp3;

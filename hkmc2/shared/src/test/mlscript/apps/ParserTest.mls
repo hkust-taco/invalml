@@ -116,7 +116,6 @@ fun toMap(...entries) =
     m.insert of ...entries.at(i)
     set i += 1
   m
-  
 
 //  _  __                                _
 // | |/ /___ _   ___      _____  _ __ __| |
@@ -126,11 +125,19 @@ fun toMap(...entries) =
 //           |___/
 // ========================================
 
+let INT_MIN = -2147483648
+let INT_MAX = 2147483647
+//│ INT_MAX = 2147483647
+//│ INT_MIN = -2147483648
+
 let keywords = new Map()
 //│ keywords = Map
 
 class Keyword(val name: Str, val leftPrec, val rightPrec) with
   keywords.insert(name, this)
+  
+  fun leftPrecOrMin = if leftPrec is Some(prec) then prec else INT_MIN
+  fun rightPrecOrMin = if rightPrec is Some(prec) then prec else INT_MIN
   
   fun toString() = fold(+) of
     "Keyword(`", name, "`, "
@@ -154,11 +161,11 @@ module Keywords with
   let eqPrec = nextPrec
   let ascPrec = nextPrec
   val _equal = Keyword("=", eqPrec, eqPrec)
+  val _bar = Keyword("|", None, currPrec)
   val _colon = Keyword(":", ascPrec, eqPrec)
   val _match = Keyword("match", None, currPrec)
   val _if = Keyword("if", None, currPrec)
   val _with = Keyword("with", None, currPrec)
-  val _bar = Keyword("|", None, currPrec)
   val _case = Keyword("case", None, currPrec)
   let thenPrec = nextPrec
   val _then = Keyword("then", thenPrec, thenPrec)
@@ -172,6 +179,7 @@ module Keywords with
   val _thinArrow = Keyword of "->", currPrec, eqPrec
   val _fun = Keyword("fun", currPrec, None)
   val _function = Keyword("function", currPrec, None)
+  val _type = Keyword("type", currPrec, None)
   val _rec = Keyword("rec", None, None)
   val _underscore = Keyword of "_", None, None
   val maxPrec = prec
@@ -186,11 +194,11 @@ print of keywords.values.join("\n")
 //│ > Keyword(`;`, 1, 0)
 //│ > Keyword(`,`, 2, 1)
 //│ > Keyword(`=`, 3, 3)
+//│ > Keyword(`|`, N/A, 4)
 //│ > Keyword(`:`, 4, 3)
 //│ > Keyword(`match`, N/A, 4)
 //│ > Keyword(`if`, N/A, 4)
 //│ > Keyword(`with`, N/A, 4)
-//│ > Keyword(`|`, N/A, 4)
 //│ > Keyword(`case`, N/A, 4)
 //│ > Keyword(`then`, 5, 5)
 //│ > Keyword(`do`, 5, 5)
@@ -202,6 +210,7 @@ print of keywords.values.join("\n")
 //│ > Keyword(`->`, 7, 3)
 //│ > Keyword(`fun`, 7, N/A)
 //│ > Keyword(`function`, 7, N/A)
+//│ > Keyword(`type`, 7, N/A)
 //│ > Keyword(`rec`, N/A, N/A)
 //│ > Keyword(`_`, N/A, N/A)
 
@@ -249,14 +258,11 @@ let prefixPrec = appPrec - 1
 //│ appPrec = 21
 //│ prefixPrec = 20
 
-let LARGEST_PREC = 2147483647
-//│ LARGEST_PREC = 2147483647
-
 fun orMaxPrec(precOpt) = if precOpt is
   Some(prec) then prec
-  None then LARGEST_PREC
+  None then INT_MAX
 
-fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else LARGEST_PREC
+fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else INT_MAX
 
 pattern Letter = "a" ..= "z" | "A" ..= "Z"
 
@@ -313,14 +319,14 @@ module Tree with
   fun summary(tree) =
     fun par(text: Str, cond: Bool) = if cond then "(" + text + ")" else text
     fun prec(tree: Tree, side: Bool) = if tree is
-      Empty(_) then LARGEST_PREC
+      Empty(_) then INT_MAX
       Error(tree, _) then prec(tree, side)
-      Ident(_, _) then LARGEST_PREC
-      Underscore() then LARGEST_PREC
+      Ident(_, _) then INT_MAX
+      Underscore() then INT_MAX
       Modified(_, _) then 1
-      Tuple(_) then LARGEST_PREC
+      Tuple(_) then INT_MAX
       Sequence(_) then 1
-      Literal(_, _) then LARGEST_PREC
+      Literal(_, _) then INT_MAX
       Match(_, _) then 2
       App(callee, _) and callee is
         Ident(op, true) and opPrec(op) is [leftPrec, rightPrec] and
@@ -365,9 +371,16 @@ module Tree with
       Infix(op, lhs, rhs) then fold(+) of
         go(lhs), " ", go(op), " ", go(rhs)
       Ternary(keyword, lhs, rhs, body) then fold(+) of
-        keyword.name, " ", go(lhs), " = "
-        if rhs is Some(rhs) then go(rhs) else ""
-        " in "
+        keyword.name, " ", go(lhs),
+        if keyword.name is
+          "if" then " then "
+          "type" then " = "
+          "let" then " = "
+        if rhs is Some(rhs') then go(rhs') else go(rhs)
+        if keyword.name is
+          "if" then " then "
+          "type" then ""
+          "let" then " in "
         if body is Some(body) then go(body) else ""
       Lambda(params, body) then fold(+) of
         "fun ", params mapJoin(go, " "), " -> ", go(body)
@@ -540,6 +553,22 @@ fun letBinding(keyword: Keyword) =
           Choice.end of None
       Choice.end of [None, None]
 
+fun typeDefinition() =
+  let intro = "type definition: "
+  Choice.keyword of
+    Keywords._type
+    intro + "`type` keyword"
+    Choice.expr of
+      (name, body) => Tree.Ternary(Keywords._type, name, body, None)
+      intro + "name"
+      Choice.keyword of
+        Keywords._equal
+        intro + "equal sign"
+        Choice.expr of
+          (body, _) => body
+          intro + "body"
+          Choice.end of ()
+
 fun ifThenElse() =
   let intro = "if-then-else: "
   Choice.keyword of
@@ -565,7 +594,7 @@ fun ifThenElse() =
           Choice.end of None
 
 let letChoice = letBinding(Keywords._let)
-//│ letChoice = Keyword(Keyword(`let`, 7, 7), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(`in`, 5, 5), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
+//│ letChoice = Keyword(Keyword(`let`, 7, 7), ParseRule("let binding: keyword", Cons(Expr([function tmp9], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(`in`, 5, 5), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil)))
 
 fun funChoice() =
   let intro = "function expression: "
@@ -635,6 +664,7 @@ let prefixRules = rule of
   "start of the statement"
   letChoice
   funChoice()
+  typeDefinition()
   matchWithChoice()
   matchFunctionChoice()
   ifThenElse()
@@ -642,7 +672,7 @@ let prefixRules = rule of
     Keywords._underscore
     "wildcard pattern"
     Choice.end of Tree.Underscore()
-//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(`let`, 7, 7), ParseRule("let binding: keyword", Cons(Expr([function tmp8], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(`in`, 5, 5), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Cons(Keyword(Keyword(`fun`, 7, N/A), ParseRule("function expression: keyword", Cons(Expr([function], ParseRule("function expression: parameters", Cons(Keyword(Keyword(`->`, 7, 3), ParseRule("function expression: arrow", Cons(Expr([function], ParseRule("function expression: body", Cons(End(None), Nil))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`match`, N/A, 4), ParseRule("`match`-`with` expression: keyword", Cons(Expr([function], ParseRule("`match`-`with` expression: scrutinee", Cons(Keyword(Keyword(`with`, N/A, 4), ParseRule("`match`-`with` expression: with", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("`match`-`with` expression: leading bar", Cons(Lazy([function getChoice], [function makeMatchArms]), Nil))), Cons(Lazy([function getChoice], [function makeMatchArms]), Nil)))), Nil))), Nil))), Cons(Keyword(Keyword(`function`, 7, N/A), ParseRule("`match` function: `function` keyword", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("`match` function: leading bar", Cons(Lazy([function getChoice], [function makeMatchArms]), Nil))), Cons(Lazy([function getChoice], [function makeMatchArms]), Nil)))), Cons(Keyword(Keyword(`if`, N/A, 4), ParseRule("if-then-else: `if` keyword", Cons(Expr([function tmp7], ParseRule("if-then-else: condition", Cons(Keyword(Keyword(`then`, 5, 5), ParseRule("if-then-else: `then` keyword", Cons(Expr([function], ParseRule("if-then-else: consequent", Cons(Keyword(Keyword(`else`, 6, 6), ParseRule("if-then-else: `else` keyword", Cons(Expr([function], ParseRule("if-then-else: alternative", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`_`, N/A, N/A), ParseRule("wildcard pattern", Cons(End(Underscore()), Nil))), Nil)))))))
+//│ prefixRules = ParseRule("start of the statement", Cons(Keyword(Keyword(`let`, 7, 7), ParseRule("let binding: keyword", Cons(Expr([function tmp9], ParseRule("let binding: left-hand side", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("let binding: equal sign", Cons(Expr([function], ParseRule("let binding: right-hand side", Cons(Keyword(Keyword(`in`, 5, 5), ParseRule("let binding: `in` keyword", Cons(Expr([function], ParseRule("let binding: body", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Cons(End([None, None]), Nil)))), Nil))), Cons(Keyword(Keyword(`fun`, 7, N/A), ParseRule("function expression: keyword", Cons(Expr([function], ParseRule("function expression: parameters", Cons(Keyword(Keyword(`->`, 7, 3), ParseRule("function expression: arrow", Cons(Expr([function], ParseRule("function expression: body", Cons(End(None), Nil))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`type`, 7, N/A), ParseRule("type definition: `type` keyword", Cons(Expr([function], ParseRule("type definition: name", Cons(Keyword(Keyword(`=`, 3, 3), ParseRule("type definition: equal sign", Cons(Expr([function], ParseRule("type definition: body", Cons(End(()), Nil))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`match`, N/A, 4), ParseRule("`match`-`with` expression: keyword", Cons(Expr([function], ParseRule("`match`-`with` expression: scrutinee", Cons(Keyword(Keyword(`with`, N/A, 4), ParseRule("`match`-`with` expression: with", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("`match`-`with` expression: leading bar", Cons(Lazy([function getChoice], [function makeMatchArms]), Nil))), Cons(Lazy([function getChoice], [function makeMatchArms]), Nil)))), Nil))), Nil))), Cons(Keyword(Keyword(`function`, 7, N/A), ParseRule("`match` function: `function` keyword", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("`match` function: leading bar", Cons(Lazy([function getChoice], [function makeMatchArms]), Nil))), Cons(Lazy([function getChoice], [function makeMatchArms]), Nil)))), Cons(Keyword(Keyword(`if`, N/A, 4), ParseRule("if-then-else: `if` keyword", Cons(Expr([function tmp8], ParseRule("if-then-else: condition", Cons(Keyword(Keyword(`then`, 5, 5), ParseRule("if-then-else: `then` keyword", Cons(Expr([function], ParseRule("if-then-else: consequent", Cons(Keyword(Keyword(`else`, 6, 6), ParseRule("if-then-else: `else` keyword", Cons(Expr([function], ParseRule("if-then-else: alternative", Cons(End(None), Nil))), Nil))), Cons(End(None), Nil)))), Nil))), Nil))), Nil))), Cons(Keyword(Keyword(`_`, N/A, N/A), ParseRule("wildcard pattern", Cons(End(Underscore()), Nil))), Nil))))))))
 
 print of prefixRules.display
 //│ > <start of the statement> ::= `let` <expression> 
@@ -651,6 +681,7 @@ print of prefixRules.display
 //│ >     <end>
 //│ >   <end>
 //│ > `fun` <expression> `->` <expression> <end>
+//│ > `type` <expression> `=` <expression> <end>
 //│ > `match` <expression> 
 //│ >   `with` `|` <expression> 
 //│ >     `->` <expression> 
@@ -683,8 +714,22 @@ prefixRules.keywordChoices.get("fun")
 prefixRules.exprChoice
 //│ = None
 
-let infixRules = rule of "the continuation of expressions"
-//│ infixRules = ParseRule("the continuation of expressions", Nil)
+fun makeInfixChoice(keyword) =
+  Choice.keyword of
+    keyword
+    "operator `" + keyword.name + "`"
+    Choice.expr of
+      (rhs, _) => lhs => Tree.Infix(keyword, lhs, rhs)
+      "operator `" + keyword.name + "` right-hand side"
+      Choice.end of ()
+
+let infixRules = rule of
+  "the continuation of expressions"
+  makeInfixChoice(Keywords._bar)
+//│ infixRules = ParseRule("the continuation of expressions", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("operator `|`", Cons(Expr([function], ParseRule("operator `|` right-hand side", Cons(End(()), Nil))), Nil))), Nil))
+
+print of infixRules.display
+//│ > <the continuation of expressions> ::= `|` <expression> <end>
 
 fun parse(tokens) =
   let
@@ -693,7 +738,7 @@ fun parse(tokens) =
   
   fun yeetSpaces =
     while current is Token.Space :: tail do
-      tracer.print of "skipped a space at " + counter
+      tracer.print of "skipped a space at " + counter, source.line
       set
         current = tail
         counter = counter + 1
@@ -701,11 +746,11 @@ fun parse(tokens) =
     
   fun consume =
     if current is head :: tail then
-      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter
+      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter, source.line
       set current = tail
       set counter = counter + 1
     else
-      tracer.print of "consumed: EOF"
+      tracer.print of "consumed: EOF", source.line
   
   fun parseRule(prec: Int, rule: ParseRule, opened) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
@@ -713,7 +758,7 @@ fun parse(tokens) =
     () => ...
     if yeetSpaces is
       Token.Close(encountered) :: _ and opened is
-        do tracer.print of "the case of closing brackets"
+        do tracer.print of "the case of closing brackets", source.line
         Some(expected) and
           encountered == expected and rule.endChoice is
             Some(value) then value
@@ -725,35 +770,36 @@ fun parse(tokens) =
             Tree.error("mismatched brackets")
         None then Tree.error("unexpected bracket: " + encountered)
       Token.Identifier(name, _) :: _ and
-        do tracer.print of "check if \"" + name + "\" is a keyword or not"
+        do tracer.print of "check if \"" + name + "\" is a keyword or not", source.line
         keywords.get(name) is Some(keyword) and
-          rule.keywordChoices.get(name) is Some(rule) then
-            tracer.print of "found a rule starting with " + name
-            consume
-            parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
-          None then
-            tracer.print of "no rule starting with " + name + " was found"
-            val expr = simpleExpr(prec, opened)
-            if rule.exprChoice is
-              Some([process, rest]) then
-                let rhs = parseRule(prec, rest, opened)
-                process(expr, rhs)
-              None then expr Tree.error("unexpected expfression")
-        do tracer.print of "\"" + name + "\" is not a keyword"
+          rule.keywordChoices.get(name) is
+            Some(rule) then
+              tracer.print of "found a rule starting with " + name, source.line
+              consume
+              parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
+            None then
+              tracer.print of "no rule starting with " + name + " was found", source.line
+              val expr = simpleExpr(prec, opened)
+              if rule.exprChoice is
+                Some([process, rest]) then
+                  let rhs = parseRule(prec, rest, opened)
+                  process(expr, rhs)
+                None then expr Tree.Error("unexpected expression")
+        do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
-        do tracer.print of "try parse an expression from " + Token.preview(current)
+        do tracer.print of "try parse an expression from " + Token.preview(current), source.line
         simpleExpr(prec, opened) is
           Tree.Error(Tree.Empty(), _) and rule.endChoice is
             Some(value) then value
           reserve and rule.exprChoice is
             Some([process, rest]) then 
               let rhs = parseRule(prec, rest, opened)
-              tracer.print of "the result from sub-rule: " + rhs Tree.summary()
-              tracer.print of "the reserved expression: " + reserve Tree.summary()
+              tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
+              tracer.print of "the reserved expression: " + reserve Tree.summary(), source.line
               process(reserve, rhs)
             None then
-              tracer.print of "the rule doesn't have a choice starting with expressions"
-              tracer.print of rule.display
+              tracer.print of "the rule doesn't have a choice starting with expressions", source.line
+              tracer.print of rule.display, source.line
               Tree.error("unexpected expression")
       Nil and rule.endChoice is
         Some(value) then value
@@ -771,7 +817,7 @@ fun parse(tokens) =
             let acc = parseRule(keyword.rightPrec orMaxPrec(), rule, bracket)
             exprCont(acc, prec, bracket)
           None then
-            tracer.print("no rule starting with " + name)
+            tracer.print("no rule starting with " + name, source.line)
             Tree.empty
         None then
           consume
@@ -792,10 +838,10 @@ fun parse(tokens) =
               else content Tree.Error("mismatched brackets")
             token :: _ then
               let message = "expect a close bracket instead of " + token
-              tracer.print of message
+              tracer.print of message, source.line
               content Tree.Error(message)
             Nil then
-              tracer.print("expect a close bracket instead of EOF")
+              tracer.print("expect a close bracket instead of EOF", source.line)
               content Tree.Error("expect a close bracket instead of EOF")
         exprCont(content, prec, bracket)
       Token.Close(kind) :: _ and bracket is
@@ -805,28 +851,29 @@ fun parse(tokens) =
             Tree.Empty()
           else Tree.error("mismatched brackets")
         None then
-          tracer.print("missing close bracket")
+          tracer.print("missing close bracket", source.line)
           Tree.error("missing close bracket")
       token :: _ then Tree.error("unrecognized token: " + token)
       Nil then Tree.error("unexpected EOF")
   
   fun exprCont(acc: Tree, prec: Int, bracket) = if yeetSpaces is
-    do tracer.print(">>> exprCont " + prec + " " + acc Tree.summary() + " <<<")
+    do tracer.print(">>> exprCont " + prec + " " + acc Tree.summary() + " <<<", source.line)
     Token.Identifier(name, _) :: _ and keywords.get(name) is Some(keyword) and
-      do tracer.print of "found a keyword: " + name
+      do tracer.print of "found a keyword: " + name, source.line
       infixRules.keywordChoices.get(name) is Some(rule) and
-        do tracer.print of "found an infix keyword: " + name
-        keyword.leftPrec is Some(leftPrec) and
-          do tracer.print of "its left precedence is " + leftPrec
-          leftPrec > prec then
+        do tracer.print of "found an infix keyword " + name, source.line
+        keyword.leftPrecOrMin > prec and rule.exprChoice is
+          Some([process, rest]) then
             consume
-            let rhs = simpleExpr(leftPrec, bracket)
+            let rhs = simpleExpr(keyword.rightPrecOrMin, bracket)
             let acc' = Tree.Infix(keyword, acc, rhs)
             exprCont(acc', prec, bracket)
+          None then acc
+      do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
     Token.Identifier(name, true) :: _ and keywords.get(name) is None and
-      do tracer.print of "found an operator \"" + name + "\""
+      do tracer.print of "found an operator \"" + name + "\"", source.line
       opPrec(name) is [leftPrec, rightPrec] and
-        do tracer.print of "its precedence is " + leftPrec
+        do tracer.print of "its precedence is " + leftPrec, source.line
         leftPrec > prec then
           consume
           let op = Tree.Ident(name, true)
@@ -835,13 +882,13 @@ fun parse(tokens) =
         else
           acc
     Token.Close(kind) :: _ and bracket is
-      do tracer.print of "found a close bracket of " + kind
+      do tracer.print of "found a close bracket of " + kind, source.line
       Some(kind') and
         kind == kind' then acc
         else acc Tree.Error("mismatched brackets")
       None then acc Tree.Error("missing close bracket")
     Token.Semicolon :: _ then
-      tracer.print of "found a semicolon"
+      tracer.print of "found a semicolon", source.line
       if keywords.get(";") is Some(keyword) and
         keyword.leftPrec is Some(leftPrec) and
           leftPrec > prec then
@@ -852,10 +899,10 @@ fun parse(tokens) =
               tree then Tree.Sequence(acc :: tree :: Nil)
             exprCont(acc', prec, bracket)
           else
-            tracer.print of "cannot consume " + keyword
+            tracer.print of "cannot consume " + keyword, source.line
             acc
     Token.Comma :: _ then
-      tracer.print of "found a comma"
+      tracer.print of "found a comma", source.line
       if keywords.get(",") is Some(keyword) and
         keyword.leftPrec is Some(leftPrec) and
           leftPrec > prec then
@@ -866,20 +913,20 @@ fun parse(tokens) =
               tree then Tree.Tuple(acc :: tree :: Nil)
             exprCont(acc', prec, bracket)
           else
-            tracer.print of "cannot consume " + keyword
+            tracer.print of "cannot consume " + keyword, source.line
             acc
     token :: _ and
       appPrec > prec then
-        do tracer.print of "found an application"
+        do tracer.print of "found an application", source.line
         if simpleExpr(appPrec, bracket) is
           Tree.Empty then acc
           Tree.Error then acc
           rhs then exprCont(Tree.App(acc, rhs :: Nil), prec, bracket)
       else
-        tracer.print of "cannot consume " + token
+        tracer.print of "cannot consume " + token, source.line
         acc
     Nil and bracket is
-      do tracer.print of "found an EOF"
+      do tracer.print of "found an EOF", source.line
       Some then acc Tree.Error("expect a close bracket instead of EOF")
       None then acc
   
@@ -1089,30 +1136,12 @@ let cos2 = compose square cos
 //│ >     body = None
 
 :todo
-debugParsed of "type sign = Positive | Negative"
-//│ > ┍ simple expression <<< 0 ┃type│␠│sign│␠│=│⋯
-//│ > ├ consumed `type` at 0
-//│ > ├ skipped a space at 1
-//│ > ├ >>> exprCont 0 {type} <<<
-//│ > ├ found an application
-//│ > ├─┮ simple expression <<< 21 ┃sign│␠│=│␠│Positive│⋯
-//│ > │ ├ consumed `sign` at 2
-//│ > │ ├ skipped a space at 3
-//│ > │ ├ >>> exprCont 21 {sign} <<<
-//│ > │ ├ found a keyword: =
-//│ > │ ├ cannot consume Identifier("=", true)
-//│ > │ ┕ simple expression >>> {sign}
-//│ > ├ >>> exprCont 0 {type(sign)} <<<
-//│ > ├ found a keyword: =
-//│ > ├ found an application
-//│ > ├─┮ simple expression <<< 21 ┃=│␠│Positive│␠│|│⋯
-//│ > │ ├ no rule starting with =
-//│ > │ ┕ simple expression >>> {}
-//│ > ┕ simple expression >>> {type(sign)}
-//│ > App:
-//│ >   callee = Ident of "type"
-//│ >   arguments = Stack of 
-//│ >     Ident of "sign"
+printParsed of "type sign = Positive | Negative"
+//│ > Ternary:
+//│ >   name = Keyword(`type`, 7, N/A)
+//│ >   lhs = Ident of "sign"
+//│ >   rhs = Ident of "Positive"
+//│ >   body = None
 
 printParsed of "true"
 //│ > Literal#Boolean of "true"
