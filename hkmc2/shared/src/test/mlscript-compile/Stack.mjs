@@ -143,38 +143,36 @@ Stack1 = class Stack {
     } else {
       if (xs4 instanceof Stack.Nil.class) {
         return ys
-      } else {
-        if (xs4 instanceof Stack.Cons.class) {
-          param0 = xs4.head;
-          param1 = xs4.tail;
-          head$_ = param0;
-          tail$_ = param1;
-          tmp = Stack.Cons(head$_, ys);
-          result = tmp;
-          current = result;
-          rest = tail$_;
-          tmp3: while (true) {
-            if (rest instanceof Stack.Cons.class) {
-              param01 = rest.head;
-              param11 = rest.tail;
-              head = param01;
-              tail1 = param11;
-              tmp1 = Stack.Cons(head, ys);
-              next = tmp1;
-              current.tail = next;
-              current = next;
-              rest = tail1;
-              tmp2 = runtime.Unit;
-              continue tmp3;
-            } else {
-              tmp2 = runtime.Unit;
-            }
-            break;
+      } else if (xs4 instanceof Stack.Cons.class) {
+        param0 = xs4.head;
+        param1 = xs4.tail;
+        head$_ = param0;
+        tail$_ = param1;
+        tmp = Stack.Cons(head$_, ys);
+        result = tmp;
+        current = result;
+        rest = tail$_;
+        tmp3: while (true) {
+          if (rest instanceof Stack.Cons.class) {
+            param01 = rest.head;
+            param11 = rest.tail;
+            head = param01;
+            tail1 = param11;
+            tmp1 = Stack.Cons(head, ys);
+            next = tmp1;
+            current.tail = next;
+            current = next;
+            rest = tail1;
+            tmp2 = runtime.Unit;
+            continue tmp3;
+          } else {
+            tmp2 = runtime.Unit;
           }
-          return result
-        } else {
-          throw new globalThis.Error("match error");
+          break;
         }
+        return result
+      } else {
+        throw new globalThis.Error("match error");
       }
     }
   } 
@@ -197,12 +195,10 @@ Stack1 = class Stack {
       } else {
         return Stack.filter(tail1, f)
       }
+    } else if (xs6 instanceof Stack.Nil.class) {
+      return Stack.Nil
     } else {
-      if (xs6 instanceof Stack.Nil.class) {
-        return Stack.Nil
-      } else {
-        throw new globalThis.Error("match error");
-      }
+      throw new globalThis.Error("match error");
     }
   }
   static toString() { return "Stack"; }

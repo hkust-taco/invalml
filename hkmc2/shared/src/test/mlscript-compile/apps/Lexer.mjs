@@ -139,83 +139,55 @@ Lexer1 = class Lexer {
         let param0, param1, literal4, param01, param11, name, param02, param03, kind, param04, kind1;
         if (token instanceof Token.Space.class) {
           return "\u2420"
-        } else {
-          if (token instanceof Token.Comma.class) {
-            return ","
+        } else if (token instanceof Token.Comma.class) {
+          return ","
+        } else if (token instanceof Token.Semicolon.class) {
+          return ";"
+        } else if (token instanceof Token.Error.class) {
+          return "\u26A0"
+        } else if (token instanceof Token.Open.class) {
+          param04 = token.kind;
+          kind1 = param04;
+          if (kind1 instanceof Lexer.Round.class) {
+            return "("
+          } else if (kind1 instanceof Lexer.Square.class) {
+            return "["
+          } else if (kind1 instanceof Lexer.Curly.class) {
+            return "{"
+          } else if (kind1 instanceof Lexer.BeginEnd.class) {
+            return "begin"
           } else {
-            if (token instanceof Token.Semicolon.class) {
-              return ";"
-            } else {
-              if (token instanceof Token.Error.class) {
-                return "\u26A0"
-              } else {
-                if (token instanceof Token.Open.class) {
-                  param04 = token.kind;
-                  kind1 = param04;
-                  if (kind1 instanceof Lexer.Round.class) {
-                    return "("
-                  } else {
-                    if (kind1 instanceof Lexer.Square.class) {
-                      return "["
-                    } else {
-                      if (kind1 instanceof Lexer.Curly.class) {
-                        return "{"
-                      } else {
-                        if (kind1 instanceof Lexer.BeginEnd.class) {
-                          return "begin"
-                        } else {
-                          throw new globalThis.Error("match error");
-                        }
-                      }
-                    }
-                  }
-                } else {
-                  if (token instanceof Token.Close.class) {
-                    param03 = token.kind;
-                    kind = param03;
-                    if (kind instanceof Lexer.Round.class) {
-                      return ")"
-                    } else {
-                      if (kind instanceof Lexer.Square.class) {
-                        return "]"
-                      } else {
-                        if (kind instanceof Lexer.Curly.class) {
-                          return "}"
-                        } else {
-                          if (kind instanceof Lexer.BeginEnd.class) {
-                            return "end"
-                          } else {
-                            throw new globalThis.Error("match error");
-                          }
-                        }
-                      }
-                    }
-                  } else {
-                    if (token instanceof Token.Comment.class) {
-                      param02 = token.content;
-                      return "\uD83D\uDCAC"
-                    } else {
-                      if (token instanceof Token.Identifier.class) {
-                        param01 = token.name;
-                        param11 = token.symbolic;
-                        name = param01;
-                        return name
-                      } else {
-                        if (token instanceof Token.Literal.class) {
-                          param0 = token.kind;
-                          param1 = token.literal;
-                          literal4 = param1;
-                          return literal4
-                        } else {
-                          throw new globalThis.Error("match error");
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            throw new globalThis.Error("match error");
           }
+        } else if (token instanceof Token.Close.class) {
+          param03 = token.kind;
+          kind = param03;
+          if (kind instanceof Lexer.Round.class) {
+            return ")"
+          } else if (kind instanceof Lexer.Square.class) {
+            return "]"
+          } else if (kind instanceof Lexer.Curly.class) {
+            return "}"
+          } else if (kind instanceof Lexer.BeginEnd.class) {
+            return "end"
+          } else {
+            throw new globalThis.Error("match error");
+          }
+        } else if (token instanceof Token.Comment.class) {
+          param02 = token.content;
+          return "\uD83D\uDCAC"
+        } else if (token instanceof Token.Identifier.class) {
+          param01 = token.name;
+          param11 = token.symbolic;
+          name = param01;
+          return name
+        } else if (token instanceof Token.Literal.class) {
+          param0 = token.kind;
+          param1 = token.literal;
+          literal4 = param1;
+          return literal4
+        } else {
+          throw new globalThis.Error("match error");
         }
       } 
       static preview(tokens) {
@@ -263,93 +235,65 @@ Lexer1 = class Lexer {
         let param0, param1, kind, literal4, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
         if (token1 instanceof Token.Space.class) {
           return "Space"
+        } else if (token1 instanceof Token.Comma.class) {
+          return "Comma"
+        } else if (token1 instanceof Token.Semicolon.class) {
+          return "Semicolon"
+        } else if (token1 instanceof Token.Error.class) {
+          return "Error"
+        } else if (token1 instanceof Token.Open.class) {
+          param04 = token1.kind;
+          kind2 = param04;
+          tmp = Token.display(kind2);
+          tmp1 = Str.concat2("Open(", tmp);
+          return Str.concat2(tmp1, ")")
+        } else if (token1 instanceof Token.Close.class) {
+          param03 = token1.kind;
+          kind1 = param03;
+          tmp2 = Token.display(kind1);
+          tmp3 = Str.concat2("Close(", tmp2);
+          return Str.concat2(tmp3, ")")
         } else {
-          if (token1 instanceof Token.Comma.class) {
-            return "Comma"
+          if (token1 instanceof Token.Comment.class) {
+            param02 = token1.content;
+            content = param02;
+            tmp4 = Str.concat2("Comment(", content);
+            return Str.concat2(tmp4, ")")
+          } else if (token1 instanceof Token.Identifier.class) {
+            param01 = token1.name;
+            param11 = token1.symbolic;
+            name = param01;
+            symbolic = param11;
+            tmp5 = Str.concat2("Identifier(", name);
+            tmp6 = Str.concat2(tmp5, ", ");
+            tmp7 = Str.concat2(tmp6, symbolic);
+            return Str.concat2(tmp7, ")")
+          } else if (token1 instanceof Token.Literal.class) {
+            param0 = token1.kind;
+            param1 = token1.literal;
+            kind = param0;
+            literal4 = param1;
+            tmp8 = Token.display(kind);
+            tmp9 = Str.concat2("Literal(", tmp8);
+            tmp10 = Str.concat2(tmp9, ", ");
+            tmp11 = Str.concat2(tmp10, literal4);
+            return Str.concat2(tmp11, ")")
+          } else if (token1 instanceof Lexer.Round.class) {
+            return "Round"
+          } else if (token1 instanceof Lexer.Square.class) {
+            return "Square"
+          } else if (token1 instanceof Lexer.Curly.class) {
+            return "Curly"
+          } else if (token1 instanceof Lexer.LiteralKind.Integer.class) {
+            return "Integer"
+          } else if (token1 instanceof Lexer.LiteralKind.Decimal.class) {
+            return "Decimal"
+          } else if (token1 instanceof Lexer.LiteralKind.String.class) {
+            return "String"
+          } else if (token1 instanceof Lexer.LiteralKind.Boolean.class) {
+            return "Boolean"
           } else {
-            if (token1 instanceof Token.Semicolon.class) {
-              return "Semicolon"
-            } else {
-              if (token1 instanceof Token.Error.class) {
-                return "Error"
-              } else {
-                if (token1 instanceof Token.Open.class) {
-                  param04 = token1.kind;
-                  kind2 = param04;
-                  tmp = Token.display(kind2);
-                  tmp1 = Str.concat2("Open(", tmp);
-                  return Str.concat2(tmp1, ")")
-                } else {
-                  if (token1 instanceof Token.Close.class) {
-                    param03 = token1.kind;
-                    kind1 = param03;
-                    tmp2 = Token.display(kind1);
-                    tmp3 = Str.concat2("Close(", tmp2);
-                    return Str.concat2(tmp3, ")")
-                  } else {
-                    if (token1 instanceof Token.Comment.class) {
-                      param02 = token1.content;
-                      content = param02;
-                      tmp4 = Str.concat2("Comment(", content);
-                      return Str.concat2(tmp4, ")")
-                    } else {
-                      if (token1 instanceof Token.Identifier.class) {
-                        param01 = token1.name;
-                        param11 = token1.symbolic;
-                        name = param01;
-                        symbolic = param11;
-                        tmp5 = Str.concat2("Identifier(", name);
-                        tmp6 = Str.concat2(tmp5, ", ");
-                        tmp7 = Str.concat2(tmp6, symbolic);
-                        return Str.concat2(tmp7, ")")
-                      } else {
-                        if (token1 instanceof Token.Literal.class) {
-                          param0 = token1.kind;
-                          param1 = token1.literal;
-                          kind = param0;
-                          literal4 = param1;
-                          tmp8 = Token.display(kind);
-                          tmp9 = Str.concat2("Literal(", tmp8);
-                          tmp10 = Str.concat2(tmp9, ", ");
-                          tmp11 = Str.concat2(tmp10, literal4);
-                          return Str.concat2(tmp11, ")")
-                        } else {
-                          if (token1 instanceof Lexer.Round.class) {
-                            return "Round"
-                          } else {
-                            if (token1 instanceof Lexer.Square.class) {
-                              return "Square"
-                            } else {
-                              if (token1 instanceof Lexer.Curly.class) {
-                                return "Curly"
-                              } else {
-                                if (token1 instanceof Lexer.LiteralKind.Integer.class) {
-                                  return "Integer"
-                                } else {
-                                  if (token1 instanceof Lexer.LiteralKind.Decimal.class) {
-                                    return "Decimal"
-                                  } else {
-                                    if (token1 instanceof Lexer.LiteralKind.String.class) {
-                                      return "String"
-                                    } else {
-                                      if (token1 instanceof Lexer.LiteralKind.Boolean.class) {
-                                        return "Boolean"
-                                      } else {
-                                        throw new globalThis.Error("match error");
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            throw new globalThis.Error("match error");
           }
         }
       }
@@ -385,79 +329,45 @@ Lexer1 = class Lexer {
           unapply(scrut) {
             if (scrut === "!") {
               return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "#") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "%") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "&") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "*") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "+") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "-") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "/") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === ":") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
             } else {
-              if (scrut === "#") {
+              if (scrut === "<") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "=") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === ">") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "?") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "@") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "\\") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "^") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "|") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === "~") {
+                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              } else if (scrut === ".") {
                 return runtime.safeCall(globalThis.Predef.MatchResult([]))
               } else {
-                if (scrut === "%") {
-                  return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                } else {
-                  if (scrut === "&") {
-                    return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                  } else {
-                    if (scrut === "*") {
-                      return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                    } else {
-                      if (scrut === "+") {
-                        return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                      } else {
-                        if (scrut === "-") {
-                          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                        } else {
-                          if (scrut === "/") {
-                            return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                          } else {
-                            if (scrut === ":") {
-                              return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                            } else {
-                              if (scrut === "<") {
-                                return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                              } else {
-                                if (scrut === "=") {
-                                  return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                } else {
-                                  if (scrut === ">") {
-                                    return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                  } else {
-                                    if (scrut === "?") {
-                                      return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                    } else {
-                                      if (scrut === "@") {
-                                        return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                      } else {
-                                        if (scrut === "\\") {
-                                          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                        } else {
-                                          if (scrut === "^") {
-                                            return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                          } else {
-                                            if (scrut === "|") {
-                                              return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                            } else {
-                                              if (scrut === "~") {
-                                                return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                              } else {
-                                                if (scrut === ".") {
-                                                  return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                                                } else {
-                                                  return runtime.safeCall(globalThis.Predef.MatchFailure())
-                                                }
-                                              }
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
+                return runtime.safeCall(globalThis.Predef.MatchFailure())
               }
             }
           } 
@@ -928,12 +838,10 @@ Lexer1 = class Lexer {
           unapply(scrut) {
             if (scrut === "0") {
               return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "1") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
             } else {
-              if (scrut === "1") {
-                return runtime.safeCall(globalThis.Predef.MatchResult([]))
-              } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
-              }
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
             }
           } 
           unapplyStringPrefix(topic) {
@@ -1047,20 +955,14 @@ Lexer1 = class Lexer {
           unapply(scrut) {
             if (scrut === " ") {
               return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "\t") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "\n") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "\r") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
             } else {
-              if (scrut === "\t") {
-                return runtime.safeCall(globalThis.Predef.MatchResult([]))
-              } else {
-                if (scrut === "\n") {
-                  return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                } else {
-                  if (scrut === "\r") {
-                    return runtime.safeCall(globalThis.Predef.MatchResult([]))
-                  } else {
-                    return runtime.safeCall(globalThis.Predef.MatchFailure())
-                  }
-                }
-              }
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
             }
           } 
           unapplyStringPrefix(topic) {
@@ -1313,40 +1215,28 @@ Lexer1 = class Lexer {
           } else {
             if (acc === "begin") {
               tmp3 = Lexer.Token.Open(Lexer.BeginEnd);
+            } else if (acc === "end") {
+              tmp3 = Lexer.Token.Close(Lexer.BeginEnd);
+            } else if (acc === "true") {
+              tmp3 = Lexer.Token.boolean("true");
+            } else if (acc === "false") {
+              tmp3 = Lexer.Token.boolean("false");
             } else {
-              if (acc === "end") {
-                tmp3 = Lexer.Token.Close(Lexer.BeginEnd);
-              } else {
-                if (acc === "true") {
-                  tmp3 = Lexer.Token.boolean("true");
-                } else {
-                  if (acc === "false") {
-                    tmp3 = Lexer.Token.boolean("false");
-                  } else {
-                    tmp3 = Lexer.Token.Identifier(acc, false);
-                  }
-                }
-              }
+              tmp3 = Lexer.Token.Identifier(acc, false);
             }
             tmp2 = Predef.tuple(idx, tmp3);
           }
         } else {
           if (acc === "begin") {
             tmp4 = Lexer.Token.Open(Lexer.BeginEnd);
+          } else if (acc === "end") {
+            tmp4 = Lexer.Token.Close(Lexer.BeginEnd);
+          } else if (acc === "true") {
+            tmp4 = Lexer.Token.boolean("true");
+          } else if (acc === "false") {
+            tmp4 = Lexer.Token.boolean("false");
           } else {
-            if (acc === "end") {
-              tmp4 = Lexer.Token.Close(Lexer.BeginEnd);
-            } else {
-              if (acc === "true") {
-                tmp4 = Lexer.Token.boolean("true");
-              } else {
-                if (acc === "false") {
-                  tmp4 = Lexer.Token.boolean("false");
-                } else {
-                  tmp4 = Lexer.Token.Identifier(acc, false);
-                }
-              }
-            }
+            tmp4 = Lexer.Token.Identifier(acc, false);
           }
           tmp2 = Predef.tuple(idx, tmp4);
         }
@@ -1426,85 +1316,83 @@ Lexer1 = class Lexer {
             break;
           }
           return tmp3
-        } else {
-          if (param0 === "*") {
-            terminated = false;
-            tmp6 = idx + 1;
-            idx = tmp6;
-            tmp21: while (true) {
-              if (terminated === false) {
-                scrut1 = char1(idx);
-                if (scrut1 instanceof Option.Some.class) {
-                  param01 = scrut1.value;
-                  if (param01 === "*") {
-                    tmp7 = idx + 1;
-                    scrut2 = char1(tmp7);
-                    if (scrut2 instanceof Option.Some.class) {
-                      param02 = scrut2.value;
-                      if (param02 === "/") {
-                        tmp8 = idx + 2;
-                        idx = tmp8;
-                        terminated = true;
-                        tmp9 = runtime.Unit;
-                        continue tmp21;
-                      } else {
-                        ch1 = param01;
-                        tmp10 = idx + 1;
-                        idx = tmp10;
-                        tmp11 = content + ch1;
-                        content = tmp11;
-                        tmp9 = runtime.Unit;
-                      }
+        } else if (param0 === "*") {
+          terminated = false;
+          tmp6 = idx + 1;
+          idx = tmp6;
+          tmp21: while (true) {
+            if (terminated === false) {
+              scrut1 = char1(idx);
+              if (scrut1 instanceof Option.Some.class) {
+                param01 = scrut1.value;
+                if (param01 === "*") {
+                  tmp7 = idx + 1;
+                  scrut2 = char1(tmp7);
+                  if (scrut2 instanceof Option.Some.class) {
+                    param02 = scrut2.value;
+                    if (param02 === "/") {
+                      tmp8 = idx + 2;
+                      idx = tmp8;
+                      terminated = true;
+                      tmp9 = runtime.Unit;
+                      continue tmp21;
                     } else {
                       ch1 = param01;
-                      tmp12 = idx + 1;
-                      idx = tmp12;
-                      tmp13 = content + ch1;
-                      content = tmp13;
+                      tmp10 = idx + 1;
+                      idx = tmp10;
+                      tmp11 = content + ch1;
+                      content = tmp11;
                       tmp9 = runtime.Unit;
                     }
                   } else {
                     ch1 = param01;
-                    tmp14 = idx + 1;
-                    idx = tmp14;
-                    tmp15 = content + ch1;
-                    content = tmp15;
+                    tmp12 = idx + 1;
+                    idx = tmp12;
+                    tmp13 = content + ch1;
+                    content = tmp13;
                     tmp9 = runtime.Unit;
                   }
                 } else {
-                  if (terminated === true) {
-                    tmp16 = Lexer.Token.Comment(content);
-                    tmp17 = [
-                      idx,
-                      tmp16
-                    ];
-                  } else {
-                    tmp17 = [
-                      idx,
-                      Lexer.Token.Error
-                    ];
-                  }
-                  tmp9 = tmp17;
+                  ch1 = param01;
+                  tmp14 = idx + 1;
+                  idx = tmp14;
+                  tmp15 = content + ch1;
+                  content = tmp15;
+                  tmp9 = runtime.Unit;
                 }
               } else {
-                throw new globalThis.Error("match error");
+                if (terminated === true) {
+                  tmp16 = Lexer.Token.Comment(content);
+                  tmp17 = [
+                    idx,
+                    tmp16
+                  ];
+                } else {
+                  tmp17 = [
+                    idx,
+                    Lexer.Token.Error
+                  ];
+                }
+                tmp9 = tmp17;
               }
-              break;
-            }
-            return tmp9
-          } else {
-            matchResult = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
-            if (matchResult instanceof globalThis.Predef.MatchResult.class) {
-              ch = param0;
-              tmp18 = Str.concat2("/", ch);
-              tmp19 = idx + 1;
-              return operator(tmp18, tmp19)
             } else {
-              return [
-                idx,
-                Lexer.Token.Error
-              ]
+              throw new globalThis.Error("match error");
             }
+            break;
+          }
+          return tmp9
+        } else {
+          matchResult = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
+          if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+            ch = param0;
+            tmp18 = Str.concat2("/", ch);
+            tmp19 = idx + 1;
+            return operator(tmp18, tmp19)
+          } else {
+            return [
+              idx,
+              Lexer.Token.Error
+            ]
           }
         }
       } else {
@@ -1578,435 +1466,427 @@ Lexer1 = class Lexer {
             idx,
             tmp
           ]
-        } else {
-          if (scrut3 instanceof Option.Some.class) {
-            param01 = scrut3.value;
-            if (param01 === "b") {
-              tmp1 = idx + 1;
-              scrut8 = take(Lexer.Char.isBinDigit, tmp1, "");
-              if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
-                first06 = scrut8[0];
-                first16 = scrut8[1];
-                idx$_5 = first06;
-                bs = first16;
-                tmp2 = Str.concat2("0b", bs);
-                tmp3 = Lexer.Token.integer(tmp2);
+        } else if (scrut3 instanceof Option.Some.class) {
+          param01 = scrut3.value;
+          if (param01 === "b") {
+            tmp1 = idx + 1;
+            scrut8 = take(Lexer.Char.isBinDigit, tmp1, "");
+            if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
+              first06 = scrut8[0];
+              first16 = scrut8[1];
+              idx$_5 = first06;
+              bs = first16;
+              tmp2 = Str.concat2("0b", bs);
+              tmp3 = Lexer.Token.integer(tmp2);
+              return [
+                idx$_5,
+                tmp3
+              ]
+            } else {
+              scrut4 = digits(idx, head);
+              if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
+                first02 = scrut4[0];
+                first12 = scrut4[1];
+                idx$_1 = first02;
+                integer1 = first12;
+                tmp4 = Lexer.Token.integer(integer1);
                 return [
-                  idx$_5,
-                  tmp3
+                  idx$_1,
+                  tmp4
                 ]
               } else {
-                scrut4 = digits(idx, head);
-                if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
-                  first02 = scrut4[0];
-                  first12 = scrut4[1];
-                  idx$_1 = first02;
-                  integer1 = first12;
-                  tmp4 = Lexer.Token.integer(integer1);
-                  return [
-                    idx$_1,
-                    tmp4
-                  ]
-                } else {
-                  scrut = digits(idx, head);
-                  if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-                    first0 = scrut[0];
-                    first1 = scrut[1];
-                    idx$_ = first0;
-                    integer = first1;
-                    scrut1 = char1(idx$_);
-                    if (scrut1 instanceof Option.Some.class) {
-                      param0 = scrut1.value;
-                      if (param0 === ".") {
-                        tmp5 = idx$_ + 1;
-                        scrut2 = digits(tmp5, "");
-                        if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                          first01 = scrut2[0];
-                          first11 = scrut2[1];
-                          idx$_$_ = first01;
-                          fraction = first11;
-                          tmp6 = Str.concat2(integer, ".");
-                          tmp7 = Str.concat2(tmp6, fraction);
-                          tmp8 = Lexer.Token.decimal(tmp7);
-                          return [
-                            idx$_$_,
-                            tmp8
-                          ]
-                        } else {
-                          tmp9 = Lexer.Token.integer(integer);
-                          return [
-                            idx$_,
-                            tmp9
-                          ]
-                        }
+                scrut = digits(idx, head);
+                if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
+                  first0 = scrut[0];
+                  first1 = scrut[1];
+                  idx$_ = first0;
+                  integer = first1;
+                  scrut1 = char1(idx$_);
+                  if (scrut1 instanceof Option.Some.class) {
+                    param0 = scrut1.value;
+                    if (param0 === ".") {
+                      tmp5 = idx$_ + 1;
+                      scrut2 = digits(tmp5, "");
+                      if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                        first01 = scrut2[0];
+                        first11 = scrut2[1];
+                        idx$_$_ = first01;
+                        fraction = first11;
+                        tmp6 = Str.concat2(integer, ".");
+                        tmp7 = Str.concat2(tmp6, fraction);
+                        tmp8 = Lexer.Token.decimal(tmp7);
+                        return [
+                          idx$_$_,
+                          tmp8
+                        ]
                       } else {
-                        tmp10 = Lexer.Token.integer(integer);
+                        tmp9 = Lexer.Token.integer(integer);
                         return [
                           idx$_,
-                          tmp10
+                          tmp9
                         ]
                       }
                     } else {
-                      tmp11 = Lexer.Token.integer(integer);
+                      tmp10 = Lexer.Token.integer(integer);
                       return [
                         idx$_,
-                        tmp11
+                        tmp10
                       ]
                     }
                   } else {
-                    throw new globalThis.Error("match error");
+                    tmp11 = Lexer.Token.integer(integer);
+                    return [
+                      idx$_,
+                      tmp11
+                    ]
                   }
+                } else {
+                  throw new globalThis.Error("match error");
                 }
               }
+            }
+          } else if (param01 === "o") {
+            tmp12 = idx + 1;
+            scrut7 = take(Lexer.Char.isOctDigit, tmp12, "");
+            if (globalThis.Array.isArray(scrut7) && scrut7.length === 2) {
+              first05 = scrut7[0];
+              first15 = scrut7[1];
+              idx$_4 = first05;
+              os = first15;
+              tmp13 = Str.concat2("0o", os);
+              tmp14 = Lexer.Token.integer(tmp13);
+              return [
+                idx$_4,
+                tmp14
+              ]
             } else {
-              if (param01 === "o") {
-                tmp12 = idx + 1;
-                scrut7 = take(Lexer.Char.isOctDigit, tmp12, "");
-                if (globalThis.Array.isArray(scrut7) && scrut7.length === 2) {
-                  first05 = scrut7[0];
-                  first15 = scrut7[1];
-                  idx$_4 = first05;
-                  os = first15;
-                  tmp13 = Str.concat2("0o", os);
-                  tmp14 = Lexer.Token.integer(tmp13);
-                  return [
-                    idx$_4,
-                    tmp14
-                  ]
-                } else {
-                  scrut4 = digits(idx, head);
-                  if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
-                    first02 = scrut4[0];
-                    first12 = scrut4[1];
-                    idx$_1 = first02;
-                    integer1 = first12;
-                    tmp15 = Lexer.Token.integer(integer1);
-                    return [
-                      idx$_1,
-                      tmp15
-                    ]
-                  } else {
-                    scrut = digits(idx, head);
-                    if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-                      first0 = scrut[0];
-                      first1 = scrut[1];
-                      idx$_ = first0;
-                      integer = first1;
-                      scrut1 = char1(idx$_);
-                      if (scrut1 instanceof Option.Some.class) {
-                        param0 = scrut1.value;
-                        if (param0 === ".") {
-                          tmp16 = idx$_ + 1;
-                          scrut2 = digits(tmp16, "");
-                          if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                            first01 = scrut2[0];
-                            first11 = scrut2[1];
-                            idx$_$_ = first01;
-                            fraction = first11;
-                            tmp17 = Str.concat2(integer, ".");
-                            tmp18 = Str.concat2(tmp17, fraction);
-                            tmp19 = Lexer.Token.decimal(tmp18);
-                            return [
-                              idx$_$_,
-                              tmp19
-                            ]
-                          } else {
-                            tmp20 = Lexer.Token.integer(integer);
-                            return [
-                              idx$_,
-                              tmp20
-                            ]
-                          }
-                        } else {
-                          tmp21 = Lexer.Token.integer(integer);
-                          return [
-                            idx$_,
-                            tmp21
-                          ]
-                        }
+              scrut4 = digits(idx, head);
+              if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
+                first02 = scrut4[0];
+                first12 = scrut4[1];
+                idx$_1 = first02;
+                integer1 = first12;
+                tmp15 = Lexer.Token.integer(integer1);
+                return [
+                  idx$_1,
+                  tmp15
+                ]
+              } else {
+                scrut = digits(idx, head);
+                if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
+                  first0 = scrut[0];
+                  first1 = scrut[1];
+                  idx$_ = first0;
+                  integer = first1;
+                  scrut1 = char1(idx$_);
+                  if (scrut1 instanceof Option.Some.class) {
+                    param0 = scrut1.value;
+                    if (param0 === ".") {
+                      tmp16 = idx$_ + 1;
+                      scrut2 = digits(tmp16, "");
+                      if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                        first01 = scrut2[0];
+                        first11 = scrut2[1];
+                        idx$_$_ = first01;
+                        fraction = first11;
+                        tmp17 = Str.concat2(integer, ".");
+                        tmp18 = Str.concat2(tmp17, fraction);
+                        tmp19 = Lexer.Token.decimal(tmp18);
+                        return [
+                          idx$_$_,
+                          tmp19
+                        ]
                       } else {
-                        tmp22 = Lexer.Token.integer(integer);
+                        tmp20 = Lexer.Token.integer(integer);
                         return [
                           idx$_,
-                          tmp22
+                          tmp20
                         ]
                       }
                     } else {
-                      throw new globalThis.Error("match error");
-                    }
-                  }
-                }
-              } else {
-                if (param01 === "x") {
-                  tmp23 = idx + 1;
-                  scrut6 = take(Lexer.Char.isHexDigit, tmp23, "");
-                  if (globalThis.Array.isArray(scrut6) && scrut6.length === 2) {
-                    first04 = scrut6[0];
-                    first14 = scrut6[1];
-                    idx$_3 = first04;
-                    xs = first14;
-                    tmp24 = Str.concat2("0x", xs);
-                    tmp25 = Lexer.Token.integer(tmp24);
-                    return [
-                      idx$_3,
-                      tmp25
-                    ]
-                  } else {
-                    scrut4 = digits(idx, head);
-                    if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
-                      first02 = scrut4[0];
-                      first12 = scrut4[1];
-                      idx$_1 = first02;
-                      integer1 = first12;
-                      tmp26 = Lexer.Token.integer(integer1);
+                      tmp21 = Lexer.Token.integer(integer);
                       return [
-                        idx$_1,
-                        tmp26
+                        idx$_,
+                        tmp21
                       ]
-                    } else {
-                      scrut = digits(idx, head);
-                      if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-                        first0 = scrut[0];
-                        first1 = scrut[1];
-                        idx$_ = first0;
-                        integer = first1;
-                        scrut1 = char1(idx$_);
-                        if (scrut1 instanceof Option.Some.class) {
-                          param0 = scrut1.value;
-                          if (param0 === ".") {
-                            tmp27 = idx$_ + 1;
-                            scrut2 = digits(tmp27, "");
-                            if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                              first01 = scrut2[0];
-                              first11 = scrut2[1];
-                              idx$_$_ = first01;
-                              fraction = first11;
-                              tmp28 = Str.concat2(integer, ".");
-                              tmp29 = Str.concat2(tmp28, fraction);
-                              tmp30 = Lexer.Token.decimal(tmp29);
-                              return [
-                                idx$_$_,
-                                tmp30
-                              ]
-                            } else {
-                              tmp31 = Lexer.Token.integer(integer);
-                              return [
-                                idx$_,
-                                tmp31
-                              ]
-                            }
-                          } else {
-                            tmp32 = Lexer.Token.integer(integer);
-                            return [
-                              idx$_,
-                              tmp32
-                            ]
-                          }
-                        } else {
-                          tmp33 = Lexer.Token.integer(integer);
-                          return [
-                            idx$_,
-                            tmp33
-                          ]
-                        }
-                      } else {
-                        throw new globalThis.Error("match error");
-                      }
                     }
+                  } else {
+                    tmp22 = Lexer.Token.integer(integer);
+                    return [
+                      idx$_,
+                      tmp22
+                    ]
                   }
                 } else {
-                  if (param01 === ".") {
-                    tmp34 = idx + 1;
-                    scrut5 = digits(tmp34);
-                    if (globalThis.Array.isArray(scrut5) && scrut5.length === 2) {
-                      first03 = scrut5[0];
-                      first13 = scrut5[1];
-                      idx$_2 = first03;
-                      ds = first13;
-                      tmp35 = Str.concat2("0.", ds);
-                      tmp36 = Lexer.Token.decimal(tmp35);
-                      return [
-                        idx$_2,
-                        tmp36
-                      ]
-                    } else {
-                      scrut4 = digits(idx, head);
-                      if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
-                        first02 = scrut4[0];
-                        first12 = scrut4[1];
-                        idx$_1 = first02;
-                        integer1 = first12;
-                        tmp37 = Lexer.Token.integer(integer1);
+                  throw new globalThis.Error("match error");
+                }
+              }
+            }
+          } else if (param01 === "x") {
+            tmp23 = idx + 1;
+            scrut6 = take(Lexer.Char.isHexDigit, tmp23, "");
+            if (globalThis.Array.isArray(scrut6) && scrut6.length === 2) {
+              first04 = scrut6[0];
+              first14 = scrut6[1];
+              idx$_3 = first04;
+              xs = first14;
+              tmp24 = Str.concat2("0x", xs);
+              tmp25 = Lexer.Token.integer(tmp24);
+              return [
+                idx$_3,
+                tmp25
+              ]
+            } else {
+              scrut4 = digits(idx, head);
+              if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
+                first02 = scrut4[0];
+                first12 = scrut4[1];
+                idx$_1 = first02;
+                integer1 = first12;
+                tmp26 = Lexer.Token.integer(integer1);
+                return [
+                  idx$_1,
+                  tmp26
+                ]
+              } else {
+                scrut = digits(idx, head);
+                if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
+                  first0 = scrut[0];
+                  first1 = scrut[1];
+                  idx$_ = first0;
+                  integer = first1;
+                  scrut1 = char1(idx$_);
+                  if (scrut1 instanceof Option.Some.class) {
+                    param0 = scrut1.value;
+                    if (param0 === ".") {
+                      tmp27 = idx$_ + 1;
+                      scrut2 = digits(tmp27, "");
+                      if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                        first01 = scrut2[0];
+                        first11 = scrut2[1];
+                        idx$_$_ = first01;
+                        fraction = first11;
+                        tmp28 = Str.concat2(integer, ".");
+                        tmp29 = Str.concat2(tmp28, fraction);
+                        tmp30 = Lexer.Token.decimal(tmp29);
                         return [
-                          idx$_1,
-                          tmp37
+                          idx$_$_,
+                          tmp30
                         ]
                       } else {
-                        scrut = digits(idx, head);
-                        if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-                          first0 = scrut[0];
-                          first1 = scrut[1];
-                          idx$_ = first0;
-                          integer = first1;
-                          scrut1 = char1(idx$_);
-                          if (scrut1 instanceof Option.Some.class) {
-                            param0 = scrut1.value;
-                            if (param0 === ".") {
-                              tmp38 = idx$_ + 1;
-                              scrut2 = digits(tmp38, "");
-                              if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                                first01 = scrut2[0];
-                                first11 = scrut2[1];
-                                idx$_$_ = first01;
-                                fraction = first11;
-                                tmp39 = Str.concat2(integer, ".");
-                                tmp40 = Str.concat2(tmp39, fraction);
-                                tmp41 = Lexer.Token.decimal(tmp40);
-                                return [
-                                  idx$_$_,
-                                  tmp41
-                                ]
-                              } else {
-                                tmp42 = Lexer.Token.integer(integer);
-                                return [
-                                  idx$_,
-                                  tmp42
-                                ]
-                              }
-                            } else {
-                              tmp43 = Lexer.Token.integer(integer);
-                              return [
-                                idx$_,
-                                tmp43
-                              ]
-                            }
-                          } else {
-                            tmp44 = Lexer.Token.integer(integer);
-                            return [
-                              idx$_,
-                              tmp44
-                            ]
-                          }
-                        } else {
-                          throw new globalThis.Error("match error");
-                        }
+                        tmp31 = Lexer.Token.integer(integer);
+                        return [
+                          idx$_,
+                          tmp31
+                        ]
                       }
+                    } else {
+                      tmp32 = Lexer.Token.integer(integer);
+                      return [
+                        idx$_,
+                        tmp32
+                      ]
                     }
                   } else {
-                    scrut4 = digits(idx, head);
-                    if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
-                      first02 = scrut4[0];
-                      first12 = scrut4[1];
-                      idx$_1 = first02;
-                      integer1 = first12;
-                      tmp45 = Lexer.Token.integer(integer1);
-                      return [
-                        idx$_1,
-                        tmp45
-                      ]
-                    } else {
-                      scrut = digits(idx, head);
-                      if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-                        first0 = scrut[0];
-                        first1 = scrut[1];
-                        idx$_ = first0;
-                        integer = first1;
-                        scrut1 = char1(idx$_);
-                        if (scrut1 instanceof Option.Some.class) {
-                          param0 = scrut1.value;
-                          if (param0 === ".") {
-                            tmp46 = idx$_ + 1;
-                            scrut2 = digits(tmp46, "");
-                            if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                              first01 = scrut2[0];
-                              first11 = scrut2[1];
-                              idx$_$_ = first01;
-                              fraction = first11;
-                              tmp47 = Str.concat2(integer, ".");
-                              tmp48 = Str.concat2(tmp47, fraction);
-                              tmp49 = Lexer.Token.decimal(tmp48);
-                              return [
-                                idx$_$_,
-                                tmp49
-                              ]
-                            } else {
-                              tmp50 = Lexer.Token.integer(integer);
-                              return [
-                                idx$_,
-                                tmp50
-                              ]
-                            }
-                          } else {
-                            tmp51 = Lexer.Token.integer(integer);
-                            return [
-                              idx$_,
-                              tmp51
-                            ]
-                          }
-                        } else {
-                          tmp52 = Lexer.Token.integer(integer);
-                          return [
-                            idx$_,
-                            tmp52
-                          ]
-                        }
-                      } else {
-                        throw new globalThis.Error("match error");
-                      }
-                    }
+                    tmp33 = Lexer.Token.integer(integer);
+                    return [
+                      idx$_,
+                      tmp33
+                    ]
                   }
+                } else {
+                  throw new globalThis.Error("match error");
+                }
+              }
+            }
+          } else if (param01 === ".") {
+            tmp34 = idx + 1;
+            scrut5 = digits(tmp34);
+            if (globalThis.Array.isArray(scrut5) && scrut5.length === 2) {
+              first03 = scrut5[0];
+              first13 = scrut5[1];
+              idx$_2 = first03;
+              ds = first13;
+              tmp35 = Str.concat2("0.", ds);
+              tmp36 = Lexer.Token.decimal(tmp35);
+              return [
+                idx$_2,
+                tmp36
+              ]
+            } else {
+              scrut4 = digits(idx, head);
+              if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
+                first02 = scrut4[0];
+                first12 = scrut4[1];
+                idx$_1 = first02;
+                integer1 = first12;
+                tmp37 = Lexer.Token.integer(integer1);
+                return [
+                  idx$_1,
+                  tmp37
+                ]
+              } else {
+                scrut = digits(idx, head);
+                if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
+                  first0 = scrut[0];
+                  first1 = scrut[1];
+                  idx$_ = first0;
+                  integer = first1;
+                  scrut1 = char1(idx$_);
+                  if (scrut1 instanceof Option.Some.class) {
+                    param0 = scrut1.value;
+                    if (param0 === ".") {
+                      tmp38 = idx$_ + 1;
+                      scrut2 = digits(tmp38, "");
+                      if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                        first01 = scrut2[0];
+                        first11 = scrut2[1];
+                        idx$_$_ = first01;
+                        fraction = first11;
+                        tmp39 = Str.concat2(integer, ".");
+                        tmp40 = Str.concat2(tmp39, fraction);
+                        tmp41 = Lexer.Token.decimal(tmp40);
+                        return [
+                          idx$_$_,
+                          tmp41
+                        ]
+                      } else {
+                        tmp42 = Lexer.Token.integer(integer);
+                        return [
+                          idx$_,
+                          tmp42
+                        ]
+                      }
+                    } else {
+                      tmp43 = Lexer.Token.integer(integer);
+                      return [
+                        idx$_,
+                        tmp43
+                      ]
+                    }
+                  } else {
+                    tmp44 = Lexer.Token.integer(integer);
+                    return [
+                      idx$_,
+                      tmp44
+                    ]
+                  }
+                } else {
+                  throw new globalThis.Error("match error");
                 }
               }
             }
           } else {
-            scrut = digits(idx, head);
-            if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-              first0 = scrut[0];
-              first1 = scrut[1];
-              idx$_ = first0;
-              integer = first1;
-              scrut1 = char1(idx$_);
-              if (scrut1 instanceof Option.Some.class) {
-                param0 = scrut1.value;
-                if (param0 === ".") {
-                  tmp53 = idx$_ + 1;
-                  scrut2 = digits(tmp53, "");
-                  if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                    first01 = scrut2[0];
-                    first11 = scrut2[1];
-                    idx$_$_ = first01;
-                    fraction = first11;
-                    tmp54 = Str.concat2(integer, ".");
-                    tmp55 = Str.concat2(tmp54, fraction);
-                    tmp56 = Lexer.Token.decimal(tmp55);
-                    return [
-                      idx$_$_,
-                      tmp56
-                    ]
+            scrut4 = digits(idx, head);
+            if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
+              first02 = scrut4[0];
+              first12 = scrut4[1];
+              idx$_1 = first02;
+              integer1 = first12;
+              tmp45 = Lexer.Token.integer(integer1);
+              return [
+                idx$_1,
+                tmp45
+              ]
+            } else {
+              scrut = digits(idx, head);
+              if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
+                first0 = scrut[0];
+                first1 = scrut[1];
+                idx$_ = first0;
+                integer = first1;
+                scrut1 = char1(idx$_);
+                if (scrut1 instanceof Option.Some.class) {
+                  param0 = scrut1.value;
+                  if (param0 === ".") {
+                    tmp46 = idx$_ + 1;
+                    scrut2 = digits(tmp46, "");
+                    if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                      first01 = scrut2[0];
+                      first11 = scrut2[1];
+                      idx$_$_ = first01;
+                      fraction = first11;
+                      tmp47 = Str.concat2(integer, ".");
+                      tmp48 = Str.concat2(tmp47, fraction);
+                      tmp49 = Lexer.Token.decimal(tmp48);
+                      return [
+                        idx$_$_,
+                        tmp49
+                      ]
+                    } else {
+                      tmp50 = Lexer.Token.integer(integer);
+                      return [
+                        idx$_,
+                        tmp50
+                      ]
+                    }
                   } else {
-                    tmp57 = Lexer.Token.integer(integer);
+                    tmp51 = Lexer.Token.integer(integer);
                     return [
                       idx$_,
-                      tmp57
+                      tmp51
                     ]
                   }
                 } else {
-                  tmp58 = Lexer.Token.integer(integer);
+                  tmp52 = Lexer.Token.integer(integer);
                   return [
                     idx$_,
-                    tmp58
+                    tmp52
                   ]
                 }
               } else {
-                tmp59 = Lexer.Token.integer(integer);
+                throw new globalThis.Error("match error");
+              }
+            }
+          }
+        } else {
+          scrut = digits(idx, head);
+          if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
+            first0 = scrut[0];
+            first1 = scrut[1];
+            idx$_ = first0;
+            integer = first1;
+            scrut1 = char1(idx$_);
+            if (scrut1 instanceof Option.Some.class) {
+              param0 = scrut1.value;
+              if (param0 === ".") {
+                tmp53 = idx$_ + 1;
+                scrut2 = digits(tmp53, "");
+                if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                  first01 = scrut2[0];
+                  first11 = scrut2[1];
+                  idx$_$_ = first01;
+                  fraction = first11;
+                  tmp54 = Str.concat2(integer, ".");
+                  tmp55 = Str.concat2(tmp54, fraction);
+                  tmp56 = Lexer.Token.decimal(tmp55);
+                  return [
+                    idx$_$_,
+                    tmp56
+                  ]
+                } else {
+                  tmp57 = Lexer.Token.integer(integer);
+                  return [
+                    idx$_,
+                    tmp57
+                  ]
+                }
+              } else {
+                tmp58 = Lexer.Token.integer(integer);
                 return [
                   idx$_,
-                  tmp59
+                  tmp58
                 ]
               }
             } else {
-              throw new globalThis.Error("match error");
+              tmp59 = Lexer.Token.integer(integer);
+              return [
+                idx$_,
+                tmp59
+              ]
             }
+          } else {
+            throw new globalThis.Error("match error");
           }
         }
       } else {
@@ -2070,107 +1950,87 @@ Lexer1 = class Lexer {
       scrut = char1(idx);
       if (scrut instanceof Option.None.class) {
         return Stack.reverse(acc)
-      } else {
-        if (scrut instanceof Option.Some.class) {
-          param0 = scrut.value;
-          matchResult3 = runtime.safeCall(Lexer.Char.Space.unapply(param0));
-          if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
-            tmp = idx + 1;
-            tmp1 = whitespace(tmp);
-            return go(tmp1, Lexer.Token.Space)
+      } else if (scrut instanceof Option.Some.class) {
+        param0 = scrut.value;
+        matchResult3 = runtime.safeCall(Lexer.Char.Space.unapply(param0));
+        if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
+          tmp = idx + 1;
+          tmp1 = whitespace(tmp);
+          return go(tmp1, Lexer.Token.Space)
+        } else {
+          if (param0 === ",") {
+            tmp2 = idx + 1;
+            return go(tmp2, Lexer.Token.Comma)
+          } else if (param0 === ";") {
+            tmp3 = idx + 1;
+            return go(tmp3, Lexer.Token.Semicolon)
+          } else if (param0 === "\"") {
+            tmp4 = idx + 1;
+            tmp5 = string(tmp4);
+            return go(...tmp5)
+          } else if (param0 === "(") {
+            tmp6 = idx + 1;
+            tmp7 = Lexer.Token.Open(Lexer.Round);
+            return go(tmp6, tmp7)
+          } else if (param0 === "[") {
+            tmp8 = idx + 1;
+            tmp9 = Lexer.Token.Open(Lexer.Square);
+            return go(tmp8, tmp9)
+          } else if (param0 === "{") {
+            tmp10 = idx + 1;
+            tmp11 = Lexer.Token.Open(Lexer.Curly);
+            return go(tmp10, tmp11)
+          } else if (param0 === ")") {
+            tmp12 = idx + 1;
+            tmp13 = Lexer.Token.Close(Lexer.Round);
+            return go(tmp12, tmp13)
+          } else if (param0 === "]") {
+            tmp14 = idx + 1;
+            tmp15 = Lexer.Token.Close(Lexer.Square);
+            return go(tmp14, tmp15)
+          } else if (param0 === "}") {
+            tmp16 = idx + 1;
+            tmp17 = Lexer.Token.Close(Lexer.Curly);
+            return go(tmp16, tmp17)
+          } else if (param0 === "/") {
+            tmp18 = idx + 1;
+            tmp19 = comment(tmp18);
+            return go(...tmp19)
           } else {
-            if (param0 === ",") {
-              tmp2 = idx + 1;
-              return go(tmp2, Lexer.Token.Comma)
+            matchResult2 = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
+            if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
+              ch2 = param0;
+              tmp20 = idx + 1;
+              tmp21 = identifier(tmp20, ch2);
+              return go(...tmp21)
             } else {
-              if (param0 === ";") {
-                tmp3 = idx + 1;
-                return go(tmp3, Lexer.Token.Semicolon)
+              matchResult1 = runtime.safeCall(Lexer.Char.Operator.unapply(param0));
+              if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+                ch1 = param0;
+                tmp22 = idx + 1;
+                tmp23 = operator(tmp22, ch1);
+                return go(...tmp23)
               } else {
-                if (param0 === "\"") {
-                  tmp4 = idx + 1;
-                  tmp5 = string(tmp4);
-                  return go(...tmp5)
+                matchResult = runtime.safeCall(Lexer.Char.Digit.unapply(param0));
+                if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+                  ch = param0;
+                  tmp24 = idx + 1;
+                  tmp25 = number(tmp24, ch);
+                  return go(...tmp25)
                 } else {
-                  if (param0 === "(") {
-                    tmp6 = idx + 1;
-                    tmp7 = Lexer.Token.Open(Lexer.Round);
-                    return go(tmp6, tmp7)
-                  } else {
-                    if (param0 === "[") {
-                      tmp8 = idx + 1;
-                      tmp9 = Lexer.Token.Open(Lexer.Square);
-                      return go(tmp8, tmp9)
-                    } else {
-                      if (param0 === "{") {
-                        tmp10 = idx + 1;
-                        tmp11 = Lexer.Token.Open(Lexer.Curly);
-                        return go(tmp10, tmp11)
-                      } else {
-                        if (param0 === ")") {
-                          tmp12 = idx + 1;
-                          tmp13 = Lexer.Token.Close(Lexer.Round);
-                          return go(tmp12, tmp13)
-                        } else {
-                          if (param0 === "]") {
-                            tmp14 = idx + 1;
-                            tmp15 = Lexer.Token.Close(Lexer.Square);
-                            return go(tmp14, tmp15)
-                          } else {
-                            if (param0 === "}") {
-                              tmp16 = idx + 1;
-                              tmp17 = Lexer.Token.Close(Lexer.Curly);
-                              return go(tmp16, tmp17)
-                            } else {
-                              if (param0 === "/") {
-                                tmp18 = idx + 1;
-                                tmp19 = comment(tmp18);
-                                return go(...tmp19)
-                              } else {
-                                matchResult2 = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
-                                if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
-                                  ch2 = param0;
-                                  tmp20 = idx + 1;
-                                  tmp21 = identifier(tmp20, ch2);
-                                  return go(...tmp21)
-                                } else {
-                                  matchResult1 = runtime.safeCall(Lexer.Char.Operator.unapply(param0));
-                                  if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
-                                    ch1 = param0;
-                                    tmp22 = idx + 1;
-                                    tmp23 = operator(tmp22, ch1);
-                                    return go(...tmp23)
-                                  } else {
-                                    matchResult = runtime.safeCall(Lexer.Char.Digit.unapply(param0));
-                                    if (matchResult instanceof globalThis.Predef.MatchResult.class) {
-                                      ch = param0;
-                                      tmp24 = idx + 1;
-                                      tmp25 = number(tmp24, ch);
-                                      return go(...tmp25)
-                                    } else {
-                                      other = param0;
-                                      tmp26 = Str.concat2("Unrecognized character: '", other);
-                                      tmp27 = Str.concat2(tmp26, "'");
-                                      tmp28 = Predef.print(tmp27);
-                                      tmp29 = idx + 1;
-                                      return go(tmp29, Lexer.Token.Error)
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  other = param0;
+                  tmp26 = Str.concat2("Unrecognized character: '", other);
+                  tmp27 = Str.concat2(tmp26, "'");
+                  tmp28 = Predef.print(tmp27);
+                  tmp29 = idx + 1;
+                  return go(tmp29, Lexer.Token.Error)
                 }
               }
             }
           }
-        } else {
-          throw new globalThis.Error("match error");
         }
+      } else {
+        throw new globalThis.Error("match error");
       }
     };
     return scan(0, Stack.Nil)
