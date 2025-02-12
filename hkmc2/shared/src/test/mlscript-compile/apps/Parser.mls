@@ -109,6 +109,7 @@ module Keywords with
   let ascPrec = nextPrec
   val _equal = Keyword("=", eqPrec, eqPrec)
   val _bar = Keyword("|", None, currPrec)
+  val _and = Keyword("and", None, currPrec)
   val _colon = Keyword(":", ascPrec, eqPrec)
   val _match = Keyword("match", None, currPrec)
   val _if = Keyword("if", None, currPrec)
@@ -434,28 +435,34 @@ fun showAsTree(thing) =
 
 fun letBinding(keyword: Keyword) =
   let intro = keyword.name + " binding: "
+  fun makeBinding(body) = Choice.expr of
+    (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
+      Tree.Ternary(Keywords._let, lhs, rhs, body)
+    intro + "left-hand side"
+    Choice.keyword of
+      Keywords._equal
+      intro + "equal sign"
+      body
+  fun makeItems(get) = Choice.expr of
+    (rhs, body) => [rhs, body]
+    intro + "right-hand side"
+    Choice.keyword of
+      Keywords._and
+      intro + "`and` keyword"
+      makeBinding of Choice.Lazy(get, makeItems)
+    Choice.keyword of
+      Keywords._in
+      intro + "`in` keyword"
+      Choice.expr of
+        (body, _) => body
+        intro + "body"
+        Choice.end of ()
+    Choice.end of Tree.empty
+  let items = Choice.lazy of makeItems
   Choice.keyword of
     keyword
     intro + "keyword"
-    Choice.expr of
-      (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
-        Tree.Ternary(keyword, lhs, rhs, body)
-      intro + "left-hand side"
-      Choice.keyword of
-        Keywords._equal
-        intro + "equal sign"
-        Choice.expr of
-          (expr, body) => [Some(expr), body]
-          intro + "right-hand side"
-          Choice.keyword of
-            Keywords._in
-            intro + "`in` keyword"
-            Choice.expr of
-              (body, _) => Some(body)
-              intro + "body"
-              Choice.end of None
-          Choice.end of None
-      Choice.end of [None, None]
+    makeBinding of items
 
 fun recursiveModifier = Choice.keyword of
   Keywords._rec
@@ -647,17 +654,22 @@ fun parse(tokens) =
         keywords.get(name) is Some(keyword) and
           rule.keywordChoices.get(name) is
             Some(rule) then
-              tracer.print of "found a rule starting with " + name, source.line
+              tracer.print of "found a rule starting with `" + name + "`", source.line
               consume
               parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
             None then
-              tracer.print of "no rule starting with " + name + " was found", source.line
-              val expr = simpleExpr(prec, opened)
-              if rule.exprChoice is
-                Some([process, rest]) then
-                  let rhs = parseRule(prec, rest, opened)
-                  process(expr, rhs)
-                None then expr Tree.Error("unexpected expression")
+              tracer.print of "no rule starting with `" + name + "` was found", source.line
+              if simpleExpr(prec, opened) is
+                Tree.Empty and
+                  rule.endChoice is Some(value) then value
+                  rule.exprChoice is Some then
+                    Tree.error("expect an expression")
+                  else ???
+                expr and rule.exprChoice is
+                  Some([process, rest]) then
+                    let rhs = parseRule(prec, rest, opened)
+                    process(expr, rhs)
+                  None then expr Tree.Error("unexpected expression")
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
         do tracer.print of "try parse an expression from " + Token.preview(current), source.line
@@ -667,8 +679,8 @@ fun parse(tokens) =
           reserve and rule.exprChoice is
             Some([process, rest]) then 
               let rhs = parseRule(prec, rest, opened)
-              tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
               tracer.print of "the reserved expression: " + reserve Tree.summary(), source.line
+              tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
               process(reserve, rhs)
             None then
               tracer.print of "the rule doesn't have a choice starting with expressions", source.line

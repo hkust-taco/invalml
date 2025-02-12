@@ -15,6 +15,9 @@ Parser.opPrec(";")
 Parser.opPrec("|>")
 //│ = [10, 16]
 
+Parser.opPrec of "+"
+//│ = [17, 17]
+
 print of Parser.keywords.values.join("\n")
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`begin`, N/A, 0)
@@ -23,6 +26,7 @@ print of Parser.keywords.values.join("\n")
 //│ > Keyword(`,`, 2, 1)
 //│ > Keyword(`=`, 3, 3)
 //│ > Keyword(`|`, N/A, 4)
+//│ > Keyword(`and`, N/A, 4)
 //│ > Keyword(`:`, 4, 3)
 //│ > Keyword(`match`, N/A, 4)
 //│ > Keyword(`if`, N/A, 4)
@@ -45,9 +49,9 @@ print of Parser.keywords.values.join("\n")
 print of Parser.prefixRules.display
 //│ > <start of the statement> ::= `let` <expression> 
 //│ >   `=` <expression> 
+//│ >     `and` <expression> `=` <rec>
 //│ >     `in` <expression> <end>
 //│ >     <end>
-//│ >   <end>
 //│ > `rec` <expression> <end>
 //│ > `fun` <expression> `->` <expression> <end>
 //│ > `type` <expression> `=` <expression> <end>
@@ -128,8 +132,8 @@ printParsed of "let zero = 0 in zero"
 //│ > Ternary:
 //│ >   name = Keyword(`let`, 7, 7)
 //│ >   lhs = Ident of "zero"
-//│ >   rhs = Some of Literal#Integer of "0"
-//│ >   body = Some of Ident of "zero"
+//│ >   rhs = Literal#Integer of "0"
+//│ >   body = Ident of "zero"
 
 printParsed of """
 let one = 1 in
@@ -139,12 +143,12 @@ one + zero
 //│ > Ternary:
 //│ >   name = Keyword(`let`, 7, 7)
 //│ >   lhs = Ident of "one"
-//│ >   rhs = Some of Literal#Integer of "1"
-//│ >   body = Some of Ternary:
+//│ >   rhs = Literal#Integer of "1"
+//│ >   body = Ternary:
 //│ >     name = Keyword(`let`, 7, 7)
 //│ >     lhs = Ident of "zero"
-//│ >     rhs = Some of Literal#Integer of "0"
-//│ >     body = Some of App:
+//│ >     rhs = Literal#Integer of "0"
+//│ >     body = App:
 //│ >       callee = Ident of "+"
 //│ >       arguments = Stack of 
 //│ >         Ident of "one"
@@ -167,7 +171,7 @@ let pi = 4.0 *. atan 1.0
 //│ > Ternary:
 //│ >   name = Keyword(`let`, 7, 7)
 //│ >   lhs = Ident of "pi"
-//│ >   rhs = Some of App:
+//│ >   rhs = App:
 //│ >     callee = Ident of "*."
 //│ >     arguments = Stack of 
 //│ >       Literal#Decimal of "4.0"
@@ -175,7 +179,7 @@ let pi = 4.0 *. atan 1.0
 //│ >         callee = Ident of "atan"
 //│ >         arguments = Stack of 
 //│ >           Literal#Decimal of "1.0"
-//│ >   body = None
+//│ >   body = Empty
 
 printParsed of "let square x = x *. x"
 //│ > Ternary:
@@ -184,12 +188,12 @@ printParsed of "let square x = x *. x"
 //│ >     callee = Ident of "square"
 //│ >     arguments = Stack of 
 //│ >       Ident of "x"
-//│ >   rhs = Some of App:
+//│ >   rhs = App:
 //│ >     callee = Ident of "*."
 //│ >     arguments = Stack of 
 //│ >       Ident of "x"
 //│ >       Ident of "x"
-//│ >   body = None
+//│ >   body = Empty
 
 printParsed of "square (sin pi) +. square (cos pi)"
 //│ > App:
@@ -228,7 +232,7 @@ printParsed of "let cat s1 s2 = s1 ^ \" \" ^ s2"
 //│ >         Ident of "s1"
 //│ >     arguments = Stack of 
 //│ >       Ident of "s2"
-//│ >   rhs = Some of App:
+//│ >   rhs = App:
 //│ >     callee = Ident of "^"
 //│ >     arguments = Stack of 
 //│ >       App:
@@ -237,7 +241,7 @@ printParsed of "let cat s1 s2 = s1 ^ \" \" ^ s2"
 //│ >           Ident of "s1"
 //│ >           Literal#String of " "
 //│ >       Ident of "s2"
-//│ >   body = None
+//│ >   body = Empty
 
 printParsed of "fun x -> x"
 //│ > Lambda:
@@ -258,7 +262,7 @@ let cos2 = compose square cos
 //│ >         Ident of "f"
 //│ >     arguments = Stack of 
 //│ >       Ident of "g"
-//│ >   rhs = Some of Lambda:
+//│ >   rhs = Lambda:
 //│ >     params = Stack of 
 //│ >       Ident of "x"
 //│ >     body = App:
@@ -268,17 +272,17 @@ let cos2 = compose square cos
 //│ >           callee = Ident of "g"
 //│ >           arguments = Stack of 
 //│ >             Ident of "x"
-//│ >   body = Some of Ternary:
+//│ >   body = Ternary:
 //│ >     name = Keyword(`let`, 7, 7)
 //│ >     lhs = Ident of "cos2"
-//│ >     rhs = Some of App:
+//│ >     rhs = App:
 //│ >       callee = App:
 //│ >         callee = Ident of "compose"
 //│ >         arguments = Stack of 
 //│ >           Ident of "square"
 //│ >       arguments = Stack of 
 //│ >         Ident of "cos"
-//│ >     body = None
+//│ >     body = Empty
 
 :todo
 printParsed of "type sign = Positive | Negative"
@@ -453,7 +457,7 @@ let f a b =
 //│ >         Ident of "a"
 //│ >     arguments = Stack of 
 //│ >       Ident of "b"
-//│ >   rhs = Some of Ternary:
+//│ >   rhs = Ternary:
 //│ >     name = Keyword(`if`, N/A, 4)
 //│ >     lhs = App:
 //│ >       callee = Ident of "=="
@@ -485,7 +489,7 @@ let f a b =
 //│ >         callee = Ident of "print_newline"
 //│ >         arguments = Stack of 
 //│ >           Tuple of Nil
-//│ >   body = None
+//│ >   body = Empty
 
 printParsed of """
 let translate p dx dy =
@@ -504,7 +508,7 @@ let translate p dx dy =
 //│ >           Ident of "dx"
 //│ >       arguments = Stack of 
 //│ >         Ident of "dy"
-//│ >     rhs = Some of App:
+//│ >     rhs = App:
 //│ >       callee = Ident of "+."
 //│ >       arguments = Stack of 
 //│ >         App:
@@ -521,7 +525,7 @@ let translate p dx dy =
 //│ >                 Ident of "p"
 //│ >                 Ident of "x"
 //│ >         Ident of "dx"
-//│ >     body = None
+//│ >     body = Empty
 //│ >   App:
 //│ >     callee = Ident of "+."
 //│ >     arguments = Stack of 
@@ -562,7 +566,7 @@ let fullname ?title first second =
 //│ >         Ident of "first"
 //│ >     arguments = Stack of 
 //│ >       Ident of "second"
-//│ >   rhs = Some of Match:
+//│ >   rhs = Match:
 //│ >     scrutinee = Ident("title", false)
 //│ >     branches = Stack of 
 //│ >       Infix:
@@ -600,7 +604,7 @@ let fullname ?title first second =
 //│ >                 Ident of "first"
 //│ >                 Literal#String of " "
 //│ >             Ident of "second"
-//│ >   body = None
+//│ >   body = Empty
 
 printParsed of """
 let rec factorial x =
@@ -616,7 +620,7 @@ let rec sum l =
 //│ >     lhs = Modified:
 //│ >       modifier = Keyword(`rec`, N/A, N/A)
 //│ >       subject = Ident of "factorial"
-//│ >     rhs = Some of Ternary:
+//│ >     rhs = Ternary:
 //│ >       name = Keyword(`if`, N/A, 4)
 //│ >       lhs = App:
 //│ >         callee = Ident of "<="
@@ -636,13 +640,13 @@ let rec sum l =
 //│ >                 arguments = Stack of 
 //│ >                   Ident of "x"
 //│ >                   Literal#Integer of "1"
-//│ >     body = None
+//│ >     body = Empty
 //│ >   Ternary:
 //│ >     name = Keyword(`let`, 7, 7)
 //│ >     lhs = Modified:
 //│ >       modifier = Keyword(`rec`, N/A, N/A)
 //│ >       subject = Ident of "sum"
-//│ >     rhs = Some of Match:
+//│ >     rhs = Match:
 //│ >       scrutinee = Ident("l", false)
 //│ >       branches = Stack of 
 //│ >         Infix:
@@ -664,7 +668,7 @@ let rec sum l =
 //│ >                 callee = Ident of "sum"
 //│ >                 arguments = Stack of 
 //│ >                   Ident of "t"
-//│ >     body = None
+//│ >     body = Empty
 
 printParsed of "begin end"
 //│ > Sequence of Nil
@@ -674,14 +678,95 @@ printParsed of """
 let v' =
     let a, b = (1, 2) in a + b
 """
-//│ > Tuple of Stack of 
-//│ >   Ternary:
+//│ ═══[RUNTIME ERROR] Error: match error
+
+printParsed of """
+let a = 0 and b = 1 in a + b
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = Ident of "a"
+//│ >   rhs = Literal#Integer of "0"
+//│ >   body = Ternary:
 //│ >     name = Keyword(`let`, 7, 7)
-//│ >     lhs = Ident of "v'"
-//│ >     rhs = Some of Ternary:
-//│ >       name = Keyword(`let`, 7, 7)
-//│ >       lhs = Ident of "a"
-//│ >       rhs = None
-//│ >       body = None
-//│ >     body = None
-//│ >   Ident of "b"
+//│ >     lhs = Ident of "b"
+//│ >     rhs = Literal#Integer of "1"
+//│ >     body = App:
+//│ >       callee = Ident of "+"
+//│ >       arguments = Stack of 
+//│ >         Ident of "a"
+//│ >         Ident of "b"
+
+printParsed of """
+let a = 0 and b = 1 in a + b
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = Ident of "a"
+//│ >   rhs = Literal#Integer of "0"
+//│ >   body = Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Ident of "b"
+//│ >     rhs = Literal#Integer of "1"
+//│ >     body = App:
+//│ >       callee = Ident of "+"
+//│ >       arguments = Stack of 
+//│ >         Ident of "a"
+//│ >         Ident of "b"
+
+printParsed of """
+let rec even =
+  function 0 -> true | n -> odd (n - 1)
+and odd =
+  function 0 -> false | n -> even (n - 1)
+in
+  even 1000
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = Modified:
+//│ >     modifier = Keyword(`rec`, N/A, N/A)
+//│ >     subject = Ident of "even"
+//│ >   rhs = Match:
+//│ >     scrutinee = Empty()
+//│ >     branches = Stack of 
+//│ >       Infix:
+//│ >         op = Keyword(`->`, 7, 3)
+//│ >         lhs = Literal#Integer of "0"
+//│ >         rhs = Literal#Boolean of "true"
+//│ >       Infix:
+//│ >         op = Keyword(`->`, 7, 3)
+//│ >         lhs = Ident of "n"
+//│ >         rhs = App:
+//│ >           callee = Ident of "odd"
+//│ >           arguments = Stack of 
+//│ >             App:
+//│ >               callee = Ident of "-"
+//│ >               arguments = Stack of 
+//│ >                 Ident of "n"
+//│ >                 Literal#Integer of "1"
+//│ >   body = Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Ident of "odd"
+//│ >     rhs = Match:
+//│ >       scrutinee = Empty()
+//│ >       branches = Stack of 
+//│ >         Infix:
+//│ >           op = Keyword(`->`, 7, 3)
+//│ >           lhs = Literal#Integer of "0"
+//│ >           rhs = Literal#Boolean of "false"
+//│ >         Infix:
+//│ >           op = Keyword(`->`, 7, 3)
+//│ >           lhs = Ident of "n"
+//│ >           rhs = App:
+//│ >             callee = Ident of "even"
+//│ >             arguments = Stack of 
+//│ >               App:
+//│ >                 callee = Ident of "-"
+//│ >                 arguments = Stack of 
+//│ >                   Ident of "n"
+//│ >                   Literal#Integer of "1"
+//│ >     body = App:
+//│ >       callee = Ident of "even"
+//│ >       arguments = Stack of 
+//│ >         Literal#Integer of "1000"
