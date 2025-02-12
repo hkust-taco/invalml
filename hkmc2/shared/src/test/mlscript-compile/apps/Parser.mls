@@ -131,9 +131,6 @@ module Keywords with
   val _underscore = Keyword of "_", None, None
   val maxPrec = prec
 
-Keywords.maxPrec
-
-
 
 //  ____                        _
 // |  _ \ _ __ ___  ___ ___  __| | ___ _ __   ___ ___
@@ -199,10 +196,6 @@ fun opPrec(opStr) = if
   rightOp is RightAssociative then [leftPrec, rightPrec - 1]
   else [leftPrec, rightPrec]
 
-opPrec(";")
-
-opPrec("|>")
-
 //  _____
 // |_   _| __ ___  ___
 //   | || '__/ _ \/ _ \
@@ -235,15 +228,15 @@ module Tree with
   fun summary(tree) =
     fun par(text: Str, cond: Bool) = if cond then "(" + text + ")" else text
     fun prec(tree: Tree, side: Bool) = if tree is
-      Empty(_) then INT_MAX
+      Empty then INT_MAX
       Error(tree, _) then prec(tree, side)
-      Ident(_, _) then INT_MAX
-      Underscore() then INT_MAX
-      Modified(_, _) then 1
-      Tuple(_) then INT_MAX
-      Sequence(_) then 1
-      Literal(_, _) then INT_MAX
-      Match(_, _) then 2
+      Ident then INT_MAX
+      Underscore then INT_MAX
+      Modified then 1
+      Tuple then INT_MAX
+      Sequence then 1
+      Literal then INT_MAX
+      Match then 2
       App(callee, _) and callee is
         Ident(op, true) and opPrec(op) is [leftPrec, rightPrec] and
           side then rightPrec
@@ -252,12 +245,12 @@ module Tree with
       Infix(op, _, _) and
         side then op.rightPrec orMaxPrec()
         else op.leftPrec orMaxPrec()
-      Ternary(_, _, _, _) then 3
+      Ternary then 3
     fun wrap(something) = if something is
       Tree then "{" + go(something) + "}"
       else go(something)
     fun go(tree) = if tree is
-      Empty(_) then ""
+      Empty then ""
       Error(Empty, _) then "⚠"
       Error(tree, _) then "<⚠:" + go(tree) + ">"
       Ident(name, _) then name
@@ -340,7 +333,7 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
-      Choice.End(_) then ["<end>"]
+      Choice.End then ["<end>"]
       Choice.Lazy(get, make) and
         get() is Knot then ["<rec>"]
         else displayChoice(make(() => Knot))
@@ -424,7 +417,7 @@ fun showAsTree(thing) =
     Tree.Ternary(n, l, r, b) then tuple of
       "Ternary", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
     Tree.Lambda(p, b) then tuple of "Lambda", [["params", go(p)], ["body", go(b)]]
-    Keyword(_, _, _) as keyword then [keyword.toString(), []]
+    Keyword as keyword then [keyword.toString(), []]
     LiteralKind.Integer then tuple of "Integer", []
     LiteralKind.Decimal then tuple of "Decimal", []
     LiteralKind.String then tuple of "String", []

@@ -6,6 +6,15 @@ import "../../mlscript-compile/apps/Parser.mls"
 open Lexer { Token, LiteralKind }
 open Parser { parse, showAsTree, tracer }
 
+Parser.Keywords.maxPrec
+//│ = 7
+
+Parser.opPrec(";")
+//│ = [2147483647, 2147483647]
+
+Parser.opPrec("|>")
+//│ = [10, 16]
+
 print of Parser.keywords.values.join("\n")
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`begin`, N/A, 0)
@@ -405,10 +414,26 @@ end
 //│ >     arguments = Stack of 
 //│ >       Literal#String of "world"
 
+printParsed of """
+if a == b then
+  a
+else
+  b
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`if`, N/A, 4)
+//│ >   lhs = App:
+//│ >     callee = Ident of "=="
+//│ >     arguments = Stack of 
+//│ >       Ident of "a"
+//│ >       Ident of "b"
+//│ >   rhs = Ident of "a"
+//│ >   body = Some of Ident of "b"
+
 :todo
 printParsed of """
 let f a b =
-  if a = b then
+  if a == b then
     print_endline "Equal"
   else begin
     print_string "Not Equal: ";
@@ -418,7 +443,45 @@ let f a b =
     print_newline ()
   end
 """
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = App:
+//│ >     callee = App:
+//│ >       callee = Ident of "f"
+//│ >       arguments = Stack of 
+//│ >         Ident of "a"
+//│ >     arguments = Stack of 
+//│ >       Ident of "b"
+//│ >   rhs = Some of Ternary:
+//│ >     name = Keyword(`if`, N/A, 4)
+//│ >     lhs = App:
+//│ >       callee = Ident of "=="
+//│ >       arguments = Stack of 
+//│ >         Ident of "a"
+//│ >         Ident of "b"
+//│ >     rhs = App:
+//│ >       callee = Ident of "print_endline"
+//│ >       arguments = Stack of 
+//│ >         Literal#String of "Equal"
+//│ >     body = Some of Sequence of Stack of 
+//│ >       App:
+//│ >         callee = Ident of "print_string"
+//│ >         arguments = Stack of 
+//│ >           Literal#String of "Not Equal: "
+//│ >       App:
+//│ >         callee = Ident of "print_int"
+//│ >         arguments = Stack of 
+//│ >           Ident of "a"
+//│ >       App:
+//│ >         callee = Ident of "print_string"
+//│ >         arguments = Stack of 
+//│ >           Literal#String of " and "
+//│ >       App:
+//│ >         callee = Ident of "print_int"
+//│ >         arguments = Stack of 
+//│ >           Ident of "b"
+//│ >       Ident of "print_newline"
+//│ >   body = None
 
 printParsed of """
 let translate p dx dy =
