@@ -128,8 +128,9 @@ fun lex(str: Str) =
   fun take(pred: Str -> Bool, idx: Int, acc: Str): [Int, Str] =
     while (char of idx) is Some(ch) and pred(ch)
       then
-        set idx = idx + 1
-        set acc = acc + ch
+        set
+          idx += 1
+          acc += ch
       else [idx, acc]
   
   fun whitespace(idx: Int): Int =
