@@ -457,6 +457,14 @@ fun letBinding(keyword: Keyword) =
           Choice.end of None
       Choice.end of [None, None]
 
+fun recursiveModifier = Choice.keyword of
+  Keywords._rec
+  "rec keyword"
+  Choice.expr of
+    (body, _) => Tree.Modified(Keywords._rec, body)
+    "body"
+    Choice.end of ()
+
 fun typeDefinition() =
   let intro = "type definition: "
   Choice.keyword of
@@ -566,6 +574,7 @@ fun matchFunctionChoice() =
 val prefixRules = rule of
   "start of the statement"
   letChoice
+  recursiveModifier
   funChoice()
   typeDefinition()
   matchWithChoice()

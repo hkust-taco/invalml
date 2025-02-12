@@ -48,6 +48,7 @@ print of Parser.prefixRules.display
 //│ >     `in` <expression> <end>
 //│ >     <end>
 //│ >   <end>
+//│ > `rec` <expression> <end>
 //│ > `fun` <expression> `->` <expression> <end>
 //│ > `type` <expression> `=` <expression> <end>
 //│ > `match` <expression> 
@@ -541,3 +542,127 @@ let translate p dx dy =
 
 printParsed of "()"
 //│ > Tuple of Nil
+
+printParsed of """
+let fullname ?title first second =
+    match title with
+    | Some t -> t ^ " " ^ first ^ " " ^ second
+    | None -> first ^ " " ^ second
+"""
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 7)
+//│ >   lhs = App:
+//│ >     callee = App:
+//│ >       callee = App:
+//│ >         callee = Ident of "?"
+//│ >         arguments = Stack of 
+//│ >           Ident of "fullname"
+//│ >           Ident of "title"
+//│ >       arguments = Stack of 
+//│ >         Ident of "first"
+//│ >     arguments = Stack of 
+//│ >       Ident of "second"
+//│ >   rhs = Some of Match:
+//│ >     scrutinee = Ident("title", false)
+//│ >     branches = Stack of 
+//│ >       Infix:
+//│ >         op = Keyword(`->`, 7, 3)
+//│ >         lhs = App:
+//│ >           callee = Ident of "Some"
+//│ >           arguments = Stack of 
+//│ >             Ident of "t"
+//│ >         rhs = App:
+//│ >           callee = Ident of "^"
+//│ >           arguments = Stack of 
+//│ >             App:
+//│ >               callee = Ident of "^"
+//│ >               arguments = Stack of 
+//│ >                 App:
+//│ >                   callee = Ident of "^"
+//│ >                   arguments = Stack of 
+//│ >                     App:
+//│ >                       callee = Ident of "^"
+//│ >                       arguments = Stack of 
+//│ >                         Ident of "t"
+//│ >                         Literal#String of " "
+//│ >                     Ident of "first"
+//│ >                 Literal#String of " "
+//│ >             Ident of "second"
+//│ >       Infix:
+//│ >         op = Keyword(`->`, 7, 3)
+//│ >         lhs = Ident of "None"
+//│ >         rhs = App:
+//│ >           callee = Ident of "^"
+//│ >           arguments = Stack of 
+//│ >             App:
+//│ >               callee = Ident of "^"
+//│ >               arguments = Stack of 
+//│ >                 Ident of "first"
+//│ >                 Literal#String of " "
+//│ >             Ident of "second"
+//│ >   body = None
+
+printParsed of """
+let rec factorial x =
+  if x <= 1 then 1 else x * factorial (x - 1);
+let rec sum l =
+    match l with
+    | [] -> 0
+    | h :: t -> h + sum t
+"""
+//│ > Sequence of Stack of 
+//│ >   Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Modified:
+//│ >       modifier = Keyword(`rec`, N/A, N/A)
+//│ >       subject = Ident of "factorial"
+//│ >     rhs = Some of Ternary:
+//│ >       name = Keyword(`if`, N/A, 4)
+//│ >       lhs = App:
+//│ >         callee = Ident of "<="
+//│ >         arguments = Stack of 
+//│ >           Ident of "x"
+//│ >           Literal#Integer of "1"
+//│ >       rhs = Literal#Integer of "1"
+//│ >       body = Some of App:
+//│ >         callee = Ident of "*"
+//│ >         arguments = Stack of 
+//│ >           Ident of "x"
+//│ >           App:
+//│ >             callee = Ident of "factorial"
+//│ >             arguments = Stack of 
+//│ >               App:
+//│ >                 callee = Ident of "-"
+//│ >                 arguments = Stack of 
+//│ >                   Ident of "x"
+//│ >                   Literal#Integer of "1"
+//│ >     body = None
+//│ >   Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Modified:
+//│ >       modifier = Keyword(`rec`, N/A, N/A)
+//│ >       subject = Ident of "sum"
+//│ >     rhs = Some of Match:
+//│ >       scrutinee = Ident("l", false)
+//│ >       branches = Stack of 
+//│ >         Infix:
+//│ >           op = Keyword(`->`, 7, 3)
+//│ >           lhs = Empty
+//│ >           rhs = Literal#Integer of "0"
+//│ >         Infix:
+//│ >           op = Keyword(`->`, 7, 3)
+//│ >           lhs = App:
+//│ >             callee = Ident of "::"
+//│ >             arguments = Stack of 
+//│ >               Ident of "h"
+//│ >               Ident of "t"
+//│ >           rhs = App:
+//│ >             callee = Ident of "+"
+//│ >             arguments = Stack of 
+//│ >               Ident of "h"
+//│ >               App:
+//│ >                 callee = Ident of "sum"
+//│ >                 arguments = Stack of 
+//│ >                   Ident of "t"
+//│ >     body = None
+
