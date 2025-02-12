@@ -36,6 +36,38 @@ printLexed of "0 1  0xDEADCAFE 0b1101 0o755     3.1415926535"
 //│ > Space
 //│ > Literal(Decimal, 3.1415926535)
 
+printLexed of """let v' =
+  let a, b = (1, 2) in a + b"""
+//│ > Identifier(let, false)
+//│ > Space
+//│ > Identifier(v', false)
+//│ > Space
+//│ > Identifier(=, true)
+//│ > Space
+//│ > Identifier(let, false)
+//│ > Space
+//│ > Identifier(a, false)
+//│ > Comma
+//│ > Space
+//│ > Identifier(b, false)
+//│ > Space
+//│ > Identifier(=, true)
+//│ > Space
+//│ > Open(Round)
+//│ > Literal(Integer, 1)
+//│ > Comma
+//│ > Space
+//│ > Literal(Integer, 2)
+//│ > Close(Round)
+//│ > Space
+//│ > Identifier(in, false)
+//│ > Space
+//│ > Identifier(a, false)
+//│ > Space
+//│ > Identifier(+, true)
+//│ > Space
+//│ > Identifier(b, false)
+
 printLexed of lines of
   "let rec factorial x = // a simple factorial function"
   "  if x <= 1 then 1 else x * factorial (x - 1)"
@@ -131,13 +163,13 @@ fun take(pattern P, idx: Str, acc: Str) =
       set acc = acc + ch
     else [acc, idx]
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.128: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.160: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	              ^^^
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.128: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.160: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                             ^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.128: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.160: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                                                             ^
 
 :e
@@ -147,13 +179,13 @@ fun foobar(x) = if x is
   Some of
     a then a
 //│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.147: 	  Some of
+//│ ║  l.179: 	  Some of
 //│ ║         	  ^^^^^^^
-//│ ║  l.148: 	    a then a
+//│ ║  l.180: 	    a then a
 //│ ╙──       	^^^^^^^^^^^^
 //│ ╔══[ERROR] Name not found: None
-//│ ║  l.146: 	  None then "hello"
+//│ ║  l.178: 	  None then "hello"
 //│ ╙──       	  ^^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.146: 	  None then "hello"
+//│ ║  l.178: 	  None then "hello"
 //│ ╙──       	  ^^^^

@@ -152,10 +152,14 @@ fun lex(str: Str) =
       else [idx, acc]
   
   fun identifier(idx: Int, acc: Str) =
-    while char(idx) is Some(Char.IdentifierBody as ch)
+    while char(idx) is Some(Char.IdentifierBody as ch) do
+      set idx = idx + 1
+      set acc = acc + ch
+    while char(idx) is Some("'" as ch)
       then
-        set idx = idx + 1
-        set acc = acc + ch
+        set
+          idx = idx + 1
+          acc = acc + "'"
       else tuple of
         idx
         if acc is

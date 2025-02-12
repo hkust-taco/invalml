@@ -668,3 +668,20 @@ let rec sum l =
 
 printParsed of "begin end"
 //│ > Sequence of Nil
+
+:todo
+printParsed of """
+let v' =
+    let a, b = (1, 2) in a + b
+"""
+//│ > Tuple of Stack of 
+//│ >   Ternary:
+//│ >     name = Keyword(`let`, 7, 7)
+//│ >     lhs = Ident of "v'"
+//│ >     rhs = Some of Ternary:
+//│ >       name = Keyword(`let`, 7, 7)
+//│ >       lhs = Ident of "a"
+//│ >       rhs = None
+//│ >       body = None
+//│ >     body = None
+//│ >   Ident of "b"

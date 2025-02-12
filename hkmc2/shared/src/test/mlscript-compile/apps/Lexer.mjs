@@ -1198,8 +1198,8 @@ Lexer1 = class Lexer {
       return tmp2
     };
     identifier = function identifier(idx, acc) {
-      let scrut, param0, ch, matchResult, tmp, tmp1, tmp2, tmp3, tmp4;
-      tmp5: while (true) {
+      let scrut, param0, ch, matchResult, scrut1, param01, ch1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+      tmp8: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
@@ -1211,38 +1211,58 @@ Lexer1 = class Lexer {
             tmp1 = acc + ch;
             acc = tmp1;
             tmp2 = runtime.Unit;
-            continue tmp5;
+            continue tmp8;
           } else {
-            if (acc === "begin") {
-              tmp3 = Lexer.Token.Open(Lexer.BeginEnd);
-            } else if (acc === "end") {
-              tmp3 = Lexer.Token.Close(Lexer.BeginEnd);
-            } else if (acc === "true") {
-              tmp3 = Lexer.Token.boolean("true");
-            } else if (acc === "false") {
-              tmp3 = Lexer.Token.boolean("false");
-            } else {
-              tmp3 = Lexer.Token.Identifier(acc, false);
-            }
-            tmp2 = Predef.tuple(idx, tmp3);
+            tmp2 = runtime.Unit;
           }
         } else {
-          if (acc === "begin") {
-            tmp4 = Lexer.Token.Open(Lexer.BeginEnd);
-          } else if (acc === "end") {
-            tmp4 = Lexer.Token.Close(Lexer.BeginEnd);
-          } else if (acc === "true") {
-            tmp4 = Lexer.Token.boolean("true");
-          } else if (acc === "false") {
-            tmp4 = Lexer.Token.boolean("false");
-          } else {
-            tmp4 = Lexer.Token.Identifier(acc, false);
-          }
-          tmp2 = Predef.tuple(idx, tmp4);
+          tmp2 = runtime.Unit;
         }
         break;
       }
-      return tmp2
+      tmp9: while (true) {
+        scrut1 = char1(idx);
+        if (scrut1 instanceof Option.Some.class) {
+          param01 = scrut1.value;
+          if (param01 === "'") {
+            ch1 = param01;
+            tmp3 = idx + 1;
+            idx = tmp3;
+            tmp4 = acc + "'";
+            acc = tmp4;
+            tmp5 = runtime.Unit;
+            continue tmp9;
+          } else {
+            if (acc === "begin") {
+              tmp6 = Lexer.Token.Open(Lexer.BeginEnd);
+            } else if (acc === "end") {
+              tmp6 = Lexer.Token.Close(Lexer.BeginEnd);
+            } else if (acc === "true") {
+              tmp6 = Lexer.Token.boolean("true");
+            } else if (acc === "false") {
+              tmp6 = Lexer.Token.boolean("false");
+            } else {
+              tmp6 = Lexer.Token.Identifier(acc, false);
+            }
+            tmp5 = Predef.tuple(idx, tmp6);
+          }
+        } else {
+          if (acc === "begin") {
+            tmp7 = Lexer.Token.Open(Lexer.BeginEnd);
+          } else if (acc === "end") {
+            tmp7 = Lexer.Token.Close(Lexer.BeginEnd);
+          } else if (acc === "true") {
+            tmp7 = Lexer.Token.boolean("true");
+          } else if (acc === "false") {
+            tmp7 = Lexer.Token.boolean("false");
+          } else {
+            tmp7 = Lexer.Token.Identifier(acc, false);
+          }
+          tmp5 = Predef.tuple(idx, tmp7);
+        }
+        break;
+      }
+      return tmp5
     };
     operator = function operator(idx, acc) {
       let scrut, param0, ch, matchResult, tmp, tmp1, tmp2, tmp3, tmp4;
