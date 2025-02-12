@@ -216,11 +216,13 @@ printParsed of "square (sin pi) +. square (cos pi)"
 
 :todo
 printParsed of "(1 < 2) = false"
-//│ > App:
-//│ >   callee = Ident of "<"
-//│ >   arguments = Stack of 
-//│ >     Literal#Integer of "1"
-//│ >     Literal#Integer of "2"
+//│ > Error:
+//│ >   tree = App:
+//│ >     callee = Ident of "<"
+//│ >     arguments = Stack of 
+//│ >       Literal#Integer of "1"
+//│ >       Literal#Integer of "2"
+//│ >   message = "expect EOF instead of Identifier(\"=\", true)"
 
 printParsed of "let cat s1 s2 = s1 ^ \" \" ^ s2"
 //│ > Ternary:
@@ -286,11 +288,13 @@ let cos2 = compose square cos
 
 :todo
 printParsed of "type sign = Positive | Negative"
-//│ > Ternary:
-//│ >   name = Keyword(`type`, 7, N/A)
-//│ >   lhs = Ident of "sign"
-//│ >   rhs = Ident of "Positive"
-//│ >   body = None
+//│ > Error:
+//│ >   tree = Ternary:
+//│ >     name = Keyword(`type`, 7, N/A)
+//│ >     lhs = Ident of "sign"
+//│ >     rhs = Ident of "Positive"
+//│ >     body = None
+//│ >   message = "expect EOF instead of Identifier(\"|\", true)"
 
 printParsed of "true"
 //│ > Literal#Boolean of "true"
