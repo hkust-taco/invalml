@@ -37,7 +37,7 @@ if
   true and
   true do
     print("ok")
-//│ /!!!\ Uncaught error: scala.NotImplementedError: infix on newline at Ln 2 Col 11:Ln 2 Col 11
+//│ /!!!\ Uncaught error: java.lang.Exception: Internal Error: infix on newline at Ln 2 Col 11:Ln 2 Col 11
 
 if
   true and
@@ -51,7 +51,7 @@ if
   and
   true do
     print("ok")
-//│ /!!!\ Uncaught error: scala.NotImplementedError: infix on newline at Ln 3 Col 6:Ln 3 Col 6
+//│ /!!!\ Uncaught error: java.lang.Exception: Internal Error: infix on newline at Ln 3 Col 6:Ln 3 Col 6
 
 if
   true
