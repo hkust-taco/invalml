@@ -666,3 +666,5 @@ let rec sum l =
 //│ >                   Ident of "t"
 //│ >     body = None
 
+printParsed of "begin end"
+//│ > Sequence of Nil

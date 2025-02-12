@@ -708,8 +708,9 @@ fun parse(tokens) =
               kind == kind' then
                 tracer.print of "closing bracket " + kind, source.line
                 consume
-                if content is Tree.Empty and kind is Lexer.Round then
-                  Tree.Tuple(Nil)
+                if content is Tree.Empty and kind is
+                  Lexer.Round then Tree.Tuple(Nil)
+                  Lexer.BeginEnd then Tree.Sequence(Nil)
                 else
                   content
               else content Tree.Error("mismatched brackets")
