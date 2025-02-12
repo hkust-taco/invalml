@@ -697,22 +697,25 @@ fun parse(tokens) =
           yeetSpaces is
             Token.Close(kind') :: _ and
               kind == kind' then
+                tracer.print of "closing bracket " + kind, source.line
                 consume
-                content
+                if content is Tree.Empty and kind is Lexer.Round then
+                  Tree.Tuple(Nil)
+                else
+                  content
               else content Tree.Error("mismatched brackets")
             token :: _ then
               let message = "expect a close bracket instead of " + token
               tracer.print of message, source.line
               content Tree.Error(message)
             Nil then
-              tracer.print("expect a close bracket instead of EOF", source.line)
-              content Tree.Error("expect a close bracket instead of EOF")
+              let message = "expect a close bracket instead of EOF"
+              tracer.print of message, source.line
+              content Tree.Error(message)
         exprCont(content, prec, bracket)
       Token.Close(kind) :: _ and bracket is
         Some(kind') and
-          kind == kind' then
-            consume
-            Tree.Empty()
+          kind == kind' then Tree.Empty()
           else Tree.error("mismatched brackets")
         None then
           tracer.print("missing close bracket", source.line)

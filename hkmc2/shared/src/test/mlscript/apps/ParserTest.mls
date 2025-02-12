@@ -480,7 +480,10 @@ let f a b =
 //│ >         callee = Ident of "print_int"
 //│ >         arguments = Stack of 
 //│ >           Ident of "b"
-//│ >       Ident of "print_newline"
+//│ >       App:
+//│ >         callee = Ident of "print_newline"
+//│ >         arguments = Stack of 
+//│ >           Tuple of Nil
 //│ >   body = None
 
 printParsed of """
@@ -535,3 +538,6 @@ let translate p dx dy =
 //│ >               Ident of "p"
 //│ >               Ident of "y"
 //│ >       Ident of "dy"
+
+printParsed of "()"
+//│ > Tuple of Nil
