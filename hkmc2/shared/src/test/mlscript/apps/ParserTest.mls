@@ -35,7 +35,7 @@ print of Parser.keywords.values.join("\n")
 //│ > Keyword(`then`, 5, 5)
 //│ > Keyword(`do`, 5, 5)
 //│ > Keyword(`else`, 6, 6)
-//│ > Keyword(`let`, 7, 7)
+//│ > Keyword(`let`, 7, 1)
 //│ > Keyword(`in`, 5, 5)
 //│ > Keyword(`true`, N/A, N/A)
 //│ > Keyword(`false`, N/A, N/A)
@@ -130,7 +130,7 @@ printParsed of "1 + 2 ** 5 * 4"
 
 printParsed of "let zero = 0 in zero"
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = Ident of "zero"
 //│ >   rhs = Literal#Integer of "0"
 //│ >   body = Ident of "zero"
@@ -141,11 +141,11 @@ let zero = 0 in
 one + zero
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = Ident of "one"
 //│ >   rhs = Literal#Integer of "1"
 //│ >   body = Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Ident of "zero"
 //│ >     rhs = Literal#Integer of "0"
 //│ >     body = App:
@@ -169,7 +169,7 @@ printParsed of """
 let pi = 4.0 *. atan 1.0
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = Ident of "pi"
 //│ >   rhs = App:
 //│ >     callee = Ident of "*."
@@ -183,7 +183,7 @@ let pi = 4.0 *. atan 1.0
 
 printParsed of "let square x = x *. x"
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = App:
 //│ >     callee = Ident of "square"
 //│ >     arguments = Stack of 
@@ -226,7 +226,7 @@ printParsed of "(1 < 2) = false"
 
 printParsed of "let cat s1 s2 = s1 ^ \" \" ^ s2"
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = App:
 //│ >     callee = App:
 //│ >       callee = Ident of "cat"
@@ -256,7 +256,7 @@ let compose f g = fun x -> f (g x) in
 let cos2 = compose square cos
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = App:
 //│ >     callee = App:
 //│ >       callee = Ident of "compose"
@@ -275,7 +275,7 @@ let cos2 = compose square cos
 //│ >           arguments = Stack of 
 //│ >             Ident of "x"
 //│ >   body = Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Ident of "cos2"
 //│ >     rhs = App:
 //│ >       callee = App:
@@ -439,7 +439,6 @@ else
 //│ >   rhs = Ident of "a"
 //│ >   body = Some of Ident of "b"
 
-:todo
 printParsed of """
 let f a b =
   if a == b then
@@ -453,7 +452,7 @@ let f a b =
   end
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = App:
 //│ >     callee = App:
 //│ >       callee = Ident of "f"
@@ -501,7 +500,7 @@ let translate p dx dy =
 """
 //│ > Sequence of Stack of 
 //│ >   Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = App:
 //│ >       callee = App:
 //│ >         callee = App:
@@ -558,7 +557,7 @@ let fullname ?title first second =
     | None -> first ^ " " ^ second
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = App:
 //│ >     callee = App:
 //│ >       callee = App:
@@ -620,7 +619,7 @@ let rec sum l =
 """
 //│ > Sequence of Stack of 
 //│ >   Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Modified:
 //│ >       modifier = Keyword(`rec`, N/A, N/A)
 //│ >       subject = Ident of "factorial"
@@ -646,7 +645,7 @@ let rec sum l =
 //│ >                   Literal#Integer of "1"
 //│ >     body = Empty
 //│ >   Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Modified:
 //│ >       modifier = Keyword(`rec`, N/A, N/A)
 //│ >       subject = Ident of "sum"
@@ -677,22 +676,37 @@ let rec sum l =
 printParsed of "begin end"
 //│ > Sequence of Nil
 
-:todo
 printParsed of """
 let v' =
     let a, b = (1, 2) in a + b
 """
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > Ternary:
+//│ >   name = Keyword(`let`, 7, 1)
+//│ >   lhs = Ident of "v'"
+//│ >   rhs = Ternary:
+//│ >     name = Keyword(`let`, 7, 1)
+//│ >     lhs = Tuple of Stack of 
+//│ >       Ident of "a"
+//│ >       Ident of "b"
+//│ >     rhs = Tuple of Stack of 
+//│ >       Literal#Integer of "1"
+//│ >       Literal#Integer of "2"
+//│ >     body = App:
+//│ >       callee = Ident of "+"
+//│ >       arguments = Stack of 
+//│ >         Ident of "a"
+//│ >         Ident of "b"
+//│ >   body = Empty
 
 printParsed of """
 let a = 0 and b = 1 in a + b
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = Ident of "a"
 //│ >   rhs = Literal#Integer of "0"
 //│ >   body = Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Ident of "b"
 //│ >     rhs = Literal#Integer of "1"
 //│ >     body = App:
@@ -705,11 +719,11 @@ printParsed of """
 let a = 0 and b = 1 in a + b
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = Ident of "a"
 //│ >   rhs = Literal#Integer of "0"
 //│ >   body = Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Ident of "b"
 //│ >     rhs = Literal#Integer of "1"
 //│ >     body = App:
@@ -727,7 +741,7 @@ in
   even 1000
 """
 //│ > Ternary:
-//│ >   name = Keyword(`let`, 7, 7)
+//│ >   name = Keyword(`let`, 7, 1)
 //│ >   lhs = Modified:
 //│ >     modifier = Keyword(`rec`, N/A, N/A)
 //│ >     subject = Ident of "even"
@@ -750,7 +764,7 @@ in
 //│ >                 Ident of "n"
 //│ >                 Literal#Integer of "1"
 //│ >   body = Ternary:
-//│ >     name = Keyword(`let`, 7, 7)
+//│ >     name = Keyword(`let`, 7, 1)
 //│ >     lhs = Ident of "odd"
 //│ >     rhs = Match:
 //│ >       scrutinee = Empty()

@@ -119,7 +119,7 @@ module Keywords with
   val _then = Keyword("then", thenPrec, thenPrec)
   val _do = Keyword("do", thenPrec, thenPrec)
   val _else = Keyword("else", nextPrec, currPrec)
-  val _let = Keyword("let", nextPrec, currPrec)
+  val _let = Keyword("let", nextPrec, semiPrec)
   val _in = Keyword("in", thenPrec, thenPrec)
   val _true = Keyword("true", None, None)
   val _false = Keyword("false", None, None)
