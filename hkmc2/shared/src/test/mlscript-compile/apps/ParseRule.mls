@@ -1,0 +1,144 @@
+import "./Parser.mls"
+import "../Predef.mls"
+import "../Stack.mls"
+import "../Option.mls"
+import "../TreeTracer.mls"
+import "path"
+import "../../vendors/railroad/railroad.mjs"
+
+open Predef
+open Stack
+open Option
+open Parser { ParseRule, Choice, prefixRules }
+open TreeTracer
+
+object RecursiveKnot
+
+class LinkOpts(val href: Str)
+
+module ParseRule with ...
+
+val rr = railroad
+
+// Check if the given path exists.
+fun ensurePath(pathString) =
+  if fs.statSync(pathString).isDirectory() is false do
+    throw new Error("The output directory does not exist.")
+  pathString
+
+// `process.cwd()` is different in `hkmc2AllTests / test` and
+// `~hkmc2DiffTests / Test / run`. This is a workaround to make the path.
+fun findProjectRoot =
+  let base = process.cwd()
+  let fragments = base.split(path.sep)
+  if fragments.at(-1) is "shared" and fragments.at(-2) is "hkmc2" then
+    base
+  else
+    base + path.sep + "hkmc2" + path.sep + "shared"
+
+fun outputPath = ensurePath of path.resolve of
+  findProjectRoot, "src", "test", "mlscript", "apps", "output"
+
+fun libraryPath = ensurePath of path.resolve of
+  findProjectRoot, "src", "test", "vendors", "railroad"
+
+val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
+
+// Put the given array of elements into a flexbox container.
+fun toHTML(...elements) = fold(+) of
+  """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parse Rules</title>
+</head>
+<body style="margin: 0; padding: 1em">
+<div style="display: flex; flex-direction: column; gap: 1em">
+"""
+  elements.join("\n")
+  """</div>
+<style>
+body{margin:0;font-family:system-ui,sans-serif}
+"""
+  CSS_CONTENT
+  """</style>
+</body>
+</html>
+"""
+
+fun save(fileName, ...diagrams) = fs.writeFileSync of
+  path.join of outputPath, fileName
+  toHTML of ...diagrams.flatMap of case
+    [caption, svg] then fold(+) of
+      "<figure>"
+      svg
+      "<figcaption id=\""
+      caption
+      "\" style=\"align: center\">" + caption + "</figcaption>"
+      "</figure>"
+    svg then svg
+  "utf-8"
+
+let tracer = new TreeTracer()
+
+fun render(rule: ParseRule) =
+  let helperRules = []
+  let renderCache = new globalThis.Map()
+  fun sequence(lhs, rhsOpt) =
+    if rhsOpt is
+      Some(rhs) then rr.Sequence(lhs, rhs)
+      None then lhs
+  fun diagram(choicesOpt) =
+    rr.Diagram of if choicesOpt is Some(choices) then choices else []
+  fun renderRule(rule: ParseRule, currentRule) =
+    diagram of renderChoices(rule.choices, currentRule)
+  fun renderChoices(cs: Stack[Choice], currentRule) = tracer.trace of
+    "renderChoices <<< "
+    result => "renderChoices >>> "
+    () => ...
+    let
+      optional = false
+      choices = []
+    while cs is head :: tail do
+      if head is
+        Choice.End do
+          tracer.print of "found Choice.End"
+          set optional = true
+        Choice.Keyword(keyword, rest) do
+          tracer.print of "found Choice.Keyword"
+          choices.push of rr.Terminal(keyword.name) sequence(renderChoices(rest.choices, currentRule))
+        Choice.Expr(_, rest) do
+          tracer.print of "found Choice.Expr"
+          choices.push of rr.NonTerminal("expr") sequence(renderChoices(rest.choices, currentRule))
+        Choice.Lazy(get, make) and
+          renderCache.has(head) do
+            tracer.print of "found Choice.Lazy in cache"
+            let ruleName = renderCache.get(head)
+            choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName )))
+          currentRule is
+            Some(ruleName) do
+              tracer.print of "found Choice.Lazy in recursion"
+              let rule = get()
+              if rule is RecursiveKnot then
+                tracer.print of "found RecursiveKnot"
+                choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName )))
+              else
+                tracer.print of "expect RecursiveKnot, found " + String(rule)
+                ???
+            None do
+              tracer.print of "found Choice.Lazy in top-level"
+              let proxyRule = make(() => RecursiveKnot)
+              let ruleName = "rule$" + helperRules.length.toString()
+              helperRules.push of tuple of
+                ruleName, diagram of renderChoices(proxyRule :: Nil, Some(ruleName))
+              choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName )))
+              renderCache.set(head, ruleName)
+      set cs = tail
+    tracer.print of "choices: ", choices.length.toString()
+    if
+      choices.length is 0 then None
+      let choice = rr.Choice(0, ...choices)
+      optional is true then Some(rr.Optional(choice))
+      else Some(choice)
+  [["Prefix Rules", renderRule(rule, None)], ...helperRules]

@@ -152,24 +152,23 @@ fun makePrecMap(...ops) =
     set i += 1
   m
 
-let precMap = makePrecMap(
+let precMap = makePrecMap of
   ","
-  "@",
-  ":",
-  "|",
-  "&",
-  "=",
-  "/ \\",
-  "^",
-  "!",
-  "< >",
-  "+ -",
-  "* %",
-  "~",
-  "", // perfix operators
-  "", // applications
-  ".",
-)
+  "@"
+  ":"
+  "|"
+  "&"
+  "="
+  "/ \\"
+  "^"
+  "!"
+  "< >"
+  "+ -"
+  "* %"
+  "~"
+  "" // perfix operators
+  "" // applications
+  "."
 
 let appPrec = if precMap.get(".") is Some(prec) then prec - 1
 let prefixPrec = appPrec - 1

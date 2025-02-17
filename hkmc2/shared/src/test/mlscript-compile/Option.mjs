@@ -36,6 +36,18 @@ Option1 = class Option {
   } 
   static test() {
     return Predef.pipeInto(2134, Predef.print)
+  } 
+  static getOrElse(opt, default1) {
+    let param0, value;
+    if (opt instanceof Option.Some.class) {
+      param0 = opt.value;
+      value = param0;
+      return value
+    } else if (opt instanceof Option.None.class) {
+      return default1
+    } else {
+      throw new globalThis.Error("match error");
+    }
   }
   static toString() { return "Option"; }
 };

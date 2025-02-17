@@ -15,6 +15,12 @@ Parser.opPrec(";")
 Parser.opPrec("|>")
 //│ = [10, 16]
 
+Parser.opPrec("<:")
+//│ = [16, 8]
+
+Parser.opPrec("::")
+//│ = [9, 8]
+
 Parser.opPrec of "+"
 //│ = [17, 17]
 
