@@ -429,6 +429,7 @@ end
 //│ >     arguments = Stack of 
 //│ >       Literal#String of "world"
 
+// TODO: comment on this syntax design smell in the paper
 printParsed of """
 if a == b then
   a

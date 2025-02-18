@@ -23,8 +23,8 @@ class TreeTracer with
     set steps += 1
   fun print(...pieces) =
     let message = if pieces is
-      [..pieces, Int as line] then fold (+) of ...pieces, " [Ln " + line + "]"
-      else fold (+) of ...pieces
+      [..pieces, Int as line] then fold(+) of ...pieces, " [Ln " + line + "]"
+      else fold(+) of ...pieces
     output of
       if steps > 0 then "│ ".repeat(steps - 1) else ""
       if steps > 0 then "├ " else ""
