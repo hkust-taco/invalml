@@ -1,0 +1,52 @@
+:js
+
+import "../../mlscript-compile/Iter.mls"
+import "../../mlscript-compile/Stack.mls"
+
+open Iter
+open Stack { Cons, Nil }
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  filtering of x => x % 2 is 0
+  mapping of x => x * 2
+  toArray()
+//│ = [4, 8, 12, 16, 20]
+
+([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  filtering of x => x % 2 is 0
+  folded of "[", (x, y) => if x is "[" then x + y else x + ", " + y) + "]"
+//│ = "[2, 4, 6, 8, 10]"
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  filtering of x => x % 2 is 1
+  rightFolded of Nil, Cons
+//│ = Cons(1, Cons(3, Cons(5, Cons(7, Cons(9, Nil)))))
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  filtering of x => x % 2 is 0
+  reduced of (x, y) => x + y
+//│ = 30
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  filtering of x => x % 2 is 0
+  folded of 1, *
+//│ = 3840
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  taking(5)
+  toArray()
+//│ = [1, 2, 3, 4, 5]
+
+["foo", "bar", "baz"]
+  zippingWithIndex()
+  toArray()
+//│ = [["foo", 0], ["bar", 1], ["baz", 2]]
+
+["foo", "bar", "baz"]
+  zippingWithIndex()
+  mapping of case [x, y] then [y, x]
+  toArray()
+//│ = [[0, "foo"], [1, "bar"], [2, "baz"]]
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10] joined(" <> ")
+//│ = "1 <> 2 <> 3 <> 4 <> 5 <> 6 <> 7 <> 8 <> 9 <> 10"

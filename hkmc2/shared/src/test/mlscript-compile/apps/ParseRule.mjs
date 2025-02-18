@@ -4,6 +4,7 @@ import Predef from "./../Predef.mjs";
 import Stack from "./../Stack.mjs";
 import Option from "./../Option.mjs";
 import TreeTracer from "./../TreeTracer.mjs";
+import XML from "./../XML.mjs";
 import path from "path";
 import railroad from "./../../vendors/railroad/railroad.mjs";
 let ParseRule1, RecursiveKnot1, LinkOpts1;
@@ -78,29 +79,74 @@ ParseRule1 = class ParseRule {
     return ParseRule.ensurePath(tmp);
   } 
   static toHTML(...elements) {
-    let tmp, tmp1;
-    tmp = Predef.fold((arg1, arg2) => {
-      return arg1 + arg2
-    });
-    tmp1 = runtime.safeCall(elements.join("\n"));
-    return runtime.safeCall(tmp("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Parse Rules</title>\n</head>\n<body style=\"margin: 0; padding: 1em\">\n<div style=\"display: flex; flex-direction: column; gap: 1em\">\n", tmp1, "</div>\n<style>\nbody{margin:0;font-family:system-ui,sans-serif}\n", ParseRule.CSS_CONTENT, "</style>\n</body>\n</html>\n"))
+    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16;
+    tmp = XML.html([
+      "lang",
+      "en"
+    ]);
+    tmp1 = XML.elem("head");
+    tmp2 = XML.tag("meta");
+    tmp3 = runtime.safeCall(tmp2([
+      "charset",
+      "UTF-8"
+    ]));
+    tmp4 = XML.tag("meta");
+    tmp5 = runtime.safeCall(tmp4([
+      "name",
+      "viewport"
+    ], [
+      "content",
+      "width=device-width, initial-scale=1.0"
+    ]));
+    tmp6 = XML.elem("title");
+    tmp7 = runtime.safeCall(tmp6("Parse Rules"));
+    tmp8 = runtime.safeCall(tmp1(tmp3, tmp5, tmp7));
+    tmp9 = XML.style([
+      "margin",
+      "0"
+    ], [
+      "padding",
+      "1em"
+    ]);
+    tmp10 = XML.elem("body", tmp9);
+    tmp11 = XML.style([
+      "display",
+      "flex"
+    ], [
+      "flex-direction",
+      "column"
+    ], [
+      "gap",
+      "1em"
+    ]);
+    tmp12 = XML.elem("div", tmp11);
+    tmp13 = runtime.safeCall(tmp12(...elements));
+    tmp14 = XML.elem("style");
+    tmp15 = runtime.safeCall(tmp14("body{margin:0;font-family:system-ui,sans-serif}", ParseRule.CSS_CONTENT));
+    tmp16 = runtime.safeCall(tmp10(tmp13, tmp15));
+    return runtime.safeCall(tmp(tmp8, tmp16))
   } 
   static save(fileName, ...diagrams) {
     let tmp, tmp1, tmp2, tmp3;
     tmp = path.join(ParseRule.outputPath, fileName);
     tmp1 = (caseScrut) => {
-      let svg, first1, first0, caption, svg1, tmp4, tmp5, tmp6;
+      let svg, first1, first0, caption, svg1, tmp4, tmp5, tmp6, tmp7;
       if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
         first0 = caseScrut[0];
         first1 = caseScrut[1];
         caption = first0;
         svg1 = first1;
-        tmp4 = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2
-        });
-        tmp5 = "\" style=\"align: center\">" + caption;
-        tmp6 = tmp5 + "</figcaption>";
-        return runtime.safeCall(tmp4("<figure>", svg1, "<figcaption id=\"", caption, tmp6, "</figure>"))
+        tmp4 = XML.style([
+          "text-align",
+          "center"
+        ]);
+        tmp5 = XML.elem("figure", tmp4);
+        tmp6 = XML.elem("figcaption", [
+          "id",
+          caption
+        ]);
+        tmp7 = runtime.safeCall(tmp6(caption));
+        return runtime.safeCall(tmp5(svg1, tmp7))
       } else {
         svg = caseScrut;
         return svg

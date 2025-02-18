@@ -3,6 +3,7 @@ import "../Predef.mls"
 import "../Stack.mls"
 import "../Option.mls"
 import "../TreeTracer.mls"
+import "../XML.mls"
 import "path"
 import "../../vendors/railroad/railroad.mjs"
 
@@ -11,6 +12,7 @@ open Stack
 open Option
 open Parser { ParseRule, Choice, prefixRules }
 open TreeTracer
+open XML { html, tag, elem, style }
 
 object RecursiveKnot
 
@@ -27,7 +29,7 @@ fun ensurePath(pathString) =
   pathString
 
 // `process.cwd()` is different in `hkmc2AllTests / test` and
-// `~hkmc2DiffTests / Test / run`. This is a workaround to make the path.
+// `~hkmc2DiffTests / Test / run`. This is a workaround to make the
 fun findProjectRoot =
   let base = process.cwd()
   let fragments = base.split(path.sep)
@@ -44,39 +46,33 @@ fun libraryPath = ensurePath of path.resolve of
 
 val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
 
-// Put the given array of elements into a flexbox container.
-fun toHTML(...elements) = fold(+) of
-  """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Parse Rules</title>
-</head>
-<body style="margin: 0; padding: 1em">
-<div style="display: flex; flex-direction: column; gap: 1em">
-"""
-  elements.join("\n")
-  """</div>
-<style>
-body{margin:0;font-family:system-ui,sans-serif}
-"""
-  CSS_CONTENT
-  """</style>
-</body>
-</html>
-"""
+fun toHTML(...elements) = html(["lang", "en"]) of
+  elem("head") of
+    tag("meta") of ["charset", "UTF-8"]
+    tag("meta") of
+      ["name", "viewport"]
+      ["content", "width=device-width, initial-scale=1.0"]
+    elem("title") of "Parse Rules"
+  elem("body", style of
+    ["margin", "0"]
+    ["padding", "1em"]
+  ) of
+    elem("div", style of
+      ["display", "flex"]
+      ["flex-direction", "column"]
+      ["gap", "1em"]
+    ) of
+      ...elements
+    elem("style") of
+      "body{margin:0;font-family:system-ui,sans-serif}"
+      CSS_CONTENT
 
 fun save(fileName, ...diagrams) = fs.writeFileSync of
   path.join of outputPath, fileName
   toHTML of ...diagrams.flatMap of case
-    [caption, svg] then fold(+) of
-      "<figure>"
+    [caption, svg] then elem("figure", style(["text-align", "center"])) of
       svg
-      "<figcaption id=\""
-      caption
-      "\" style=\"align: center\">" + caption + "</figcaption>"
-      "</figure>"
+      elem("figcaption", ["id", caption]) of caption
     svg then svg
   "utf-8"
 
@@ -132,7 +128,7 @@ fun render(rule: ParseRule) =
               let ruleName = "rule$" + helperRules.length.toString()
               helperRules.push of tuple of
                 ruleName, diagram of renderChoices(proxyRule :: Nil, Some(ruleName))
-              choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName )))
+              choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName)))
               renderCache.set(head, ruleName)
       set cs = tail
     tracer.print of "choices: ", choices.length.toString()

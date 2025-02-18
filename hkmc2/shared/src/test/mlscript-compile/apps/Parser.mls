@@ -333,6 +333,13 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
+      Choice.Optional(_, rule, rest) then
+        let prefix = if go(rule) is
+          [name, [line]] then [name + " ", line]
+          [name, lines] then [name, ..lines.map((line, _, _) => "  " + line)]
+        if go(rest) is
+          [name, [line]] then [prefix + line]
+          [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
       Choice.End then ["<end>"]
       Choice.Lazy(get, make) and
         get() is Knot then ["<rec>"]
@@ -357,6 +364,7 @@ module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
   class Expr(process: Tree -> Tree, rest: ParseRule)
   class End(value: Tree)
+  class Optional(process: (Some | None, Tree) -> Tree, rule: ParseRule, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
   fun forced(choice) = if choice is Lazy(get) then get() else choice
   // Shorthands for constructing rule choices.

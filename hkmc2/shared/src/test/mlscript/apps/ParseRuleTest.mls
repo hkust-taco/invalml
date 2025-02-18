@@ -8,15 +8,4 @@ open ParseRule { save, rr, render }
 open Parser { Choice, prefixRules }
 open Stack
 
-save of
-  "rule.html"
-  // rr.Diagram of
-  //   rr.Terminal("let")
-  //   rr.NonTerminal("expr")
-  //   rr.Terminal("=")
-  //   rr.NonTerminal("expr")
-  //   rr.Optional of
-  //     rr.Sequence of
-  //       rr.Terminal("in")
-  //       rr.NonTerminal("expr")
-  ...render(prefixRules)
+save of "rule.html", ...render(prefixRules)
