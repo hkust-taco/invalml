@@ -40,7 +40,7 @@ Result1 = class Result {
 };
 Iter1 = class Iter {
   static {}
-  static derive(iterable, makeNext) {
+  static adaptIterable(iterable, makeNext) {
     return Iterable1(() => {
       let iterator, tmp, tmp1;
       tmp = runtime.safeCall(iterable[globalThis.Symbol.iterator]());
@@ -50,7 +50,7 @@ Iter1 = class Iter {
     })
   } 
   static mapping(xs, op) {
-    return Iter.derive(xs, (iterator) => {
+    return Iter.adaptIterable(xs, (iterator) => {
       return () => {
         let next, scrut, tmp, tmp1;
         tmp = runtime.safeCall(iterator.next());
@@ -66,7 +66,7 @@ Iter1 = class Iter {
     })
   } 
   static filtering(xs1, op1) {
-    return Iter.derive(xs1, (iterator) => {
+    return Iter.adaptIterable(xs1, (iterator) => {
       return () => {
         let next, scrut, scrut1, scrut2, tmp, tmp1, tmp2;
         tmp = runtime.safeCall(iterator.next());

@@ -5,7 +5,7 @@ open Predef
 // * Implements the `Iterable` protocol.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_iterable_protocol
 class Iterable(mk) with
-  set this.(globalThis.Symbol.iterator) = mk
+  set this.(Symbol.iterator) = mk
 
 // * Implements the `Iterator` protocol.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_iterator_protocol
@@ -19,12 +19,12 @@ module Result with
 
 module Iter with ...
 
-fun derive(iterable, makeNext) = Iterable of () =>
-  let iterator = iterable.(globalThis.Symbol.iterator)()
+fun adaptIterable(iterable, makeNext) = Iterable of () =>
+  let iterator = iterable.(Symbol.iterator)()
   Iterator of makeNext of iterator
 
 fun mapping(xs, op) =
-  xs derive of iterator => () =>
+  xs adaptIterable of iterator => () =>
     let next = iterator.next()
     if next.done then
       Result.Done
@@ -32,7 +32,7 @@ fun mapping(xs, op) =
       Result.Next of op(next.value)
 
 fun filtering(xs, op) =
-  xs derive of iterator => () =>
+  xs adaptIterable of iterator => () =>
     let next = iterator.next()
     while next.done is false and op(next.value) is false do
       set next = iterator.next()
@@ -62,18 +62,18 @@ fun foldingImpl(iterator, acc, op) =
   acc
 
 fun reduced(xs, op) =
-  let iterator = xs.(globalThis.Symbol.iterator)()
+  let iterator = xs.(Symbol.iterator)()
   let next = iterator.next()
   if next.done do
     throw new Error("Empty iterator")
   foldingImpl(iterator, next.value, op)
 
 fun folded(xs, z, op) =
-  let iterator = xs.(globalThis.Symbol.iterator)()
+  let iterator = xs.(Symbol.iterator)()
   foldingImpl(iterator, z, op)
 
 fun rightFolded(xs, z, op) =
-  let iterator = xs.(globalThis.Symbol.iterator)()
+  let iterator = xs.(Symbol.iterator)()
   fun go() = if
     let next = iterator.next()
     next.done is true then
@@ -83,7 +83,7 @@ fun rightFolded(xs, z, op) =
   go()
 
 fun joined(xs, sep) =
-  let iterator = xs.(globalThis.Symbol.iterator)()
+  let iterator = xs.(Symbol.iterator)()
   let next = iterator.next()
   if next.done then "" else
     let sep' = String(sep)

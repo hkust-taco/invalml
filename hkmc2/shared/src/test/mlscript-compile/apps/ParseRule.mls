@@ -29,7 +29,7 @@ fun ensurePath(pathString) =
   pathString
 
 // `process.cwd()` is different in `hkmc2AllTests / test` and
-// `~hkmc2DiffTests / Test / run`. This is a workaround to make the
+// `~hkmc2DiffTests / Test / run`. This is a workaround to make the path.
 fun findProjectRoot =
   let base = process.cwd()
   let fragments = base.split(path.sep)
