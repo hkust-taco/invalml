@@ -1,16 +1,19 @@
 import "../Predef.mls"
 import "../Option.mls"
 import "../Stack.mls"
-import "../Map.mls"
+import "../BetterMap.mls"
 import "../TreeTracer.mls"
+import "../Iter.mls"
 import "../apps/Lexer.mls"
 
 open Predef
 open Option
 open Stack
-open Map
+open BetterMap
 open TreeTracer { TreeTracer }
 open Lexer { Token, LiteralKind, BracketKind }
+
+type Option[A] = Some[A] | None
 
 module Parser with ...
 
@@ -64,6 +67,21 @@ fun collectToArray[A, B](stack: Stack[A], p) =
       elements.push of value
     set stack = tail
   elements
+
+fun map(xs, op) = if xs is
+  Nil then Nil
+  head :: tail then ...
+  let
+    result = op(head) :: Nil
+    current = result
+    rest = tail
+  while rest is head :: tail do
+    let next = op(head) :: Nil
+    set
+      current.tail = next
+      current = next
+      rest = tail
+  result
 
 //  _  __                                _
 // | |/ /___ _   ___      _____  _ __ __| |
@@ -311,14 +329,61 @@ module Tree with
 // =============================================
 
 class ParseRule(val name: Str, val choices: Stack[Choice]) with
-  fun endChoice = choices collectFirst of choice => if choice Choice.forced() is
-    Choice.End(value) then Some(value)
-    else None
-  fun keywordChoices = toMap of ...(choices collectToArray of choice =>
-      if choice Choice.forced() is Choice.Keyword(keyword, rest) then Some([keyword.name, rest]) else None)
+  
+  // Append a rule to the end of all choices in this rule.
+  fun andThen(rest: ParseRule) = ParseRule of
+    name
+    choices
+      Iter.fromStack()
+      Iter.mapping of case
+        Choice.Keyword(keyword, rest') then [Choice.Keyword(keyword, rest'.andThen(rest))]
+        Choice.Expr(process, rest') then [Choice.Expr(process, rest'.andThen(rest))]
+        Choice.End then rest.choices Iter.fromStack()
+        Choice.Optional(rule, rest') then [Choice.Optional(process, rule, rest'.andThen(rest))]
+        Choice.Lazy(get, make) then
+          let get' = () => get() andThen(rest)
+          let make' = getChoice => make(() => getChoice andThen(rest))
+          [Choice.Lazy(get', make')]
+      Iter.flattening()
+      Iter.toStack()
+  
+  // Collect the first end choice in this rule.
+  fun endChoice = choices collectFirst of choice =>
+    if choice Choice.forced() is
+      Choice.End(value) then Some(value)
+      Choice.Optional(_, rest) then rest.endChoice
+      else None
+  
+  // Manual memoization for keyword choices.
+  let _keywordChoices = None
+  
+  // Collect all keyword choices in this rule.
+  fun keywordChoices = if _keywordChoices is
+    None then
+      let computed = toMap of choices
+        Iter.fromStack()
+        Iter.mapping of choice => if choice Choice.forced() is
+          Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
+          Choice.Optional(rule, rest) then rule.keywordChoices
+            Iter.mapping of case [keyword, rule] then
+              [keyword, rule.andThen(rest)]
+            Iter.appended of rest.keywordChoices
+            Iter.toArray()
+          else []
+        Iter.flattening()
+        Iter.toArray()
+      set _keywordChoices = Some(computed)
+      computed
+    Some(cache) then cache
+  
   fun exprChoice = choices collectFirst of choice => if choice Choice.forced() is
     Choice.Expr(process, rest) then Some([process, rest])
+    Choice.Optional(rule, rest) and
+      rule.exprChoice is Some([process, rest']) then
+        Some([process, rest'.andThen(rest)])
+      else rest.exprChoice
     else None
+  
   // Display parse rules as a tree in a BNF-like format.
   fun display =
     object Knot
@@ -333,18 +398,20 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
-      Choice.Optional(_, rule, rest) then
-        let prefix = if go(rule) is
-          [name, [line]] then [name + " ", line]
-          [name, lines] then [name, ..lines.map((line, _, _) => "  " + line)]
+      Choice.Optional(rule, rest) then
+        let prefix = "[" + (if go(rule) is
+          [name, [line]] then line
+          [name, lines] then lines.map((line, _, _) => "  " + line)) + "] "
         if go(rest) is
           [name, [line]] then [prefix + line]
           [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
-      Choice.End then ["<end>"]
+      Choice.End then [""]
       Choice.Lazy(get, make) and
         get() is Knot then ["<rec>"]
         else displayChoice(make(() => Knot))
-      other then ["<unknown>" + JSON.stringify(other)]
+      other then
+        print of Object.getPrototypeOf(other)
+        ["<unknown>" + JSON.stringify(other)]
     fun go(rule) =
       let
         choices = rule.choices
@@ -364,7 +431,7 @@ module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
   class Expr(process: Tree -> Tree, rest: ParseRule)
   class End(value: Tree)
-  class Optional(process: (Some | None, Tree) -> Tree, rule: ParseRule, rest: ParseRule)
+  class Optional(rule: ParseRule, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
   fun forced(choice) = if choice is Lazy(get) then get() else choice
   // Shorthands for constructing rule choices.
@@ -555,11 +622,16 @@ fun patternMatchingBody(intro, cons, nil) =
           Choice.Lazy(get, makeMatchArms)
   let matchArms = Choice.lazy of makeMatchArms
   tuple of
-    Choice.keyword of
-      Keywords._bar
-      intro + "leading bar"
-      matchArms
-    matchArms
+    Choice.Optional of
+      rule of
+        "match arms"
+        Choice.keyword of
+          Keywords._bar
+          intro + "leading bar"
+          Choice.end of ()
+      rule of
+        "match arms"
+        matchArms
 
 fun matchWithChoice() =
   let intro = "`match`-`with` expression: "
@@ -598,12 +670,6 @@ val prefixRules = rule of
     Keywords._underscore
     "wildcard pattern"
     Choice.end of Tree.Underscore()
-
-prefixRules.endChoice
-
-prefixRules.keywordChoices.get("fun")
-
-prefixRules.exprChoice
 
 fun makeInfixChoice(keyword) =
   Choice.keyword of
@@ -659,11 +725,16 @@ fun parse(tokens) =
       Token.Identifier(name, _) :: _ and
         do tracer.print of "check if \"" + name + "\" is a keyword or not", source.line
         keywords.get(name) is Some(keyword) and
+          do tracer.print of "keyword choices: ", rule.keywordChoices
+            Iter.mapping of case [k, v] then "`" + k + "`"
+            Iter.joined(", ")
           rule.keywordChoices.get(name) is
-            Some(rule) then
+            Some(rest) then
               tracer.print of "found a rule starting with `" + name + "`", source.line
+              tracer.print of "the rest of the rule: " + rest.display, source.line
+              tracer.print of "keyword choices of the rule: " + Array(rule.keywordChoices), source.line
               consume
-              parseRule(keyword.rightPrec orMaxPrec(), rule, opened)
+              parseRule(keyword.rightPrec orMaxPrec(), rest, opened)
             None then
               tracer.print of "no rule starting with `" + name + "` was found", source.line
               if simpleExpr(prec, opened) is

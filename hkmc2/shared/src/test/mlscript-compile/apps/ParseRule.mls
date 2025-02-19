@@ -104,6 +104,12 @@ fun render(rule: ParseRule) =
         Choice.Keyword(keyword, rest) do
           tracer.print of "found Choice.Keyword"
           choices.push of rr.Terminal(keyword.name) sequence(renderChoices(rest.choices, currentRule))
+        Choice.Optional(rule, rest) do
+          tracer.print of "found Choice.Optional"
+          choices.push of if renderChoices(rule.choices, currentRule) is
+            let latterPart = renderChoices(rest.choices, currentRule)
+            Some(optionalPart) then rr.Optional(optionalPart) sequence(latterPart)
+            None then latterPart
         Choice.Expr(_, rest) do
           tracer.print of "found Choice.Expr"
           choices.push of rr.NonTerminal("expr") sequence(renderChoices(rest.choices, currentRule))

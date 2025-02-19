@@ -503,7 +503,7 @@ extends Importer:
       if sym.contains(ctx.builtins.source.line) then
         val loc = tree.toLoc.getOrElse(???)
         val (line, _, _) = loc.origin.fph.getLineColAt(loc.spanStart)
-        Term.Lit(Tree.IntLit(loc.origin.startLineNum + line - 1))
+        Term.Lit(Tree.IntLit(loc.origin.startLineNum + line))
       else if sym.contains(ctx.builtins.source.name) then
         Term.Lit(Tree.StrLit(ctx.getOuter.map(_.nme).getOrElse("")))
       else if sym.contains(ctx.builtins.source.file) then

@@ -2,10 +2,13 @@ import "./Option.mls"
 
 open Option { Some, None }
 
-module Map with ...
+module BetterMap with ...
 
 class Map with
   let storage = new globalThis.Map()
+  
+  set this.(Symbol.iterator) =
+    () => storage.(Symbol.iterator)()
   
   fun get(key) =
     if storage.has(key)
@@ -18,7 +21,7 @@ class Map with
     
   fun values = globalThis.Array.from of storage.values()
 
-fun toMap(...entries) =
+fun toMap(entries) =
   let
     m = new Map
     i = 0

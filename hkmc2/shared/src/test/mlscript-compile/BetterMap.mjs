@@ -1,14 +1,17 @@
 import runtime from "./Runtime.mjs";
 import Option from "./Option.mjs";
-let Map2;
-Map2 = class Map {
+let BetterMap1;
+BetterMap1 = class BetterMap {
   static {
-    this.Map = class Map1 {
+    this.Map = class Map {
       #storage;
       constructor() {
         let tmp;
         tmp = new globalThis.Map();
         this.#storage = tmp;
+        this[globalThis.Symbol.iterator] = () => {
+          return runtime.safeCall(this.#storage[globalThis.Symbol.iterator]())
+        };
       }
       get(key) {
         let scrut, tmp;
@@ -33,9 +36,9 @@ Map2 = class Map {
       toString() { return "Map"; }
     };
   }
-  static toMap(...entries) {
+  static toMap(entries) {
     let m, i, length, scrut, tmp, tmp1, tmp2, tmp3, tmp4;
-    tmp = new Map.Map();
+    tmp = new BetterMap.Map();
     m = tmp;
     i = 0;
     length = entries.length;
@@ -55,6 +58,6 @@ Map2 = class Map {
     }
     return m
   }
-  static toString() { return "Map"; }
+  static toString() { return "BetterMap"; }
 };
-let Map = Map2; export default Map;
+let BetterMap = BetterMap1; export default BetterMap;

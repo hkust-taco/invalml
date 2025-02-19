@@ -2,9 +2,12 @@
 
 import "../../mlscript-compile/apps/Lexer.mls"
 import "../../mlscript-compile/apps/Parser.mls"
+import "../../mlscript-compile/Iter.mls"
+import "../../mlscript-compile/Option.mls"
 
 open Lexer { Token, LiteralKind }
 open Parser { parse, showAsTree, tracer }
+open Option { Some, None }
 
 Parser.Keywords.maxPrec
 //│ = 7
@@ -56,36 +59,30 @@ print of Parser.prefixRules.display
 //│ > <start of the statement> ::= `let` <expression> 
 //│ >   `=` <expression> 
 //│ >     `and` <expression> `=` <rec>
-//│ >     `in` <expression> <end>
-//│ >     <end>
-//│ > `rec` <expression> <end>
-//│ > `fun` <expression> `->` <expression> <end>
-//│ > `type` <expression> `=` <expression> <end>
+//│ >     `in` <expression> 
+//│ >     
+//│ > `rec` <expression> 
+//│ > `fun` <expression> `->` <expression> 
+//│ > `type` <expression> `=` <expression> 
 //│ > `match` <expression> 
-//│ >   `with` `|` <expression> 
-//│ >     `->` <expression> 
-//│ >       <end>
-//│ >       `|` <rec>
+//│ >   `with` [`|` ] 
+//│ >     <expression> 
+//│ >       `->` <expression> 
+//│ >         
+//│ >         `|` <rec>
+//│ > `function` [`|` ] 
 //│ >   <expression> 
 //│ >     `->` <expression> 
-//│ >       <end>
+//│ >       
 //│ >       `|` <rec>
-//│ > `function` `|` <expression> 
-//│ >   `->` <expression> 
-//│ >     <end>
-//│ >     `|` <rec>
-//│ > <expression> 
-//│ >   `->` <expression> 
-//│ >     <end>
-//│ >     `|` <rec>
 //│ > `if` <expression> 
 //│ >   `then` <expression> 
-//│ >     `else` <expression> <end>
-//│ >     <end>
-//│ > `_` <end>
+//│ >     `else` <expression> 
+//│ >     
+//│ > `_` 
 
 print of Parser.infixRules.display
-//│ > <the continuation of expressions> ::= `|` <expression> <end>
+//│ > <the continuation of expressions> ::= `|` <expression> 
 
 fun printParsed(...lines) =
   tracer.reset()
@@ -556,6 +553,35 @@ let translate p dx dy =
 
 printParsed of "()"
 //│ > Tuple of Nil
+
+let rule = Parser.rule of
+  "test rule"
+  Parser.Choice.Optional of
+    Parser.rule of
+      "with the bar"
+      Parser.Choice.keyword of
+        Parser.Keywords._bar
+        "leading bar"
+        Parser.Choice.end of ()
+    Parser.rule of
+      "body"
+      Parser.Choice.expr of
+        (body, _) => body
+        "expression"
+        Parser.Choice.end of ()
+//│ rule = ParseRule("test rule", Cons(Optional(ParseRule("with the bar", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("leading bar", Cons(End(()), Nil))), Nil)), ParseRule("body", Cons(Expr([function], ParseRule("expression", Cons(End(()), Nil))), Nil))), Nil))
+
+print of rule.display
+//│ > <test rule> ::= [`|` ] <expression> 
+
+printParsed of """match x with | 0 -> 1"""
+//│ > Match:
+//│ >   scrutinee = Ident("x", false)
+//│ >   branches = Stack of 
+//│ >     Infix:
+//│ >       op = Keyword(`->`, 7, 3)
+//│ >       lhs = Literal#Integer of "0"
+//│ >       rhs = Literal#Integer of "1"
 
 printParsed of """
 let fullname ?title first second =

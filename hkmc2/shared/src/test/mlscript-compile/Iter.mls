@@ -1,6 +1,10 @@
 import "./Predef.mls"
+import "./Option.mls"
+import "./Stack.mls"
 
 open Predef
+open Option { Some, None }
+open Stack { Nil, Cons }
 
 // * Implements the `Iterable` protocol.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#the_iterable_protocol
@@ -31,6 +35,36 @@ fun mapping(xs, op) =
     else
       Result.Next of op(next.value)
 
+fun flattening(xss) =
+  Iterable of () =>
+    let iterableIterator = xss.(Symbol.iterator)()
+    // Get the first `Iterator` from the first `Iterable`.
+    let currentIterator = if
+      let firstIterableResult = iterableIterator.next()
+      firstIterableResult.done then None
+      else Some of firstIterableResult.value.(Symbol.iterator)()
+    // Recursively skip empty `Iterable`s and get the next `Iterator` and value.
+    fun skipEmptyIterables() = if
+      let nextIterableResult = iterableIterator.next()
+      nextIterableResult.done then None
+      let nextIterator = nextIterableResult.value.(Symbol.iterator)()
+      let nextResult = nextIterator.next()
+      nextResult.done then skipEmptyIterables()
+      else Some of [nextIterator, nextResult.value]
+    Iterator of () =>
+      if currentIterator is
+        None then Result.Done // No more `Iterator`s means we're done.
+        Some(iterator) and
+          let next = iterator.next() // The next item from the current `Iterator`.
+          next.done and skipEmptyIterables() is // The current `Iterator` is drained.
+            Some([nextIterator, value]) then
+              set currentIterator = Some of nextIterator
+              Result.Next of value
+            None then
+              set currentIterator = None
+              Result.Done
+          else Result.Next of next.value
+
 fun filtering(xs, op) =
   xs adaptIterable of iterator => () =>
     let next = iterator.next()
@@ -60,6 +94,21 @@ fun foldingImpl(iterator, acc, op) =
     set acc = op(acc, next.value)
     set next = iterator.next()
   acc
+
+fun appended(xs, ys) =
+  Iterable of () =>
+    let xsIterator = xs.(Symbol.iterator)()
+    let currentIterator = xsIterator
+    Iterator of () => if
+      let next = currentIterator.next()
+      next.done and
+        currentIterator == xsIterator and
+          do set currentIterator = ys.(Symbol.iterator)()
+          let next = currentIterator.next()
+          next.done then Result.Done
+          else Result.Next of next.value
+        else Result.Done
+      else Result.Next of next.value
 
 fun reduced(xs, op) =
   let iterator = xs.(Symbol.iterator)()
@@ -93,3 +142,13 @@ fun joined(xs, sep) =
       (acc, x) => acc + sep + String(x)
 
 fun toArray(view) = Array.from(view)
+
+fun fromStack(stack) = Iterable of () =>
+  let current = stack
+  Iterator of () => if current is
+    Cons(head, tail) then
+      set current = tail
+      Result.Next of head
+    Nil then Result.Done
+
+fun toStack(xs) = xs rightFolded of Nil, Cons
