@@ -1,6 +1,9 @@
 :js
 
 import "../../mlscript-compile/apps/Lexer.mls"
+import "../../mlscript-compile/apps/parsing/Precedence.mls"
+import "../../mlscript-compile/apps/parsing/ParseRule.mls"
+import "../../mlscript-compile/apps/parsing/Keyword.mls"
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/Option.mls"
@@ -8,26 +11,28 @@ import "../../mlscript-compile/Option.mls"
 open Lexer { Token, LiteralKind }
 open Parser { parse, showAsTree, tracer }
 open Option { Some, None }
+open Precedence { Keywords, opPrec }
+open Keyword { allKeywords }
 
-Parser.Keywords.maxPrec
+Keywords.maxPrec
 //│ = 7
 
-Parser.opPrec(";")
+opPrec(";")
 //│ = [2147483647, 2147483647]
 
-Parser.opPrec("|>")
+opPrec("|>")
 //│ = [10, 16]
 
-Parser.opPrec("<:")
+opPrec("<:")
 //│ = [16, 8]
 
-Parser.opPrec("::")
+opPrec("::")
 //│ = [9, 8]
 
-Parser.opPrec of "+"
+opPrec of "+"
 //│ = [17, 17]
 
-print of Parser.keywords.values.join("\n")
+print of allKeywords.values.join("\n")
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`begin`, N/A, 0)
 //│ > Keyword(`end`, 0, N/A)
@@ -554,21 +559,21 @@ let translate p dx dy =
 printParsed of "()"
 //│ > Tuple of Nil
 
-let rule = Parser.rule of
+let rule = ParseRule.rule of
   "test rule"
-  Parser.Choice.Optional of
-    Parser.rule of
+  ParseRule.Choice.Optional of
+    ParseRule.rule of
       "with the bar"
-      Parser.Choice.keyword of
-        Parser.Keywords._bar
+      ParseRule.Choice.keyword of
+        Keywords._bar
         "leading bar"
-        Parser.Choice.end of ()
-    Parser.rule of
+        ParseRule.Choice.end of ()
+    ParseRule.rule of
       "body"
-      Parser.Choice.expr of
+      ParseRule.Choice.expr of
         (body, _) => body
         "expression"
-        Parser.Choice.end of ()
+        ParseRule.Choice.end of ()
 //│ rule = ParseRule("test rule", Cons(Optional(ParseRule("with the bar", Cons(Keyword(Keyword(`|`, N/A, 4), ParseRule("leading bar", Cons(End(()), Nil))), Nil)), ParseRule("body", Cons(Expr([function], ParseRule("expression", Cons(End(()), Nil))), Nil))), Nil))
 
 print of rule.display

@@ -310,6 +310,33 @@ Iter1 = class Iter {
       })
     }
   } 
+  static firstDefined(xs9, op6) {
+    let iterator1, next, result, scrut, tmp, tmp1, tmp2, tmp3, tmp4;
+    tmp = runtime.safeCall(xs9[globalThis.Symbol.iterator]());
+    iterator1 = tmp;
+    tmp1 = runtime.safeCall(iterator1.next());
+    next = tmp1;
+    result = Option.None;
+    tmp5: while (true) {
+      scrut = next.done;
+      if (scrut === false) {
+        if (result instanceof Option.None.class) {
+          tmp2 = runtime.safeCall(op6(next.value));
+          result = tmp2;
+          tmp3 = runtime.safeCall(iterator1.next());
+          next = tmp3;
+          tmp4 = runtime.Unit;
+          continue tmp5;
+        } else {
+          tmp4 = runtime.Unit;
+        }
+      } else {
+        tmp4 = runtime.Unit;
+      }
+      break;
+    }
+    return result
+  } 
   static toArray(view) {
     return runtime.safeCall(globalThis.Array.from(view))
   } 
@@ -335,8 +362,8 @@ Iter1 = class Iter {
       return Iterator1(tmp)
     })
   } 
-  static toStack(xs9) {
-    return Iter.rightFolded(xs9, Stack.Nil, Stack.Cons)
+  static toStack(xs10) {
+    return Iter.rightFolded(xs10, Stack.Nil, Stack.Cons)
   }
   static toString() { return "Iter"; }
 };

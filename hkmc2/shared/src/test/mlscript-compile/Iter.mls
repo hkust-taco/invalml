@@ -141,6 +141,16 @@ fun joined(xs, sep) =
       String(next.value)
       (acc, x) => acc + sep + String(x)
 
+fun firstDefined(xs, op) =
+  let iterator = xs.(Symbol.iterator)()
+  let next = iterator.next()
+  let result = None
+  while next.done is false and result is None do
+    set
+      result = op(next.value)
+      next = iterator.next()
+  result
+
 fun toArray(view) = Array.from(view)
 
 fun fromStack(stack) = Iterable of () =>

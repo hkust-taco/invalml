@@ -1,0 +1,37 @@
+import "../../Predef.mls"
+import "../../Option.mls"
+import "../../BetterMap.mls"
+
+open Predef { fold }
+open Option { Some, None }
+open BetterMap { Map }
+
+//  _  __                                _
+// | |/ /___ _   ___      _____  _ __ __| |
+// | ' // _ \ | | \ \ /\ / / _ \| '__/ _` |
+// | . \  __/ |_| |\ V  V / (_) | | | (_| |
+// |_|\_\___|\__, | \_/\_/ \___/|_|  \__,_|
+//           |___/
+// ========================================
+
+module Keyword with ...
+
+// https://v8.dev/blog/pointer-compression
+// The maximal and minimal values of V8's Smi on 64-bit platforms.
+val INT_MIN = -2147483648
+val INT_MAX = 2147483647
+
+val allKeywords = new Map()
+
+class Keyword(val name: Str, val leftPrec, val rightPrec) with
+  allKeywords.insert(name, this)
+  
+  fun leftPrecOrMin = if leftPrec is Some(prec) then prec else INT_MIN
+  fun rightPrecOrMin = if rightPrec is Some(prec) then prec else INT_MIN
+  fun leftPrecOrMax = if leftPrec is Some(prec) then prec else INT_MAX
+  fun rightPrecOrMax = if rightPrec is Some(prec) then prec else INT_MAX
+  
+  fun toString() = fold(+) of
+    "Keyword(`", name, "`, "
+    (if leftPrec is Some(prec) then prec.toString() else "N/A"), ", ",
+    (if rightPrec is Some(prec) then prec.toString() else "N/A"), ")"

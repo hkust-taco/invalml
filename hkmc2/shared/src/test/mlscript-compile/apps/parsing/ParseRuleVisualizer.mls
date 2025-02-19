@@ -1,16 +1,18 @@
-import "./Parser.mls"
-import "../Predef.mls"
-import "../Stack.mls"
-import "../Option.mls"
-import "../TreeTracer.mls"
-import "../XML.mls"
+import "../Parser.mls"
+import "./ParseRule.mls"
+import "../../Predef.mls"
+import "../../Stack.mls"
+import "../../Option.mls"
+import "../../TreeTracer.mls"
+import "../../XML.mls"
 import "path"
-import "../../vendors/railroad/railroad.mjs"
+import "../../../vendors/railroad/railroad.mjs"
 
 open Predef
 open Stack
 open Option
-open Parser { ParseRule, Choice, prefixRules }
+open Parser { prefixRules }
+open ParseRule { ParseRule, Choice }
 open TreeTracer
 open XML { html, tag, elem, style }
 
@@ -18,7 +20,7 @@ object RecursiveKnot
 
 class LinkOpts(val href: Str)
 
-module ParseRule with ...
+module ParseRuleVisualizer with ...
 
 val rr = railroad
 

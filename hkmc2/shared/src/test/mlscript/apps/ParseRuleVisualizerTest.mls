@@ -1,11 +1,11 @@
 :js
 
-import "../../mlscript-compile/apps/ParseRule.mls"
 import "../../mlscript-compile/apps/Parser.mls"
+import "../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
 import "../../mlscript-compile/Stack.mls"
 
-open ParseRule { save, rr, render }
-open Parser { Choice, prefixRules }
+open ParseRuleVisualizer { save, rr, render }
+open Parser { prefixRules }
 open Stack
 
 save of "rule.html", ...render(prefixRules)
