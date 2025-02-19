@@ -168,6 +168,7 @@ enum Tree extends AutoLocated:
     case Open(_) => "open"
     case MemberProj(_, _) => "member projection"
     case Keywrd(kw) => s"'${kw.name}' keyword"
+    case Unt() => "unit"
     
   def deparenthesized: Tree = this match
     case Bra(BracketKind.Round, inner) => inner.deparenthesized

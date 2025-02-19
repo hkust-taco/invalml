@@ -6,6 +6,8 @@ fun id(x) = x
 fun not(x) = x is false
 
 
+fun (@) apply(f, ...args) = f(...args)
+
 fun (|>) pipeInto(x, f) = f(x)
 fun (<|) pipeFrom(f, x) = f(x)
 
