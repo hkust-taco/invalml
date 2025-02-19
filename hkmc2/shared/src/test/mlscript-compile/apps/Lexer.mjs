@@ -232,7 +232,7 @@ Lexer1 = class Lexer {
         return runtime.safeCall(tmp4("\u2503", tmp5, tmp6))
       } 
       static display(token1) {
-        let param0, param1, kind, literal4, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+        let param0, param1, kind, literal4, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10;
         if (token1 instanceof Token.Space.class) {
           return "Space"
         } else if (token1 instanceof Token.Comma.class) {
@@ -273,11 +273,12 @@ Lexer1 = class Lexer {
             param1 = token1.literal;
             kind = param0;
             literal4 = param1;
-            tmp8 = Token.display(kind);
-            tmp9 = Str.concat2("Literal(", tmp8);
-            tmp10 = Str.concat2(tmp9, ", ");
-            tmp11 = Str.concat2(tmp10, literal4);
-            return Str.concat2(tmp11, ")")
+            tmp8 = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp9 = Token.display(kind);
+            tmp10 = runtime.safeCall(globalThis.JSON.stringify(literal4));
+            return runtime.safeCall(tmp8("Literal(", tmp9, ", ", tmp10, ")"))
           } else if (token1 instanceof Lexer.Round.class) {
             return "Round"
           } else if (token1 instanceof Lexer.Square.class) {
@@ -1071,7 +1072,7 @@ Lexer1 = class Lexer {
     };
   }
   static lex(str) {
-    let number, hex, identifier, digits, char1, take, whitespace, scan, string, operator, comment;
+    let number, hex, identifier, digits, char1, scanHexDigits, whitespace, scan, string, escape, take, operator, comment;
     char1 = function char(idx) {
       let scrut, tmp;
       scrut = idx < str.length;
@@ -1422,59 +1423,283 @@ Lexer1 = class Lexer {
         ]
       }
     };
+    scanHexDigits = function scanHexDigits(idx, lim, acc, cnt) {
+      let scrut, param0, ch, matchResult, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+      scrut = char1(idx);
+      if (scrut instanceof Option.Some.class) {
+        param0 = scrut.value;
+        matchResult = runtime.safeCall(Lexer.Char.HexDigit.unapply(param0));
+        if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+          ch = param0;
+          scrut1 = cnt < lim;
+          if (scrut1 === true) {
+            tmp = idx + 1;
+            tmp1 = acc * 16;
+            tmp2 = globalThis.parseInt(ch, 16);
+            tmp3 = tmp1 + tmp2;
+            tmp4 = cnt + 1;
+            return scanHexDigits(tmp, lim, tmp3, tmp4)
+          } else {
+            tmp5 = idx + 1;
+            tmp6 = cnt + 1;
+            return scanHexDigits(tmp5, lim, acc, tmp6)
+          }
+        } else {
+          return [
+            idx,
+            acc,
+            cnt
+          ]
+        }
+      } else {
+        return [
+          idx,
+          acc,
+          cnt
+        ]
+      }
+    };
+    escape = function escape(idx) {
+      let scrut, param0, ch, scrut1, first2, first1, first0, idx1, cp, cnt, scrut2, param01, scrut3, first21, first11, first01, idx2, cp1, cnt1, idx3, scrut4, param02, scrut5, first22, first12, first02, idx4, cp2, cnt2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31;
+      scrut = char1(idx);
+      if (scrut instanceof Option.Some.class) {
+        param0 = scrut.value;
+        if (param0 === "n") {
+          tmp = idx + 1;
+          tmp1 = Option.Some("\n");
+          return [
+            tmp,
+            tmp1
+          ]
+        } else if (param0 === "r") {
+          tmp2 = idx + 1;
+          tmp3 = Option.Some("\r");
+          return [
+            tmp2,
+            tmp3
+          ]
+        } else if (param0 === "t") {
+          tmp4 = idx + 1;
+          tmp5 = Option.Some("\t");
+          return [
+            tmp4,
+            tmp5
+          ]
+        } else if (param0 === "0") {
+          tmp6 = idx + 1;
+          tmp7 = Option.Some("\u0000");
+          return [
+            tmp6,
+            tmp7
+          ]
+        } else if (param0 === "b") {
+          tmp8 = idx + 1;
+          tmp9 = Option.Some("\b");
+          return [
+            tmp8,
+            tmp9
+          ]
+        } else if (param0 === "f") {
+          tmp10 = idx + 1;
+          tmp11 = Option.Some("\f");
+          return [
+            tmp10,
+            tmp11
+          ]
+        } else if (param0 === "\"") {
+          tmp12 = idx + 1;
+          tmp13 = Option.Some("\"");
+          return [
+            tmp12,
+            tmp13
+          ]
+        } else if (param0 === "\\") {
+          tmp14 = idx + 1;
+          tmp15 = Option.Some("\\");
+          return [
+            tmp14,
+            tmp15
+          ]
+        } else if (param0 === "x") {
+          tmp16 = idx + 1;
+          scrut5 = scanHexDigits(tmp16, 2, 0, 0);
+          if (globalThis.Array.isArray(scrut5) && scrut5.length === 3) {
+            first02 = scrut5[0];
+            first12 = scrut5[1];
+            first22 = scrut5[2];
+            idx4 = first02;
+            cp2 = first12;
+            cnt2 = first22;
+            if (cnt2 === 0) {
+              tmp17 = Option.None;
+            } else {
+              tmp18 = runtime.safeCall(globalThis.String.fromCodePoint(cp2));
+              tmp17 = Option.Some(tmp18);
+            }
+            return Predef.tuple(idx4, tmp17)
+          } else {
+            throw new globalThis.Error("match error");
+          }
+        } else if (param0 === "u") {
+          tmp19 = idx + 1;
+          scrut2 = char1(tmp19);
+          if (scrut2 instanceof Option.Some.class) {
+            param01 = scrut2.value;
+            if (param01 === "{") {
+              tmp20 = idx + 2;
+              scrut3 = scanHexDigits(tmp20, 6, 0, 0);
+              if (globalThis.Array.isArray(scrut3) && scrut3.length === 3) {
+                first01 = scrut3[0];
+                first11 = scrut3[1];
+                first21 = scrut3[2];
+                idx2 = first01;
+                cp1 = first11;
+                cnt1 = first21;
+                scrut4 = char1(idx2);
+                if (scrut4 instanceof Option.Some.class) {
+                  param02 = scrut4.value;
+                  if (param02 === "}") {
+                    tmp21 = idx2 + 1;
+                  } else {
+                    tmp21 = idx2;
+                  }
+                } else {
+                  tmp21 = idx2;
+                }
+                idx3 = tmp21;
+                if (cnt1 === 0) {
+                  tmp22 = Option.None;
+                } else {
+                  tmp23 = runtime.safeCall(globalThis.String.fromCodePoint(cp1));
+                  tmp22 = Option.Some(tmp23);
+                }
+                return Predef.tuple(idx3, tmp22)
+              } else {
+                throw new globalThis.Error("match error");
+              }
+            } else {
+              tmp24 = idx + 1;
+              scrut1 = scanHexDigits(tmp24, 4, 0, 0);
+              if (globalThis.Array.isArray(scrut1) && scrut1.length === 3) {
+                first0 = scrut1[0];
+                first1 = scrut1[1];
+                first2 = scrut1[2];
+                idx1 = first0;
+                cp = first1;
+                cnt = first2;
+                if (cnt === 0) {
+                  tmp25 = Option.None;
+                } else {
+                  tmp26 = runtime.safeCall(globalThis.String.fromCodePoint(cp));
+                  tmp25 = Option.Some(tmp26);
+                }
+                return Predef.tuple(idx1, tmp25)
+              } else {
+                throw new globalThis.Error("match error");
+              }
+            }
+          } else {
+            tmp27 = idx + 1;
+            scrut1 = scanHexDigits(tmp27, 4, 0, 0);
+            if (globalThis.Array.isArray(scrut1) && scrut1.length === 3) {
+              first0 = scrut1[0];
+              first1 = scrut1[1];
+              first2 = scrut1[2];
+              idx1 = first0;
+              cp = first1;
+              cnt = first2;
+              if (cnt === 0) {
+                tmp28 = Option.None;
+              } else {
+                tmp29 = runtime.safeCall(globalThis.String.fromCodePoint(cp));
+                tmp28 = Option.Some(tmp29);
+              }
+              return Predef.tuple(idx1, tmp28)
+            } else {
+              throw new globalThis.Error("match error");
+            }
+          }
+        } else {
+          ch = param0;
+          tmp30 = idx + 1;
+          tmp31 = Option.Some(ch);
+          return [
+            tmp30,
+            tmp31
+          ]
+        }
+      } else if (scrut instanceof Option.None.class) {
+        return [
+          idx,
+          Option.None
+        ]
+      } else {
+        throw new globalThis.Error("match error");
+      }
+    };
     string = function string(idx) {
-      let dummy, content, terminated, scrut, param0, ch, scrut1, scrut2, tmp, tmp1, tmp2, tmp3, tmp4;
-      dummy = function dummy(ch1) {
-        return true
-      };
+      let content, terminated, scrut, param0, ch, scrut1, first1, first0, idx$_, chOpt, param01, ch1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
       content = "";
       terminated = false;
-      tmp5: while (true) {
+      tmp10: while (true) {
         if (terminated === false) {
           scrut = char1(idx);
           if (scrut instanceof Option.Some.class) {
             param0 = scrut.value;
-            ch = param0;
-            scrut2 = ch == "\"";
-            if (scrut2 === true) {
+            if (param0 === "\"") {
               terminated = true;
               tmp = idx + 1;
               idx = tmp;
               tmp1 = runtime.Unit;
-              continue tmp5;
-            } else {
-              scrut1 = dummy(ch);
-              if (scrut1 === true) {
-                tmp2 = idx + 1;
-                idx = tmp2;
-                tmp3 = content + ch;
-                content = tmp3;
-                tmp1 = runtime.Unit;
-                continue tmp5;
+            } else if (param0 === "\\") {
+              tmp2 = idx + 1;
+              scrut1 = escape(tmp2);
+              if (globalThis.Array.isArray(scrut1) && scrut1.length === 2) {
+                first0 = scrut1[0];
+                first1 = scrut1[1];
+                idx$_ = first0;
+                chOpt = first1;
+                idx = idx$_;
+                if (chOpt instanceof Option.Some.class) {
+                  param01 = chOpt.value;
+                  ch1 = param01;
+                  tmp3 = content + ch1;
+                  content = tmp3;
+                  tmp4 = runtime.Unit;
+                } else {
+                  tmp4 = runtime.Unit;
+                }
+                tmp5 = tmp4;
               } else {
-                tmp1 = runtime.Unit;
+                throw new globalThis.Error("match error");
               }
+              tmp1 = tmp5;
+            } else {
+              ch = param0;
+              tmp6 = idx + 1;
+              idx = tmp6;
+              tmp7 = content + ch;
+              content = tmp7;
+              tmp1 = runtime.Unit;
             }
+          } else if (scrut instanceof Option.None.class) {
+            terminated = true;
+            tmp1 = runtime.Unit;
           } else {
             tmp1 = runtime.Unit;
           }
+          tmp8 = tmp1;
+          continue tmp10;
         } else {
-          tmp1 = runtime.Unit;
+          tmp8 = runtime.Unit;
         }
         break;
       }
-      if (terminated === true) {
-        tmp4 = Lexer.Token.Literal(Lexer.LiteralKind.String, content);
-        return [
-          idx,
-          tmp4
-        ]
-      } else {
-        return [
-          idx,
-          Lexer.Token.Error
-        ]
-      }
+      tmp9 = Lexer.Token.Literal(Lexer.LiteralKind.String, content);
+      return [
+        idx,
+        tmp9
+      ]
     };
     number = function number(idx, head) {
       let scrut, first1, first0, idx$_, integer, scrut1, param0, scrut2, first11, first01, idx$_$_, fraction, scrut3, param01, scrut4, first12, first02, idx$_1, integer1, scrut5, first13, first03, idx$_2, ds, scrut6, first14, first04, idx$_3, xs, scrut7, first15, first05, idx$_4, os, scrut8, first16, first06, idx$_5, bs, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66;

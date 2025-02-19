@@ -9,7 +9,9 @@ import "../Option.mls"
 
 open Stack
 open Str
-open Option
+open Option { Some, None}
+
+type Opt[T] = Some[T] | None
 
 module Lexer with ...
 
@@ -88,7 +90,12 @@ module Token with
     Close(kind) then "Close(" ~ display(kind) ~ ")"
     Comment(content) then "Comment(" ~ content ~ ")"
     Identifier(name, symbolic) then "Identifier(" ~ name ~ ", " ~ symbolic ~ ")"
-    Literal(kind, literal) then "Literal(" ~ display(kind) ~ ", " ~ literal ~ ")"
+    Literal(kind, literal) then fold(+) of
+      "Literal("
+      display(kind)
+      ", "
+      JSON.stringify(literal)
+      ")"
     Round then "Round"
     Square then "Square"
     Curly then "Curly"
@@ -205,24 +212,64 @@ fun lex(str: Str) =
       Some(Char.IdentifierStart as ch) then operator("/" ~ ch, idx + 1)
       else [idx, Token.Error]
   
-  fun string(idx: Int) =
-    let content = ""
-    let terminated = false
-    fun dummy(ch) = true
-    
-    while terminated is false and char(idx) is Some(ch) and
-      ch == "\"" then
-        set terminated = true
-        set idx = idx + 1
-      dummy(ch) then // If I use wildcard, then the loop will not continue.
-        set idx = idx + 1
-        set content = content + ch
-    else ()
-    
-    if terminated then
-      [idx, Token.Literal(LiteralKind.String, content)]
-    else
-      [idx, Token.Error]
+  fun scanHexDigits(idx: Int, lim: Int, acc: Int, cnt: Int): [Int, Int, Int] =
+    if char(idx) is Some(Char.HexDigit as ch) and
+      cnt < lim then scanHexDigits(idx + 1, lim, acc * 16 + parseInt(ch, 16), cnt + 1)
+      else scanHexDigits(idx + 1, lim, acc, cnt + 1)
+    else [idx, acc, cnt]
+  
+  fun escape(idx: Int): [Int, Opt[Str]] = if char(idx) is
+    Some("n") then [idx + 1, Some("\n")]
+    Some("r") then [idx + 1, Some("\r")]
+    Some("t") then [idx + 1, Some("\t")]
+    Some("0") then [idx + 1, Some("\u{0}")]
+    Some("b") then [idx + 1, Some("\b")]
+    Some("f") then [idx + 1, Some("\f")]
+    Some("\"") then [idx + 1, Some("\"")]
+    Some("\\") then [idx + 1, Some("\\")]
+    Some("x") then
+      if scanHexDigits(idx + 1, 2, 0, 0) is [idx, cp, cnt] then ...
+      // TODO: ensure that `cnt == 2`
+      tuple of idx, if cnt is 0 then None else Some of String.fromCodePoint(cp)
+    Some("u") and
+      // Unicode code point escape: "\u{XXXXXX}"
+      char(idx + 1) is Some("{") then
+        if scanHexDigits(idx + 2, 6, 0, 0) is [idx, cp, cnt] then ...
+        // TODO: ensure that `1 <= cnt <= 6`
+        let idx = if char(idx) is Some("}") then idx + 1 else
+          // TODO: report missing "}"
+          idx
+        tuple of idx, if cnt is 0 then None else Some of String.fromCodePoint(cp)
+      // Trandition Unicode range: "\uXXXX"
+      else
+        if scanHexDigits(idx + 1, 4, 0, 0) is [idx, cp, cnt] then ...
+        // TODO: ensure that `cnt == 4`
+        tuple of idx, if cnt is 0 then None else Some of String.fromCodePoint(cp)
+    Some(ch) then [idx + 1, Some(ch)]
+    None then [idx, None]
+  
+  fun string(idx: Int): [Int, Token.Literal] =
+    let
+      content = ""
+      terminated = false
+    while terminated is false do
+      if char(idx) is
+        Some("\"") do
+          set
+            terminated = true
+            idx += 1
+        Some("\\") do
+          if escape(idx + 1) is [idx', chOpt] then ...
+          set idx = idx'
+          if chOpt is Some(ch) do set content += ch
+        Some(ch) do
+          set
+            idx += 1
+            content += ch
+        None do
+          // TODO report missing quote
+          set terminated = true
+    [idx, Token.Literal(LiteralKind.String, content)]
   
   fun number(idx: Int, head: Str) =
     if head is "0" and char(idx) is
@@ -246,8 +293,6 @@ fun lex(str: Str) =
   
   fun scan(idx: Int, acc: Stack[Token]): Stack[Token] =
     fun go(idx: Int, tok: Token) = scan(idx, tok :: acc)
-    
-    // print("Progress: " ~ idx ~ " / Last token: " ~ if acc is Cons(h, _) then Token.display(h) else "None")
     
     if char(idx) is
       None then reverse of acc

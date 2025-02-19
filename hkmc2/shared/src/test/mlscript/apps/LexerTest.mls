@@ -24,17 +24,75 @@ lex of "0 1"
 //│ = Cons(Literal(Integer, "0"), Cons(Space, Cons(Literal(Integer, "1"), Nil)))
 
 printLexed of "0 1  0xDEADCAFE 0b1101 0o755     3.1415926535"
-//│ > Literal(Integer, 0)
+//│ > Literal(Integer, "0")
 //│ > Space
-//│ > Literal(Integer, 1)
+//│ > Literal(Integer, "1")
 //│ > Space
-//│ > Literal(Integer, 0xDEADCAFE)
+//│ > Literal(Integer, "0xDEADCAFE")
 //│ > Space
-//│ > Literal(Integer, 0b1101)
+//│ > Literal(Integer, "0b1101")
 //│ > Space
-//│ > Literal(Integer, 0o755)
+//│ > Literal(Integer, "0o755")
 //│ > Space
-//│ > Literal(Decimal, 3.1415926535)
+//│ > Literal(Decimal, "3.1415926535")
+
+// Good strings.
+printLexed of """
+"hello, world"
+"\x48\x65\x6C\x6C\x6F\x2C\x20\x77\x6F\x72\x6C\x64"
+"\u0048\u0065\u006C\u006C\u006F\u002C\u0020\u0077\u006F\u0072\u006C\u0064"
+"\u{48}\u{65}\u{6C}\u{6C}\u{6F}\u{2C}\u{20}\u{77}\u{6F}\u{72}\u{6C}\u{64}"
+"\u{1F600}" // 😀
+"\u{1F601}" // 😁
+"\u{1F602}" // 😂
+"\u{1F603}" // 😃
+"\u{1F604}" // 😄
+"\n\r\t\b"
+"""
+//│ > Space
+//│ > Literal(String, "hello, world")
+//│ > Space
+//│ > Literal(String, "Hello, world")
+//│ > Space
+//│ > Literal(String, "Hello, world")
+//│ > Space
+//│ > Literal(String, "Hello, world")
+//│ > Space
+//│ > Literal(String, "😀")
+//│ > Space
+//│ > Comment( 😀)
+//│ > Space
+//│ > Literal(String, "😁")
+//│ > Space
+//│ > Comment( 😁)
+//│ > Space
+//│ > Literal(String, "😂")
+//│ > Space
+//│ > Comment( 😂)
+//│ > Space
+//│ > Literal(String, "😃")
+//│ > Space
+//│ > Comment( 😃)
+//│ > Space
+//│ > Literal(String, "😄")
+//│ > Space
+//│ > Comment( 😄)
+//│ > Space
+//│ > Literal(String, "\n\r\t\b")
+//│ > Space
+
+// Ill-formed Strings
+// ==================
+
+printLexed of """
+"hello, world.   """
+//│ > Space
+//│ > Literal(String, "hello, world.   ")
+
+printLexed of """
+"hello, \world"""
+//│ > Space
+//│ > Literal(String, "hello, world")
 
 printLexed of """let v' =
   let a, b = (1, 2) in a + b"""
@@ -54,10 +112,10 @@ printLexed of """let v' =
 //│ > Identifier(=, true)
 //│ > Space
 //│ > Open(Round)
-//│ > Literal(Integer, 1)
+//│ > Literal(Integer, "1")
 //│ > Comma
 //│ > Space
-//│ > Literal(Integer, 2)
+//│ > Literal(Integer, "2")
 //│ > Close(Round)
 //│ > Space
 //│ > Identifier(in, false)
@@ -94,11 +152,11 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier(<=, true)
 //│ > Space
-//│ > Literal(Integer, 1)
+//│ > Literal(Integer, "1")
 //│ > Space
 //│ > Identifier(then, false)
 //│ > Space
-//│ > Literal(Integer, 1)
+//│ > Literal(Integer, "1")
 //│ > Space
 //│ > Identifier(else, false)
 //│ > Space
@@ -113,7 +171,7 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier(-, true)
 //│ > Space
-//│ > Literal(Integer, 1)
+//│ > Literal(Integer, "1")
 //│ > Close(Round)
 //│ > Space
 //│ > Identifier(let, false)
@@ -126,19 +184,19 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier(|, true)
 //│ > Space
-//│ > Literal(String, true)
+//│ > Literal(String, "true")
 //│ > Space
 //│ > Identifier(->, true)
 //│ > Space
-//│ > Literal(Boolean, true)
+//│ > Literal(Boolean, "true")
 //│ > Space
 //│ > Identifier(|, true)
 //│ > Space
-//│ > Literal(String, false)
+//│ > Literal(String, "false")
 //│ > Space
 //│ > Identifier(->, true)
 //│ > Space
-//│ > Literal(Boolean, false)
+//│ > Literal(Boolean, "false")
 //│ > Space
 //│ > Identifier(|, true)
 //│ > Space
@@ -151,7 +209,7 @@ printLexed of lines of
 //│ > Open(Round)
 //│ > Identifier(Invalid_argument, false)
 //│ > Space
-//│ > Literal(String, bool_of_string)
+//│ > Literal(String, "bool_of_string")
 //│ > Close(Round)
 
 :e
@@ -163,13 +221,13 @@ fun take(pattern P, idx: Str, acc: Str) =
       set acc = acc + ch
     else [acc, idx]
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.160: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.218: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	              ^^^
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.160: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.218: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                             ^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.160: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.218: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                                                             ^
 
 :e
@@ -179,13 +237,13 @@ fun foobar(x) = if x is
   Some of
     a then a
 //│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.179: 	  Some of
+//│ ║  l.237: 	  Some of
 //│ ║         	  ^^^^^^^
-//│ ║  l.180: 	    a then a
+//│ ║  l.238: 	    a then a
 //│ ╙──       	^^^^^^^^^^^^
 //│ ╔══[ERROR] Name not found: None
-//│ ║  l.178: 	  None then "hello"
+//│ ║  l.236: 	  None then "hello"
 //│ ╙──       	  ^^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.178: 	  None then "hello"
+//│ ║  l.236: 	  None then "hello"
 //│ ╙──       	  ^^^^
