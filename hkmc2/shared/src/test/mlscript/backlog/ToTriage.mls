@@ -319,3 +319,35 @@ Int
 
 // ——— ——— ———
 
+import "../../mlscript-compile/Stack.mls"
+
+// The parser rejects this, but it should be allowed.
+open Stack { ::, Nil }
+//│ ╔══[PARSE ERROR] Expected start of statement in this position; found comma instead
+//│ ║  l.325: 	open Stack { ::, Nil }
+//│ ╙──       	               ^
+//│ ╔══[PARSE ERROR] Unexpected comma in this position
+//│ ║  l.325: 	open Stack { ::, Nil }
+//│ ╙──       	               ^
+//│ ╔══[PARSE ERROR] Unexpected identifier here
+//│ ║  l.325: 	open Stack { ::, Nil }
+//│ ╙──       	                 ^^^
+//│ ╔══[ERROR] Illegal 'open' statement shape.
+//│ ║  l.325: 	open Stack { ::, Nil }
+//│ ╙──       	     ^^^^^^^^^^^
+
+// Instead, if we parenthesize the operator, it is rejected by the elaborator.
+open Stack { (::), Nil }
+//│ ╔══[ERROR] Illegal 'open' statement element.
+//│ ║  l.340: 	open Stack { (::), Nil }
+//│ ╙──       	             ^^^^
+
+open Stack { Nil, :: }
+
+:sjs
+1 :: Nil
+//│ JS (unsanitized):
+//│ Stack["::"](1, Stack.Nil)
+//│ ═══[RUNTIME ERROR] TypeError: Stack.:: is not a function
+
+// ——— ——— ———
