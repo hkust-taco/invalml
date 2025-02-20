@@ -1,11 +1,12 @@
 :js
 
 import "../../mlscript-compile/apps/Lexer.mls"
+import "../../mlscript-compile/apps/parsing/Token.mls"
 import "../../mlscript-compile/Stack.mls"
 
 fun lines(...strs) = strs.join("\n")
 
-open Lexer { lex, Token }
+open Lexer { lex }
 open Stack
 
 fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
@@ -212,6 +213,12 @@ printLexed of lines of
 //│ > Literal(String, "bool_of_string")
 //│ > Close(Round)
 
+// It turns out that OCaml identifiers' apostrophes are not limited to the end.
+printLexed of "a'b"
+printLexed of "'a"
+//│ > Identifier(a'b, false)
+//│ > TypeVariable(a)
+
 :e
 // It would be decent if we allow pattern parameters in functions.
 fun take(pattern P, idx: Str, acc: Str) =
@@ -221,13 +228,13 @@ fun take(pattern P, idx: Str, acc: Str) =
       set acc = acc + ch
     else [acc, idx]
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.218: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	              ^^^
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.218: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                             ^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.218: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                                                             ^
 
 :e
@@ -237,13 +244,14 @@ fun foobar(x) = if x is
   Some of
     a then a
 //│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.237: 	  Some of
+//│ ║  l.244: 	  Some of
 //│ ║         	  ^^^^^^^
-//│ ║  l.238: 	    a then a
+//│ ║  l.245: 	    a then a
 //│ ╙──       	^^^^^^^^^^^^
 //│ ╔══[ERROR] Name not found: None
-//│ ║  l.236: 	  None then "hello"
+//│ ║  l.243: 	  None then "hello"
 //│ ╙──       	  ^^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.236: 	  None then "hello"
+//│ ║  l.243: 	  None then "hello"
 //│ ╙──       	  ^^^^
+

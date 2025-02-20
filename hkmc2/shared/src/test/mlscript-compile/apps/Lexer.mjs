@@ -3,303 +3,11 @@ import Predef from "./../Predef.mjs";
 import Stack from "./../Stack.mjs";
 import Str from "./../Str.mjs";
 import Option from "./../Option.mjs";
+import Iter from "./../Iter.mjs";
+import Token from "./parsing/Token.mjs";
 let Lexer1;
 Lexer1 = class Lexer {
   static {
-    const Round$class = class Round {
-      constructor() {}
-      toString() { return "Round"; }
-    };
-    this.Round = new Round$class;
-    this.Round.class = Round$class;
-    const Square$class = class Square {
-      constructor() {}
-      toString() { return "Square"; }
-    };
-    this.Square = new Square$class;
-    this.Square.class = Square$class;
-    const Curly$class = class Curly {
-      constructor() {}
-      toString() { return "Curly"; }
-    };
-    this.Curly = new Curly$class;
-    this.Curly.class = Curly$class;
-    const BeginEnd$class = class BeginEnd {
-      constructor() {}
-      toString() { return "BeginEnd"; }
-    };
-    this.BeginEnd = new BeginEnd$class;
-    this.BeginEnd.class = BeginEnd$class;
-    this.LiteralKind = class LiteralKind {
-      static {
-        const Integer$class = class Integer {
-          constructor() {}
-          toString() { return "Integer"; }
-        };
-        this.Integer = new Integer$class;
-        this.Integer.class = Integer$class;
-        const Decimal$class = class Decimal {
-          constructor() {}
-          toString() { return "Decimal"; }
-        };
-        this.Decimal = new Decimal$class;
-        this.Decimal.class = Decimal$class;
-        const String$class = class String {
-          constructor() {}
-          toString() { return "String"; }
-        };
-        this.String = new String$class;
-        this.String.class = String$class;
-        const Boolean$class = class Boolean {
-          constructor() {}
-          toString() { return "Boolean"; }
-        };
-        this.Boolean = new Boolean$class;
-        this.Boolean.class = Boolean$class;
-      }
-      static toString() { return "LiteralKind"; }
-    };
-    this.Token = class Token {
-      static {
-        const Space$class = class Space {
-          constructor() {}
-          toString() { return "Space"; }
-        };
-        this.Space = new Space$class;
-        this.Space.class = Space$class;
-        const Comma$class = class Comma {
-          constructor() {}
-          toString() { return "Comma"; }
-        };
-        this.Comma = new Comma$class;
-        this.Comma.class = Comma$class;
-        const Semicolon$class = class Semicolon {
-          constructor() {}
-          toString() { return "Semicolon"; }
-        };
-        this.Semicolon = new Semicolon$class;
-        this.Semicolon.class = Semicolon$class;
-        const Error$class = class Error {
-          constructor() {}
-          toString() { return "Error"; }
-        };
-        this.Error = new Error$class;
-        this.Error.class = Error$class;
-        this.Open = function Open(kind1) { return new Open.class(kind1); };
-        this.Open.class = class Open {
-          constructor(kind) {
-            this.kind = kind;
-          }
-          toString() { return "Open(" + globalThis.Predef.render(this.kind) + ")"; }
-        };
-        this.Close = function Close(kind1) { return new Close.class(kind1); };
-        this.Close.class = class Close {
-          constructor(kind) {
-            this.kind = kind;
-          }
-          toString() { return "Close(" + globalThis.Predef.render(this.kind) + ")"; }
-        };
-        this.Comment = function Comment(content1) { return new Comment.class(content1); };
-        this.Comment.class = class Comment {
-          constructor(content) {
-            this.content = content;
-          }
-          toString() { return "Comment(" + globalThis.Predef.render(this.content) + ")"; }
-        };
-        this.Identifier = function Identifier(name1, symbolic1) { return new Identifier.class(name1, symbolic1); };
-        this.Identifier.class = class Identifier {
-          constructor(name, symbolic) {
-            this.name = name;
-            this.symbolic = symbolic;
-          }
-          toString() { return "Identifier(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.symbolic) + ")"; }
-        };
-        this.Literal = function Literal(kind1, literal1) { return new Literal.class(kind1, literal1); };
-        this.Literal.class = class Literal {
-          constructor(kind, literal) {
-            this.kind = kind;
-            this.literal = literal;
-          }
-          toString() { return "Literal(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.literal) + ")"; }
-        };
-      }
-      static integer(literal) {
-        return Lexer.Token.Literal(Lexer.LiteralKind.Integer, literal)
-      } 
-      static decimal(literal1) {
-        return Lexer.Token.Literal(Lexer.LiteralKind.Decimal, literal1)
-      } 
-      static string(literal2) {
-        return Lexer.Token.Literal(Lexer.LiteralKind.String, literal2)
-      } 
-      static boolean(literal3) {
-        return Lexer.Token.Literal(Lexer.LiteralKind.Boolean, literal3)
-      } 
-      static summary(token) {
-        let param0, param1, literal4, param01, param11, name, param02, param03, kind, param04, kind1;
-        if (token instanceof Token.Space.class) {
-          return "\u2420"
-        } else if (token instanceof Token.Comma.class) {
-          return ","
-        } else if (token instanceof Token.Semicolon.class) {
-          return ";"
-        } else if (token instanceof Token.Error.class) {
-          return "\u26A0"
-        } else if (token instanceof Token.Open.class) {
-          param04 = token.kind;
-          kind1 = param04;
-          if (kind1 instanceof Lexer.Round.class) {
-            return "("
-          } else if (kind1 instanceof Lexer.Square.class) {
-            return "["
-          } else if (kind1 instanceof Lexer.Curly.class) {
-            return "{"
-          } else if (kind1 instanceof Lexer.BeginEnd.class) {
-            return "begin"
-          } else {
-            throw new globalThis.Error("match error");
-          }
-        } else if (token instanceof Token.Close.class) {
-          param03 = token.kind;
-          kind = param03;
-          if (kind instanceof Lexer.Round.class) {
-            return ")"
-          } else if (kind instanceof Lexer.Square.class) {
-            return "]"
-          } else if (kind instanceof Lexer.Curly.class) {
-            return "}"
-          } else if (kind instanceof Lexer.BeginEnd.class) {
-            return "end"
-          } else {
-            throw new globalThis.Error("match error");
-          }
-        } else if (token instanceof Token.Comment.class) {
-          param02 = token.content;
-          return "\uD83D\uDCAC"
-        } else if (token instanceof Token.Identifier.class) {
-          param01 = token.name;
-          param11 = token.symbolic;
-          name = param01;
-          return name
-        } else if (token instanceof Token.Literal.class) {
-          param0 = token.kind;
-          param1 = token.literal;
-          literal4 = param1;
-          return literal4
-        } else {
-          throw new globalThis.Error("match error");
-        }
-      } 
-      static preview(tokens) {
-        let i, limit, values, scrut, param0, param1, head, tail, param01, param11, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
-        i = 0;
-        limit = 5;
-        values = [];
-        tmp7: while (true) {
-          scrut = i < limit;
-          if (scrut === true) {
-            if (tokens instanceof Stack.Cons.class) {
-              param0 = tokens.head;
-              param1 = tokens.tail;
-              head = param0;
-              tail = param1;
-              tmp = Lexer1.Token.summary(head);
-              tmp1 = runtime.safeCall(values.push(tmp));
-              tokens = tail;
-              tmp2 = i + 1;
-              i = tmp2;
-              tmp3 = runtime.Unit;
-              continue tmp7;
-            } else {
-              tmp3 = runtime.Unit;
-            }
-          } else {
-            tmp3 = runtime.Unit;
-          }
-          break;
-        }
-        tmp4 = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2
-        });
-        tmp5 = runtime.safeCall(values.join("\u2502"));
-        if (tokens instanceof Stack.Cons.class) {
-          param01 = tokens.head;
-          param11 = tokens.tail;
-          tmp6 = "\u2502\u22EF";
-        } else {
-          tmp6 = "\u2503";
-        }
-        return runtime.safeCall(tmp4("\u2503", tmp5, tmp6))
-      } 
-      static display(token1) {
-        let param0, param1, kind, literal4, param01, param11, name, symbolic, param02, content, param03, kind1, param04, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10;
-        if (token1 instanceof Token.Space.class) {
-          return "Space"
-        } else if (token1 instanceof Token.Comma.class) {
-          return "Comma"
-        } else if (token1 instanceof Token.Semicolon.class) {
-          return "Semicolon"
-        } else if (token1 instanceof Token.Error.class) {
-          return "Error"
-        } else if (token1 instanceof Token.Open.class) {
-          param04 = token1.kind;
-          kind2 = param04;
-          tmp = Token.display(kind2);
-          tmp1 = Str.concat2("Open(", tmp);
-          return Str.concat2(tmp1, ")")
-        } else if (token1 instanceof Token.Close.class) {
-          param03 = token1.kind;
-          kind1 = param03;
-          tmp2 = Token.display(kind1);
-          tmp3 = Str.concat2("Close(", tmp2);
-          return Str.concat2(tmp3, ")")
-        } else {
-          if (token1 instanceof Token.Comment.class) {
-            param02 = token1.content;
-            content = param02;
-            tmp4 = Str.concat2("Comment(", content);
-            return Str.concat2(tmp4, ")")
-          } else if (token1 instanceof Token.Identifier.class) {
-            param01 = token1.name;
-            param11 = token1.symbolic;
-            name = param01;
-            symbolic = param11;
-            tmp5 = Str.concat2("Identifier(", name);
-            tmp6 = Str.concat2(tmp5, ", ");
-            tmp7 = Str.concat2(tmp6, symbolic);
-            return Str.concat2(tmp7, ")")
-          } else if (token1 instanceof Token.Literal.class) {
-            param0 = token1.kind;
-            param1 = token1.literal;
-            kind = param0;
-            literal4 = param1;
-            tmp8 = Predef.fold((arg1, arg2) => {
-              return arg1 + arg2
-            });
-            tmp9 = Token.display(kind);
-            tmp10 = runtime.safeCall(globalThis.JSON.stringify(literal4));
-            return runtime.safeCall(tmp8("Literal(", tmp9, ", ", tmp10, ")"))
-          } else if (token1 instanceof Lexer.Round.class) {
-            return "Round"
-          } else if (token1 instanceof Lexer.Square.class) {
-            return "Square"
-          } else if (token1 instanceof Lexer.Curly.class) {
-            return "Curly"
-          } else if (token1 instanceof Lexer.LiteralKind.Integer.class) {
-            return "Integer"
-          } else if (token1 instanceof Lexer.LiteralKind.Decimal.class) {
-            return "Decimal"
-          } else if (token1 instanceof Lexer.LiteralKind.String.class) {
-            return "String"
-          } else if (token1 instanceof Lexer.LiteralKind.Boolean.class) {
-            return "Boolean"
-          } else {
-            throw new globalThis.Error("match error");
-          }
-        }
-      }
-      static toString() { return "Token"; }
-    };
     this.Location = function Location(start1, end1) { return new Location.class(start1, end1); };
     this.Location.class = class Location {
       constructor(start, end) {
@@ -676,6 +384,56 @@ Lexer1 = class Lexer {
         };
         this.Digit = new Digit$class;
         this.Digit.class = Digit$class;
+        const Underscore$class = class Underscore {
+          constructor() {}
+          unapply(scrut) {
+            if (scrut === "_") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else {
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
+            }
+          } 
+          unapplyStringPrefix(topic) {
+            let cond, sliced;
+            cond = globalThis.Predef.stringStartsWith(topic, "_");
+            if (cond === true) {
+              sliced = globalThis.Predef.stringDrop(topic, 1);
+              return runtime.safeCall(globalThis.Predef.MatchResult([
+                sliced
+              ]))
+            } else {
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
+            }
+          }
+          toString() { return "Underscore"; }
+        };
+        this.Underscore = new Underscore$class;
+        this.Underscore.class = Underscore$class;
+        const Apostrophe$class = class Apostrophe {
+          constructor() {}
+          unapply(scrut) {
+            if (scrut === "'") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else {
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
+            }
+          } 
+          unapplyStringPrefix(topic) {
+            let cond, sliced;
+            cond = globalThis.Predef.stringStartsWith(topic, "'");
+            if (cond === true) {
+              sliced = globalThis.Predef.stringDrop(topic, 1);
+              return runtime.safeCall(globalThis.Predef.MatchResult([
+                sliced
+              ]))
+            } else {
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
+            }
+          }
+          toString() { return "Apostrophe"; }
+        };
+        this.Apostrophe = new Apostrophe$class;
+        this.Apostrophe.class = Apostrophe$class;
         const HexDigit$class = class HexDigit {
           constructor() {}
           unapply(scrut) {
@@ -912,8 +670,8 @@ Lexer1 = class Lexer {
         const IdentifierBody$class = class IdentifierBody {
           constructor() {}
           unapply(scrut) {
-            let matchResult, matchResult1;
-            matchResult = runtime.safeCall(Char.IdentifierStart.unapply(scrut));
+            let matchResult, matchResult1, matchResult2, matchResult3;
+            matchResult = runtime.safeCall(Char.Letter.unapply(scrut));
             if (matchResult instanceof globalThis.Predef.MatchResult.class) {
               return runtime.safeCall(globalThis.Predef.MatchResult([]))
             } else {
@@ -921,13 +679,23 @@ Lexer1 = class Lexer {
               if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
                 return runtime.safeCall(globalThis.Predef.MatchResult([]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                matchResult2 = runtime.safeCall(Char.Underscore.unapply(scrut));
+                if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
+                  return runtime.safeCall(globalThis.Predef.MatchResult([]))
+                } else {
+                  matchResult3 = runtime.safeCall(Char.Apostrophe.unapply(scrut));
+                  if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
+                    return runtime.safeCall(globalThis.Predef.MatchResult([]))
+                  } else {
+                    return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  }
+                }
               }
             }
           } 
           unapplyStringPrefix(topic) {
-            let matchResult, arg, postfix, matchResult1, arg1, postfix1;
-            matchResult = runtime.safeCall(Char.IdentifierStart.unapplyStringPrefix(topic));
+            let matchResult, arg, postfix, matchResult1, arg1, postfix1, matchResult2, arg2, postfix2, matchResult3, arg3, postfix3;
+            matchResult = runtime.safeCall(Char.Letter.unapplyStringPrefix(topic));
             if (matchResult instanceof globalThis.Predef.MatchResult.class) {
               arg = matchResult.captures;
               postfix = globalThis.Predef.tupleGet(arg, 0);
@@ -943,7 +711,25 @@ Lexer1 = class Lexer {
                   postfix1
                 ]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                matchResult2 = runtime.safeCall(Char.Underscore.unapplyStringPrefix(topic));
+                if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
+                  arg2 = matchResult2.captures;
+                  postfix2 = globalThis.Predef.tupleGet(arg2, 0);
+                  return runtime.safeCall(globalThis.Predef.MatchResult([
+                    postfix2
+                  ]))
+                } else {
+                  matchResult3 = runtime.safeCall(Char.Apostrophe.unapplyStringPrefix(topic));
+                  if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
+                    arg3 = matchResult3.captures;
+                    postfix3 = globalThis.Predef.tupleGet(arg3, 0);
+                    return runtime.safeCall(globalThis.Predef.MatchResult([
+                      postfix3
+                    ]))
+                  } else {
+                    return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  }
+                }
               }
             }
           }
@@ -951,7 +737,7 @@ Lexer1 = class Lexer {
         };
         this.IdentifierBody = new IdentifierBody$class;
         this.IdentifierBody.class = IdentifierBody$class;
-        const Space$class = class Space1 {
+        const Space$class = class Space {
           constructor() {}
           unapply(scrut) {
             if (scrut === " ") {
@@ -1199,8 +985,8 @@ Lexer1 = class Lexer {
       return tmp2
     };
     identifier = function identifier(idx, acc) {
-      let scrut, param0, ch, matchResult, scrut1, param01, ch1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-      tmp8: while (true) {
+      let scrut, param0, ch, matchResult, tmp, tmp1, tmp2, tmp3, tmp4;
+      tmp5: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
@@ -1212,58 +998,38 @@ Lexer1 = class Lexer {
             tmp1 = acc + ch;
             acc = tmp1;
             tmp2 = runtime.Unit;
-            continue tmp8;
-          } else {
-            tmp2 = runtime.Unit;
-          }
-        } else {
-          tmp2 = runtime.Unit;
-        }
-        break;
-      }
-      tmp9: while (true) {
-        scrut1 = char1(idx);
-        if (scrut1 instanceof Option.Some.class) {
-          param01 = scrut1.value;
-          if (param01 === "'") {
-            ch1 = param01;
-            tmp3 = idx + 1;
-            idx = tmp3;
-            tmp4 = acc + "'";
-            acc = tmp4;
-            tmp5 = runtime.Unit;
-            continue tmp9;
+            continue tmp5;
           } else {
             if (acc === "begin") {
-              tmp6 = Lexer.Token.Open(Lexer.BeginEnd);
+              tmp3 = Token.Open(Token.BeginEnd);
             } else if (acc === "end") {
-              tmp6 = Lexer.Token.Close(Lexer.BeginEnd);
+              tmp3 = Token.Close(Token.BeginEnd);
             } else if (acc === "true") {
-              tmp6 = Lexer.Token.boolean("true");
+              tmp3 = Token.boolean("true");
             } else if (acc === "false") {
-              tmp6 = Lexer.Token.boolean("false");
+              tmp3 = Token.boolean("false");
             } else {
-              tmp6 = Lexer.Token.Identifier(acc, false);
+              tmp3 = Token.Identifier(acc, false);
             }
-            tmp5 = Predef.tuple(idx, tmp6);
+            tmp2 = Predef.tuple(idx, tmp3);
           }
         } else {
           if (acc === "begin") {
-            tmp7 = Lexer.Token.Open(Lexer.BeginEnd);
+            tmp4 = Token.Open(Token.BeginEnd);
           } else if (acc === "end") {
-            tmp7 = Lexer.Token.Close(Lexer.BeginEnd);
+            tmp4 = Token.Close(Token.BeginEnd);
           } else if (acc === "true") {
-            tmp7 = Lexer.Token.boolean("true");
+            tmp4 = Token.boolean("true");
           } else if (acc === "false") {
-            tmp7 = Lexer.Token.boolean("false");
+            tmp4 = Token.boolean("false");
           } else {
-            tmp7 = Lexer.Token.Identifier(acc, false);
+            tmp4 = Token.Identifier(acc, false);
           }
-          tmp5 = Predef.tuple(idx, tmp7);
+          tmp2 = Predef.tuple(idx, tmp4);
         }
         break;
       }
-      return tmp5
+      return tmp2
     };
     operator = function operator(idx, acc) {
       let scrut, param0, ch, matchResult, tmp, tmp1, tmp2, tmp3, tmp4;
@@ -1281,14 +1047,14 @@ Lexer1 = class Lexer {
             tmp2 = runtime.Unit;
             continue tmp5;
           } else {
-            tmp3 = Lexer.Token.Identifier(acc, true);
+            tmp3 = Token.Identifier(acc, true);
             tmp2 = [
               idx,
               tmp3
             ];
           }
         } else {
-          tmp4 = Lexer.Token.Identifier(acc, true);
+          tmp4 = Token.Identifier(acc, true);
           tmp2 = [
             idx,
             tmp4
@@ -1321,14 +1087,14 @@ Lexer1 = class Lexer {
                 tmp3 = runtime.Unit;
                 continue tmp20;
               } else {
-                tmp4 = Lexer.Token.Comment(content);
+                tmp4 = Token.Comment(content);
                 tmp3 = [
                   idx,
                   tmp4
                 ];
               }
             } else {
-              tmp5 = Lexer.Token.Comment(content);
+              tmp5 = Token.Comment(content);
               tmp3 = [
                 idx,
                 tmp5
@@ -1383,7 +1149,7 @@ Lexer1 = class Lexer {
                 }
               } else {
                 if (terminated === true) {
-                  tmp16 = Lexer.Token.Comment(content);
+                  tmp16 = Token.Comment(content);
                   tmp17 = [
                     idx,
                     tmp16
@@ -1391,7 +1157,7 @@ Lexer1 = class Lexer {
                 } else {
                   tmp17 = [
                     idx,
-                    Lexer.Token.Error
+                    Token.Error
                   ];
                 }
                 tmp9 = tmp17;
@@ -1412,14 +1178,14 @@ Lexer1 = class Lexer {
           } else {
             return [
               idx,
-              Lexer.Token.Error
+              Token.Error
             ]
           }
         }
       } else {
         return [
           idx,
-          Lexer.Token.Error
+          Token.Error
         ]
       }
     };
@@ -1695,7 +1461,7 @@ Lexer1 = class Lexer {
         }
         break;
       }
-      tmp9 = Lexer.Token.Literal(Lexer.LiteralKind.String, content);
+      tmp9 = Token.Literal(Token.LiteralKind.String, content);
       return [
         idx,
         tmp9
@@ -1706,7 +1472,7 @@ Lexer1 = class Lexer {
       if (head === "0") {
         scrut3 = char1(idx);
         if (scrut3 instanceof Option.None.class) {
-          tmp = Lexer.Token.integer("0");
+          tmp = Token.integer("0");
           return [
             idx,
             tmp
@@ -1722,7 +1488,7 @@ Lexer1 = class Lexer {
               idx$_5 = first06;
               bs = first16;
               tmp2 = Str.concat2("0b", bs);
-              tmp3 = Lexer.Token.integer(tmp2);
+              tmp3 = Token.integer(tmp2);
               return [
                 idx$_5,
                 tmp3
@@ -1734,7 +1500,7 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp4 = Lexer.Token.integer(integer1);
+                tmp4 = Token.integer(integer1);
                 return [
                   idx$_1,
                   tmp4
@@ -1759,27 +1525,27 @@ Lexer1 = class Lexer {
                         fraction = first11;
                         tmp6 = Str.concat2(integer, ".");
                         tmp7 = Str.concat2(tmp6, fraction);
-                        tmp8 = Lexer.Token.decimal(tmp7);
+                        tmp8 = Token.decimal(tmp7);
                         return [
                           idx$_$_,
                           tmp8
                         ]
                       } else {
-                        tmp9 = Lexer.Token.integer(integer);
+                        tmp9 = Token.integer(integer);
                         return [
                           idx$_,
                           tmp9
                         ]
                       }
                     } else {
-                      tmp10 = Lexer.Token.integer(integer);
+                      tmp10 = Token.integer(integer);
                       return [
                         idx$_,
                         tmp10
                       ]
                     }
                   } else {
-                    tmp11 = Lexer.Token.integer(integer);
+                    tmp11 = Token.integer(integer);
                     return [
                       idx$_,
                       tmp11
@@ -1799,7 +1565,7 @@ Lexer1 = class Lexer {
               idx$_4 = first05;
               os = first15;
               tmp13 = Str.concat2("0o", os);
-              tmp14 = Lexer.Token.integer(tmp13);
+              tmp14 = Token.integer(tmp13);
               return [
                 idx$_4,
                 tmp14
@@ -1811,7 +1577,7 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp15 = Lexer.Token.integer(integer1);
+                tmp15 = Token.integer(integer1);
                 return [
                   idx$_1,
                   tmp15
@@ -1836,27 +1602,27 @@ Lexer1 = class Lexer {
                         fraction = first11;
                         tmp17 = Str.concat2(integer, ".");
                         tmp18 = Str.concat2(tmp17, fraction);
-                        tmp19 = Lexer.Token.decimal(tmp18);
+                        tmp19 = Token.decimal(tmp18);
                         return [
                           idx$_$_,
                           tmp19
                         ]
                       } else {
-                        tmp20 = Lexer.Token.integer(integer);
+                        tmp20 = Token.integer(integer);
                         return [
                           idx$_,
                           tmp20
                         ]
                       }
                     } else {
-                      tmp21 = Lexer.Token.integer(integer);
+                      tmp21 = Token.integer(integer);
                       return [
                         idx$_,
                         tmp21
                       ]
                     }
                   } else {
-                    tmp22 = Lexer.Token.integer(integer);
+                    tmp22 = Token.integer(integer);
                     return [
                       idx$_,
                       tmp22
@@ -1876,7 +1642,7 @@ Lexer1 = class Lexer {
               idx$_3 = first04;
               xs = first14;
               tmp24 = Str.concat2("0x", xs);
-              tmp25 = Lexer.Token.integer(tmp24);
+              tmp25 = Token.integer(tmp24);
               return [
                 idx$_3,
                 tmp25
@@ -1888,7 +1654,7 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp26 = Lexer.Token.integer(integer1);
+                tmp26 = Token.integer(integer1);
                 return [
                   idx$_1,
                   tmp26
@@ -1913,27 +1679,27 @@ Lexer1 = class Lexer {
                         fraction = first11;
                         tmp28 = Str.concat2(integer, ".");
                         tmp29 = Str.concat2(tmp28, fraction);
-                        tmp30 = Lexer.Token.decimal(tmp29);
+                        tmp30 = Token.decimal(tmp29);
                         return [
                           idx$_$_,
                           tmp30
                         ]
                       } else {
-                        tmp31 = Lexer.Token.integer(integer);
+                        tmp31 = Token.integer(integer);
                         return [
                           idx$_,
                           tmp31
                         ]
                       }
                     } else {
-                      tmp32 = Lexer.Token.integer(integer);
+                      tmp32 = Token.integer(integer);
                       return [
                         idx$_,
                         tmp32
                       ]
                     }
                   } else {
-                    tmp33 = Lexer.Token.integer(integer);
+                    tmp33 = Token.integer(integer);
                     return [
                       idx$_,
                       tmp33
@@ -1953,7 +1719,7 @@ Lexer1 = class Lexer {
               idx$_2 = first03;
               ds = first13;
               tmp35 = Str.concat2("0.", ds);
-              tmp36 = Lexer.Token.decimal(tmp35);
+              tmp36 = Token.decimal(tmp35);
               return [
                 idx$_2,
                 tmp36
@@ -1965,7 +1731,7 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp37 = Lexer.Token.integer(integer1);
+                tmp37 = Token.integer(integer1);
                 return [
                   idx$_1,
                   tmp37
@@ -1990,27 +1756,27 @@ Lexer1 = class Lexer {
                         fraction = first11;
                         tmp39 = Str.concat2(integer, ".");
                         tmp40 = Str.concat2(tmp39, fraction);
-                        tmp41 = Lexer.Token.decimal(tmp40);
+                        tmp41 = Token.decimal(tmp40);
                         return [
                           idx$_$_,
                           tmp41
                         ]
                       } else {
-                        tmp42 = Lexer.Token.integer(integer);
+                        tmp42 = Token.integer(integer);
                         return [
                           idx$_,
                           tmp42
                         ]
                       }
                     } else {
-                      tmp43 = Lexer.Token.integer(integer);
+                      tmp43 = Token.integer(integer);
                       return [
                         idx$_,
                         tmp43
                       ]
                     }
                   } else {
-                    tmp44 = Lexer.Token.integer(integer);
+                    tmp44 = Token.integer(integer);
                     return [
                       idx$_,
                       tmp44
@@ -2028,7 +1794,7 @@ Lexer1 = class Lexer {
               first12 = scrut4[1];
               idx$_1 = first02;
               integer1 = first12;
-              tmp45 = Lexer.Token.integer(integer1);
+              tmp45 = Token.integer(integer1);
               return [
                 idx$_1,
                 tmp45
@@ -2053,27 +1819,27 @@ Lexer1 = class Lexer {
                       fraction = first11;
                       tmp47 = Str.concat2(integer, ".");
                       tmp48 = Str.concat2(tmp47, fraction);
-                      tmp49 = Lexer.Token.decimal(tmp48);
+                      tmp49 = Token.decimal(tmp48);
                       return [
                         idx$_$_,
                         tmp49
                       ]
                     } else {
-                      tmp50 = Lexer.Token.integer(integer);
+                      tmp50 = Token.integer(integer);
                       return [
                         idx$_,
                         tmp50
                       ]
                     }
                   } else {
-                    tmp51 = Lexer.Token.integer(integer);
+                    tmp51 = Token.integer(integer);
                     return [
                       idx$_,
                       tmp51
                     ]
                   }
                 } else {
-                  tmp52 = Lexer.Token.integer(integer);
+                  tmp52 = Token.integer(integer);
                   return [
                     idx$_,
                     tmp52
@@ -2104,27 +1870,27 @@ Lexer1 = class Lexer {
                   fraction = first11;
                   tmp54 = Str.concat2(integer, ".");
                   tmp55 = Str.concat2(tmp54, fraction);
-                  tmp56 = Lexer.Token.decimal(tmp55);
+                  tmp56 = Token.decimal(tmp55);
                   return [
                     idx$_$_,
                     tmp56
                   ]
                 } else {
-                  tmp57 = Lexer.Token.integer(integer);
+                  tmp57 = Token.integer(integer);
                   return [
                     idx$_,
                     tmp57
                   ]
                 }
               } else {
-                tmp58 = Lexer.Token.integer(integer);
+                tmp58 = Token.integer(integer);
                 return [
                   idx$_,
                   tmp58
                 ]
               }
             } else {
-              tmp59 = Lexer.Token.integer(integer);
+              tmp59 = Token.integer(integer);
               return [
                 idx$_,
                 tmp59
@@ -2154,27 +1920,27 @@ Lexer1 = class Lexer {
                 fraction = first11;
                 tmp61 = Str.concat2(integer, ".");
                 tmp62 = Str.concat2(tmp61, fraction);
-                tmp63 = Lexer.Token.decimal(tmp62);
+                tmp63 = Token.decimal(tmp62);
                 return [
                   idx$_$_,
                   tmp63
                 ]
               } else {
-                tmp64 = Lexer.Token.integer(integer);
+                tmp64 = Token.integer(integer);
                 return [
                   idx$_,
                   tmp64
                 ]
               }
             } else {
-              tmp65 = Lexer.Token.integer(integer);
+              tmp65 = Token.integer(integer);
               return [
                 idx$_,
                 tmp65
               ]
             }
           } else {
-            tmp66 = Lexer.Token.integer(integer);
+            tmp66 = Token.integer(integer);
             return [
               idx$_,
               tmp66
@@ -2186,89 +1952,143 @@ Lexer1 = class Lexer {
       }
     };
     scan = function scan(idx, acc) {
-      let go, scrut, param0, other, ch, matchResult, ch1, matchResult1, ch2, matchResult2, matchResult3, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29;
+      let go, scrut, param0, other, scrut1, param01, ch, matchResult, scrut2, first1, first0, idx$_, param02, param1, name, ch1, matchResult1, ch2, matchResult2, ch3, matchResult3, matchResult4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48;
       go = function go(idx1, tok) {
-        let tmp30;
-        tmp30 = Stack.Cons(tok, acc);
-        return scan(idx1, tmp30)
+        let tmp49;
+        tmp49 = Stack.Cons(tok, acc);
+        return scan(idx1, tmp49)
       };
       scrut = char1(idx);
       if (scrut instanceof Option.None.class) {
         return Stack.reverse(acc)
       } else if (scrut instanceof Option.Some.class) {
         param0 = scrut.value;
-        matchResult3 = runtime.safeCall(Lexer.Char.Space.unapply(param0));
-        if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
+        matchResult4 = runtime.safeCall(Lexer.Char.Space.unapply(param0));
+        if (matchResult4 instanceof globalThis.Predef.MatchResult.class) {
           tmp = idx + 1;
           tmp1 = whitespace(tmp);
-          return go(tmp1, Lexer.Token.Space)
+          return go(tmp1, Token.Space)
         } else {
           if (param0 === ",") {
             tmp2 = idx + 1;
-            return go(tmp2, Lexer.Token.Comma)
+            return go(tmp2, Token.Comma)
           } else if (param0 === ";") {
             tmp3 = idx + 1;
-            return go(tmp3, Lexer.Token.Semicolon)
+            return go(tmp3, Token.Semicolon)
           } else if (param0 === "\"") {
             tmp4 = idx + 1;
             tmp5 = string(tmp4);
             return go(...tmp5)
           } else if (param0 === "(") {
             tmp6 = idx + 1;
-            tmp7 = Lexer.Token.Open(Lexer.Round);
+            tmp7 = Token.Open(Token.Round);
             return go(tmp6, tmp7)
           } else if (param0 === "[") {
             tmp8 = idx + 1;
-            tmp9 = Lexer.Token.Open(Lexer.Square);
+            tmp9 = Token.Open(Token.Square);
             return go(tmp8, tmp9)
           } else if (param0 === "{") {
             tmp10 = idx + 1;
-            tmp11 = Lexer.Token.Open(Lexer.Curly);
+            tmp11 = Token.Open(Token.Curly);
             return go(tmp10, tmp11)
           } else if (param0 === ")") {
             tmp12 = idx + 1;
-            tmp13 = Lexer.Token.Close(Lexer.Round);
+            tmp13 = Token.Close(Token.Round);
             return go(tmp12, tmp13)
           } else if (param0 === "]") {
             tmp14 = idx + 1;
-            tmp15 = Lexer.Token.Close(Lexer.Square);
+            tmp15 = Token.Close(Token.Square);
             return go(tmp14, tmp15)
           } else if (param0 === "}") {
             tmp16 = idx + 1;
-            tmp17 = Lexer.Token.Close(Lexer.Curly);
+            tmp17 = Token.Close(Token.Curly);
             return go(tmp16, tmp17)
           } else if (param0 === "/") {
             tmp18 = idx + 1;
             tmp19 = comment(tmp18);
             return go(...tmp19)
           } else {
-            matchResult2 = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
-            if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
-              ch2 = param0;
+            matchResult3 = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
+            if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
+              ch3 = param0;
               tmp20 = idx + 1;
-              tmp21 = identifier(tmp20, ch2);
+              tmp21 = identifier(tmp20, ch3);
               return go(...tmp21)
             } else {
-              matchResult1 = runtime.safeCall(Lexer.Char.Operator.unapply(param0));
-              if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
-                ch1 = param0;
+              matchResult2 = runtime.safeCall(Lexer.Char.Operator.unapply(param0));
+              if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
+                ch2 = param0;
                 tmp22 = idx + 1;
-                tmp23 = operator(tmp22, ch1);
+                tmp23 = operator(tmp22, ch2);
                 return go(...tmp23)
               } else {
-                matchResult = runtime.safeCall(Lexer.Char.Digit.unapply(param0));
-                if (matchResult instanceof globalThis.Predef.MatchResult.class) {
-                  ch = param0;
+                matchResult1 = runtime.safeCall(Lexer.Char.Digit.unapply(param0));
+                if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+                  ch1 = param0;
                   tmp24 = idx + 1;
-                  tmp25 = number(tmp24, ch);
+                  tmp25 = number(tmp24, ch1);
                   return go(...tmp25)
                 } else {
-                  other = param0;
-                  tmp26 = Str.concat2("Unrecognized character: '", other);
-                  tmp27 = Str.concat2(tmp26, "'");
-                  tmp28 = Predef.print(tmp27);
-                  tmp29 = idx + 1;
-                  return go(tmp29, Lexer.Token.Error)
+                  if (param0 === "'") {
+                    tmp26 = idx + 1;
+                    scrut1 = char1(tmp26);
+                    if (scrut1 instanceof Option.Some.class) {
+                      param01 = scrut1.value;
+                      matchResult = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param01));
+                      if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+                        ch = param01;
+                        tmp27 = idx + 2;
+                        scrut2 = identifier(tmp27, ch);
+                        if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                          first0 = scrut2[0];
+                          first1 = scrut2[1];
+                          idx$_ = first0;
+                          if (first1 instanceof Token.Identifier.class) {
+                            param02 = first1.name;
+                            param1 = first1.symbolic;
+                            name = param02;
+                            tmp28 = Token.TypeVariable(name);
+                            return go(idx$_, tmp28)
+                          } else {
+                            other = param0;
+                            tmp29 = Str.concat2("Unrecognized character: '", other);
+                            tmp30 = Str.concat2(tmp29, "'");
+                            tmp31 = Predef.print(tmp30);
+                            tmp32 = idx + 1;
+                            return go(tmp32, Token.Error)
+                          }
+                        } else {
+                          other = param0;
+                          tmp33 = Str.concat2("Unrecognized character: '", other);
+                          tmp34 = Str.concat2(tmp33, "'");
+                          tmp35 = Predef.print(tmp34);
+                          tmp36 = idx + 1;
+                          return go(tmp36, Token.Error)
+                        }
+                      } else {
+                        other = param0;
+                        tmp37 = Str.concat2("Unrecognized character: '", other);
+                        tmp38 = Str.concat2(tmp37, "'");
+                        tmp39 = Predef.print(tmp38);
+                        tmp40 = idx + 1;
+                        return go(tmp40, Token.Error)
+                      }
+                    } else {
+                      other = param0;
+                      tmp41 = Str.concat2("Unrecognized character: '", other);
+                      tmp42 = Str.concat2(tmp41, "'");
+                      tmp43 = Predef.print(tmp42);
+                      tmp44 = idx + 1;
+                      return go(tmp44, Token.Error)
+                    }
+                  } else {
+                    other = param0;
+                    tmp45 = Str.concat2("Unrecognized character: '", other);
+                    tmp46 = Str.concat2(tmp45, "'");
+                    tmp47 = Predef.print(tmp46);
+                    tmp48 = idx + 1;
+                    return go(tmp48, Token.Error)
+                  }
                 }
               }
             }

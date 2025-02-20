@@ -3,6 +3,7 @@ import BetterMap from "./../../BetterMap.mjs";
 import Iter from "./../../Iter.mjs";
 import Option from "./../../Option.mjs";
 import Stack from "./../../Stack.mjs";
+import Token from "./Token.mjs";
 import Keyword1 from "./Keyword.mjs";
 import Tree from "./Tree.mjs";
 let ParseRule2;
@@ -457,6 +458,23 @@ ParseRule2 = class ParseRule {
           }
           toString() { return "Expr(" + globalThis.Predef.render(this.process) + ", " + globalThis.Predef.render(this.rest) + ")"; }
         };
+        this.Type = function Type(process1, rest1) { return new Type.class(process1, rest1); };
+        this.Type.class = class Type {
+          constructor(process, rest) {
+            this.process = process;
+            this.rest = rest;
+          }
+          toString() { return "Type(" + globalThis.Predef.render(this.process) + ", " + globalThis.Predef.render(this.rest) + ")"; }
+        };
+        this.Terminal = function Terminal(process1, token1, rest1) { return new Terminal.class(process1, token1, rest1); };
+        this.Terminal.class = class Terminal {
+          constructor(process, token, rest) {
+            this.process = process;
+            this.token = token;
+            this.rest = rest;
+          }
+          toString() { return "Terminal(" + globalThis.Predef.render(this.process) + ", " + globalThis.Predef.render(this.token) + ", " + globalThis.Predef.render(this.rest) + ")"; }
+        };
         this.End = function End(value1) { return new End.class(value1); };
         this.End.class = class End {
           constructor(value) {
@@ -501,6 +519,16 @@ ParseRule2 = class ParseRule {
         let tmp;
         tmp = ParseRule.rule(name1, ...choices1);
         return Choice.Expr(process, tmp)
+      } 
+      static terminal(process1, token, name2, ...choices2) {
+        let tmp;
+        tmp = ParseRule.rule(name2, ...choices2);
+        return Choice.Terminal(process1, token, tmp)
+      } 
+      static token(token1, name3, ...choices3) {
+        return Choice.terminal((_, tree) => {
+          return tree
+        }, token1, name3, ...choices3)
       } 
       static end(value) {
         return Choice.End(value)

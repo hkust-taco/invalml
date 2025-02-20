@@ -5,6 +5,8 @@ import "../BetterMap.mls"
 import "../TreeTracer.mls"
 import "../Iter.mls"
 import "../apps/Lexer.mls"
+import "./parsing/Token.mls"
+import "./parsing/TokenHelpers.mls"
 import "./parsing/Keyword.mls"
 import "./parsing/Precedence.mls"
 import "./parsing/Tree.mls"
@@ -15,7 +17,7 @@ open Option
 open Stack
 open BetterMap
 open TreeTracer { TreeTracer }
-open Lexer { Token, LiteralKind, BracketKind }
+open Token { LiteralKind, BracketKind }
 open Precedence { Keywords, appPrec, opPrec }
 open Keyword { allKeywords, Keyword }
 open ParseRule { ParseRule, Choice, rule }
@@ -394,7 +396,7 @@ fun parse(tokens) =
                   None then expr Tree.Error("unexpected expression")
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
-        do tracer.print of "try parse an expression from " + Token.preview(current), source.line
+        do tracer.print of "try parse an expression from " + TokenHelpers.preview(current), source.line
         simpleExpr(prec, opened) is
           Tree.Error(Tree.Empty(), _) and rule.endChoice is
             Some(value) then value
@@ -413,7 +415,7 @@ fun parse(tokens) =
         None then Tree.error("unexpected EOF")
   
   fun simpleExpr(prec: Int, bracket) = tracer.trace of
-    "simple expression <<< " + prec + " " + Token.preview(current)
+    "simple expression <<< " + prec + " " + TokenHelpers.preview(current)
     result => "simple expression >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
@@ -443,8 +445,8 @@ fun parse(tokens) =
                 tracer.print of "closing bracket " + kind, source.line
                 consume
                 if content is Tree.Empty and kind is
-                  Lexer.Round then Tree.Tuple(Nil)
-                  Lexer.BeginEnd then Tree.Sequence(Nil)
+                  Token.Round then Tree.Tuple(Nil)
+                  Token.BeginEnd then Tree.Sequence(Nil)
                 else
                   content
               else content Tree.Error("mismatched brackets")

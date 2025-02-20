@@ -6,103 +6,18 @@ open Predef
 import "../Stack.mls"
 import "../Str.mls"
 import "../Option.mls"
+import "../Iter.mls"
+
+import "./parsing/Token.mls"
 
 open Stack
 open Str
 open Option { Some, None}
+open Token { Round, Curly, Square, BeginEnd, LiteralKind }
 
 type Opt[T] = Some[T] | None
 
 module Lexer with ...
-
-object
-  Round
-  Square
-  Curly
-  BeginEnd
-
-type BracketKind = Round | Square | Curly | BeginEnd
-
-module LiteralKind with
-  object
-    Integer
-    Decimal
-    String
-    Boolean
-
-module Token with
-  object
-    Space
-    Comma
-    Semicolon
-    Error
-  
-  class
-    Open(kind: BracketKind)
-    Close(kind: BracketKind)
-    Comment(content: Str)
-    Identifier(name: Str, symbolic: Bool)
-    Literal(kind: LiteralKind, literal: Str)
-  
-  fun integer(literal) = Token.Literal(LiteralKind.Integer, literal)
-  fun decimal(literal) = Token.Literal(LiteralKind.Decimal, literal)
-  fun string(literal) = Token.Literal(LiteralKind.String, literal)
-  fun boolean(literal) = Token.Literal(LiteralKind.Boolean, literal)
-    
-  fun summary(token) = if token is
-    Space then "␠"
-    Comma then ","
-    Semicolon then ";"
-    Error then "⚠"
-    Open(kind) and kind is
-      Round then "("
-      Square then "["
-      Curly then "{"
-      BeginEnd then "begin"
-    Close(kind) and kind is
-      Round then ")"
-      Square then "]"
-      Curly then "}"
-      BeginEnd then "end"
-    Comment(_) then "\uD83D\uDCAC" // The text ballon emoji.
-    Identifier(name, _) then name
-    Literal(_, literal) then literal
-  
-  fun preview(tokens: Stack[Lexer.Token]): Str =
-    let
-      i = 0
-      limit = 5
-      values = []
-    while i < limit and tokens is head :: tail do
-      values.push of head Lexer.Token.summary()
-      set tokens = tail
-      set i += 1
-    fold(+) of
-      "┃", values.join("│"),
-      if tokens is _ :: _ then "│⋯" else "┃"
-  
-  fun display(token) = if token is
-    Space then "Space"
-    Comma then "Comma"
-    Semicolon then "Semicolon"
-    Error then "Error"
-    Open(kind) then "Open(" ~ display(kind) ~ ")"
-    Close(kind) then "Close(" ~ display(kind) ~ ")"
-    Comment(content) then "Comment(" ~ content ~ ")"
-    Identifier(name, symbolic) then "Identifier(" ~ name ~ ", " ~ symbolic ~ ")"
-    Literal(kind, literal) then fold(+) of
-      "Literal("
-      display(kind)
-      ", "
-      JSON.stringify(literal)
-      ")"
-    Round then "Round"
-    Square then "Square"
-    Curly then "Curly"
-    LiteralKind.Integer then "Integer"
-    LiteralKind.Decimal then "Decimal"
-    LiteralKind.String then "String"
-    LiteralKind.Boolean then "Boolean"
 
 class Location(start: Int, end: Int)
 
@@ -114,6 +29,8 @@ module Char with
   pattern Operator = "!" | "#" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<" | "=" | ">" | "?" | "@" | "\\" | "^" | "|" | "~" | "."
   pattern Letter = "a" ..= "z" | "A" ..= "Z"
   pattern Digit = "0" ..= "9"
+  pattern Underscore = "_"
+  pattern Apostrophe = "'"
   fun isDigit(ch: Str) = ch is Digit
   pattern HexDigit = Digit | "a" ..= "f" | "A" ..= "F"
   fun isHexDigit(ch: Str) = ch is HexDigit
@@ -122,7 +39,7 @@ module Char with
   pattern BinDigit = "0" | "1"
   fun isBinDigit(ch: Str) = ch is BinDigit
   pattern IdentifierStart = Letter | "_"
-  pattern IdentifierBody = IdentifierStart | Digit
+  pattern IdentifierBody = Letter | Digit | Underscore | Apostrophe
   pattern Space = " " | "\t" | "\n" | "\r"
   pattern Zero = "0"
 
@@ -160,22 +77,17 @@ fun lex(str: Str) =
       else [idx, acc]
   
   fun identifier(idx: Int, acc: Str) =
-    while char(idx) is Some(Char.IdentifierBody as ch) do
+    while char(idx) is Some(Char.IdentifierBody as ch) then
       set idx = idx + 1
       set acc = acc + ch
-    while char(idx) is Some("'" as ch)
-      then
-        set
-          idx = idx + 1
-          acc = acc + "'"
-      else tuple of
-        idx
-        if acc is
-          "begin" then Token.Open(BeginEnd)
-          "end" then Token.Close(BeginEnd)
-          "true" then Token.boolean("true")
-          "false" then Token.boolean("false")
-          else Token.Identifier(acc, false)
+    else tuple of
+      idx
+      if acc is
+        "begin" then Token.Open(BeginEnd)
+        "end" then Token.Close(BeginEnd)
+        "true" then Token.boolean("true")
+        "false" then Token.boolean("false")
+        else Token.Identifier(acc, false)
   
   fun operator(idx: Int, acc: Str) =
     while char(idx) is Some(Char.Operator as ch)
@@ -310,6 +222,9 @@ fun lex(str: Str) =
       Some(Char.IdentifierStart as ch) then go(..identifier(idx + 1, ch))
       Some(Char.Operator as ch) then go(..operator(idx + 1, ch))
       Some(Char.Digit as ch) then go(..number(idx + 1, ch))
+      Some("'") and char(idx + 1) is Some(Char.IdentifierStart as ch) and
+        identifier(idx + 2, ch) is [idx', Token.Identifier(name, _)] then
+          go(idx', Token.TypeVariable(name))
       Some(other) then
         print("Unrecognized character: '" ~ other ~ "'")
         go(idx + 1, Token.Error)

@@ -5,11 +5,12 @@ import "../../Option.mls"
 import "../Lexer.mls"
 import "./Keyword.mls"
 import "./Precedence.mls"
+import "./Token.mls"
 
 open Predef { fold }
 open Stack
 open Option { Some, None }
-open Lexer { Token, LiteralKind, BracketKind }
+open Token { LiteralKind, BracketKind }
 open Keyword { Keyword, INT_MAX }
 open Precedence { appPrec, opPrec }
 

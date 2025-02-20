@@ -4,11 +4,12 @@ import "../../mlscript-compile/apps/Lexer.mls"
 import "../../mlscript-compile/apps/parsing/Precedence.mls"
 import "../../mlscript-compile/apps/parsing/ParseRule.mls"
 import "../../mlscript-compile/apps/parsing/Keyword.mls"
+import "../../mlscript-compile/apps/parsing/Token.mls"
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/Option.mls"
 
-open Lexer { Token, LiteralKind }
+open Token { LiteralKind }
 open Parser { parse, showAsTree, tracer }
 open Option { Some, None }
 open Precedence { Keywords, opPrec }
@@ -826,3 +827,27 @@ in
 //│ >       callee = Ident of "even"
 //│ >       arguments = Stack of 
 //│ >         Literal#Integer of "1000"
+
+:todo
+printParsed of """
+type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
+"""
+//│ > Error:
+//│ >   tree = Ternary:
+//│ >     name = Keyword(`type`, 7, N/A)
+//│ >     lhs = Error of "unrecognized token: TypeVariable(\"a\")"
+//│ >     rhs = Error of "unexpected expression"
+//│ >     body = None
+//│ >   message = "expect EOF instead of TypeVariable(\"a\")"
+
+:todo
+printParsed of """
+type 'a 'b twist = a list * b list
+"""
+//│ > Error:
+//│ >   tree = Ternary:
+//│ >     name = Keyword(`type`, 7, N/A)
+//│ >     lhs = Error of "unrecognized token: TypeVariable(\"a\")"
+//│ >     rhs = Error of "unexpected expression"
+//│ >     body = None
+//│ >   message = "expect EOF instead of TypeVariable(\"a\")"

@@ -1,0 +1,114 @@
+import "../../Predef.mls"
+import "../../Stack.mls"
+import "../../Option.mls"
+import "../../Iter.mls"
+import "../Lexer.mls"
+import "./Token.mls"
+
+open Predef { mkStr }
+open Stack
+open Option { Some, None }
+open Token { Round, LiteralKind }
+
+type Opt[A] = Some[A] | None
+type Stack[A] = Cons[A] | Nil
+
+module RecursiveDescent with ...
+
+fun parenthesized(x, cond) = if cond then "(" + x + ")" else x
+
+module Expr with
+  abstract class Expr
+  class
+    Lit(value: Int) extends Expr
+    Var(name: Str) extends Expr
+    Add(left: Expr, right: Expr) extends Expr
+    Mul(left: Expr, right: Expr) extends Expr
+    Err(expr: Opt[Expr], msg: Str) extends Expr
+  
+  fun withErr(expr, msg) = Err(Some(expr), msg)
+  fun justErr(msg) = Err(None, msg)
+  
+  fun prettyPrint(tree: Expr): Str = if tree is
+    Lit(value) then value.toString()
+    Var(name) then name
+    Add(left, right) then left prettyPrint() + " + " + right prettyPrint()
+    Mul(left, right) then mkStr of
+      left prettyPrint() parenthesized(left is Add)
+      " * "
+      right prettyPrint() parenthesized(right is Add)
+    Err(Some(expr), msg) then mkStr of
+      "{ ", expr prettyPrint() + " | " + JSON.stringify(msg) + " }"
+    Err(None, msg) then "{ " + JSON.stringify(msg) + " }"
+
+fun parse(tokens) =
+  fun advance = if tokens is
+    Token.Space :: tail then
+      set tokens = tail
+      advance
+    head :: tail then
+      set tokens = tail
+      Some(head)
+    Nil then None
+  
+  let peek = advance
+  
+  fun consume = set peek = advance
+  
+  fun require(result: Expr, expected) = if peek is
+    Some(actual) and
+      expected Token.same(actual) then
+        consume
+        result
+      else result Expr.withErr of mkStr of
+        "Expected token "
+        expected Token.summary()
+        ", but found "
+        actual Token.summary() 
+    None then result Expr.withErr of mkStr of
+      "Expected token "
+      expected Token.summary()
+      ", but found end of input"
+  
+  fun atom: Expr = if peek is
+    Some(Token.Literal(LiteralKind.Integer, literal)) then
+      consume
+      Expr.Lit(parseInt(literal, 10))
+    Some(Token.Identifier(name, false)) then
+      consume
+      Expr.Var(name)
+    Some(Token.Open(Round)) then
+      consume
+      expr require of Token.Close(Round)
+    Some(token) then Expr.justErr of "Unexpected token " + token Token.summary()
+    None then Expr.justErr of "Unexpected end of input"
+  
+  fun expr: Expr =
+    let leftmost = product
+    addSeq
+      Iter.fromStack()
+      Iter.folded of leftmost, Expr.Add
+  
+  fun addSeq: Stack[Expr] = if peek is
+    Some(Token.Identifier("+", _)) then
+      consume
+      product :: addSeq
+    else Nil
+  
+  fun product: Expr =
+    let leftmost = atom
+    mulSeq
+      Iter.fromStack()
+      Iter.folded of leftmost, Expr.Mul
+  
+  fun mulSeq: Stack[Expr] = if peek is
+    Some(Token.Identifier("*", _)) then
+      consume
+      atom :: mulSeq
+    else Nil
+  
+  let result = expr
+  if peek is
+    Some(token) then result Expr.withErr of
+      "Expect end of input, but found " + token Token.summary()
+    None then result

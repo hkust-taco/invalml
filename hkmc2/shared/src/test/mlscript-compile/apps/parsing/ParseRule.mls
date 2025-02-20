@@ -2,6 +2,7 @@ import "../../BetterMap.mls"
 import "../../Iter.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
+import "./Token.mls"
 import "./Keyword.mls"
 import "./Tree.mls"
 
@@ -124,6 +125,8 @@ fun rule(name, ...choices) = ParseRule(name, choices Iter.toStack())
 module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
   class Expr(process: Tree -> Tree, rest: ParseRule)
+  class Type(process: Tree -> Tree, rest: ParseRule)
+  class Terminal(process: (Token, Tree) -> Tree, token: Token, rest: ParseRule)
   class End(value: Tree)
   class Optional(rule: ParseRule, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
@@ -132,6 +135,8 @@ module Choice with
   // Shorthands for constructing rule choices.
   fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
   fun expr(process, name, ...choices) = Expr(process, rule(name, ...choices))
+  fun terminal(process, token, name, ...choices) = Terminal(process, token, rule(name, ...choices))
+  fun token(token, name, ...choices) = terminal((_, tree) => tree, token, name, ...choices)
   fun end(value) = End(value)
   fun lazy(makeChoice) =
     let cache = None

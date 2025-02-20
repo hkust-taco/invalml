@@ -6,6 +6,7 @@ import Option from "./../../Option.mjs";
 import Lexer from "./../Lexer.mjs";
 import Keyword from "./Keyword.mjs";
 import Precedence from "./Precedence.mjs";
+import Token from "./Token.mjs";
 let Tree2;
 Tree2 = class Tree {
   static {
@@ -273,7 +274,7 @@ Tree2 = class Tree {
       } else if (tree1 instanceof Tree.Literal.class) {
         param014 = tree1.kind;
         param111 = tree1.value;
-        if (param014 instanceof Lexer.LiteralKind.String.class) {
+        if (param014 instanceof Token.LiteralKind.String.class) {
           value1 = param111;
           scrut4 = value1.length > 5;
           if (scrut4 === true) {
