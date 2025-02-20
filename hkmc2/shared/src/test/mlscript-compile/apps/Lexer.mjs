@@ -1065,7 +1065,7 @@ Lexer1 = class Lexer {
       return tmp2
     };
     comment = function comment(idx) {
-      let content, scrut, param0, ch, matchResult, terminated, scrut1, param01, ch1, scrut2, param02, scrut3, param03, ch2, scrut4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19;
+      let content, scrut, param0, terminated, scrut1, param01, ch, scrut2, param02, scrut3, param03, ch1, scrut4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17;
       content = "";
       scrut = char1(idx);
       if (scrut instanceof Option.Some.class) {
@@ -1073,19 +1073,19 @@ Lexer1 = class Lexer {
         if (param0 === "/") {
           tmp = idx + 1;
           idx = tmp;
-          tmp20: while (true) {
+          tmp18: while (true) {
             scrut3 = char1(idx);
             if (scrut3 instanceof Option.Some.class) {
               param03 = scrut3.value;
-              ch2 = param03;
-              scrut4 = ch2 !== "\n";
+              ch1 = param03;
+              scrut4 = ch1 !== "\n";
               if (scrut4 === true) {
                 tmp1 = idx + 1;
                 idx = tmp1;
-                tmp2 = content + ch2;
+                tmp2 = content + ch1;
                 content = tmp2;
                 tmp3 = runtime.Unit;
-                continue tmp20;
+                continue tmp18;
               } else {
                 tmp4 = Token.Comment(content);
                 tmp3 = [
@@ -1107,7 +1107,7 @@ Lexer1 = class Lexer {
           terminated = false;
           tmp6 = idx + 1;
           idx = tmp6;
-          tmp21: while (true) {
+          tmp19: while (true) {
             if (terminated === false) {
               scrut1 = char1(idx);
               if (scrut1 instanceof Option.Some.class) {
@@ -1122,28 +1122,28 @@ Lexer1 = class Lexer {
                       idx = tmp8;
                       terminated = true;
                       tmp9 = runtime.Unit;
-                      continue tmp21;
+                      continue tmp19;
                     } else {
-                      ch1 = param01;
+                      ch = param01;
                       tmp10 = idx + 1;
                       idx = tmp10;
-                      tmp11 = content + ch1;
+                      tmp11 = content + ch;
                       content = tmp11;
                       tmp9 = runtime.Unit;
                     }
                   } else {
-                    ch1 = param01;
+                    ch = param01;
                     tmp12 = idx + 1;
                     idx = tmp12;
-                    tmp13 = content + ch1;
+                    tmp13 = content + ch;
                     content = tmp13;
                     tmp9 = runtime.Unit;
                   }
                 } else {
-                  ch1 = param01;
+                  ch = param01;
                   tmp14 = idx + 1;
                   idx = tmp14;
-                  tmp15 = content + ch1;
+                  tmp15 = content + ch;
                   content = tmp15;
                   tmp9 = runtime.Unit;
                 }
@@ -1169,24 +1169,10 @@ Lexer1 = class Lexer {
           }
           return tmp9
         } else {
-          matchResult = runtime.safeCall(Lexer.Char.IdentifierStart.unapply(param0));
-          if (matchResult instanceof globalThis.Predef.MatchResult.class) {
-            ch = param0;
-            tmp18 = Str.concat2("/", ch);
-            tmp19 = idx + 1;
-            return operator(tmp18, tmp19)
-          } else {
-            return [
-              idx,
-              Token.Error
-            ]
-          }
+          return operator(idx, "/")
         }
       } else {
-        return [
-          idx,
-          Token.Error
-        ]
+        return operator(idx, "/")
       }
     };
     scanHexDigits = function scanHexDigits(idx, lim, acc, cnt) {

@@ -121,8 +121,7 @@ fun lex(str: Str) =
               [idx, Token.Comment(content)]
             else
               [idx, Token.Error]
-      Some(Char.IdentifierStart as ch) then operator("/" ~ ch, idx + 1)
-      else [idx, Token.Error]
+      else operator(idx, "/")
   
   fun scanHexDigits(idx: Int, lim: Int, acc: Int, cnt: Int): [Int, Int, Int] =
     if char(idx) is Some(Char.HexDigit as ch) and

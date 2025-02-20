@@ -1,18 +1,20 @@
 :js
 
 import "../../mlscript-compile/apps/parsing/RecursiveDescent.mls"
+import "../../mlscript-compile/apps/parsing/BasicExpr.mls"
 import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
 import "../../mlscript-compile/apps/Lexer.mls"
 
 open Lexer { lex }
-open RecursiveDescent { parse, Expr }
+open RecursiveDescent { parse }
+open BasicExpr { Expr }
 
 fun example(input) =
   let tokens = lex of input
   print of "Tokens: " + TokenHelpers.panorama(tokens)
   let expr = parse of tokens
   print of "Parsed: " + expr.toString()
-  print of "Pretty-printed: " + expr Expr.prettyPrint()
+  print of "Pretty-printed: " + expr BasicExpr.prettyPrint()
 
 example of "1 + 2 * 3"
 //│ > Tokens: ┃1│␠│+│␠│2│␠│*│␠│3┃
