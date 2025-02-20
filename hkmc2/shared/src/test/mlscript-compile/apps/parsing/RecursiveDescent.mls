@@ -45,16 +45,17 @@ fun parse(tokens) =
       ", but found end of input"
   
   fun atom: Expr = if peek is
-    Some(Token.Literal(LiteralKind.Integer, literal)) then
-      consume
-      BasicExpr.Lit(parseInt(literal, 10))
-    Some(Token.Identifier(name, false)) then
-      consume
-      BasicExpr.Var(name)
-    Some(Token.Open(Round)) then
-      consume
-      expr require of Token.Close(Round)
-    Some(token) then BasicExpr.justErr of "Unexpected token " + token Token.summary()
+    Some of
+      Token.Literal(LiteralKind.Integer, literal) then
+        consume
+        BasicExpr.Lit(parseInt(literal, 10))
+      Token.Identifier(name, false) then
+        consume
+        BasicExpr.Var(name)
+      Token.Open(Round) then
+        consume
+        expr require of Token.Close(Round)
+      token then BasicExpr.justErr of "Unexpected token " + token Token.summary()
     None then BasicExpr.justErr of "Unexpected end of input"
   
   fun expr: Expr =

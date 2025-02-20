@@ -8,27 +8,4 @@
 :d
 
 
-:sjs
-let opPrec = case
-  "*" then [50, 51]
-  "+" then [30, 31]
-//│ Elab: { let opPrec‹393›; opPrec‹393› = λ(Param(‹›,caseScrut‹394›,None), ). if { caseScrut is "*" -> { else [50, 51] }; caseScrut is "+" -> { else [30, 31] };  }; }
-//│ JS (unsanitized):
-//│ let opPrec, tmp;
-//│ tmp = (caseScrut) => {
-//│   if (caseScrut === "*") {
-//│     return [
-//│       50,
-//│       51
-//│     ]
-//│   } else if (caseScrut === "+") {
-//│     return [
-//│       30,
-//│       31
-//│     ]
-//│   } else {
-//│     throw new this.Error("match error");
-//│   }
-//│ };
-//│ opPrec = tmp;
-//│ opPrec = [function tmp]
+

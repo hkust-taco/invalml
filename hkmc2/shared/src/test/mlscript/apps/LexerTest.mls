@@ -237,21 +237,3 @@ fun take(pattern P, idx: Str, acc: Str) =
 //│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                                                             ^
 
-:e
-// We can mitigate the boilerplate if we support split around `of`.
-fun foobar(x) = if x is
-  None then "hello"
-  Some of
-    a then a
-//│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.244: 	  Some of
-//│ ║         	  ^^^^^^^
-//│ ║  l.245: 	    a then a
-//│ ╙──       	^^^^^^^^^^^^
-//│ ╔══[ERROR] Name not found: None
-//│ ║  l.243: 	  None then "hello"
-//│ ╙──       	  ^^^^
-//│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.243: 	  None then "hello"
-//│ ╙──       	  ^^^^
-
