@@ -159,3 +159,37 @@ foldr(-)(0, 1, 2, 3)
 //│ = -2
 
 
+fold(+) of
+  "0"
+  "1"
+  "2"
+  "3"
+//│ = "0123"
+
+import "../../mlscript-compile/Iter.mls"
+
+Iter.joined(_, "") of [
+  "0"
+  "1"
+  "2"
+  "3"
+]
+//│ = "0123"
+
+
+mkStr of
+  "0"
+  "1"
+  "2"
+  "3"
+//│ = "0123"
+
+mkStr of
+  "0"
+  1
+//│ // Standard Error:
+//│ Assertion failed
+//│ 
+//│ = "01"
+
+

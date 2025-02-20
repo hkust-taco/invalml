@@ -409,6 +409,22 @@ Predef1 = class Predef {
       }
     }
   } 
+  static mkStr(...xs4) {
+    let tmp, tmp1;
+    tmp = (acc, x5) => {
+      let tmp2, tmp3, tmp4;
+      if (typeof x5 === 'string') {
+        tmp2 = true;
+      } else {
+        tmp2 = false;
+      }
+      tmp3 = runtime.safeCall(Predef.assert(tmp2));
+      tmp4 = acc + x5;
+      return (tmp3 , tmp4)
+    };
+    tmp1 = Predef.fold(tmp);
+    return runtime.safeCall(tmp1(...xs4))
+  } 
   static stringStartsWith(string, prefix) {
     return runtime.safeCall(string.startsWith(prefix))
   } 

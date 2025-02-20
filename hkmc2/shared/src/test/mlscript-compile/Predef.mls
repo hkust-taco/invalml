@@ -110,6 +110,9 @@ fun foldr(f)(first, ...rest) =
       init = f(rest.at(i), init)
   f(first, init)
 
+fun mkStr(...xs) =
+  fold((acc, x) => assert(x is Str); acc + x) of ...xs
+
 
 fun stringStartsWith(string, prefix) = string.startsWith(prefix)
 
