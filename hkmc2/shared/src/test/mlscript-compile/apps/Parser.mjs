@@ -25,7 +25,7 @@ Parser1 = class Parser {
     tmp3 = Parser.matchWithChoice();
     tmp4 = Parser.matchFunctionChoice();
     tmp5 = Parser.ifThenElse();
-    tmp6 = ParseRule.rule("prefix rules for expressions", Parser.#letChoice, Parser.recursiveModifier, tmp2, tmp3, tmp4, tmp5);
+    tmp6 = ParseRule.rule("prefix rules for expressions", Parser.#letChoice, tmp2, tmp3, tmp4, tmp5);
     this.prefixRules = tmp6;
     tmp7 = Parser.typeDefinition();
     tmp8 = ParseRule.rule("start of the statement", Parser.#letChoice, tmp7);
@@ -571,10 +571,10 @@ Parser1 = class Parser {
     return go(thing)
   } 
   static letBinding(keyword) {
-    let makeItems, makeBinding, intro, items, tmp, tmp1, tmp2, tmp3;
+    let makeItems, makeBinding, intro, items, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
     makeBinding = function makeBinding(body) {
-      let tmp4, tmp5, tmp6, tmp7;
-      tmp4 = (lhs, rhsAndBody) => {
+      let tmp12, tmp13, tmp14, tmp15;
+      tmp12 = (lhs, rhsAndBody) => {
         let first1, first0, rhs, body1;
         if (globalThis.Array.isArray(rhsAndBody) && rhsAndBody.length === 2) {
           first0 = rhsAndBody[0];
@@ -586,47 +586,47 @@ Parser1 = class Parser {
           throw new globalThis.Error("match error");
         }
       };
-      tmp5 = intro + "left-hand side";
-      tmp6 = intro + "right-hand side";
-      tmp7 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp6, body);
-      return ParseRule.Choice.expr(tmp4, tmp5, tmp7)
+      tmp13 = intro + "left-hand side";
+      tmp14 = intro + "right-hand side";
+      tmp15 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp14, body);
+      return ParseRule.Choice.expr(tmp12, tmp13, tmp15)
     };
     makeItems = function makeItems(get) {
-      let tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
-      tmp4 = intro + "right-hand side";
-      tmp5 = intro + "`and` keyword";
-      tmp6 = ParseRule.Choice.Lazy(get, makeItems);
-      tmp7 = makeBinding(tmp6);
-      tmp8 = ParseRule.Choice.keyword(Precedence.Keywords._and, tmp5, tmp7);
-      tmp9 = intro + "`in` keyword";
-      tmp10 = intro + "body";
-      tmp11 = ParseRule.Choice.end(runtime.Unit);
-      tmp12 = ParseRule.Choice.expr((body, _) => {
+      let tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21;
+      tmp12 = intro + "right-hand side";
+      tmp13 = intro + "`and` keyword";
+      tmp14 = ParseRule.Choice.Lazy(get, makeItems);
+      tmp15 = makeBinding(tmp14);
+      tmp16 = ParseRule.Choice.keyword(Precedence.Keywords._and, tmp13, tmp15);
+      tmp17 = intro + "`in` keyword";
+      tmp18 = intro + "body";
+      tmp19 = ParseRule.Choice.end(runtime.Unit);
+      tmp20 = ParseRule.Choice.expr((body, _) => {
         return body
-      }, tmp10, tmp11);
-      tmp13 = ParseRule.Choice.keyword(Precedence.Keywords._in, tmp9, tmp12);
+      }, tmp18, tmp19);
+      tmp21 = ParseRule.Choice.keyword(Precedence.Keywords._in, tmp17, tmp20);
       return ParseRule.Choice.expr((rhs, body) => {
         return [
           rhs,
           body
         ]
-      }, tmp4, tmp8, tmp13)
+      }, tmp12, tmp16, tmp21)
     };
     tmp = keyword.name + " binding: ";
     intro = tmp;
     tmp1 = ParseRule.Choice.lazy(makeItems);
     items = tmp1;
     tmp2 = intro + "keyword";
-    tmp3 = makeBinding(items);
-    return ParseRule.Choice.keyword(keyword, tmp2, tmp3)
-  } 
-  static get recursiveModifier() {
-    let tmp, tmp1;
-    tmp = ParseRule.Choice.end(runtime.Unit);
-    tmp1 = ParseRule.Choice.expr((body, _) => {
-      return Tree.Modified(Precedence.Keywords._rec, body)
-    }, "body", tmp);
-    return ParseRule.Choice.keyword(Precedence.Keywords._rec, "rec keyword", tmp1);
+    tmp3 = intro + "keyword";
+    tmp4 = intro + "`rec` keyword";
+    tmp5 = ParseRule.Choice.end(runtime.Unit);
+    tmp6 = ParseRule.Choice.keyword(Precedence.Keywords._rec, tmp4, tmp5);
+    tmp7 = ParseRule.rule(tmp3, tmp6);
+    tmp8 = intro + "body";
+    tmp9 = makeBinding(items);
+    tmp10 = ParseRule.rule(tmp8, tmp9);
+    tmp11 = ParseRule.Choice.Optional(tmp7, tmp10);
+    return ParseRule.Choice.keyword(keyword, tmp2, tmp11)
   } 
   static typeDefinition() {
     let intro, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;

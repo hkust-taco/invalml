@@ -184,15 +184,16 @@ fun letBinding(keyword: Keyword) =
   Choice.keyword of
     keyword
     intro + "keyword"
-    makeBinding of items
-
-fun recursiveModifier = Choice.keyword of
-  Keywords._rec
-  "rec keyword"
-  Choice.expr of
-    (body, _) => Tree.Modified(Keywords._rec, body)
-    "body"
-    Choice.end of ()
+    Choice.Optional of
+      rule of
+        intro + "keyword"
+        Choice.keyword of
+          Keywords._rec
+          intro + "`rec` keyword"
+          Choice.end of ()
+      rule of
+        intro + "body"
+        makeBinding of items
 
 fun typeDefinition() =
   let intro = "type definition: "
@@ -308,7 +309,6 @@ fun matchFunctionChoice() =
 val prefixRules = rule of
   "prefix rules for expressions"
   letChoice
-  recursiveModifier
   funChoice()
   matchWithChoice()
   matchFunctionChoice()

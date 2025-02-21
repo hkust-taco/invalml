@@ -62,11 +62,11 @@ print of allKeywords.values.join("\n")
 //│ > Keyword(`rec`, 9, 3)
 
 print of Parser.prefixRules.display
-//│ > <prefix rules for expressions> ::= `let` <expr> 
-//│ >   `=` <expr> 
-//│ >     `and` <expr> `=` <rec>
-//│ >     `in` <expr> 
-//│ > `rec` <expr> 
+//│ > <prefix rules for expressions> ::= `let` [`rec` ] 
+//│ >   <expr> 
+//│ >     `=` <expr> 
+//│ >       `and` <expr> `=` <rec>
+//│ >       `in` <expr> 
 //│ > `fun` <expr> `->` <expr> 
 //│ > `match` <expr> 
 //│ >   `with` [`|` ] 
@@ -693,12 +693,10 @@ in
 """
 //│ > Ternary:
 //│ >   name = Keyword(`let`, 3, 1)
-//│ >   lhs = Modified:
-//│ >     modifier = Keyword(`rec`, 9, 3)
-//│ >     subject = App:
-//│ >       callee = Ident of "factorial"
-//│ >       arguments = Stack of 
-//│ >         Ident of "x"
+//│ >   lhs = App:
+//│ >     callee = Ident of "factorial"
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
 //│ >   rhs = Ternary:
 //│ >     name = Keyword(`if`, 7, 6)
 //│ >     lhs = App:
@@ -815,9 +813,7 @@ in
 """
 //│ > Ternary:
 //│ >   name = Keyword(`let`, 3, 1)
-//│ >   lhs = Modified:
-//│ >     modifier = Keyword(`rec`, 9, 3)
-//│ >     subject = Ident of "even"
+//│ >   lhs = Ident of "even"
 //│ >   rhs = Match:
 //│ >     scrutinee = Empty()
 //│ >     branches = Stack of 
