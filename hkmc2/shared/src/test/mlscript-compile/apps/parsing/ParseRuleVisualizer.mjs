@@ -182,8 +182,8 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       }
       return runtime.safeCall(ParseRuleVisualizer.rr.Diagram(tmp3))
     };
-    renderChoice = function renderChoice(choice, currentRule) {
-      let doTemp, param0, param1, get, make, proxyRule, ruleName, param01, ruleName1, rule1, scrut, ruleName2, param02, param11, param2, rest, param03, param12, rule2, rest1, scrut1, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43;
+    renderChoice = function renderChoice(parentRule, choice, currentRule) {
+      let doTemp, param0, param1, get, make, proxyRule, ruleName, param01, ruleName1, rule1, scrut, ruleName2, param02, param11, param2, rest, param03, param12, rule2, rest1, scrut1, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp3 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.End"));
         return Option.None
@@ -265,28 +265,26 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
               return RecursiveKnot1
             }));
             proxyRule = tmp30;
-            tmp31 = runtime.safeCall(helperRules.length.toString());
-            tmp32 = "rule$" + tmp31;
-            ruleName = tmp32;
-            tmp33 = Option.Some(ruleName);
-            tmp34 = renderChoice(proxyRule, tmp33);
-            tmp35 = diagram(tmp34);
-            tmp36 = Predef.tuple(ruleName, tmp35);
-            tmp37 = runtime.safeCall(helperRules.push(tmp36));
-            tmp38 = renderCache.set(choice, ruleName);
-            tmp39 = "#" + ruleName;
-            tmp40 = LinkOpts1(tmp39);
-            tmp41 = ParseRuleVisualizer.rr.NonTerminal(ruleName, tmp40);
-            return Option.Some(tmp41)
+            ruleName = parentRule.name;
+            tmp31 = Option.Some(ruleName);
+            tmp32 = renderChoice(parentRule, proxyRule, tmp31);
+            tmp33 = diagram(tmp32);
+            tmp34 = Predef.tuple(ruleName, tmp33);
+            tmp35 = runtime.safeCall(helperRules.push(tmp34));
+            tmp36 = renderCache.set(choice, ruleName);
+            tmp37 = "#" + ruleName;
+            tmp38 = LinkOpts1(tmp37);
+            tmp39 = ParseRuleVisualizer.rr.NonTerminal(ruleName, tmp38);
+            return Option.Some(tmp39)
           } else {
-            tmp42 = "unexpected choice: " + choice;
-            doTemp = runtime.safeCall(globalThis.console.log(tmp42));
+            tmp40 = "unexpected choice: " + choice;
+            doTemp = runtime.safeCall(globalThis.console.log(tmp40));
             throw new globalThis.Error("match error");
           }
         }
       } else {
-        tmp43 = "unexpected choice: " + choice;
-        doTemp = runtime.safeCall(globalThis.console.log(tmp43));
+        tmp41 = "unexpected choice: " + choice;
+        doTemp = runtime.safeCall(globalThis.console.log(tmp41));
         throw new globalThis.Error("match error");
       }
     };
@@ -303,7 +301,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
             param1 = rest.tail;
             head = param0;
             tail = param1;
-            scrut = renderChoice(head, currentRule);
+            scrut = renderChoice(rule1, head, currentRule);
             if (scrut instanceof Option.Some.class) {
               param01 = scrut.value;
               node = param01;

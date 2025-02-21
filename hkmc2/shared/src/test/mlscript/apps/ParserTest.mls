@@ -62,7 +62,7 @@ print of allKeywords.values.join("\n")
 //│ > Keyword(`rec`, 9, 3)
 
 print of Parser.prefixRules.display
-//│ > <start of the statement> ::= `let` <expr> 
+//│ > <prefix rules for expressions> ::= `let` <expr> 
 //│ >   `=` <expr> 
 //│ >     `and` <expr> `=` <rec>
 //│ >     `in` <expr> 

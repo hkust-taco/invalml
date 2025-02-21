@@ -25,7 +25,7 @@ Parser1 = class Parser {
     tmp3 = Parser.matchWithChoice();
     tmp4 = Parser.matchFunctionChoice();
     tmp5 = Parser.ifThenElse();
-    tmp6 = ParseRule.rule("start of the statement", Parser.#letChoice, Parser.recursiveModifier, tmp2, tmp3, tmp4, tmp5);
+    tmp6 = ParseRule.rule("prefix rules for expressions", Parser.#letChoice, Parser.recursiveModifier, tmp2, tmp3, tmp4, tmp5);
     this.prefixRules = tmp6;
     tmp7 = Parser.typeDefinition();
     tmp8 = ParseRule.rule("start of the statement", Parser.#letChoice, tmp7);
@@ -587,7 +587,7 @@ Parser1 = class Parser {
         }
       };
       tmp5 = intro + "left-hand side";
-      tmp6 = intro + "equal sign";
+      tmp6 = intro + "right-hand side";
       tmp7 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp6, body);
       return ParseRule.Choice.expr(tmp4, tmp5, tmp7)
     };
@@ -702,51 +702,53 @@ Parser1 = class Parser {
     return ParseRule.Choice.keyword(Precedence.Keywords._fun, tmp, tmp7)
   } 
   static patternMatchingBody(intro, cons, nil) {
-    let makeMatchArms, matchArms, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    let makeMatchArms, matchArms, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
     makeMatchArms = function makeMatchArms(get) {
-      let tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16;
-      tmp7 = (pat, rhsAndRest) => {
-        let first1, first0, rhs, rest, tmp17;
+      let tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18;
+      tmp9 = (pat, rhsAndRest) => {
+        let first1, first0, rhs, rest, tmp19;
         if (globalThis.Array.isArray(rhsAndRest) && rhsAndRest.length === 2) {
           first0 = rhsAndRest[0];
           first1 = rhsAndRest[1];
           rhs = first0;
           rest = first1;
-          tmp17 = Tree.Infix(Precedence.Keywords._thinArrow, pat, rhs);
-          return runtime.safeCall(cons(tmp17, rest))
+          tmp19 = Tree.Infix(Precedence.Keywords._thinArrow, pat, rhs);
+          return runtime.safeCall(cons(tmp19, rest))
         } else {
           throw new globalThis.Error("match error");
         }
       };
-      tmp8 = intro + "pattern";
-      tmp9 = intro + "arrow";
-      tmp10 = intro + "body";
-      tmp11 = ParseRule.Choice.end(nil);
-      tmp12 = intro + "leading bar";
-      tmp13 = ParseRule.Choice.Lazy(get, makeMatchArms);
-      tmp14 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp12, tmp13);
-      tmp15 = ParseRule.Choice.expr((curr, next) => {
+      tmp10 = intro + "pattern";
+      tmp11 = intro + "arrow";
+      tmp12 = intro + "body";
+      tmp13 = ParseRule.Choice.end(nil);
+      tmp14 = intro + "leading bar";
+      tmp15 = ParseRule.Choice.Lazy(get, makeMatchArms);
+      tmp16 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp14, tmp15);
+      tmp17 = ParseRule.Choice.expr((curr, next) => {
         return [
           curr,
           next
         ]
-      }, tmp10, tmp11, tmp14);
-      tmp16 = ParseRule.Choice.keyword(Precedence.Keywords._thinArrow, tmp9, tmp15);
-      return ParseRule.Choice.expr(tmp7, tmp8, tmp16)
+      }, tmp12, tmp13, tmp16);
+      tmp18 = ParseRule.Choice.keyword(Precedence.Keywords._thinArrow, tmp11, tmp17);
+      return ParseRule.Choice.expr(tmp9, tmp10, tmp18)
     };
     tmp = ParseRule.Choice.lazy(makeMatchArms);
     matchArms = tmp;
-    tmp1 = intro + "leading bar";
-    tmp2 = ParseRule.Choice.end(runtime.Unit);
-    tmp3 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp1, tmp2);
-    tmp4 = ParseRule.rule("match arms", tmp3);
-    tmp5 = ParseRule.rule("match arms", matchArms);
-    tmp6 = ParseRule.Choice.Optional(tmp4, tmp5);
-    return Predef.tuple(tmp6)
+    tmp1 = intro + "body";
+    tmp2 = intro + "leading bar";
+    tmp3 = ParseRule.Choice.end(runtime.Unit);
+    tmp4 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp2, tmp3);
+    tmp5 = ParseRule.rule(tmp1, tmp4);
+    tmp6 = intro + "body";
+    tmp7 = ParseRule.rule(tmp6, matchArms);
+    tmp8 = ParseRule.Choice.Optional(tmp5, tmp7);
+    return Predef.tuple(tmp8)
   } 
   static matchWithChoice() {
     let intro1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
-    intro1 = "`match`-`with` expression: ";
+    intro1 = "`match` expression: ";
     tmp = intro1 + "keyword";
     tmp1 = intro1 + "scrutinee";
     tmp2 = intro1 + "with";
@@ -761,7 +763,7 @@ Parser1 = class Parser {
   } 
   static matchFunctionChoice() {
     let intro1, tmp, tmp1, tmp2, tmp3;
-    intro1 = "`match` function: ";
+    intro1 = "`function` definition: ";
     tmp = intro1 + "`function` keyword";
     tmp1 = (x, xs1) => {
       let param0, param1, scrut, arms, tmp4;

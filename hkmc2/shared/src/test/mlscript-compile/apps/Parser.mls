@@ -163,7 +163,7 @@ fun letBinding(keyword: Keyword) =
     intro + "left-hand side"
     Choice.keyword of
       Keywords._equal
-      intro + "equal sign"
+      intro + "right-hand side"
       body
   fun makeItems(get) = Choice.expr of
     (rhs, body) => [rhs, body]
@@ -272,17 +272,17 @@ fun patternMatchingBody(intro, cons, nil) =
   tuple of
     Choice.Optional of
       rule of
-        "match arms"
+        intro + "body"
         Choice.keyword of
           Keywords._bar
           intro + "leading bar"
           Choice.end of ()
       rule of
-        "match arms"
+        intro + "body"
         matchArms
 
 fun matchWithChoice() =
-  let intro = "`match`-`with` expression: "
+  let intro = "`match` expression: "
   Choice.keyword of
     Keywords._match
     intro + "keyword"
@@ -295,7 +295,7 @@ fun matchWithChoice() =
         ...patternMatchingBody(intro, (x, xs) => x :: xs, Nil)
 
 fun matchFunctionChoice() =
-  let intro = "`match` function: "
+  let intro = "`function` definition: "
   Choice.keyword of
     Keywords._function
     intro + "`function` keyword"
@@ -306,7 +306,7 @@ fun matchFunctionChoice() =
       Tree.Match(Tree.empty, Nil)
 
 val prefixRules = rule of
-  "start of the statement"
+  "prefix rules for expressions"
   letChoice
   recursiveModifier
   funChoice()

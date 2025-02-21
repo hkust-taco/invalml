@@ -89,7 +89,7 @@ fun render(rule: ParseRule) =
       None then lhs
   fun diagram(choicesOpt) =
     rr.Diagram of if choicesOpt is Some(choices) then choices else []
-  fun renderChoice(choice, currentRule) = if choice is
+  fun renderChoice(parentRule, choice, currentRule) = if choice is
     Choice.End then
       tracer.print of "found Choice.End"
       None
@@ -123,9 +123,9 @@ fun render(rule: ParseRule) =
         None then
           tracer.print of "found Choice.Lazy in top-level"
           let proxyRule = make(() => RecursiveKnot)
-          let ruleName = "rule$" + helperRules.length.toString()
+          let ruleName = parentRule.name
           helperRules.push of tuple of
-            ruleName, diagram of renderChoice(proxyRule, Some(ruleName))
+            ruleName, diagram of renderChoice(parentRule, proxyRule, Some(ruleName))
           renderCache.set(choice, ruleName)
           Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
     do console.log("unexpected choice: " + choice)
@@ -138,7 +138,7 @@ fun render(rule: ParseRule) =
       optional = false
       nodes = []
     while rest is head :: tail do
-      if renderChoice(head, currentRule) is
+      if renderChoice(rule, head, currentRule) is
         Some(node) do nodes.push of node
         None do set optional = true
       set rest = tail
