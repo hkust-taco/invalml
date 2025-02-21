@@ -89,60 +89,63 @@ fun render(rule: ParseRule) =
       None then lhs
   fun diagram(choicesOpt) =
     rr.Diagram of if choicesOpt is Some(choices) then choices else []
-  fun renderRule(rule: ParseRule, currentRule) =
-    diagram of renderChoices(rule.choices, currentRule)
-  fun renderChoices(cs: Stack[Choice], currentRule) = tracer.trace of
-    "renderChoices <<< "
-    result => "renderChoices >>> "
+  fun renderChoice(choice, currentRule) = if choice is
+    Choice.End then
+      tracer.print of "found Choice.End"
+      None
+    Choice.Keyword(keyword, rest) then
+      tracer.print of "found Choice.Keyword"
+      Some of rr.Terminal(keyword.name) sequence(renderRule(rest, currentRule))
+    Choice.Optional(rule, rest) then
+      tracer.print of "found Choice.Optional"
+      Some of if renderRule(rule, currentRule) is
+        let latterPart = renderRule(rest, currentRule)
+        Some(optionalPart) then rr.Optional(optionalPart) sequence(latterPart)
+        None then latterPart
+    Choice.Expr(_, _, rest) then
+      tracer.print of "found Choice.Expr"
+      Some of rr.NonTerminal("expr") sequence(renderRule(rest, currentRule))
+    Choice.Lazy(get, make) and
+      renderCache.has(choice) then
+        tracer.print of "found Choice.Lazy in cache"
+        let ruleName = renderCache.get(choice)
+        Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+      currentRule is
+        Some(ruleName) then
+          tracer.print of "found Choice.Lazy in recursion"
+          let rule = get()
+          if rule is RecursiveKnot then
+            tracer.print of "found RecursiveKnot"
+            Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+          else
+            tracer.print of "expect RecursiveKnot, found " + String(rule)
+            ???
+        None then
+          tracer.print of "found Choice.Lazy in top-level"
+          let proxyRule = make(() => RecursiveKnot)
+          let ruleName = "rule$" + helperRules.length.toString()
+          helperRules.push of tuple of
+            ruleName, diagram of renderChoice(proxyRule, Some(ruleName))
+          renderCache.set(choice, ruleName)
+          Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+    do console.log("unexpected choice: " + choice)
+  fun renderRule(rule: ParseRule, currentRule) = tracer.trace of
+    "renderRule <<< "
+    result => "renderRule >>> "
     () => ...
     let
+      rest = rule.choices
       optional = false
-      choices = []
-    while cs is head :: tail do
-      if head is
-        Choice.End do
-          tracer.print of "found Choice.End"
-          set optional = true
-        Choice.Keyword(keyword, rest) do
-          tracer.print of "found Choice.Keyword"
-          choices.push of rr.Terminal(keyword.name) sequence(renderChoices(rest.choices, currentRule))
-        Choice.Optional(rule, rest) do
-          tracer.print of "found Choice.Optional"
-          choices.push of if renderChoices(rule.choices, currentRule) is
-            let latterPart = renderChoices(rest.choices, currentRule)
-            Some(optionalPart) then rr.Optional(optionalPart) sequence(latterPart)
-            None then latterPart
-        Choice.Expr(_, _, rest) do
-          tracer.print of "found Choice.Expr"
-          choices.push of rr.NonTerminal("expr") sequence(renderChoices(rest.choices, currentRule))
-        Choice.Lazy(get, make) and
-          renderCache.has(head) do
-            tracer.print of "found Choice.Lazy in cache"
-            let ruleName = renderCache.get(head)
-            choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName )))
-          currentRule is
-            Some(ruleName) do
-              tracer.print of "found Choice.Lazy in recursion"
-              let rule = get()
-              if rule is RecursiveKnot then
-                tracer.print of "found RecursiveKnot"
-                choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName )))
-              else
-                tracer.print of "expect RecursiveKnot, found " + String(rule)
-                ???
-            None do
-              tracer.print of "found Choice.Lazy in top-level"
-              let proxyRule = make(() => RecursiveKnot)
-              let ruleName = "rule$" + helperRules.length.toString()
-              helperRules.push of tuple of
-                ruleName, diagram of renderChoices(proxyRule :: Nil, Some(ruleName))
-              choices.push(rr.NonTerminal(ruleName, LinkOpts("#" + ruleName)))
-              renderCache.set(head, ruleName)
-      set cs = tail
-    tracer.print of "choices: ", choices.length.toString()
+      nodes = []
+    while rest is head :: tail do
+      if renderChoice(head, currentRule) is
+        Some(node) do nodes.push of node
+        None do set optional = true
+      set rest = tail
+    tracer.print of "nodes: ", nodes.length.toString()
     if
-      choices.length is 0 then None
-      let choice = rr.Choice(0, ...choices)
+      nodes.length is 0 then None
+      let choice = rr.Choice(0, ...nodes)
       optional is true then Some(rr.Optional(choice))
       else Some(choice)
-  [["Prefix Rules", renderRule(rule, None)], ...helperRules]
+  [["Prefix Rules", diagram of renderRule(rule, None)], ...helperRules]
