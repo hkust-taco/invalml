@@ -3,26 +3,18 @@
 import "../../mlscript-compile/apps/Lexer.mls"
 import "../../mlscript-compile/apps/parsing/Token.mls"
 import "../../mlscript-compile/Stack.mls"
+import "../../mlscript-compile/Iter.mls"
 
 fun lines(...strs) = strs.join("\n")
 
 open Lexer { lex }
 open Stack
 
-fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
-  let buffer = ""
-  while stack is head :: tail do
-    set buffer = buffer + op(head)
-    if tail is _ :: _ do
-      set buffer = buffer + sep
-    set stack = tail
-  buffer
-
 fun printLexed(text) = print of
-  (lex of text) mapJoin(Token.display, "\n")
-
-lex of "0 1"
-//│ = Cons(Literal(Integer, "0"), Cons(Space, Cons(Literal(Integer, "1"), Nil)))
+  (lex of text)
+    Iter.fromStack()
+    Iter.mapping of String
+    Iter.joined of "\n"
 
 printLexed of "0 1  0xDEADCAFE 0b1101 0o755     3.1415926535"
 //│ > Literal(Integer, "0")
@@ -61,23 +53,23 @@ printLexed of """
 //│ > Space
 //│ > Literal(String, "😀")
 //│ > Space
-//│ > Comment( 😀)
+//│ > Comment(" 😀")
 //│ > Space
 //│ > Literal(String, "😁")
 //│ > Space
-//│ > Comment( 😁)
+//│ > Comment(" 😁")
 //│ > Space
 //│ > Literal(String, "😂")
 //│ > Space
-//│ > Comment( 😂)
+//│ > Comment(" 😂")
 //│ > Space
 //│ > Literal(String, "😃")
 //│ > Space
-//│ > Comment( 😃)
+//│ > Comment(" 😃")
 //│ > Space
 //│ > Literal(String, "😄")
 //│ > Space
-//│ > Comment( 😄)
+//│ > Comment(" 😄")
 //│ > Space
 //│ > Literal(String, "\n\r\t\b")
 //│ > Space
@@ -97,20 +89,20 @@ printLexed of """
 
 printLexed of """let v' =
   let a, b = (1, 2) in a + b"""
-//│ > Identifier(let, false)
+//│ > Identifier("let", false)
 //│ > Space
-//│ > Identifier(v', false)
+//│ > Identifier("v'", false)
 //│ > Space
-//│ > Identifier(=, true)
+//│ > Identifier("=", true)
 //│ > Space
-//│ > Identifier(let, false)
+//│ > Identifier("let", false)
 //│ > Space
-//│ > Identifier(a, false)
+//│ > Identifier("a", false)
 //│ > Comma
 //│ > Space
-//│ > Identifier(b, false)
+//│ > Identifier("b", false)
 //│ > Space
-//│ > Identifier(=, true)
+//│ > Identifier("=", true)
 //│ > Space
 //│ > Open(Round)
 //│ > Literal(Integer, "1")
@@ -119,13 +111,13 @@ printLexed of """let v' =
 //│ > Literal(Integer, "2")
 //│ > Close(Round)
 //│ > Space
-//│ > Identifier(in, false)
+//│ > Identifier("in", false)
 //│ > Space
-//│ > Identifier(a, false)
+//│ > Identifier("a", false)
 //│ > Space
-//│ > Identifier(+, true)
+//│ > Identifier("+", true)
 //│ > Space
-//│ > Identifier(b, false)
+//│ > Identifier("b", false)
 
 printLexed of lines of
   "let rec factorial x = // a simple factorial function"
@@ -135,80 +127,80 @@ printLexed of lines of
   "  | \"true\" -> true"
   "  | \"false\" -> false"
   "  | _ -> raise (Invalid_argument \"bool_of_string\")"
-//│ > Identifier(let, false)
+//│ > Identifier("let", false)
 //│ > Space
-//│ > Identifier(rec, false)
+//│ > Identifier("rec", false)
 //│ > Space
-//│ > Identifier(factorial, false)
+//│ > Identifier("factorial", false)
 //│ > Space
-//│ > Identifier(x, false)
+//│ > Identifier("x", false)
 //│ > Space
-//│ > Identifier(=, true)
+//│ > Identifier("=", true)
 //│ > Space
-//│ > Comment( a simple factorial function)
+//│ > Comment(" a simple factorial function")
 //│ > Space
-//│ > Identifier(if, false)
+//│ > Identifier("if", false)
 //│ > Space
-//│ > Identifier(x, false)
+//│ > Identifier("x", false)
 //│ > Space
-//│ > Identifier(<=, true)
-//│ > Space
-//│ > Literal(Integer, "1")
-//│ > Space
-//│ > Identifier(then, false)
+//│ > Identifier("<=", true)
 //│ > Space
 //│ > Literal(Integer, "1")
 //│ > Space
-//│ > Identifier(else, false)
+//│ > Identifier("then", false)
 //│ > Space
-//│ > Identifier(x, false)
+//│ > Literal(Integer, "1")
 //│ > Space
-//│ > Identifier(*, true)
+//│ > Identifier("else", false)
 //│ > Space
-//│ > Identifier(factorial, false)
+//│ > Identifier("x", false)
+//│ > Space
+//│ > Identifier("*", true)
+//│ > Space
+//│ > Identifier("factorial", false)
 //│ > Space
 //│ > Open(Round)
-//│ > Identifier(x, false)
+//│ > Identifier("x", false)
 //│ > Space
-//│ > Identifier(-, true)
+//│ > Identifier("-", true)
 //│ > Space
 //│ > Literal(Integer, "1")
 //│ > Close(Round)
 //│ > Space
-//│ > Identifier(let, false)
+//│ > Identifier("let", false)
 //│ > Space
-//│ > Identifier(bool_of_string, false)
+//│ > Identifier("bool_of_string", false)
 //│ > Space
-//│ > Identifier(=, true)
+//│ > Identifier("=", true)
 //│ > Space
-//│ > Identifier(function, false)
+//│ > Identifier("function", false)
 //│ > Space
-//│ > Identifier(|, true)
+//│ > Identifier("|", true)
 //│ > Space
 //│ > Literal(String, "true")
 //│ > Space
-//│ > Identifier(->, true)
+//│ > Identifier("->", true)
 //│ > Space
 //│ > Literal(Boolean, "true")
 //│ > Space
-//│ > Identifier(|, true)
+//│ > Identifier("|", true)
 //│ > Space
 //│ > Literal(String, "false")
 //│ > Space
-//│ > Identifier(->, true)
+//│ > Identifier("->", true)
 //│ > Space
 //│ > Literal(Boolean, "false")
 //│ > Space
-//│ > Identifier(|, true)
+//│ > Identifier("|", true)
 //│ > Space
-//│ > Identifier(_, false)
+//│ > Identifier("_", false)
 //│ > Space
-//│ > Identifier(->, true)
+//│ > Identifier("->", true)
 //│ > Space
-//│ > Identifier(raise, false)
+//│ > Identifier("raise", false)
 //│ > Space
 //│ > Open(Round)
-//│ > Identifier(Invalid_argument, false)
+//│ > Identifier("Invalid_argument", false)
 //│ > Space
 //│ > Literal(String, "bool_of_string")
 //│ > Close(Round)
@@ -216,8 +208,29 @@ printLexed of lines of
 // It turns out that OCaml identifiers' apostrophes are not limited to the end.
 printLexed of "a'b"
 printLexed of "'a"
-//│ > Identifier(a'b, false)
-//│ > TypeVariable(a)
+//│ > Identifier("a'b", false)
+//│ > TypeVariable("a")
+
+printLexed of "[< ] < .. ... >"
+//│ > Open(Square)
+//│ > Identifier("<", true)
+//│ > Space
+//│ > Close(Square)
+//│ > Space
+//│ > Identifier("<", true)
+//│ > Space
+//│ > Identifier("..", true)
+//│ > Space
+//│ > Identifier("...", true)
+//│ > Space
+//│ > Identifier(">", true)
+
+printLexed of "`a `b _"
+//│ > TagName("a")
+//│ > Space
+//│ > TagName("b")
+//│ > Space
+//│ > Identifier("_", false)
 
 :e
 // It would be decent if we allow pattern parameters in functions.
@@ -228,12 +241,12 @@ fun take(pattern P, idx: Str, acc: Str) =
       set acc = acc + ch
     else [acc, idx]
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.238: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	              ^^^
 //│ ╔══[ERROR] Name not found: str
-//│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.238: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                             ^^^
 //│ ╔══[ERROR] Cannot use this identifier as a pattern
-//│ ║  l.225: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
+//│ ║  l.238: 	  while idx < str.length and str.charAt(idx) is ch and ch is P
 //│ ╙──       	                                                             ^
 

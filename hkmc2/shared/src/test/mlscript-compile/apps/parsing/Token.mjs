@@ -2,6 +2,12 @@ import runtime from "./../../Runtime.mjs";
 let Token1;
 Token1 = class Token {
   static {
+    const Angle$class = class Angle {
+      constructor() {}
+      toString() { return "Angle"; }
+    };
+    this.Angle = new Angle$class;
+    this.Angle.class = Angle$class;
     const Round$class = class Round {
       constructor() {}
       toString() { return "Round"; }
@@ -114,6 +120,13 @@ Token1 = class Token {
         this.name = name;
       }
       toString() { return "TypeVariable(" + globalThis.Predef.render(this.name) + ")"; }
+    };
+    this.TagName = function TagName(name1) { return new TagName.class(name1); };
+    this.TagName.class = class TagName {
+      constructor(name) {
+        this.name = name;
+      }
+      toString() { return "TagName(" + globalThis.Predef.render(this.name) + ")"; }
     };
     this.Literal = function Literal(kind1, literal1) { return new Literal.class(kind1, literal1); };
     this.Literal.class = class Literal {
@@ -249,135 +262,72 @@ Token1 = class Token {
     return Token.Literal(Token.LiteralKind.Boolean, literal3)
   } 
   static summary(token) {
-    let param0, param1, literal4, param01, name, param02, param11, name1, param03, param04, kind, param05, kind1;
+    let param0, param1, literal4, param01, name, param02, name1, param03, param11, name2, param04, param05, kind, param06, kind1;
     if (token instanceof Token.Space.class) {
       return "\u2420"
-    } else if (token instanceof Token.Comma.class) {
-      return ","
-    } else if (token instanceof Token.Semicolon.class) {
-      return ";"
-    } else if (token instanceof Token.Error.class) {
-      return "\u26A0"
-    } else if (token instanceof Token.Open.class) {
-      param05 = token.kind;
-      kind1 = param05;
-      if (kind1 instanceof Token.Round.class) {
-        return "("
-      } else if (kind1 instanceof Token.Square.class) {
-        return "["
-      } else if (kind1 instanceof Token.Curly.class) {
-        return "{"
-      } else if (kind1 instanceof Token.BeginEnd.class) {
-        return "begin"
-      } else {
-        throw new globalThis.Error("match error");
-      }
-    } else if (token instanceof Token.Close.class) {
-      param04 = token.kind;
-      kind = param04;
-      if (kind instanceof Token.Round.class) {
-        return ")"
-      } else if (kind instanceof Token.Square.class) {
-        return "]"
-      } else if (kind instanceof Token.Curly.class) {
-        return "}"
-      } else if (kind instanceof Token.BeginEnd.class) {
-        return "end"
-      } else {
-        throw new globalThis.Error("match error");
-      }
-    } else if (token instanceof Token.Comment.class) {
-      param03 = token.content;
-      return "\uD83D\uDCAC"
-    } else if (token instanceof Token.Identifier.class) {
-      param02 = token.name;
-      param11 = token.symbolic;
-      name1 = param02;
-      return name1
-    } else if (token instanceof Token.TypeVariable.class) {
-      param01 = token.name;
-      name = param01;
-      return "'" + name
-    } else if (token instanceof Token.Literal.class) {
-      param0 = token.kind;
-      param1 = token.literal;
-      literal4 = param1;
-      return literal4
     } else {
-      throw new globalThis.Error("match error");
+      if (token instanceof Token.Comma.class) {
+        return ","
+      } else if (token instanceof Token.Semicolon.class) {
+        return ";"
+      } else if (token instanceof Token.Error.class) {
+        return "\u26A0"
+      } else if (token instanceof Token.Open.class) {
+        param06 = token.kind;
+        kind1 = param06;
+        if (kind1 instanceof Token.Round.class) {
+          return "("
+        } else if (kind1 instanceof Token.Square.class) {
+          return "["
+        } else if (kind1 instanceof Token.Curly.class) {
+          return "{"
+        } else if (kind1 instanceof Token.BeginEnd.class) {
+          return "begin"
+        } else {
+          throw new globalThis.Error("match error");
+        }
+      } else if (token instanceof Token.Close.class) {
+        param05 = token.kind;
+        kind = param05;
+        if (kind instanceof Token.Round.class) {
+          return ")"
+        } else if (kind instanceof Token.Square.class) {
+          return "]"
+        } else if (kind instanceof Token.Curly.class) {
+          return "}"
+        } else if (kind instanceof Token.BeginEnd.class) {
+          return "end"
+        } else {
+          throw new globalThis.Error("match error");
+        }
+      } else if (token instanceof Token.Comment.class) {
+        param04 = token.content;
+        return "\uD83D\uDCAC"
+      } else if (token instanceof Token.Identifier.class) {
+        param03 = token.name;
+        param11 = token.symbolic;
+        name2 = param03;
+        return name2
+      } else if (token instanceof Token.TypeVariable.class) {
+        param02 = token.name;
+        name1 = param02;
+        return "'" + name1
+      } else if (token instanceof Token.TagName.class) {
+        param01 = token.name;
+        name = param01;
+        return "`" + name
+      } else if (token instanceof Token.Literal.class) {
+        param0 = token.kind;
+        param1 = token.literal;
+        literal4 = param1;
+        return literal4
+      } else {
+        throw new globalThis.Error("match error");
+      }
     }
   } 
   static display(token1) {
-    let param0, param1, kind, literal4, param01, name, param02, param11, name1, symbolic, param03, content, param04, kind1, param05, kind2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
-    if (token1 instanceof Token.Space.class) {
-      return "Space"
-    } else if (token1 instanceof Token.Comma.class) {
-      return "Comma"
-    } else if (token1 instanceof Token.Semicolon.class) {
-      return "Semicolon"
-    } else if (token1 instanceof Token.Error.class) {
-      return "Error"
-    } else if (token1 instanceof Token.Open.class) {
-      param05 = token1.kind;
-      kind2 = param05;
-      tmp = Token.display(kind2);
-      tmp1 = "Open(" + tmp;
-      return tmp1 + ")"
-    } else if (token1 instanceof Token.Close.class) {
-      param04 = token1.kind;
-      kind1 = param04;
-      tmp2 = Token.display(kind1);
-      tmp3 = "Close(" + tmp2;
-      return tmp3 + ")"
-    } else if (token1 instanceof Token.Comment.class) {
-      param03 = token1.content;
-      content = param03;
-      tmp4 = "Comment(" + content;
-      return tmp4 + ")"
-    } else {
-      if (token1 instanceof Token.Identifier.class) {
-        param02 = token1.name;
-        param11 = token1.symbolic;
-        name1 = param02;
-        symbolic = param11;
-        tmp5 = "Identifier(" + name1;
-        tmp6 = tmp5 + ", ";
-        tmp7 = tmp6 + symbolic;
-        return tmp7 + ")"
-      } else if (token1 instanceof Token.TypeVariable.class) {
-        param01 = token1.name;
-        name = param01;
-        tmp8 = "TypeVariable(" + name;
-        return tmp8 + ")"
-      } else if (token1 instanceof Token.Literal.class) {
-        param0 = token1.kind;
-        param1 = token1.literal;
-        kind = param0;
-        literal4 = param1;
-        tmp9 = Token.display(kind);
-        tmp10 = "Literal(" + tmp9;
-        tmp11 = tmp10 + ", ";
-        tmp12 = runtime.safeCall(globalThis.JSON.stringify(literal4));
-        tmp13 = tmp11 + tmp12;
-        return tmp13 + ")"
-      } else if (token1 instanceof Token.Round.class) {
-        return "Round"
-      } else if (token1 instanceof Token.Square.class) {
-        return "Square"
-      } else if (token1 instanceof Token.Curly.class) {
-        return "Curly"
-      } else if (token1 instanceof Token.LiteralKind.Integer.class) {
-        return "Integer"
-      } else if (token1 instanceof Token.LiteralKind.Decimal.class) {
-        return "Decimal"
-      } else if (token1 instanceof Token.LiteralKind.String.class) {
-        return "String"
-      } else if (token1 instanceof Token.LiteralKind.Boolean.class) {
-        return "Boolean"
-      } else {
-        throw new globalThis.Error("match error");
-      }
-    }
+    return runtime.safeCall(token1.toString())
   }
   static toString() { return "Token"; }
 };

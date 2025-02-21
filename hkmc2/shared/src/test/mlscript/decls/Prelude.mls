@@ -16,6 +16,7 @@ declare class RegExp
 declare class Set
 declare class Map
 declare class Error(msg)
+declare class TypeError(msg)
 declare class Symbol
 
 // MLscript-specific types
@@ -30,6 +31,7 @@ declare class Str with
 // declare module Math // TODO: list members
 declare val Math // so we can, eg, `open { pow }` in the meantime
 
+declare val Reflect
 declare val console
 declare val process
 declare val fs

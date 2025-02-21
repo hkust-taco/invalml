@@ -3,6 +3,7 @@ import "../Predef.mls"
 
 open Predef
 
+import "../Char.mls"
 import "../Stack.mls"
 import "../Str.mls"
 import "../Option.mls"
@@ -25,23 +26,13 @@ class Message(description: Str, location: Location)
 
 class Report(messages: Stack[Message])
 
-module Char with
-  pattern Operator = "!" | "#" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<" | "=" | ">" | "?" | "@" | "\\" | "^" | "|" | "~" | "."
-  pattern Letter = "a" ..= "z" | "A" ..= "Z"
-  pattern Digit = "0" ..= "9"
-  pattern Underscore = "_"
-  pattern Apostrophe = "'"
-  fun isDigit(ch: Str) = ch is Digit
-  pattern HexDigit = Digit | "a" ..= "f" | "A" ..= "F"
-  fun isHexDigit(ch: Str) = ch is HexDigit
-  pattern OctDigit = "0" ..= "7"
-  fun isOctDigit(ch: Str) = ch is OctDigit
-  pattern BinDigit = "0" | "1"
-  fun isBinDigit(ch: Str) = ch is BinDigit
-  pattern IdentifierStart = Letter | "_"
-  pattern IdentifierBody = Letter | Digit | Underscore | Apostrophe
-  pattern Space = " " | "\t" | "\n" | "\r"
-  pattern Zero = "0"
+pattern IdentifierStart = Char.Letter | "_"
+
+pattern IdentifierBody = Char.Letter | Char.Digit | "_" | "'"
+
+pattern Operator =
+  "!" | "#" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<" |
+  "=" | ">" | "?" | "@" | "\\" | "^" | "|" | "~" | "."
 
 fun lex(str: Str) =
   fun char(idx: Int) = if idx < str.length
@@ -58,7 +49,7 @@ fun lex(str: Str) =
       else [idx, acc]
   
   fun whitespace(idx: Int): Int =
-    while char(idx) is Some(Char.Space)
+    while char(idx) is Some(Char.Whitespace)
       then set idx = idx + 1
       else idx
   
@@ -77,7 +68,7 @@ fun lex(str: Str) =
       else [idx, acc]
   
   fun identifier(idx: Int, acc: Str) =
-    while char(idx) is Some(Char.IdentifierBody as ch) then
+    while char(idx) is Some(IdentifierBody as ch) then
       set idx = idx + 1
       set acc = acc + ch
     else tuple of
@@ -90,7 +81,7 @@ fun lex(str: Str) =
         else Token.Identifier(acc, false)
   
   fun operator(idx: Int, acc: Str) =
-    while char(idx) is Some(Char.Operator as ch)
+    while char(idx) is Some(Operator as ch)
       then
         set idx = idx + 1
         set acc = acc + ch
@@ -185,11 +176,11 @@ fun lex(str: Str) =
   fun number(idx: Int, head: Str) =
     if head is "0" and char(idx) is
       None then [idx, Token.integer("0")]
-      Some("b") and take(Char.isBinDigit, idx + 1, "") is [idx', bs] then
+      Some("b") and take(x => x is Char.BinDigit, idx + 1, "") is [idx', bs] then
         [idx', Token.integer("0b" ~ bs)]
-      Some("o") and take(Char.isOctDigit, idx + 1, "") is [idx', os] then
+      Some("o") and take(x => x is Char.OctDigit, idx + 1, "") is [idx', os] then
         [idx', Token.integer("0o" ~ os)]
-      Some("x") and take(Char.isHexDigit, idx + 1, "") is [idx', xs] then
+      Some("x") and take(x => x is Char.HexDigit, idx + 1, "") is [idx', xs] then
         [idx', Token.integer("0x" ~ xs)]
       Some(".") and digits(idx + 1) is [idx', ds] then
         [idx', Token.decimal("0." ~ ds)]
@@ -207,7 +198,7 @@ fun lex(str: Str) =
     
     if char(idx) is
       None then reverse of acc
-      Some(Char.Space) then go(whitespace(idx + 1), Token.Space)
+      Some(Char.Whitespace) then go(whitespace(idx + 1), Token.Space)
       Some(",") then go(idx + 1, Token.Comma)
       Some(";") then go(idx + 1, Token.Semicolon)
       Some("\"") then go(..string(idx + 1))
@@ -218,12 +209,21 @@ fun lex(str: Str) =
       Some("]") then go(idx + 1, Token.Close(Square))
       Some("}") then go(idx + 1, Token.Close(Curly))
       Some("/") then go(..comment(idx + 1))
-      Some(Char.IdentifierStart as ch) then go(..identifier(idx + 1, ch))
-      Some(Char.Operator as ch) then go(..operator(idx + 1, ch))
+      Some(Operator as ch) then go(..operator(idx + 1, ch))
       Some(Char.Digit as ch) then go(..number(idx + 1, ch))
-      Some("'") and char(idx + 1) is Some(Char.IdentifierStart as ch) and
-        identifier(idx + 2, ch) is [idx', Token.Identifier(name, _)] then
-          go(idx', Token.TypeVariable(name))
+      Some(IdentifierStart as ch) then go(..identifier(idx + 1, ch))
+      Some("'")
+        and char(idx + 1) is Some(IdentifierStart as ch)
+        and identifier(idx + 2, ch) is [idx', token] and
+          token is Token.Identifier(name, _) then
+            go(idx', Token.TypeVariable(name))
+          else go(idx + 1, Token.Error)
+      Some("`")
+        and char(idx + 1) is Some(IdentifierStart as ch)
+        and identifier(idx + 2, ch) is [idx', token] and
+          token is Token.Identifier(name, _) then
+            go(idx', Token.TagName(name))
+          else go(idx + 1, Token.Error)
       Some(other) then
         print("Unrecognized character: '" ~ other ~ "'")
         go(idx + 1, Token.Error)

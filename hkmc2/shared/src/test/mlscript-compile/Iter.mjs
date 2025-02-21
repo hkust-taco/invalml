@@ -42,10 +42,32 @@ Result1 = class Result {
 };
 Iter1 = class Iter {
   static {}
+  static getIterator(something) {
+    let test, prototype, tmp, tmp1;
+    test = something[globalThis.Symbol.iterator];
+    if (test === undefined) {
+      if (something === undefined) {
+        tmp = "undefined";
+      } else if (something === null) {
+        tmp = "null";
+      } else {
+        prototype = runtime.safeCall(globalThis.Reflect.getPrototypeOf(something));
+        if (prototype === null) {
+          tmp = "object";
+        } else {
+          tmp = prototype.constructor.name;
+        }
+      }
+      tmp1 = "Not an iterable: " + tmp;
+      throw globalThis.TypeError(tmp1);
+    } else {
+      return runtime.safeCall(something[globalThis.Symbol.iterator]())
+    }
+  } 
   static adaptIterable(iterable, makeNext) {
     return Iterable1(() => {
       let iterator, tmp, tmp1;
-      tmp = runtime.safeCall(iterable[globalThis.Symbol.iterator]());
+      tmp = Iter.getIterator(iterable);
       iterator = tmp;
       tmp1 = runtime.safeCall(makeNext(iterator));
       return Iterator1(tmp1)
@@ -78,7 +100,7 @@ Iter1 = class Iter {
         if (scrut2 === true) {
           return Option.None
         } else {
-          nextIterator = runtime.safeCall(nextIterableResult.value[globalThis.Symbol.iterator]());
+          nextIterator = Iter.getIterator(nextIterableResult.value);
           nextResult = runtime.safeCall(nextIterator.next());
           scrut1 = nextResult.done;
           if (scrut1 === true) {
@@ -91,14 +113,14 @@ Iter1 = class Iter {
           }
         }
       };
-      tmp1 = runtime.safeCall(xss[globalThis.Symbol.iterator]());
+      tmp1 = Iter.getIterator(xss);
       iterableIterator = tmp1;
       firstIterableResult = runtime.safeCall(iterableIterator.next());
       scrut = firstIterableResult.done;
       if (scrut === true) {
         tmp2 = Option.None;
       } else {
-        tmp3 = runtime.safeCall(firstIterableResult.value[globalThis.Symbol.iterator]());
+        tmp3 = Iter.getIterator(firstIterableResult.value);
         tmp2 = Option.Some(tmp3);
       }
       currentIterator = tmp2;
@@ -222,7 +244,7 @@ Iter1 = class Iter {
   static appended(xs4, ys) {
     return Iterable1(() => {
       let xsIterator, currentIterator, tmp, tmp1;
-      tmp = runtime.safeCall(xs4[globalThis.Symbol.iterator]());
+      tmp = Iter.getIterator(xs4);
       xsIterator = tmp;
       currentIterator = xsIterator;
       tmp1 = () => {
@@ -232,7 +254,7 @@ Iter1 = class Iter {
         if (scrut === true) {
           scrut1 = currentIterator == xsIterator;
           if (scrut1 === true) {
-            tmp2 = runtime.safeCall(ys[globalThis.Symbol.iterator]());
+            tmp2 = Iter.getIterator(ys);
             currentIterator = tmp2;
             doTemp = runtime.Unit;
             next1 = runtime.safeCall(currentIterator.next());
@@ -254,7 +276,7 @@ Iter1 = class Iter {
   } 
   static reduced(xs5, op3) {
     let iterator1, next, scrut, tmp, tmp1, tmp2;
-    tmp = runtime.safeCall(xs5[globalThis.Symbol.iterator]());
+    tmp = Iter.getIterator(xs5);
     iterator1 = tmp;
     tmp1 = runtime.safeCall(iterator1.next());
     next = tmp1;
@@ -268,7 +290,7 @@ Iter1 = class Iter {
   } 
   static folded(xs6, z, op4) {
     let iterator1, tmp;
-    tmp = runtime.safeCall(xs6[globalThis.Symbol.iterator]());
+    tmp = Iter.getIterator(xs6);
     iterator1 = tmp;
     return Iter.foldingImpl(iterator1, z, op4)
   } 
@@ -285,13 +307,13 @@ Iter1 = class Iter {
         return runtime.safeCall(op5(next.value, tmp1))
       }
     };
-    tmp = runtime.safeCall(xs7[globalThis.Symbol.iterator]());
+    tmp = Iter.getIterator(xs7);
     iterator1 = tmp;
     return go()
   } 
   static joined(xs8, sep) {
     let iterator1, next, sep$_, scrut, tmp, tmp1, tmp2, tmp3;
-    tmp = runtime.safeCall(xs8[globalThis.Symbol.iterator]());
+    tmp = Iter.getIterator(xs8);
     iterator1 = tmp;
     tmp1 = runtime.safeCall(iterator1.next());
     next = tmp1;
@@ -312,7 +334,7 @@ Iter1 = class Iter {
   } 
   static firstDefined(xs9, op6) {
     let iterator1, next, result, scrut, tmp, tmp1, tmp2, tmp3, tmp4;
-    tmp = runtime.safeCall(xs9[globalThis.Symbol.iterator]());
+    tmp = Iter.getIterator(xs9);
     iterator1 = tmp;
     tmp1 = runtime.safeCall(iterator1.next());
     next = tmp1;

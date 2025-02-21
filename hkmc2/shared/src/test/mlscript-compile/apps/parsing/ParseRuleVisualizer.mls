@@ -112,7 +112,7 @@ fun render(rule: ParseRule) =
             let latterPart = renderChoices(rest.choices, currentRule)
             Some(optionalPart) then rr.Optional(optionalPart) sequence(latterPart)
             None then latterPart
-        Choice.Expr(_, rest) do
+        Choice.Expr(_, _, rest) do
           tracer.print of "found Choice.Expr"
           choices.push of rr.NonTerminal("expr") sequence(renderChoices(rest.choices, currentRule))
         Choice.Lazy(get, make) and

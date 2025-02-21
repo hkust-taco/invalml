@@ -48,6 +48,18 @@ Option1 = class Option {
     } else {
       throw new globalThis.Error("match error");
     }
+  } 
+  static get(opt1) {
+    let param0, value;
+    if (opt1 instanceof Option.Some.class) {
+      param0 = opt1.value;
+      value = param0;
+      return value
+    } else if (opt1 instanceof Option.None.class) {
+      throw globalThis.Error("None.get");
+    } else {
+      throw new globalThis.Error("match error");
+    }
   }
   static toString() { return "Option"; }
 };

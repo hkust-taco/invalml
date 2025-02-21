@@ -190,7 +190,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
     renderChoices = function renderChoices(cs, currentRule) {
       let tmp2;
       tmp2 = () => {
-        let optional, choices, param0, param1, head, tail, param01, param11, get, make, proxyRule, ruleName, param02, ruleName1, rule1, scrut, ruleName2, param03, param12, rest, param04, param13, rule2, rest1, scrut1, latterPart, param05, optionalPart, param06, param14, keyword, rest2, choice, scrut2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48;
+        let optional, choices, param0, param1, head, tail, param01, param11, get, make, proxyRule, ruleName, param02, ruleName1, rule1, scrut, ruleName2, param03, param12, param2, rest, param04, param13, rule2, rest1, scrut1, latterPart, param05, optionalPart, param06, param14, keyword, rest2, choice, scrut2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48;
         optional = false;
         choices = [];
         tmp49: while (true) {
@@ -233,9 +233,10 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
               }
               tmp4 = runtime.safeCall(choices.push(tmp11));
             } else if (head instanceof ParseRule.Choice.Expr.class) {
-              param03 = head.process;
-              param12 = head.rest;
-              rest = param12;
+              param03 = head.isType;
+              param12 = head.process;
+              param2 = head.rest;
+              rest = param2;
               tmp12 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Expr"));
               tmp13 = runtime.safeCall(ParseRuleVisualizer.rr.NonTerminal("expr"));
               tmp14 = renderChoices(rest.choices, currentRule);

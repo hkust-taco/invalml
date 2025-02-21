@@ -58,13 +58,13 @@ fun parse(tokens) =
       token then Expr.justErr of "Unexpected token " + token Token.summary()
     None then Expr.justErr of "Unexpected end of input"
   
-  fun exprCont(acc: Expr.Expr, prec: Int): Expr.Expr = if peek is
-    Some(Token.Identifier(op, true)) and
-      Expr.opPrec(op) is [leftPrec, rightPrec] and
-        leftPrec > prec then
-          consume
-          let right = expr of rightPrec
-          Expr.Inf(op, acc, right) exprCont(prec)
+  fun exprCont(acc: Expr.Expr, prec: Int): Expr.Expr =
+    if peek is Some(Token.Identifier(op, true))
+      and Expr.opPrec(op) is [leftPrec, rightPrec]
+      and leftPrec > prec then
+        consume
+        let right = expr of rightPrec
+        Expr.Inf(op, acc, right) exprCont(prec)
     else acc
   
   let result = expr(0)

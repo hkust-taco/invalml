@@ -23,8 +23,21 @@ module Result with
 
 module Iter with ...
 
+// A helper function to detect if `Symbol.iterator` is on an object, and if not,
+// indicate the object's class in the error message, which is useful for debugging.
+fun getIterator(something) =
+  let test = something.(Symbol.iterator)
+  if test is undefined then
+    throw TypeError of "Not an iterable: " + if
+      something is undefined then "undefined"
+      something is null then "null"
+      let prototype = Reflect.getPrototypeOf of something
+      prototype is null then "object"
+      else prototype.constructor.name
+  else something.(Symbol.iterator)()
+
 fun adaptIterable(iterable, makeNext) = Iterable of () =>
-  let iterator = iterable.(Symbol.iterator)()
+  let iterator = getIterator of iterable
   Iterator of makeNext of iterator
 
 fun mapping(xs, op) =
@@ -37,17 +50,17 @@ fun mapping(xs, op) =
 
 fun flattening(xss) =
   Iterable of () =>
-    let iterableIterator = xss.(Symbol.iterator)()
+    let iterableIterator = getIterator of xss
     // Get the first `Iterator` from the first `Iterable`.
     let currentIterator = if
       let firstIterableResult = iterableIterator.next()
       firstIterableResult.done then None
-      else Some of firstIterableResult.value.(Symbol.iterator)()
+      else Some of getIterator of firstIterableResult.value
     // Recursively skip empty `Iterable`s and get the next `Iterator` and value.
     fun skipEmptyIterables() = if
       let nextIterableResult = iterableIterator.next()
       nextIterableResult.done then None
-      let nextIterator = nextIterableResult.value.(Symbol.iterator)()
+      let nextIterator = getIterator of nextIterableResult.value
       let nextResult = nextIterator.next()
       nextResult.done then skipEmptyIterables()
       else Some of [nextIterator, nextResult.value]
@@ -97,13 +110,13 @@ fun foldingImpl(iterator, acc, op) =
 
 fun appended(xs, ys) =
   Iterable of () =>
-    let xsIterator = xs.(Symbol.iterator)()
+    let xsIterator = getIterator of xs
     let currentIterator = xsIterator
     Iterator of () => if
       let next = currentIterator.next()
       next.done and
         currentIterator == xsIterator and
-          do set currentIterator = ys.(Symbol.iterator)()
+          do set currentIterator = getIterator of ys
           let next = currentIterator.next()
           next.done then Result.Done
           else Result.Next of next.value
@@ -111,18 +124,18 @@ fun appended(xs, ys) =
       else Result.Next of next.value
 
 fun reduced(xs, op) =
-  let iterator = xs.(Symbol.iterator)()
+  let iterator = getIterator of xs
   let next = iterator.next()
   if next.done do
     throw new Error("Empty iterator")
   foldingImpl(iterator, next.value, op)
 
 fun folded(xs, z, op) =
-  let iterator = xs.(Symbol.iterator)()
+  let iterator = getIterator of xs
   foldingImpl(iterator, z, op)
 
 fun rightFolded(xs, z, op) =
-  let iterator = xs.(Symbol.iterator)()
+  let iterator = getIterator of xs
   fun go() = if
     let next = iterator.next()
     next.done is true then
@@ -132,7 +145,7 @@ fun rightFolded(xs, z, op) =
   go()
 
 fun joined(xs, sep) =
-  let iterator = xs.(Symbol.iterator)()
+  let iterator = getIterator of xs
   let next = iterator.next()
   if next.done then "" else
     let sep' = String(sep)
@@ -142,7 +155,7 @@ fun joined(xs, sep) =
       (acc, x) => acc + sep + String(x)
 
 fun firstDefined(xs, op) =
-  let iterator = xs.(Symbol.iterator)()
+  let iterator = getIterator of xs
   let next = iterator.next()
   let result = None
   while next.done is false and result is None do

@@ -28,6 +28,7 @@ module Tree with
   class
     Empty() extends Tree
     Error(tree: Tree, message: Str) extends Tree
+    Bracketed(kind: BracketKind, tree: Tree) extends Tree
     Ident(name: Str, symbolic: Bool) extends Tree
     Underscore() extends Tree
     Modified(modifier, subject) extends Tree
@@ -48,6 +49,7 @@ module Tree with
     fun prec(tree: Tree, side: Bool) = if tree is
       Empty then INT_MAX
       Error(tree, _) then prec(tree, side)
+      Bracketed(_, _) then INT_MAX
       Ident then INT_MAX
       Underscore then INT_MAX
       Modified then 1
@@ -71,6 +73,11 @@ module Tree with
       Empty then ""
       Error(Empty, _) then "⚠"
       Error(tree, _) then "<⚠:" + go(tree) + ">"
+      Bracketed(kind, tree) and kind is
+        Token.Round then "(" + go(tree) + ")"
+        Token.Square then "[" + go(tree) + "]"
+        Token.Curly then "{" + go(tree) + "}"
+        Token.Angle then "<" + go(tree) + ">"
       Ident(name, _) then name
       Underscore() then "_"
       Modified(modifier, subject) then go(modifier) + " " + go(subject)
@@ -119,3 +126,15 @@ module Tree with
       [..trees] then "[" + trees.map((tree, _, _) => wrap(tree)).join(", ") + "]"
       else "<unexpected:" + tree + ">"
     wrap(tree)
+  
+  fun tupleWithHead(tree, head) = if tree is
+    Tuple(tail) then Tuple(head :: tail)
+    else Tuple(head :: tree :: Nil)
+  
+  fun sequenceWithHead(tree, head) = if tree is
+    Sequence(tail) then Sequence(head :: tail)
+    else Sequence(head :: tree :: Nil)
+  
+  fun nonEmptyError(tree) = if tree is
+    Error(Empty, _) then false
+    else true

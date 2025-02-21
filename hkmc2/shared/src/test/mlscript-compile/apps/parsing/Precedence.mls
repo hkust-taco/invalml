@@ -36,25 +36,25 @@ module Keywords with
   val _bar = Keyword("|", None, currPrec)
   val _and = Keyword("and", None, currPrec)
   val _colon = Keyword(":", ascPrec, eqPrec)
-  val _match = Keyword("match", None, currPrec)
-  val _if = Keyword("if", None, currPrec)
+  val _match = Keyword("match", nextPrec, currPrec)
   val _with = Keyword("with", None, currPrec)
   val _case = Keyword("case", None, currPrec)
   let thenPrec = nextPrec
+  val _if = Keyword("if", nextPrec, thenPrec)
   val _then = Keyword("then", thenPrec, thenPrec)
   val _do = Keyword("do", thenPrec, thenPrec)
-  val _else = Keyword("else", nextPrec, currPrec)
-  val _let = Keyword("let", nextPrec, semiPrec)
+  val _else = Keyword("else", thenPrec, thenPrec)
+  val _let = Keyword("let", eqPrec, semiPrec)
   val _in = Keyword("in", thenPrec, thenPrec)
   val _true = Keyword("true", None, None)
   val _false = Keyword("false", None, None)
   // val _fatArrow = Keyword of "=>", nextPrec, eqPrec
-  val _thinArrow = Keyword of "->", currPrec, eqPrec
+  val _as = Keyword("as", nextPrec, currPrec)
+  val _thinArrow = Keyword of "->", nextPrec, eqPrec
   val _fun = Keyword("fun", currPrec, None)
   val _function = Keyword("function", currPrec, None)
   val _type = Keyword("type", currPrec, None)
-  val _rec = Keyword("rec", None, None)
-  val _underscore = Keyword of "_", None, None
+  val _rec = Keyword("rec", currPrec, eqPrec)
   val maxPrec = prec
 
 fun makePrecMap(...ops) =

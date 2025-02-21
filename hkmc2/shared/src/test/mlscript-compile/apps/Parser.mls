@@ -22,7 +22,7 @@ open Precedence { Keywords, appPrec, opPrec }
 open Keyword { allKeywords, Keyword }
 open ParseRule { ParseRule, Choice, rule }
 
-type Option[A] = Some[A] | None
+type Opt[A] = Some[A] | None
 
 module Parser with ...
 
@@ -124,6 +124,8 @@ fun showAsTree(thing) =
     Tree.Error(Tree.Empty, m) then tuple of "Error", [["message", go(m)]]
     Tree.Error(t, m) then tuple of "Error", [["tree", go(t)], ["message", go(m)]]
     Tree.Ident(n, _) then tuple of "Ident", [["name", go(n)]]
+    Tree.Bracketed(k, items) then tuple of
+      "Bracketed#" + k, [["items", go(items)]]
     Tree.Underscore() then tuple of "Underscore", []
     Tree.Modified(m, s) then
       tuple of "Modified", [["modifier", go(m)], ["subject", go(s)]]
@@ -177,7 +179,7 @@ fun letBinding(keyword: Keyword) =
         (body, _) => body
         intro + "body"
         Choice.end of ()
-    Choice.end of Tree.empty
+    // Choice.end of Tree.empty
   let items = Choice.lazy of makeItems
   Choice.keyword of
     keyword
@@ -308,14 +310,14 @@ val prefixRules = rule of
   letChoice
   recursiveModifier
   funChoice()
-  typeDefinition()
   matchWithChoice()
   matchFunctionChoice()
   ifThenElse()
-  Choice.keyword of
-    Keywords._underscore
-    "wildcard pattern"
-    Choice.end of Tree.Underscore()
+
+val moduleRules = rule of
+  "start of the statement"
+  letChoice
+  typeDefinition()
 
 fun makeInfixChoice(keyword) =
   Choice.keyword of
@@ -345,11 +347,27 @@ fun parse(tokens) =
     
   fun consume =
     if current is head :: tail then
-      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter, source.line
+      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter
       set current = tail
       set counter = counter + 1
     else
-      tracer.print of "consumed: EOF", source.line
+      tracer.print of "consumed: EOF"
+  
+  // Useful when consuming matched brackets.
+  fun require(result: Tree, expected) = if yeetSpaces is
+    Some(actual) and
+      expected Token.same(actual) then
+        consume
+        result
+      else result Tree.Error of mkStr of
+        "Expected token "
+        expected Token.summary()
+        ", but found "
+        actual Token.summary() 
+    None then result Tree.Error of mkStr of
+      "Expected token "
+      expected Token.summary()
+      ", but found end of input"
   
   fun parseRule(prec: Int, rule: ParseRule, opened) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
@@ -378,41 +396,64 @@ fun parse(tokens) =
             Some(rest) then
               tracer.print of "found a rule starting with `" + name + "`", source.line
               tracer.print of "the rest of the rule: " + rest.display, source.line
-              tracer.print of "keyword choices of the rule: " + Array(rule.keywordChoices), source.line
               consume
-              parseRule(keyword.rightPrecOrMax, rest, opened)
-            None then
-              tracer.print of "no rule starting with `" + name + "` was found", source.line
-              if simpleExpr(prec, opened) is
-                Tree.Empty and
-                  rule.endChoice is Some(value) then value
-                  rule.exprChoice is Some then
-                    Tree.error("expect an expression")
-                  else ???
-                expr and rule.exprChoice is
-                  Some([process, rest]) then
-                    let rhs = parseRule(prec, rest, opened)
-                    process(expr, rhs)
-                  None then expr Tree.Error("unexpected expression")
+              // parseRule(keyword.rightPrecOrMax, rest, opened)
+              parseRule(0, rest, opened)
+            None and
+              do tracer.print of "no rule starting with `" + name + "` was found", source.line
+              // if simpleExpr(prec, opened) is
+              //   Tree.Empty and
+              //     rule.endChoice is Some(value) then value
+              //     rule.exprChoice is Some then
+              //       Tree.error("expect an expression")
+              //     else ???
+              //   expr and rule.exprChoice is
+              //     Some([isType, process, rest]) then
+              //       let rhs = parseRule(prec, rest, opened)
+              //       process(expr, rhs)
+              //     None then expr Tree.Error("unexpected expression")
+              do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
+              rule.exprChoice is Some([isType, process, rest]) and keyword.leftPrecOrMin > prec then
+                let acc = simpleExpr(keyword.rightPrecOrMax, opened) // TODO: isType?
+                let tree = parseRule(prec, rest, opened)
+                process(acc, tree)
+              rule.endChoice is Some(value) then
+                tracer.print of "found end choice", source.line
+                value
+              else ???
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
         do tracer.print of "try parse an expression from " + TokenHelpers.preview(current), source.line
-        simpleExpr(prec, opened) is
-          Tree.Error(Tree.Empty(), _) and rule.endChoice is
-            Some(value) then value
-          reserve and rule.exprChoice is
-            Some([process, rest]) then 
-              let rhs = parseRule(prec, rest, opened)
-              tracer.print of "the reserved expression: " + reserve Tree.summary(), source.line
-              tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
-              process(reserve, rhs)
-            None then
-              tracer.print of "the rule doesn't have a choice starting with expressions", source.line
-              tracer.print of rule.display, source.line
-              Tree.error("unexpected expression")
+        // simpleExpr(prec, opened) is
+        //   Tree.Error(Tree.Empty(), _) and rule.endChoice is
+        //     Some(value) then value
+        //   reserve and rule.exprChoice is
+        //     Some([isType, process, rest]) then 
+        //       let rhs = parseRule(prec, rest, opened)
+        //       tracer.print of "the reserved expression: " + reserve Tree.summary(), source.line
+        //       tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
+        //       process(reserve, rhs)
+        //     None then
+        //       tracer.print of "the rule doesn't have a choice starting with expressions", source.line
+        //       tracer.print of rule.display, source.line
+        //       Tree.error("unexpected expression")
+        // ----
+        rule.exprChoice is Some([isType, process, rest]) and
+          let acc = (if isType then typeExpr else simpleExpr)(prec, opened)
+          acc Tree.nonEmptyError() then
+            let tree = parseRule(prec, rest, opened)
+            tracer.print of "acc: " + acc Tree.summary(), source.line
+            tracer.print of "tree: " + tree Tree.summary(), source.line
+            process(acc, tree)
+          do tracer.print of "fallback to end choice", source.line
+        do tracer.print of "no expression choice", source.line
+        rule.endChoice is Some(value) then
+          tracer.print of "found end choice", source.line
+          value
+        do tracer.print of "no end choice", source.line
       Nil and rule.endChoice is
         Some(value) then value
-        None then Tree.error("unexpected EOF")
+        None then Tree.error("unexpected end of input")
   
   fun simpleExpr(prec: Int, bracket) = tracer.trace of
     "simple expression <<< " + prec + " " + TokenHelpers.preview(current)
@@ -437,18 +478,20 @@ fun parse(tokens) =
       Token.Open(kind) :: _ then
         consume
         let content = if
-          // TODO: should the prec be 0?
           let content = simpleExpr(0, Some(kind))
           yeetSpaces is
             Token.Close(kind') :: _ and
               kind == kind' then
                 tracer.print of "closing bracket " + kind, source.line
                 consume
-                if content is Tree.Empty and kind is
-                  Token.Round then Tree.Tuple(Nil)
-                  Token.BeginEnd then Tree.Sequence(Nil)
-                else
-                  content
+                if
+                  content is Tree.Empty and kind is
+                    Token.Round then Tree.Tuple(Nil)
+                    Token.Square then Tree.Bracketed(Token.Square, Nil)
+                    Token.BeginEnd then Tree.Sequence(Nil)
+                  kind is
+                    Token.Square then Tree.Bracketed(Token.Square, content)
+                    else content
               else content Tree.Error("mismatched brackets")
             token :: _ then
               let message = "expect a close bracket instead of " + token
@@ -476,7 +519,7 @@ fun parse(tokens) =
       infixRules.keywordChoices.get(name) is Some(rule) and
         do tracer.print of "found an infix keyword " + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
-          Some([process, rest]) then
+          Some([isType, process, rest]) then
             consume
             let rhs = simpleExpr(keyword.rightPrecOrMin, bracket)
             let acc' = Tree.Infix(keyword, acc, rhs)
@@ -500,34 +543,28 @@ fun parse(tokens) =
         kind == kind' then acc
         else acc Tree.Error("mismatched brackets")
       None then acc Tree.Error("missing close bracket")
-    Token.Semicolon :: _ then
-      tracer.print of "found a semicolon", source.line
-      if allKeywords.get(";") is Some(keyword) and
-        keyword.leftPrec is Some(leftPrec) and
-          leftPrec > prec then
-            consume
-            if keyword.rightPrec is Some(rightPrec) then ...
-            let acc' = if simpleExpr(rightPrec, bracket) is
-              Tree.Sequence(trees) then Tree.Sequence(acc :: trees)
-              tree then Tree.Sequence(acc :: tree :: Nil)
-            exprCont(acc', prec, bracket)
-          else
-            tracer.print of "cannot consume " + keyword, source.line
-            acc
-    Token.Comma :: _ then
-      tracer.print of "found a comma", source.line
-      if allKeywords.get(",") is Some(keyword) and
-        keyword.leftPrec is Some(leftPrec) and
-          leftPrec > prec then
-            consume
-            if keyword.rightPrec is Some(rightPrec) then ...
-            let acc' = if simpleExpr(rightPrec, bracket) is
-              Tree.Tuple(trees) then Tree.Tuple(acc :: trees)
-              tree then Tree.Tuple(acc :: tree :: Nil)
-            exprCont(acc', prec, bracket)
-          else
-            tracer.print of "cannot consume " + keyword, source.line
-            acc
+    // TODO: BEGIN deduplication
+    Token.Semicolon :: _ and
+      do tracer.print of "found a semicolon", source.line
+      Keywords._semicolon.leftPrec Option.get() > prec then
+        consume
+        simpleExpr(Keywords._semicolon.rightPrec Option.get(), bracket)
+          Tree.sequenceWithHead of acc
+          exprCont of prec, bracket
+      else
+        tracer.print of "cannot consume the semicolon", source.line
+        acc
+    Token.Comma :: _ and
+      do tracer.print of "found a comma", source.line
+      Keywords._comma.leftPrec Option.get() > prec then
+        consume
+        simpleExpr(Keywords._comma.rightPrec Option.get(), bracket)
+          Tree.tupleWithHead of acc
+          exprCont of prec, bracket
+      else
+        tracer.print of "cannot consume the comma", source.line
+        acc
+    // TODO: END deduplication
     token :: _ and
       appPrec > prec then
         do tracer.print of "found an application", source.line
@@ -542,6 +579,116 @@ fun parse(tokens) =
       do tracer.print of "found an EOF", source.line
       Some then acc Tree.Error("expect a close bracket instead of EOF")
       None then acc
+  
+  fun typeExpr(prec: Int, bracket: Opt[BracketKind]): Tree = tracer.trace of
+    "typeExpr <<< " + prec + " " + bracket + " " + TokenHelpers.preview(current)
+    result => "typeExpr >>> " + result Tree.summary()
+    () => ...
+    if yeetSpaces is
+      Token.TypeVariable(name) :: _ then
+        consume
+        // What's the corresponding tree of type variables?
+        typeExprCont(Tree.Ident(name), prec, bracket)
+      Token.Identifier("_", _) :: _ then
+        consume
+        typeExprCont(Tree.Underscore(), prec, bracket)
+      Token.Open(Token.Round) :: _ then
+        consume
+        typeExpr(0, Some(Token.Round))
+          require of Token.Close(Token.Round)
+          typeExprCont of prec, bracket
+      // '[' is special because of the open/close variant markers.
+      Token.Open(Token.Square) :: _ then
+        consume
+        // OCaml disallows spaces between '[' and '<'/'>'.
+        let openness = if current is
+          (Token.Identifier(">", _) as marker) :: _ then
+            consume
+            Some(marker)
+          (Token.Identifier("<", _) as marker) :: _ then
+            consume
+            // An optional `|` is allowed only after "<".
+            if yeetSpaces is Token.Identifier("|", _) :: _ do consume
+            Some(marker)
+          else None
+        typeExpr(0, Some(Token.Square))
+          require of Token.Close(Token.Square)
+          typeExprCont of prec, bracket
+      // Handle closing brackets.
+      Token.Close(kind) :: _ and bracket is
+        Some(kind') then Tree.Empty()
+        Some(kind) then Tree.error("mismatched brackets")
+        None then Tree.error("unexpected close bracket")
+      // `<` and `>` in type expressions are not infix operators
+      Token.Identifier("<", _) :: _ then
+        consume
+        typeExpr(0, Some(Token.Angle))
+          require of Token.Identifier(">", _)
+          typeExprCont of prec, bracket
+      // Closing ">" is handled in the same way as closing other brackets.
+      Token.Identifier(">", _) :: _ and bracket is
+        Some(Token.Angle) then Tree.Empty()
+        Some(kind) then Tree.error("mismatched brackets")
+        None then Tree.error("unexpected close bracket")
+  
+  fun typeExprCont(acc: Tree, prec: Int, bracket: Opt[BracketKind]) =
+    tracer.print of ">>> typeExprCont " + prec + " " + acc Tree.summary() + " <<<", source.line
+    if yeetSpaces is
+      Token.Close(kind) :: _ and bracket is
+        Some(kind') and
+          kind == kind' then acc
+          else Tree.error("mismatched brackets")
+        None then Tree.error("unexpected close bracket")
+      Token.Identifier(">", _) :: _ and bracket is
+        Some(Token.Angle) then acc
+        Some(kind) then Tree.error("mismatched brackets")
+        None then Tree.error("unexpected close bracket")
+      // TODO: BEGIN deduplication
+      Token.Semicolon :: _ and
+        do tracer.print of "found a semicolon", source.line
+        Keywords._semicolon.leftPrec Option.get() > prec then
+          consume
+          typeExpr(Keywords._semicolon.rightPrec Option.get(), bracket)
+            Tree.sequenceWithHead of acc
+            typeExprCont of prec, bracket
+        else
+          tracer.print of "cannot consume the semicolon", source.line
+          acc
+      Token.Comma :: _ and
+        do tracer.print of "found a comma", source.line
+        Keywords._comma.leftPrec Option.get() > prec then
+          consume
+          typeExpr(Keywords._comma.rightPrec Option.get(), bracket)
+            Tree.tupleWithHead of acc
+            typeExprCont of prec, bracket
+        else
+          tracer.print of "cannot consume the comma", source.line
+          acc
+      // TODO: END deduplication
+      // * the case of type application
+      token :: _ and
+        appPrec > prec then
+          do tracer.print of "found an application", source.line
+          if typeExpr(appPrec, bracket) is
+            Tree.Empty then acc
+            Tree.Error then acc
+            rhs then exprCont(Tree.App(acc, rhs :: Nil), prec, bracket)
+        else
+          tracer.print of "cannot consume " + token, source.line
+          acc
+  
+  // fun mod(acc: Stack[Tree]) = if yeetSpaces is
+  //   Token.Identifier(";;", _) :: _ then
+  //     consume
+  //     mod
+  //   Nil then acc reverse()
+  
+  // fun modCont(acc: Stack[Tree]) = if yeetSpaces is
+  //   Token.Identifier(";;", _) :: _ then
+  //     consume
+  //     acc mod()
+  //   _ :: _ then parseRule(0, moduleRules, None) :: acc
+  //   Nil then acc mod()
   
   let tree = simpleExpr(0, None)
   if yeetSpaces is
