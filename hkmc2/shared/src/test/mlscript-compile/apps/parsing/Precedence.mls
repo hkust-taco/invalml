@@ -23,6 +23,7 @@ module Keywords with
     set prec = prec + 1
     Some(prec)
   let basePrec = currPrec // the lowest precedence
+  val _terminator = Keyword(";;", basePrec, basePrec)
   val _class = Keyword("class", None, basePrec)
   val _begin = Keyword("begin", None, basePrec)
   val _end = Keyword("end", basePrec, None)

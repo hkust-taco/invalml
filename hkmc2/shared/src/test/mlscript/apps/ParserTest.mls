@@ -40,6 +40,7 @@ opPrec of "+"
 //│ = [19, 19]
 
 print of allKeywords.values.join("\n")
+//│ > Keyword(`;;`, 0, 0)
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`begin`, N/A, 0)
 //│ > Keyword(`end`, 0, N/A)
@@ -120,7 +121,10 @@ fun example(...lines) =
   let trees = parse(tokens)
   set tracer.enabled = false
   if flags.has("tree") do
-    print of showAsTree of trees
+    print of trees
+      Iter.fromStack()
+      Iter.mapping of showAsTree
+      Iter.joined of "\n"
   print of trees
     Iter.fromStack()
     Iter.mapping of Tree.summary
@@ -324,6 +328,14 @@ in
 //│ > {let even = match {} with 0 -> true | n -> odd(n - 1) in let odd = match {} with 0 -> false | n -> even(n - 1) in even(1000)}
 
 example of """
+let rec even =
+  function 0 -> true | n -> odd (n - 1)
+and odd =
+  function 0 -> false | n -> even (n - 1)
+"""
+//│ > {let even = match {} with 0 -> true | n -> odd(n - 1) in let odd = match {} with 0 -> false | n -> even(n - 1) in {}}
+
+example of """
 let a = 0
 let b = 0
 let f x = x + 1
@@ -334,13 +346,39 @@ let g x = f (f x)
 //│ > {let f(x) = x + 1 in {}}
 //│ > {let g(x) = f(f(x)) in {}}
 
+example of """
+:tree
+-2 * 3
+;;
+~2 * 3
+"""
+//│ > App:
+//│ >   callee = Ident of "*"
+//│ >   arguments = Stack of 
+//│ >     App:
+//│ >       callee = Ident of "-"
+//│ >       arguments = Stack of 
+//│ >         Literal#Integer of "2"
+//│ >     Literal#Integer of "3"
+//│ > App:
+//│ >   callee = Ident of "*"
+//│ >   arguments = Stack of 
+//│ >     App:
+//│ >       callee = Ident of "~"
+//│ >       arguments = Stack of 
+//│ >         Literal#Integer of "2"
+//│ >     Literal#Integer of "3"
+//│ > {(-(2)) * 3}
+//│ > {~(2) * 3}
+
 :todo
 example of """
 let f x = x
 ;;
 1 + 2 * 3
 """
-//│ > {let f(x) = x; ⚠; 1 + 2 * 3 in {}}
+//│ > {let f(x) = x in {}}
+//│ > {1 + 2 * 3}
 
 :todo
 example of """
