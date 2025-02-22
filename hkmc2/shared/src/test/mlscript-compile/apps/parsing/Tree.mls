@@ -25,6 +25,7 @@ open Precedence { appPrec, opPrec }
 module Tree with
   abstract class Tree
   
+  
   class
     Empty() extends Tree
     Error(tree: Tree, message: Str) extends Tree
@@ -70,7 +71,7 @@ module Tree with
       Tree then "{" + go(something) + "}"
       else go(something)
     fun go(tree) = if tree is
-      Empty then ""
+      Empty then "{}"
       Error(Empty, _) then "⚠"
       Error(tree, _) then "<⚠:" + go(tree) + ">"
       Bracketed(kind, tree) and kind is
@@ -115,7 +116,7 @@ module Tree with
           "if" then " then "
           "type" then ""
           "let" then " in "
-        if body is Some(body) then go(body) else ""
+        if body is Some(body) then go(body) else go(body)
       Lambda(params, body) then fold(+) of
         "fun ", params Iter.fromStack() Iter.mapping(go) Iter.joined(" "), " -> ", go(body)
       Keyword(name, _, _) then name

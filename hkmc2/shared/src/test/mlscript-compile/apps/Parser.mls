@@ -177,10 +177,10 @@ fun letBinding(hasInClause: Bool) =
         Keywords._in
         intro + "`in` keyword"
         Choice.expr of
-          (body, _) => Some(body)
+          (body, _) => body
           intro + "body"
           Choice.end of ()
-      Choice.end of None
+      Choice.end of Tree.empty
     else tuple of Choice.end of Tree.empty
   let items = Choice.lazy of makeItems
   Choice.keyword of
@@ -335,7 +335,7 @@ fun exceptionDefinition() =
       Choice.end of None
 
 val moduleRules = rule of
-  "start of statement"
+  "prefix rules for module items"
   letDefinition
   typeDefinition()
   exceptionDefinition()
@@ -360,7 +360,7 @@ fun parse(tokens) =
   
   fun yeetSpaces =
     while current is Token.Space :: tail do
-      tracer.print of "skipped a space at " + counter, source.line
+      tracer.print of "skipped a space at " + counter
       set
         current = tail
         counter = counter + 1
@@ -434,10 +434,11 @@ fun parse(tokens) =
               //       process(expr, rhs)
               //     None then expr Tree.Error("unexpected expression")
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
-              rule.exprChoice is Some([isType, process, rest]) and keyword.leftPrecOrMin > prec then
-                let acc = simpleExpr(keyword.rightPrecOrMax, opened) // TODO: isType?
-                let tree = parseRule(prec, rest, opened)
-                process(acc, tree)
+              rule.exprChoice is Some([isType, process, rest]) and
+                keyword.leftPrecOrMin > prec then
+                  let acc = simpleExpr(prec, opened) // TODO: isType?
+                  let tree = parseRule(prec, rest, opened)
+                  process(acc, tree)
               rule.endChoice is Some(value) then
                 tracer.print of "found end choice", source.line
                 value
@@ -483,10 +484,14 @@ fun parse(tokens) =
     if yeetSpaces is
       Token.Identifier(name, symbolic) :: _ and allKeywords.get(name) is
         Some(keyword) and exprRules.keywordChoices.get(name) is
-          Some(rule) then
-            consume
-            let acc = parseRule(keyword.rightPrecOrMax, rule, bracket)
-            exprCont(acc, prec, bracket)
+          Some(rule) and
+            keyword.leftPrecOrMin > prec then
+              consume
+              let acc = parseRule(keyword.rightPrecOrMax, rule, bracket)
+              exprCont(acc, prec, bracket)
+            else
+              tracer.print of "the left precedence is less" + name, source.line
+              Tree.empty
           None then
             tracer.print("no rule starting with " + name, source.line)
             Tree.empty
@@ -508,7 +513,7 @@ fun parse(tokens) =
                 if
                   content is Tree.Empty and kind is
                     Token.Round then Tree.Tuple(Nil)
-                    Token.Square then Tree.Bracketed(Token.Square, Nil)
+                    Token.Square then Tree.Bracketed(Token.Square, Tree.Sequence(Nil))
                     Token.BeginEnd then Tree.Sequence(Nil)
                   kind is
                     Token.Square then Tree.Bracketed(Token.Square, content)
@@ -699,6 +704,7 @@ fun parse(tokens) =
           acc
   
   fun mod(acc: Stack[Tree]) = if yeetSpaces is
+    do tracer.print of ">>>>>> mod <<<<<<", source.line
     Token.Identifier(";;", _) :: _ then
       consume
       mod
@@ -708,7 +714,7 @@ fun parse(tokens) =
           consume
           let tree = parseRule(0, rule, None)
           if tree is Tree.Ternary(Keyword("let", _, _), _, _, None) then
-            mod of tree :: acc
+            modCont of tree :: acc
           else
             modCont of tree :: acc
         moduleRules.keywordChoices.get(name) is Some(rule) then
@@ -719,13 +725,18 @@ fun parse(tokens) =
     Nil then acc reverse()
   
   fun modCont(acc: Stack[Tree]) = if yeetSpaces is
+    do tracer.print of ">>>>>> modCont <<<<<<", source.line
     Token.Identifier(";;", _) :: _ then
       consume
       acc mod()
-    _ :: _ then parseRule(0, moduleRules, None) :: acc
+    _ :: _ then modCont of parseRule(0, moduleRules, None) :: acc
     Nil then acc reverse()
   
-  let tree = mod(Nil)
+  let tree = tracer.trace of
+    "module <<< "
+    result => "module >>> " + result Tree.summary()
+    () => mod(Nil)
+  
   if yeetSpaces is
     token :: _ then
       let message = "expect EOF instead of " + token

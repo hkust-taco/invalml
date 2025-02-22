@@ -242,7 +242,7 @@ Tree2 = class Tree {
     go = function go(tree1) {
       let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, param22, op, lhs1, rhs1, param08, param15, callee, arguments1, param09, param16, op1, param010, param17, lhs2, param011, param18, rhs2, scrut2, first1, first0, leftPrec, rightPrec, target, param012, param19, field, scrut3, first11, first01, leftPrec1, param013, param110, scrutinee, branches, param014, param111, value, value1, scrut4, param015, trees1, param016, trees2, param017, param112, modifier, subject, param018, param113, name1, param019, param114, kind, tree3, param020, param115, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, tmp130, tmp131, tmp132, tmp133, tmp134, tmp135, tmp136, tmp137, tmp138, tmp139, tmp140;
       if (tree1 instanceof Tree.Empty.class) {
-        return ""
+        return "{}"
       } else if (tree1 instanceof Tree.Error.class) {
         param020 = tree1.tree;
         param115 = tree1.message;
@@ -663,7 +663,7 @@ Tree2 = class Tree {
             body2 = param06;
             tmp126 = go(body2);
           } else {
-            tmp126 = "";
+            tmp126 = go(body1);
           }
           return runtime.safeCall(tmp121(keyword.name, " ", tmp122, tmp123, tmp124, tmp125, tmp126))
         } else if (tree1 instanceof Tree.Lambda.class) {
