@@ -23,6 +23,7 @@ fun getOrElse(opt, default) = if opt is
   Some(value) then value
   None then default
 
-fun get(opt) = if opt is
-  Some(value) then value
-  None then throw Error("None.get")
+module unsafe with
+  fun get(opt) = if opt is
+    Some(value) then value
+    None then throw Error("None.get")
