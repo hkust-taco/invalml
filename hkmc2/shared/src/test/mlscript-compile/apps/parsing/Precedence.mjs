@@ -16,7 +16,7 @@ Precedence1 = class Precedence {
       static #ascPrec;
       static #thenPrec;
       static {
-        let tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28;
+        let tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29;
         Keywords.#prec = 0;
         Keywords.#basePrec = Keywords.currPrec;
         tmp3 = Keyword.Keyword("class", Option.None, Keywords.#basePrec);
@@ -74,8 +74,10 @@ Precedence1 = class Precedence {
         this._function = tmp26;
         tmp27 = Keyword.Keyword("type", Keywords.currPrec, Option.None);
         this._type = tmp27;
-        tmp28 = Keyword.Keyword("rec", Keywords.currPrec, Keywords.#eqPrec);
-        this._rec = tmp28;
+        tmp28 = Keyword.Keyword("exception", Keywords.currPrec, Option.None);
+        this._exception = tmp28;
+        tmp29 = Keyword.Keyword("rec", Keywords.currPrec, Keywords.#eqPrec);
+        this._rec = tmp29;
         this.maxPrec = Keywords.#prec;
       }
       static get currPrec() {

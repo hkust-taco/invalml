@@ -1,4 +1,3 @@
-import "../Parser.mls"
 import "./ParseRule.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
@@ -11,7 +10,6 @@ import "../../../vendors/railroad/railroad.mjs"
 open Predef
 open Stack
 open Option
-open Parser { prefixRules }
 open ParseRule { ParseRule, Choice }
 open TreeTracer
 open XML { html, tag, elem, style }
@@ -27,7 +25,7 @@ val rr = railroad
 // Check if the given path exists.
 fun ensurePath(pathString) =
   if fs.statSync(pathString).isDirectory() is false do
-    throw new Error("The output directory does not exist.")
+    throw Error("The output directory does not exist.")
   pathString
 
 // `process.cwd()` is different in `hkmc2AllTests / test` and
@@ -40,47 +38,19 @@ fun findProjectRoot =
   else
     base + path.sep + "hkmc2" + path.sep + "shared"
 
-fun outputPath = ensurePath of path.resolve of
+let outputPath = ensurePath of path.resolve of
   findProjectRoot, "src", "test", "mlscript", "apps", "output"
+
+fun filePath(...fragments) = path.join(outputPath, ...fragments)
 
 fun libraryPath = ensurePath of path.resolve of
   findProjectRoot, "src", "test", "vendors", "railroad"
 
 val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
 
-fun toHTML(...elements) = html(["lang", "en"]) of
-  elem("head") of
-    tag("meta") of ["charset", "UTF-8"]
-    tag("meta") of
-      ["name", "viewport"]
-      ["content", "width=device-width, initial-scale=1.0"]
-    elem("title") of "Parse Rules"
-  elem("body", style of
-    ["margin", "0"]
-    ["padding", "1em"]
-  ) of
-    elem("div", style of
-      ["display", "flex"]
-      ["flex-direction", "column"]
-      ["gap", "1em"]
-    ) of
-      ...elements
-    elem("style") of
-      "body{margin:0;font-family:system-ui,sans-serif}"
-      CSS_CONTENT
-
-fun save(fileName, ...diagrams) = fs.writeFileSync of
-  path.join of outputPath, fileName
-  toHTML of ...diagrams.flatMap of case
-    [caption, svg] then elem("figure", style(["text-align", "center"])) of
-      svg
-      elem("figcaption", ["id", caption]) of caption
-    svg then svg
-  "utf-8"
-
 let tracer = new TreeTracer()
 
-fun render(rule: ParseRule) =
+fun render(title: Str, rule: ParseRule) =
   let helperRules = []
   let renderCache = new globalThis.Map()
   fun sequence(lhs, rhsOpt) =
@@ -102,9 +72,9 @@ fun render(rule: ParseRule) =
         let latterPart = renderRule(rest, currentRule)
         Some(optionalPart) then rr.Optional(optionalPart) sequence(latterPart)
         None then latterPart
-    Choice.Expr(_, _, rest) then
+    Choice.Expr(isType, _, rest) then
       tracer.print of "found Choice.Expr"
-      Some of rr.NonTerminal("expr") sequence(renderRule(rest, currentRule))
+      Some of rr.NonTerminal(if isType then "type" else "expr") sequence(renderRule(rest, currentRule))
     Choice.Lazy(get, make) and
       renderCache.has(choice) then
         tracer.print of "found Choice.Lazy in cache"
@@ -148,4 +118,4 @@ fun render(rule: ParseRule) =
       let choice = rr.Choice(0, ...nodes)
       optional is true then Some(rr.Optional(choice))
       else Some(choice)
-  [["Prefix Rules", diagram of renderRule(rule, None)], ...helperRules]
+  [[title, diagram of renderRule(rule, None)], ...helperRules]

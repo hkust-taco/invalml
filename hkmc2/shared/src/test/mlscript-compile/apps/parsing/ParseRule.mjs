@@ -516,7 +516,7 @@ ParseRule2 = class ParseRule {
         tmp = ParseRule.rule(name1, ...choices1);
         return Choice.Expr(false, process, tmp)
       } 
-      static typexpr(process1, name2, ...choices2) {
+      static typeExpr(process1, name2, ...choices2) {
         let tmp;
         tmp = ParseRule.rule(name2, ...choices2);
         return Choice.Expr(true, process1, tmp)

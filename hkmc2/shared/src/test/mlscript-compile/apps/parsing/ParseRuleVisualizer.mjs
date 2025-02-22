@@ -1,5 +1,4 @@
 import runtime from "./../../Runtime.mjs";
-import Parser from "./../Parser.mjs";
 import ParseRule from "./ParseRule.mjs";
 import Predef from "./../../Predef.mjs";
 import Stack from "./../../Stack.mjs";
@@ -22,22 +21,26 @@ LinkOpts1.class = class LinkOpts {
   toString() { return "LinkOpts(" + globalThis.Predef.render(this.href) + ")"; }
 };
 ParseRuleVisualizer1 = class ParseRuleVisualizer {
+  static #outputPath;
   static #tracer;
   static {
-    let tmp, tmp1, tmp2;
+    let tmp, tmp1, tmp2, tmp3, tmp4;
     this.rr = railroad;
-    tmp = path.join(ParseRuleVisualizer.libraryPath, "railroad.css");
-    tmp1 = globalThis.fs.readFileSync(tmp, "utf-8");
-    this.CSS_CONTENT = tmp1;
-    tmp2 = new TreeTracer.TreeTracer();
-    ParseRuleVisualizer.#tracer = tmp2;
+    tmp = runtime.safeCall(path.resolve(ParseRuleVisualizer.findProjectRoot, "src", "test", "mlscript", "apps", "output"));
+    tmp1 = ParseRuleVisualizer.ensurePath(tmp);
+    ParseRuleVisualizer.#outputPath = tmp1;
+    tmp2 = path.join(ParseRuleVisualizer.libraryPath, "railroad.css");
+    tmp3 = globalThis.fs.readFileSync(tmp2, "utf-8");
+    this.CSS_CONTENT = tmp3;
+    tmp4 = new TreeTracer.TreeTracer();
+    ParseRuleVisualizer.#tracer = tmp4;
   }
   static ensurePath(pathString) {
     let scrut, tmp, tmp1;
     tmp = runtime.safeCall(globalThis.fs.statSync(pathString));
     scrut = runtime.safeCall(tmp.isDirectory());
     if (scrut === false) {
-      throw new globalThis.Error.class("The output directory does not exist.");
+      throw globalThis.Error("The output directory does not exist.");
     } else {
       tmp1 = runtime.Unit;
     }
@@ -69,95 +72,15 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return tmp9 + "shared"
     }
   } 
-  static get outputPath() {
-    let tmp;
-    tmp = runtime.safeCall(path.resolve(ParseRuleVisualizer.findProjectRoot, "src", "test", "mlscript", "apps", "output"));
-    return ParseRuleVisualizer.ensurePath(tmp);
+  static filePath(...fragments) {
+    return path.join(ParseRuleVisualizer.#outputPath, ...fragments)
   } 
   static get libraryPath() {
     let tmp;
     tmp = runtime.safeCall(path.resolve(ParseRuleVisualizer.findProjectRoot, "src", "test", "vendors", "railroad"));
     return ParseRuleVisualizer.ensurePath(tmp);
   } 
-  static toHTML(...elements) {
-    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16;
-    tmp = XML.html([
-      "lang",
-      "en"
-    ]);
-    tmp1 = XML.elem("head");
-    tmp2 = XML.tag("meta");
-    tmp3 = runtime.safeCall(tmp2([
-      "charset",
-      "UTF-8"
-    ]));
-    tmp4 = XML.tag("meta");
-    tmp5 = runtime.safeCall(tmp4([
-      "name",
-      "viewport"
-    ], [
-      "content",
-      "width=device-width, initial-scale=1.0"
-    ]));
-    tmp6 = XML.elem("title");
-    tmp7 = runtime.safeCall(tmp6("Parse Rules"));
-    tmp8 = runtime.safeCall(tmp1(tmp3, tmp5, tmp7));
-    tmp9 = XML.style([
-      "margin",
-      "0"
-    ], [
-      "padding",
-      "1em"
-    ]);
-    tmp10 = XML.elem("body", tmp9);
-    tmp11 = XML.style([
-      "display",
-      "flex"
-    ], [
-      "flex-direction",
-      "column"
-    ], [
-      "gap",
-      "1em"
-    ]);
-    tmp12 = XML.elem("div", tmp11);
-    tmp13 = runtime.safeCall(tmp12(...elements));
-    tmp14 = XML.elem("style");
-    tmp15 = runtime.safeCall(tmp14("body{margin:0;font-family:system-ui,sans-serif}", ParseRuleVisualizer.CSS_CONTENT));
-    tmp16 = runtime.safeCall(tmp10(tmp13, tmp15));
-    return runtime.safeCall(tmp(tmp8, tmp16))
-  } 
-  static save(fileName, ...diagrams) {
-    let tmp, tmp1, tmp2, tmp3;
-    tmp = path.join(ParseRuleVisualizer.outputPath, fileName);
-    tmp1 = (caseScrut) => {
-      let svg, first1, first0, caption, svg1, tmp4, tmp5, tmp6, tmp7;
-      if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
-        first0 = caseScrut[0];
-        first1 = caseScrut[1];
-        caption = first0;
-        svg1 = first1;
-        tmp4 = XML.style([
-          "text-align",
-          "center"
-        ]);
-        tmp5 = XML.elem("figure", tmp4);
-        tmp6 = XML.elem("figcaption", [
-          "id",
-          caption
-        ]);
-        tmp7 = runtime.safeCall(tmp6(caption));
-        return runtime.safeCall(tmp5(svg1, tmp7))
-      } else {
-        svg = caseScrut;
-        return svg
-      }
-    };
-    tmp2 = runtime.safeCall(diagrams.flatMap(tmp1));
-    tmp3 = ParseRuleVisualizer.toHTML(...tmp2);
-    return runtime.safeCall(globalThis.fs.writeFileSync(tmp, tmp3, "utf-8"))
-  } 
-  static render(rule) {
+  static render(title, rule) {
     let diagram, sequence, renderChoice, renderRule, helperRules, renderCache, tmp, tmp1, tmp2;
     sequence = function sequence(lhs, rhsOpt) {
       let param0, rhs;
@@ -183,7 +106,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return runtime.safeCall(ParseRuleVisualizer.rr.Diagram(tmp3))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
-      let doTemp, param0, param1, get, make, proxyRule, ruleName, param01, ruleName1, rule1, scrut, ruleName2, param02, param11, param2, rest, param03, param12, rule2, rest1, scrut1, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41;
+      let doTemp, param0, param1, get, make, proxyRule, ruleName, param01, ruleName1, rule1, scrut, ruleName2, param02, param11, param2, isType, rest, param03, param12, rule2, rest1, scrut1, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp3 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.End"));
         return Option.None
@@ -220,12 +143,18 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         param02 = choice.isType;
         param11 = choice.process;
         param2 = choice.rest;
+        isType = param02;
         rest = param2;
         tmp11 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Expr"));
-        tmp12 = runtime.safeCall(ParseRuleVisualizer.rr.NonTerminal("expr"));
-        tmp13 = renderRule(rest, currentRule);
-        tmp14 = sequence(tmp12, tmp13);
-        return Option.Some(tmp14)
+        if (isType === true) {
+          tmp12 = "type";
+        } else {
+          tmp12 = "expr";
+        }
+        tmp13 = runtime.safeCall(ParseRuleVisualizer.rr.NonTerminal(tmp12));
+        tmp14 = renderRule(rest, currentRule);
+        tmp15 = sequence(tmp13, tmp14);
+        return Option.Some(tmp15)
       } else if (choice instanceof ParseRule.Choice.Lazy.class) {
         param0 = choice.get;
         param1 = choice.make;
@@ -233,58 +162,58 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         make = param1;
         scrut = runtime.safeCall(renderCache.has(choice));
         if (scrut === true) {
-          tmp15 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Lazy in cache"));
-          tmp16 = runtime.safeCall(renderCache.get(choice));
-          ruleName2 = tmp16;
-          tmp17 = "#" + ruleName2;
-          tmp18 = LinkOpts1(tmp17);
-          tmp19 = ParseRuleVisualizer.rr.NonTerminal(ruleName2, tmp18);
-          return Option.Some(tmp19)
+          tmp16 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Lazy in cache"));
+          tmp17 = runtime.safeCall(renderCache.get(choice));
+          ruleName2 = tmp17;
+          tmp18 = "#" + ruleName2;
+          tmp19 = LinkOpts1(tmp18);
+          tmp20 = ParseRuleVisualizer.rr.NonTerminal(ruleName2, tmp19);
+          return Option.Some(tmp20)
         } else {
           if (currentRule instanceof Option.Some.class) {
             param01 = currentRule.value;
             ruleName1 = param01;
-            tmp20 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Lazy in recursion"));
-            tmp21 = runtime.safeCall(get());
-            rule1 = tmp21;
+            tmp21 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Lazy in recursion"));
+            tmp22 = runtime.safeCall(get());
+            rule1 = tmp22;
             if (rule1 instanceof RecursiveKnot1.class) {
-              tmp22 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found RecursiveKnot"));
-              tmp23 = "#" + ruleName1;
-              tmp24 = LinkOpts1(tmp23);
-              tmp25 = ParseRuleVisualizer.rr.NonTerminal(ruleName1, tmp24);
-              return Option.Some(tmp25)
+              tmp23 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found RecursiveKnot"));
+              tmp24 = "#" + ruleName1;
+              tmp25 = LinkOpts1(tmp24);
+              tmp26 = ParseRuleVisualizer.rr.NonTerminal(ruleName1, tmp25);
+              return Option.Some(tmp26)
             } else {
-              tmp26 = globalThis.String(rule1);
-              tmp27 = "expect RecursiveKnot, found " + tmp26;
-              tmp28 = runtime.safeCall(ParseRuleVisualizer.#tracer.print(tmp27));
+              tmp27 = globalThis.String(rule1);
+              tmp28 = "expect RecursiveKnot, found " + tmp27;
+              tmp29 = runtime.safeCall(ParseRuleVisualizer.#tracer.print(tmp28));
               return Predef.notImplementedError
             }
           } else if (currentRule instanceof Option.None.class) {
-            tmp29 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Lazy in top-level"));
-            tmp30 = runtime.safeCall(make(() => {
+            tmp30 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Lazy in top-level"));
+            tmp31 = runtime.safeCall(make(() => {
               return RecursiveKnot1
             }));
-            proxyRule = tmp30;
+            proxyRule = tmp31;
             ruleName = parentRule.name;
-            tmp31 = Option.Some(ruleName);
-            tmp32 = renderChoice(parentRule, proxyRule, tmp31);
-            tmp33 = diagram(tmp32);
-            tmp34 = Predef.tuple(ruleName, tmp33);
-            tmp35 = runtime.safeCall(helperRules.push(tmp34));
-            tmp36 = renderCache.set(choice, ruleName);
-            tmp37 = "#" + ruleName;
-            tmp38 = LinkOpts1(tmp37);
-            tmp39 = ParseRuleVisualizer.rr.NonTerminal(ruleName, tmp38);
-            return Option.Some(tmp39)
+            tmp32 = Option.Some(ruleName);
+            tmp33 = renderChoice(parentRule, proxyRule, tmp32);
+            tmp34 = diagram(tmp33);
+            tmp35 = Predef.tuple(ruleName, tmp34);
+            tmp36 = runtime.safeCall(helperRules.push(tmp35));
+            tmp37 = renderCache.set(choice, ruleName);
+            tmp38 = "#" + ruleName;
+            tmp39 = LinkOpts1(tmp38);
+            tmp40 = ParseRuleVisualizer.rr.NonTerminal(ruleName, tmp39);
+            return Option.Some(tmp40)
           } else {
-            tmp40 = "unexpected choice: " + choice;
-            doTemp = runtime.safeCall(globalThis.console.log(tmp40));
+            tmp41 = "unexpected choice: " + choice;
+            doTemp = runtime.safeCall(globalThis.console.log(tmp41));
             throw new globalThis.Error("match error");
           }
         }
       } else {
-        tmp41 = "unexpected choice: " + choice;
-        doTemp = runtime.safeCall(globalThis.console.log(tmp41));
+        tmp42 = "unexpected choice: " + choice;
+        doTemp = runtime.safeCall(globalThis.console.log(tmp42));
         throw new globalThis.Error("match error");
       }
     };
@@ -346,7 +275,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
     tmp2 = diagram(tmp1);
     return [
       [
-        "Prefix Rules",
+        title,
         tmp2
       ],
       ...helperRules

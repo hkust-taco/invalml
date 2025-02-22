@@ -133,7 +133,7 @@ module Choice with
   // Shorthands for constructing rule choices.
   fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
   fun expr(process, name, ...choices) = Expr(false, process, rule(name, ...choices))
-  fun typexpr(process, name, ...choices) = Expr(true, process, rule(name, ...choices))
+  fun typeExpr(process, name, ...choices) = Expr(true, process, rule(name, ...choices))
   fun end(value) = End(value)
   fun lazy(makeChoice) =
     let cache = None

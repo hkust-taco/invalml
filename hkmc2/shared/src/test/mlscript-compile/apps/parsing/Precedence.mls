@@ -54,6 +54,7 @@ module Keywords with
   val _fun = Keyword("fun", currPrec, None)
   val _function = Keyword("function", currPrec, None)
   val _type = Keyword("type", currPrec, None)
+  val _exception = Keyword("exception", currPrec, None)
   val _rec = Keyword("rec", currPrec, eqPrec)
   val maxPrec = prec
 

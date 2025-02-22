@@ -59,9 +59,10 @@ print of allKeywords.values.join("\n")
 //│ > Keyword(`fun`, 9, N/A)
 //│ > Keyword(`function`, 9, N/A)
 //│ > Keyword(`type`, 9, N/A)
+//│ > Keyword(`exception`, 9, N/A)
 //│ > Keyword(`rec`, 9, 3)
 
-print of Parser.prefixRules.display
+print of Parser.exprRules.display
 //│ > <prefix rules for expressions> ::= `let` [`rec` ] 
 //│ >   <expr> 
 //│ >     `=` <expr> 

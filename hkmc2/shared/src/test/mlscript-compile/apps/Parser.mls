@@ -155,8 +155,8 @@ fun showAsTree(thing) =
       intro + ":\n  " + indented of dialogue.join("\n")
   go(thing)
 
-fun letBinding(keyword: Keyword) =
-  let intro = keyword.name + " binding: "
+fun letBinding(hasInClause: Bool) =
+  let intro = "let binding: "
   fun makeBinding(body) = Choice.expr of
     (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
       Tree.Ternary(Keywords._let, lhs, rhs, body)
@@ -172,17 +172,18 @@ fun letBinding(keyword: Keyword) =
       Keywords._and
       intro + "`and` keyword"
       makeBinding of Choice.Lazy(get, makeItems)
-    Choice.keyword of
-      Keywords._in
-      intro + "`in` keyword"
-      Choice.expr of
-        (body, _) => body
-        intro + "body"
-        Choice.end of ()
-    // Choice.end of Tree.empty
+    if hasInClause then
+      Choice.keyword of
+        Keywords._in
+        intro + "`in` keyword"
+        Choice.expr of
+          (body, _) => body
+          intro + "body"
+          Choice.end of ()
+    else Choice.end of Tree.empty
   let items = Choice.lazy of makeItems
   Choice.keyword of
-    keyword
+    Keywords._let
     intro + "keyword"
     Choice.Optional of
       rule of
@@ -195,21 +196,8 @@ fun letBinding(keyword: Keyword) =
         intro + "body"
         makeBinding of items
 
-fun typeDefinition() =
-  let intro = "type definition: "
-  Choice.keyword of
-    Keywords._type
-    intro + "`type` keyword"
-    Choice.expr of
-      (name, body) => Tree.Ternary(Keywords._type, name, body, None)
-      intro + "name"
-      Choice.keyword of
-        Keywords._equal
-        intro + "equal sign"
-        Choice.expr of
-          (body, _) => body
-          intro + "body"
-          Choice.end of ()
+let letExpression = letBinding(true)
+let letDefinition = letBinding(false)
 
 fun ifThenElse() =
   let intro = "if-then-else: "
@@ -234,8 +222,6 @@ fun ifThenElse() =
               intro + "alternative"
               Choice.end of None
           Choice.end of None
-
-let letChoice = letBinding(Keywords._let)
 
 fun funChoice() =
   let intro = "function expression: "
@@ -306,18 +292,52 @@ fun matchFunctionChoice() =
         Tree.Match(scrut, arms) then Tree.Match(scrut, x :: arms)
       Tree.Match(Tree.empty, Nil)
 
-val prefixRules = rule of
+val exprRules = rule of
   "prefix rules for expressions"
-  letChoice
+  letExpression
   funChoice()
   matchWithChoice()
   matchFunctionChoice()
   ifThenElse()
 
+fun typeDefinition() =
+  let intro = "type definition: "
+  Choice.keyword of
+    Keywords._type
+    intro + "`type` keyword"
+    Choice.typeExpr of
+      (name, body) => Tree.Ternary(Keywords._type, name, body, None)
+      intro + "name"
+      Choice.keyword of
+        Keywords._equal
+        intro + "equal sign"
+        Choice.typeExpr of
+          (body, _) => body
+          intro + "body"
+          Choice.end of ()
+
+fun exceptionDefinition() =
+  let intro = "exception definition: "
+  Choice.keyword of
+    Keywords._exception
+    intro + "keyword"
+    Choice.typeExpr of
+      (name, body) => Tree.Ternary(Keywords._exception, name, body, None)
+      intro + "name"
+      Choice.keyword of
+        Keywords._equal
+        intro + "equal sign"
+        Choice.typeExpr of
+          (body, _) => Some(body)
+          intro + "body"
+          Choice.end of ()
+      Choice.end of None
+
 val moduleRules = rule of
   "start of statement"
-  letChoice
+  letDefinition
   typeDefinition()
+  exceptionDefinition()
 
 fun makeInfixChoice(keyword) =
   Choice.keyword of
@@ -461,7 +481,7 @@ fun parse(tokens) =
     () => ...
     if yeetSpaces is
       Token.Identifier(name, symbolic) :: _ and allKeywords.get(name) is
-        Some(keyword) and prefixRules.keywordChoices.get(name) is
+        Some(keyword) and exprRules.keywordChoices.get(name) is
           Some(rule) then
             consume
             let acc = parseRule(keyword.rightPrecOrMax, rule, bracket)
@@ -677,18 +697,25 @@ fun parse(tokens) =
           tracer.print of "cannot consume " + token, source.line
           acc
   
-  // fun mod(acc: Stack[Tree]) = if yeetSpaces is
-  //   Token.Identifier(";;", _) :: _ then
-  //     consume
-  //     mod
-  //   Nil then acc reverse()
+  fun mod(acc: Stack[Tree]) = if yeetSpaces is
+    Token.Identifier(";;", _) :: _ then
+      consume
+      mod
+    Token.Identifier(name, _) :: _ and
+      allKeywords.get(name) is Some(keyword) and
+        moduleRules.keywordChoices.get(name) is Some(rule) then
+          consume
+          let tree = parseRule(0, rule, None)
+          modCont(tree :: acc)
+    
+    Nil then acc reverse()
   
-  // fun modCont(acc: Stack[Tree]) = if yeetSpaces is
-  //   Token.Identifier(";;", _) :: _ then
-  //     consume
-  //     acc mod()
-  //   _ :: _ then parseRule(0, moduleRules, None) :: acc
-  //   Nil then acc mod()
+  fun modCont(acc: Stack[Tree]) = if yeetSpaces is
+    Token.Identifier(";;", _) :: _ then
+      consume
+      acc mod()
+    _ :: _ then parseRule(0, moduleRules, None) :: acc
+    Nil then acc mod()
   
   let tree = simpleExpr(0, None)
   if yeetSpaces is

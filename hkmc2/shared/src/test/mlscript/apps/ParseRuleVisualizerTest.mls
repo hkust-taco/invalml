@@ -2,11 +2,43 @@
 
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
-import "../../mlscript-compile/Stack.mls"
+import "../../mlscript-compile/Iter.mls"
+import "../../mlscript-compile/XML.mls"
 
-open ParseRuleVisualizer { save, rr, render }
-open Parser { prefixRules }
-open Stack
+open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
+open Parser { exprRules, moduleRules }
+open XML { html, tag, elem, style }
 
-save of "rule.html", ...render(prefixRules)
- 
+fun toHTML(...elements) = html(["lang", "en"]) of
+  elem("head") of
+    tag("meta") of ["charset", "UTF-8"]
+    tag("meta") of
+      ["name", "viewport"]
+      ["content", "width=device-width, initial-scale=1.0"]
+    elem("title") of "Parse Rules"
+  elem("body", style of
+    ["margin", "0"]
+    ["padding", "1em"]
+  ) of
+    elem("div", style of
+      ["display", "flex"]
+      ["flex-direction", "column"]
+      ["gap", "1em"]
+    ) of
+      ...elements
+    elem("style") of
+      "body{margin:0;font-family:system-ui,sans-serif}"
+      CSS_CONTENT
+
+fs.writeFileSync of
+  filePath of "rule.html"
+  toHTML of
+    ...render("Expression Rules", exprRules)
+      Iter.appended of render("Module Rules", moduleRules)
+      Iter.mapping of case [caption, svg] then
+        elem("figure", style(["text-align", "center"])) of
+          svg
+          elem("figcaption", ["id", caption]) of caption
+      Iter.flattening()
+      Iter.toArray()
+  "utf-8"
