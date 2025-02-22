@@ -315,7 +315,7 @@ val prefixRules = rule of
   ifThenElse()
 
 val moduleRules = rule of
-  "start of the statement"
+  "start of statement"
   letChoice
   typeDefinition()
 
