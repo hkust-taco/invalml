@@ -172,15 +172,16 @@ fun letBinding(hasInClause: Bool) =
       Keywords._and
       intro + "`and` keyword"
       makeBinding of Choice.Lazy(get, makeItems)
-    if hasInClause then
+    ...if hasInClause then tuple of
       Choice.keyword of
         Keywords._in
         intro + "`in` keyword"
         Choice.expr of
-          (body, _) => body
+          (body, _) => Some(body)
           intro + "body"
           Choice.end of ()
-    else Choice.end of Tree.empty
+      Choice.end of None
+    else tuple of Choice.end of Tree.empty
   let items = Choice.lazy of makeItems
   Choice.keyword of
     Keywords._let
@@ -703,11 +704,18 @@ fun parse(tokens) =
       mod
     Token.Identifier(name, _) :: _ and
       allKeywords.get(name) is Some(keyword) and
+        exprRules.keywordChoices.get(name) is Some(rule) then
+          consume
+          let tree = parseRule(0, rule, None)
+          if tree is Tree.Ternary(Keyword("let", _, _), _, _, None) then
+            mod of tree :: acc
+          else
+            modCont of tree :: acc
         moduleRules.keywordChoices.get(name) is Some(rule) then
           consume
           let tree = parseRule(0, rule, None)
           modCont(tree :: acc)
-    
+    _ :: _ then modCont of simpleExpr(0, None) :: acc
     Nil then acc reverse()
   
   fun modCont(acc: Stack[Tree]) = if yeetSpaces is
@@ -715,9 +723,9 @@ fun parse(tokens) =
       consume
       acc mod()
     _ :: _ then parseRule(0, moduleRules, None) :: acc
-    Nil then acc mod()
+    Nil then acc reverse()
   
-  let tree = simpleExpr(0, None)
+  let tree = mod(Nil)
   if yeetSpaces is
     token :: _ then
       let message = "expect EOF instead of " + token
