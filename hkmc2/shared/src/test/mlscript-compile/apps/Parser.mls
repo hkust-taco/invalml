@@ -546,9 +546,9 @@ fun parse(tokens) =
     // TODO: BEGIN deduplication
     Token.Semicolon :: _ and
       do tracer.print of "found a semicolon", source.line
-      Keywords._semicolon.leftPrec Option.get() > prec then
+      Keywords._semicolon.leftPrec Option.unsafe.get() > prec then
         consume
-        simpleExpr(Keywords._semicolon.rightPrec Option.get(), bracket)
+        simpleExpr(Keywords._semicolon.rightPrec Option.unsafe.get(), bracket)
           Tree.sequenceWithHead of acc
           exprCont of prec, bracket
       else
@@ -556,9 +556,9 @@ fun parse(tokens) =
         acc
     Token.Comma :: _ and
       do tracer.print of "found a comma", source.line
-      Keywords._comma.leftPrec Option.get() > prec then
+      Keywords._comma.leftPrec Option.unsafe.get() > prec then
         consume
-        simpleExpr(Keywords._comma.rightPrec Option.get(), bracket)
+        simpleExpr(Keywords._comma.rightPrec Option.unsafe.get(), bracket)
           Tree.tupleWithHead of acc
           exprCont of prec, bracket
       else
@@ -646,9 +646,9 @@ fun parse(tokens) =
       // TODO: BEGIN deduplication
       Token.Semicolon :: _ and
         do tracer.print of "found a semicolon", source.line
-        Keywords._semicolon.leftPrec Option.get() > prec then
+        Keywords._semicolon.leftPrec Option.unsafe.get() > prec then
           consume
-          typeExpr(Keywords._semicolon.rightPrec Option.get(), bracket)
+          typeExpr(Keywords._semicolon.rightPrec Option.unsafe.get(), bracket)
             Tree.sequenceWithHead of acc
             typeExprCont of prec, bracket
         else
@@ -656,9 +656,9 @@ fun parse(tokens) =
           acc
       Token.Comma :: _ and
         do tracer.print of "found a comma", source.line
-        Keywords._comma.leftPrec Option.get() > prec then
+        Keywords._comma.leftPrec Option.unsafe.get() > prec then
           consume
-          typeExpr(Keywords._comma.rightPrec Option.get(), bracket)
+          typeExpr(Keywords._comma.rightPrec Option.unsafe.get(), bracket)
             Tree.tupleWithHead of acc
             typeExprCont of prec, bracket
         else

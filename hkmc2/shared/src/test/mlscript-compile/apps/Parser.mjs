@@ -28,7 +28,7 @@ Parser1 = class Parser {
     tmp6 = ParseRule.rule("prefix rules for expressions", Parser.#letChoice, tmp2, tmp3, tmp4, tmp5);
     this.prefixRules = tmp6;
     tmp7 = Parser.typeDefinition();
-    tmp8 = ParseRule.rule("start of the statement", Parser.#letChoice, tmp7);
+    tmp8 = ParseRule.rule("start of statement", Parser.#letChoice, tmp7);
     this.moduleRules = tmp8;
     tmp9 = Parser.makeInfixChoice(Precedence.Keywords._bar);
     tmp10 = ParseRule.rule("the continuation of expressions", tmp9);
@@ -2057,11 +2057,11 @@ Parser1 = class Parser {
           }
         } else if (param01 instanceof Token.Semicolon.class) {
           doTemp3 = Parser.tracer.print("found a semicolon", 548);
-          tmp149 = Option.get(Precedence.Keywords._semicolon.leftPrec);
+          tmp149 = Option.unsafe.get(Precedence.Keywords._semicolon.leftPrec);
           scrut5 = tmp149 > prec;
           if (scrut5 === true) {
             tmp150 = consume();
-            tmp151 = Option.get(Precedence.Keywords._semicolon.rightPrec);
+            tmp151 = Option.unsafe.get(Precedence.Keywords._semicolon.rightPrec);
             tmp152 = simpleExpr(tmp151, bracket);
             tmp153 = Tree.sequenceWithHead(tmp152, acc);
             return exprCont(tmp153, prec, bracket)
@@ -2071,11 +2071,11 @@ Parser1 = class Parser {
           }
         } else if (param01 instanceof Token.Comma.class) {
           doTemp2 = Parser.tracer.print("found a comma", 558);
-          tmp155 = Option.get(Precedence.Keywords._comma.leftPrec);
+          tmp155 = Option.unsafe.get(Precedence.Keywords._comma.leftPrec);
           scrut4 = tmp155 > prec;
           if (scrut4 === true) {
             tmp156 = consume();
-            tmp157 = Option.get(Precedence.Keywords._comma.rightPrec);
+            tmp157 = Option.unsafe.get(Precedence.Keywords._comma.rightPrec);
             tmp158 = simpleExpr(tmp157, bracket);
             tmp159 = Tree.tupleWithHead(tmp158, acc);
             return exprCont(tmp159, prec, bracket)
@@ -2368,11 +2368,11 @@ Parser1 = class Parser {
           }
         } else if (param01 instanceof Token.Semicolon.class) {
           doTemp1 = Parser.tracer.print("found a semicolon", 648);
-          tmp26 = Option.get(Precedence.Keywords._semicolon.leftPrec);
+          tmp26 = Option.unsafe.get(Precedence.Keywords._semicolon.leftPrec);
           scrut5 = tmp26 > prec;
           if (scrut5 === true) {
             tmp27 = consume();
-            tmp28 = Option.get(Precedence.Keywords._semicolon.rightPrec);
+            tmp28 = Option.unsafe.get(Precedence.Keywords._semicolon.rightPrec);
             tmp29 = typeExpr(tmp28, bracket);
             tmp30 = Tree.sequenceWithHead(tmp29, acc);
             return typeExprCont(tmp30, prec, bracket)
@@ -2382,11 +2382,11 @@ Parser1 = class Parser {
           }
         } else if (param01 instanceof Token.Comma.class) {
           doTemp = Parser.tracer.print("found a comma", 658);
-          tmp32 = Option.get(Precedence.Keywords._comma.leftPrec);
+          tmp32 = Option.unsafe.get(Precedence.Keywords._comma.leftPrec);
           scrut4 = tmp32 > prec;
           if (scrut4 === true) {
             tmp33 = consume();
-            tmp34 = Option.get(Precedence.Keywords._comma.rightPrec);
+            tmp34 = Option.unsafe.get(Precedence.Keywords._comma.rightPrec);
             tmp35 = typeExpr(tmp34, bracket);
             tmp36 = Tree.tupleWithHead(tmp35, acc);
             return typeExprCont(tmp36, prec, bracket)

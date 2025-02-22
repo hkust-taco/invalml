@@ -24,6 +24,22 @@ Option1 = class Option {
       }
       toString() { return "Both(" + globalThis.Predef.render(this.fst) + ", " + globalThis.Predef.render(this.snd) + ")"; }
     };
+    this.unsafe = class unsafe {
+      static {}
+      static get(opt) {
+        let param0, value;
+        if (opt instanceof Option.Some.class) {
+          param0 = opt.value;
+          value = param0;
+          return value
+        } else if (opt instanceof Option.None.class) {
+          throw globalThis.Error("None.get");
+        } else {
+          throw new globalThis.Error("match error");
+        }
+      }
+      static toString() { return "unsafe"; }
+    };
   }
   static isDefined(x) {
     if (x instanceof Option.Some.class) {
@@ -45,18 +61,6 @@ Option1 = class Option {
       return value
     } else if (opt instanceof Option.None.class) {
       return default1
-    } else {
-      throw new globalThis.Error("match error");
-    }
-  } 
-  static get(opt1) {
-    let param0, value;
-    if (opt1 instanceof Option.Some.class) {
-      param0 = opt1.value;
-      value = param0;
-      return value
-    } else if (opt1 instanceof Option.None.class) {
-      throw globalThis.Error("None.get");
     } else {
       throw new globalThis.Error("match error");
     }

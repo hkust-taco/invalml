@@ -61,7 +61,7 @@ Iter1 = class Iter {
       tmp1 = "Not an iterable: " + tmp;
       throw globalThis.TypeError(tmp1);
     } else {
-      return runtime.safeCall(something[globalThis.Symbol.iterator]())
+      return runtime.safeCall(test.call(something))
     }
   } 
   static adaptIterable(iterable, makeNext) {
