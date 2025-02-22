@@ -7,17 +7,19 @@ import "../../mlscript-compile/apps/parsing/Keyword.mls"
 import "../../mlscript-compile/apps/parsing/Token.mls"
 import "../../mlscript-compile/apps/parsing/Tree.mls"
 import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
+import "../../mlscript-compile/apps/parsing/TreeHelpers.mls"
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/Option.mls"
 import "../../mlscript-compile/Stack.mls"
 
 open Token { LiteralKind }
-open Parser { parse, showAsTree, tracer }
+open Parser { parse, tracer }
 open Option { Some, None }
 open Precedence { Keywords, opPrec }
 open Stack
 open Keyword { allKeywords }
+open TreeHelpers { showAsTree }
 
 Keywords.maxPrec
 //│ = 9
