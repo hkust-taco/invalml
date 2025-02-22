@@ -34,7 +34,7 @@ fun getIterator(something) =
       let prototype = Reflect.getPrototypeOf of something
       prototype is null then "object"
       else prototype.constructor.name
-  else something.(Symbol.iterator)()
+  else test.call(something)
 
 fun adaptIterable(iterable, makeNext) = Iterable of () =>
   let iterator = getIterator of iterable
