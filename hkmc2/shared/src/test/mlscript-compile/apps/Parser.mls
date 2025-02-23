@@ -100,16 +100,22 @@ val tracer = new TreeTracer
 
 fun letBinding(hasInClause: Bool) =
   let intro = "let binding: "
-  fun makeBinding(body) = Choice.expr of
-    (lhs, rhsAndBody) => if rhsAndBody is [rhs, body] then
-      Tree.Ternary(Keywords._let, lhs, rhs, body)
+  fun makeBinding(bindingBody) = Choice.expr of
+    if hasInClause then
+      (head, bodyAndLetIn) => if bodyAndLetIn is
+        [body, Tree.LetIn(bindings, letBody)] then
+          Tree.LetIn([head, body] :: bindings, letBody)
+    else
+      (head, bodyAndDefine) => if bodyAndDefine is
+        [body, Tree.Define(kind, defs)] then
+          Tree.Define(kind, [head, body] :: defs)
     intro + "left-hand side"
     Choice.keyword of
       Keywords._equal
       intro + "right-hand side"
-      body
+      bindingBody
   fun makeItems(get) = Choice.expr of
-    (rhs, body) => [rhs, body]
+    (body, defLike) => [body, defLike]
     intro + "right-hand side"
     Choice.keyword of
       Keywords._and
@@ -120,11 +126,11 @@ fun letBinding(hasInClause: Bool) =
         Keywords._in
         intro + "`in` keyword"
         Choice.expr of
-          (body, _) => body
+          (body, _) => Tree.LetIn(Nil, body)
           intro + "body"
           Choice.end of ()
-      Choice.end of Tree.empty
-    else tuple of Choice.end of Tree.empty
+      Choice.end of Tree.LetIn(Nil, Tree.empty)
+    else tuple of Choice.end of Tree.Define(Tree.DefineKind.Let(false), Nil)
   let items = Choice.lazy of makeItems
   Choice.keyword of
     Keywords._let
@@ -246,13 +252,37 @@ val exprRules = rule of
 
 fun typeDefinition() =
   let intro = "type definition: "
+  fun typedefs(tail) =
+    Choice.typeExpr of
+      (head, bodyAndDefine) => if bodyAndDefine is
+        [body, Tree.Define(kind, typedefs)] then
+          Tree.Define(kind, [head, body] :: typedefs)
+      intro + "name"
+      Choice.keyword of
+        Keywords._equal
+        intro + "equal sign"
+        Choice.typeExpr of
+          (body, define) => [body, define]
+          intro + "body"
+          Choice.end of Tree.Define(Tree.DefineKind.Type, Nil)
+          tail
+  fun makeTypedefsTail(get) = Choice.keyword of
+    Keywords._and
+    intro + "more typedefs"
+    typedefs of Choice.Lazy(get, makeTypedefsTail)
+  let typedefsTail = Choice.lazy of makeTypedefsTail
   Choice.keyword of
     Keywords._type
     intro + "`type` keyword"
+    typedefs of typedefsTail
+
+fun exceptionDefinition() =
+  let intro = "exception definition: "
+  Choice.keyword of
+    Keywords._exception
+    intro + "keyword"
     Choice.typeExpr of
-      (name, body) => Tree.Define of
-        Tree.DefineKind.Type
-        tuple(name, body) :: Nil
+      (name, body) => Tree.Define(Tree.DefineKind.Exception, [name, body] :: Nil)
       intro + "name"
       Choice.keyword of
         Keywords._equal
@@ -261,23 +291,7 @@ fun typeDefinition() =
           (body, _) => body
           intro + "body"
           Choice.end of ()
-
-fun exceptionDefinition() =
-  let intro = "exception definition: "
-  Choice.keyword of
-    Keywords._exception
-    intro + "keyword"
-    Choice.typeExpr of
-      (name, body) => Tree.Ternary(Keywords._exception, name, body, None)
-      intro + "name"
-      Choice.keyword of
-        Keywords._equal
-        intro + "equal sign"
-        Choice.typeExpr of
-          (body, _) => Some(body)
-          intro + "body"
-          Choice.end of ()
-      Choice.end of None
+      Choice.end of Tree.empty
 
 val moduleRules = rule of
   "prefix rules for module items"
@@ -353,8 +367,9 @@ fun parse(tokens) =
             Tree.error("mismatched brackets")
         None then Tree.error("unexpected bracket: " + encountered)
       Token.Identifier(name, _) :: _ and
-        do tracer.print of "check if \"" + name + "\" is a keyword or not", source.line
+        do tracer.print of "found an identifier \"" + name + "\"", source.line
         Keywords.all.get(name) is Some(keyword) and
+          do tracer.print of keyword.toString(), source.line
           do tracer.print of "keyword choices: ", rule.keywordChoices
             Iter.mapping of case [k, v] then "`" + k + "`"
             Iter.joined(", ")
@@ -367,23 +382,14 @@ fun parse(tokens) =
               parseRule(0, rest, opened)
             None and
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
-              // if simpleExpr(prec, opened) is
-              //   Tree.Empty and
-              //     rule.endChoice is Some(value) then value
-              //     rule.exprChoice is Some then
-              //       Tree.error("expect an expression")
-              //     else ???
-              //   expr and rule.exprChoice is
-              //     Some([isType, process, rest]) then
-              //       let rhs = parseRule(prec, rest, opened)
-              //       process(expr, rhs)
-              //     None then expr Tree.Error("unexpected expression")
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
               rule.exprChoice is Some([isType, process, rest]) and
-                keyword.leftPrecOrMin > prec then
-                  let acc = simpleExpr(prec, opened) // TODO: isType?
+                // keyword.leftPrecOrMin > prec then
+                true then
+                  let acc = (if isType then typeExpr else simpleExpr) of prec, opened
                   let tree = parseRule(prec, rest, opened)
                   process(acc, tree)
+              do tracer.print of "no exprChoice or the prec is less than " + prec, source.line
               rule.endChoice is Some(value) then
                 tracer.print of "found end choice", source.line
                 value
@@ -556,6 +562,10 @@ fun parse(tokens) =
     result => "typeExpr >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
+      // * Type expressions that begin with a single bar are allowed.
+      Token.Identifier("|", _) :: _ then
+        consume
+        typeExpr(prec, bracket)
       // * Only allow polymorphic variant tags in the beginning.
       Token.TagName(name) :: _ then
         consume
@@ -573,12 +583,6 @@ fun parse(tokens) =
       Token.Identifier(name, false) :: _ then
         consume
         typeExprCont(Tree.Ident(name), prec, bracket)
-      Token.Open(Token.Round) :: _ then
-        tracer.print of "found an open round bracket", source.line
-        consume
-        typeExpr(0, Some(Token.Round))
-          require of Token.Close(Token.Round)
-          typeExprCont of prec, bracket
       // '[' is special because of the open/close variant markers.
       Token.Open(Token.Square) :: _ then
         consume
@@ -595,6 +599,14 @@ fun parse(tokens) =
           else None
         typeExpr(0, Some(Token.Square))
           require of Token.Close(Token.Square)
+          typeExprCont of prec, bracket
+      // Handle opening brackets (mostly round and curly)
+      Token.Open(kind) :: _ then
+        tracer.print of "found an open ", kind, " bracket", source.line
+        consume
+        typeExpr(0, Some(kind))
+          (if kind is Token.Curly then Tree.Bracketed(Token.Curly, _) else id)()
+          require of Token.Close(kind)
           typeExprCont of prec, bracket
       // Handle closing brackets.
       Token.Close(kind) :: _ and bracket is
@@ -635,6 +647,7 @@ fun parse(tokens) =
           consume
           typeExpr(TypeKeywords._semicolon.rightPrec Option.unsafe.get(), bracket)
             Tree.sequenceWithHead of acc
+            tap of x => tracer.print of "bruh: " + x
             typeExprCont of prec, bracket
         else
           tracer.print of "cannot consume the semicolon", source.line
@@ -684,8 +697,9 @@ fun parse(tokens) =
         exprRules.keywordChoices.get(name) is Some(rule) then
           consume
           let tree = parseRule(0, rule, None)
-          if tree is Tree.Ternary(Keyword("let", _, _), _, _, None) then
-            modCont of tree :: acc
+          if tree is Tree.LetIn(bindings, Tree.Empty) then
+            // If the body is empty, then this is a let-definition.
+            modCont of Tree.Define(Tree.DefineKind.Let(false), bindings) :: acc
           else
             modCont of tree :: acc
         moduleRules.keywordChoices.get(name) is Some(rule) then

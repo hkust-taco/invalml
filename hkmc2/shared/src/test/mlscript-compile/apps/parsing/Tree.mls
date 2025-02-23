@@ -26,9 +26,10 @@ module Tree with
   abstract class Tree
   
   module DefineKind with
+    class Let(recursive: Bool)
     object Type
     object Exception
-    type DefineKind = Type | Exception
+    type DefineKind = Let | Type | Exception
   
   open DefineKind
   
@@ -48,7 +49,8 @@ module Tree with
     Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
     // `items` is separated by `and`
     Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
-    // For `let` bindings and `if`-`then`-`else`. The last part is optional.
+    LetIn(bindings: Stack[[Tree, Tree]], body: Tree) extends Tree
+    // For `if`-`then`-`else`. The last part is optional.
     Ternary(keyword: Keyword, lhs: Tree, rhs: Tree, body) extends Tree
   
   fun empty = Empty()
@@ -75,8 +77,9 @@ module Tree with
         side then op.rightPrecOrMax
         else op.leftPrecOrMax
       Ternary then 3
+    // Wrap trees in guillemet so they are easier to spot.
     fun wrap(something) = if something is
-      Tree then "{" + go(something) + "}"
+      Tree then "«" + go(something) + "»"
       else go(something)
     fun go(tree) = if tree is
       Empty then "{}"
@@ -96,8 +99,9 @@ module Tree with
         value.length > 5 then JSON.stringify(value.slice(0, 5)).slice(0, -1) + "…\""
         else JSON.stringify(value)
       Literal(_, value) then value
-      Match(scrutinee, branches) then fold(+) of
-        "match ", go(scrutinee), " with "
+      Match(scrutinee, branches) then mkStr of
+        if scrutinee is Empty then "function " else
+          "match " + go(scrutinee) + " with "
         branches Iter.fromStack() Iter.mapping(go) Iter.joined(" | ")
       // Selection
       App(Ident(".", _), target :: Ident(field) :: Nil) then
@@ -115,12 +119,22 @@ module Tree with
         go(lhs), " ", go(op), " ", go(rhs)
       Define(kind, items) then mkStr of
         if kind is
+          Let(true) then "let rec "
+          Let(false) then "let "
           Type then "type "
           Exception then "exception "
         items
           Iter.fromStack()
           Iter.mapping of case [lhs, rhs] then go(lhs) + " = " + go(rhs)
           Iter.joined(" and ")
+      LetIn(bindings, body) then mkStr of
+        "let "
+        bindings
+          Iter.fromStack()
+          Iter.mapping of case [lhs, rhs] then go(lhs) + " = " + go(rhs)
+          Iter.joined(" and ")
+        " in "
+        go(body)
       Ternary(keyword, lhs, rhs, body) then fold(+) of
         keyword.name, " ", go(lhs),
         if keyword.name is

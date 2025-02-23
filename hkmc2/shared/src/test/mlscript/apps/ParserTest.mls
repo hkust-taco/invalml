@@ -45,22 +45,22 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`;`, 1, 0)
 //│ > Keyword(`,`, 2, 1)
 //│ > Keyword(`=`, 3, 3)
-//│ > Keyword(`|`, N/A, 4)
 //│ > Keyword(`and`, N/A, 4)
+//│ > Keyword(`|`, N/A, 4)
+//│ > Keyword(`->`, 5, 3)
 //│ > Keyword(`:`, 4, 3)
-//│ > Keyword(`match`, 5, 5)
-//│ > Keyword(`with`, N/A, 5)
-//│ > Keyword(`case`, N/A, 5)
-//│ > Keyword(`if`, 7, 6)
-//│ > Keyword(`then`, 6, 6)
-//│ > Keyword(`do`, 6, 6)
-//│ > Keyword(`else`, 6, 6)
+//│ > Keyword(`match`, 6, 6)
+//│ > Keyword(`with`, N/A, 6)
+//│ > Keyword(`case`, N/A, 6)
+//│ > Keyword(`if`, 8, 7)
+//│ > Keyword(`then`, 7, 7)
+//│ > Keyword(`do`, 7, 7)
+//│ > Keyword(`else`, 7, 7)
 //│ > Keyword(`let`, 3, 1)
-//│ > Keyword(`in`, 6, 6)
+//│ > Keyword(`in`, 7, 7)
 //│ > Keyword(`true`, N/A, N/A)
 //│ > Keyword(`false`, N/A, N/A)
-//│ > Keyword(`as`, 8, 8)
-//│ > Keyword(`->`, 9, 3)
+//│ > Keyword(`as`, 9, 9)
 //│ > Keyword(`fun`, 9, N/A)
 //│ > Keyword(`function`, 9, N/A)
 //│ > Keyword(`type`, 9, N/A)
@@ -72,7 +72,7 @@ print of TypeKeywords.all.values.join("\n")
 //│ > Keyword(`exception`, N/A, N/A)
 //│ > Keyword(`let`, N/A, N/A)
 //│ > Keyword(`and`, N/A, N/A)
-//│ > Keyword(`;`, 1, 1)
+//│ > Keyword(`;`, 1, 0)
 //│ > Keyword(`,`, 2, 2)
 //│ > Keyword(`|`, 3, 3)
 //│ > Keyword(``, 4, 4)
@@ -145,70 +145,72 @@ fun example(...lines) =
     Iter.joined of "\n"
 
 example of "(x) => x"
-//│ > {x => x}
+//│ > «x => x»
 
 example of "(1 + 2) * 3"
-//│ > {(1 + 2) * 3}
+//│ > «(1 + 2) * 3»
 
 example of "1 + 2 ** 5 * 4"
-//│ > {1 + 2 ** 5 * 4}
+//│ > «1 + 2 ** 5 * 4»
 
 example of "let zero = 0 in zero"
-//│ > {let zero = 0 in zero}
+//│ > «let zero = 0 in zero»
 
 example of """
 let one = 1 in
 let zero = 0 in
 one + zero
 """
-//│ > {let one = 1 in let zero = 0 in one + zero}
+//│ > «let one = 1 in let zero = 0 in one + zero»
 
 example of """
 f x y
 """
-//│ > {f(x)(y)}
+//│ > «f(x)(y)»
 
 example of """
 let pi = 4.0 *. atan 1.0
 """
-//│ > {let pi = 4.0 *. atan(1.0) in {}}
+//│ > «let pi = 4.0 *. atan(1.0)»
 
 example of "let square x = x *. x"
-//│ > {let square(x) = x *. x in {}}
+//│ > «let square(x) = x *. x»
 
 example of "square (sin pi) +. square (cos pi)"
-//│ > {square(sin(pi)) +. square(cos(pi))}
+//│ > «square(sin(pi)) +. square(cos(pi))»
 
 :todo
 example of "(1 < 2) = false"
 //│ ═══[RUNTIME ERROR] Error: Not implemented
 
 example of "let cat s1 s2 = s1 ^ \" \" ^ s2"
-//│ > {let cat(s1)(s2) = s1 ^ " " ^ s2 in {}}
+//│ > «let cat(s1)(s2) = s1 ^ " " ^ s2»
 
 example of "fun x -> x"
-//│ > {fun x -> x}
+//│ > «fun x -> x»
 
 example of """
 let compose f g = fun x -> f (g x) in
   let cos2 = compose square cos
 """
-//│ > {let compose(f)(g) = fun x -> f(g(x)) in let cos2 = compose(square)(cos) in {}}
+//│ > «let compose(f)(g) = fun x -> f(g(x)) in let cos2 = compose(square)(cos) in {}»
 
 :todo
 example of "type sign = Positive | Negative"
-//│ > {type sign = Positive | Negative}
+//│ > «type sign = Positive | Negative»
 
 example of "true"
-//│ > {true}
+//│ > «true»
 
-example of "match x with true -> 1 | false -> 0"
-//│ > {match x with true -> 1 | false -> 0}
+example of """
+match x with true -> 1 | false -> 0
+"""
+//│ > «match x with true -> 1 | false -> 0»
 
 example of """
 function (_, 0) -> "both zero"
 """
-//│ > {match {} with (_, 0) -> "both …"}
+//│ > «function (_, 0) -> "both …"»
 
 example of """
 function (0, 0) -> "both zero"
@@ -216,26 +218,26 @@ function (0, 0) -> "both zero"
        | (_, 0) -> "second only zero"
        | (_, _) -> "neither zero"
 """
-//│ > {match {} with (0, 0) -> "both …" | (0, _) -> "first…" | (_, 0) -> "secon…" | (_, _) -> "neith…"}
+//│ > «function (0, 0) -> "both …" | (0, _) -> "first…" | (_, 0) -> "secon…" | (_, _) -> "neith…"»
 
 set tracer.enabled = false
 
 example of "if f x then y else z"
-//│ > {if f(x) then y then z}
+//│ > «if f(x) then y then z»
 
 example of "if f x then if g x then z else w else if h x then y else w"
-//│ > {if f(x) then if g(x) then z then w then if h(x) then y then w}
+//│ > «if f(x) then if g(x) then z then w then if h(x) then y then w»
 
 example of "1, 2, 3"
-//│ > {(1, 2, 3)}
+//│ > «(1, 2, 3)»
 
 example of "1; 2; 3"
-//│ > {1; 2; 3}
+//│ > «1; 2; 3»
 
 example of """
 1, 2; 3, 4; 5
 """
-//│ > {(1, 2); (3, 4); 5}
+//│ > «(1, 2); (3, 4); 5»
 
 // > The expressions `( expr )` and `begin expr end` have the same value as `expr`.
 // > The two constructs are semantically equivalent, but it is good style to use
@@ -246,7 +248,7 @@ begin
   print_string "world"
 end
 """
-//│ > {print_string("hello"); print_string("world")}
+//│ > «print_string("hello"); print_string("world")»
 
 // TODO: comment on this syntax design smell in the paper
 example of """
@@ -255,7 +257,7 @@ if a == b then
 else
   b
 """
-//│ > {if a == b then a then b}
+//│ > «if a == b then a then b»
 
 example of """
 let f a b =
@@ -269,26 +271,26 @@ let f a b =
     print_newline ()
   end
 """
-//│ > {let f(a)(b) = if a == b then print_endline("Equal") then print_string("Not E…"); print_int(a); print_string(" and "); print_int(b); print_newline(()) in {}}
+//│ > «let f(a)(b) = if a == b then print_endline("Equal") then print_string("Not E…"); print_int(a); print_string(" and "); print_int(b); print_newline(())»
 
 example of """
 let foo = y; x
 """
-//│ > {let foo = y; x in {}}
+//│ > «let foo = y; x»
 
 example of """
 let translate p dx dy =
     p.x <- p.x +. dx; p.y <- p.y +. dy
 """
-//│ > {let translate(p)(dx)(dy) = (p.x <- p.x) +. dx; (p.y <- p.y) +. dy in {}}
+//│ > «let translate(p)(dx)(dy) = (p.x <- p.x) +. dx; (p.y <- p.y) +. dy»
 
 example of "()"
-//│ > {()}
+//│ > «()»
 
 example of """
 match x with | 0 -> 1
 """
-//│ > {match x with 0 -> 1}
+//│ > «match x with 0 -> 1»
 
 example of """
 let fullname ?title first second =
@@ -296,13 +298,13 @@ let fullname ?title first second =
   | Some t -> t ^ " " ^ first ^ " " ^ second
   | None -> first ^ " " ^ second
 """
-//│ > {let fullname ? title(first)(second) = match title with Some(t) -> t ^ " " ^ first ^ " " ^ second | None -> first ^ " " ^ second in {}}
+//│ > «let fullname ? title(first)(second) = match title with Some(t) -> t ^ " " ^ first ^ " " ^ second | None -> first ^ " " ^ second»
 
 example of """
 let a = if x then 1 else 0 in
 let b = 0
 """
-//│ > {let a = if x then 1 then 0 in let b = 0 in {}}
+//│ > «let a = if x then 1 then 0 in let b = 0 in {}»
 
 example of """
 let rec factorial x =
@@ -314,22 +316,22 @@ and sum l =
 in
   factorial 5 + sum [1; 2; 3]
 """
-//│ > {let factorial(x) = if x <= 1 then 1 then x * factorial(x - 1) in let sum(l) = match l with [] -> 0 | h :: t -> h + sum(t) in factorial(5) + sum([1; 2; 3])}
+//│ > «let factorial(x) = if x <= 1 then 1 then x * factorial(x - 1) and sum(l) = match l with [] -> 0 | h :: t -> h + sum(t) in factorial(5) + sum([1; 2; 3])»
 
 example of "begin end"
-//│ > {}
+//│ > «»
 
 example of """
 let v' =
     let a, b = (1, 2) in a + b
   in v'
 """
-//│ > {let v' = let (a, b) = (1, 2) in a + b in v'}
+//│ > «let v' = let (a, b) = (1, 2) in a + b in v'»
 
 example of """
 let a = 0 and b = 1 in a + b
 """
-//│ > {let a = 0 in let b = 1 in a + b}
+//│ > «let a = 0 and b = 1 in a + b»
 
 example of """
 let rec even =
@@ -339,7 +341,7 @@ and odd =
 in
   even 1000
 """
-//│ > {let even = match {} with 0 -> true | n -> odd(n - 1) in let odd = match {} with 0 -> false | n -> even(n - 1) in even(1000)}
+//│ > «let even = function 0 -> true | n -> odd(n - 1) and odd = function 0 -> false | n -> even(n - 1) in even(1000)»
 
 example of """
 let rec even =
@@ -347,7 +349,7 @@ let rec even =
 and odd =
   function 0 -> false | n -> even (n - 1)
 """
-//│ > {let even = match {} with 0 -> true | n -> odd(n - 1) in let odd = match {} with 0 -> false | n -> even(n - 1) in {}}
+//│ > «let even = function 0 -> true | n -> odd(n - 1) and odd = function 0 -> false | n -> even(n - 1)»
 
 example of """
 let a = 0
@@ -355,10 +357,10 @@ let b = 0
 let f x = x + 1
 let g x = f (f x)
 """
-//│ > {let a = 0 in {}}
-//│ > {let b = 0 in {}}
-//│ > {let f(x) = x + 1 in {}}
-//│ > {let g(x) = f(f(x)) in {}}
+//│ > «let a = 0»
+//│ > «let b = 0»
+//│ > «let f(x) = x + 1»
+//│ > «let g(x) = f(f(x))»
 
 example of """
 :tree
@@ -382,8 +384,8 @@ example of """
 //│ >       arguments = Stack of 
 //│ >         Literal#Integer of "2"
 //│ >     Literal#Integer of "3"
-//│ > {(-(2)) * 3}
-//│ > {~(2) * 3}
+//│ > «(-(2)) * 3»
+//│ > «~(2) * 3»
 
 :todo
 example of """
@@ -391,17 +393,17 @@ let f x = x
 ;;
 1 + 2 * 3
 """
-//│ > {let f(x) = x in {}}
-//│ > {1 + 2 * 3}
+//│ > «let f(x) = x»
+//│ > «1 + 2 * 3»
 
 example of """
 type a = b
 type b = int * int
 type f = int -> int
 """
-//│ > {type a = b}
-//│ > {type b = int * int}
-//│ > {type f = int -> int}
+//│ > «type a = b»
+//│ > «type b = int * int»
+//│ > «type f = int -> int»
 
 example of """
 :tree
@@ -432,20 +434,20 @@ type g = int * (string -> float)
 //│ >           op = Keyword(`->`, 5, 4)
 //│ >           lhs = Ident of "string"
 //│ >           rhs = Ident of "float"
-//│ > {type f = int * string -> float}
-//│ > {type g = int * string -> float}
+//│ > «type f = int * string -> float»
+//│ > «type g = int * string -> float»
 
 example of """
 type 'a f = 'a * 'a
 """
-//│ > {type f('a) = 'a * 'a}
+//│ > «type f('a) = 'a * 'a»
 
 example of """
 type foo = Bar | Qux
 let double n = n * 2
 """
-//│ > {type foo = Bar | Qux}
-//│ > {let double(n) = n * 2 in {}}
+//│ > «type foo = Bar | Qux»
+//│ > «let double(n) = n * 2»
 
 example of """
 :tree
@@ -469,7 +471,7 @@ type foo = Bar of int | Qux of int * int
 //│ >             op = Keyword(`*`, 7, 7)
 //│ >             lhs = Ident of "int"
 //│ >             rhs = Ident of "int"
-//│ > {type foo = Bar of int | Qux of int * int}
+//│ > «type foo = Bar of int | Qux of int * int»
 
 example of """
 :tree
@@ -490,7 +492,7 @@ type 'a option = Some of 'a | None
 //│ >           lhs = Ident of "Some"
 //│ >           rhs = Ident of "'a"
 //│ >         rhs = Ident of "None"
-//│ > {type option('a) = Some of 'a | None}
+//│ > «type option('a) = Some of 'a | None»
 
 example of """
 :tree
@@ -523,36 +525,133 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >               callee = Ident of "tree"
 //│ >               arguments = Stack of 
 //│ >                 Ident of "'a"
-//│ > {type tree('a) = Leaf | Node of tree('a) * 'a * tree('a)}
+//│ > «type tree('a) = Leaf | Node of tree('a) * 'a * tree('a)»
 
 example of """
 type ('a, 'b) twist = a list * b list
 """
-//│ > {type twist(('a, 'b)) = list(a) * list(b)}
+//│ > «type twist(('a, 'b)) = list(a) * list(b)»
 
 example of """
 type empty = < >
 type more = < .. >
 """
-//│ > {type empty = <>}
-//│ > {type more = <..>}
+//│ > «type empty = <>»
+//│ > «type more = <..>»
 
 example of """
 type test_type = < a : int >
 type test_type = < a : int; b : string >
 type test_type = < a : int; b : string; .. >
 """
-//│ > {type test_type = <a : int>}
-//│ > {type test_type = <a : int; b : string>}
-//│ > {type test_type = <a : int; b : string; ..>}
+//│ > «type test_type = <a : int>»
+//│ > «type test_type = <a : int; b : string>»
+//│ > «type test_type = <a : int; b : string; ..>»
 
 :todo polymorphic type expressions
 example of """
 type tool = < cool : 'a . 'a wool >
 """
-//│ > {type tool = <cool : wool('a . 'a)>}
+//│ > «type tool = <cool : wool('a . 'a)>»
 
 example of """
 type pv = [ `A | `B of int | `C of int * int ]
 """
-//│ > {type pv = `A | `B of int | `C of int * int}
+//│ > «type pv = `A | `B of int | `C of int * int»
+
+example of """
+type qux = Qux of { q : int; u: int; x :int }
+"""
+//│ > «type qux = Qux of {q : int; u : int; x : int}»
+
+example of """
+type colour =
+  | Red | Green | Blue | Yellow | Black | White
+  | RGB of {r : int; g : int; b : int}
+type 'a tree = Lf | Br of 'a * 'a tree * 'a;;
+"""
+//│ > «type colour = Red | Green | Blue | Yellow | Black | White | RGB of {r : int; g : int; b : int}»
+//│ > «type tree('a) = Lf | Br of 'a * tree('a) * 'a»
+
+example of """
+:tree
+type t = {decoration : string; substance : t'}
+and t' = Int of int | List of t list
+"""
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Ident of "t"
+//│ >       second = Bracketed#Curly of Sequence of Stack of 
+//│ >         Infix:
+//│ >           op = Keyword(`:`, 9, 9)
+//│ >           lhs = Ident of "decoration"
+//│ >           rhs = Ident of "string"
+//│ >         Infix:
+//│ >           op = Keyword(`:`, 9, 9)
+//│ >           lhs = Ident of "substance"
+//│ >           rhs = Ident of "t'"
+//│ >     Pair:
+//│ >       first = Ident of "t'"
+//│ >       second = Infix:
+//│ >         op = Keyword(`|`, 3, 3)
+//│ >         lhs = Infix:
+//│ >           op = Keyword(`of`, 6, 6)
+//│ >           lhs = Ident of "Int"
+//│ >           rhs = Ident of "int"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`of`, 6, 6)
+//│ >           lhs = Ident of "List"
+//│ >           rhs = App:
+//│ >             callee = Ident of "list"
+//│ >             arguments = Stack of 
+//│ >               Ident of "t"
+//│ > «type t = {decoration : string; substance : t'} and t' = Int of int | List of list(t)»
+
+example of """
+:tree
+exception E of int * string
+"""
+//│ > Define:
+//│ >   kind = Exception
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Infix:
+//│ >         op = Keyword(`of`, 6, 6)
+//│ >         lhs = Ident of "E"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`*`, 7, 7)
+//│ >           lhs = Ident of "int"
+//│ >           rhs = Ident of "string"
+//│ >       second = Empty
+//│ > «exception E of int * string = {}»
+
+example of """
+type 'a bst = E | N of 'a * 'a bst * 'a bst
+let rec insert x = function
+  | E -> N (x, E, E)
+  | N (y, l, r) ->
+      if x < y then N (y, insert x l, r)
+      else N (y, l, insert x r)
+let rec min_elt = function
+  | E -> failwith "min_elt called on empty tree"
+  | N (x, E, _) -> x
+  | N (_, l, _) -> min_elt l
+let rec remove x = function
+  | E -> E
+  | N (y, l, r) ->
+      if x < y then N (y, remove x l, r)
+      else if x > y then N (y, l, remove x r)
+      else
+        match (l, r) with
+        | (E, _) -> r
+        | (_, E) -> l
+        | _ ->
+            let m = min_elt r in
+            N (m, l, remove m r)
+"""
+//│ > «type bst('a) = E | N of 'a * bst('a) * bst('a)»
+//│ > «let insert(x) = function E -> N((x, E, E)) | N((y, l, r)) -> if x < y then N((y, insert(x)(l), r)) then N((y, l, insert(x)(r)))»
+//│ > «let min_elt = function E -> failwith("min_e…") | N((x, E, _)) -> x | N((_, l, _)) -> min_elt(l)»
+//│ > «let remove(x) = function E -> E | N((y, l, r)) -> if x < y then N((y, remove(x)(l), r)) then if x > y then N((y, l, remove(x)(r))) then match (l, r) with (E, _) -> r | (_, E) -> l | _ -> let m = min_elt(r) in N((m, l, remove(m)(r)))»
