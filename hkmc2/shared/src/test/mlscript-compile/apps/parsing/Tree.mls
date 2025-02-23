@@ -7,7 +7,7 @@ import "./Keyword.mls"
 import "./Precedence.mls"
 import "./Token.mls"
 
-open Predef { fold }
+open Predef { fold, mkStr }
 open Stack
 open Option { Some, None }
 open Token { LiteralKind, BracketKind }
@@ -25,6 +25,12 @@ open Precedence { appPrec, opPrec }
 module Tree with
   abstract class Tree
   
+  module DefineKind with
+    object Type
+    object Exception
+    type DefineKind = Type | Exception
+  
+  open DefineKind
   
   class
     Empty() extends Tree
@@ -40,6 +46,8 @@ module Tree with
     Lambda(params: Stack[Tree], body: Tree) extends Tree
     App(callee: Tree, arguments: Stack[Tree]) extends Tree
     Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
+    // `items` is separated by `and`
+    Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
     // For `let` bindings and `if`-`then`-`else`. The last part is optional.
     Ternary(keyword: Keyword, lhs: Tree, rhs: Tree, body) extends Tree
   
@@ -105,6 +113,14 @@ module Tree with
         go(callee), "(", arguments Iter.fromStack() Iter.mapping(go) Iter.joined(", "), ")"
       Infix(op, lhs, rhs) then fold(+) of
         go(lhs), " ", go(op), " ", go(rhs)
+      Define(kind, items) then mkStr of
+        if kind is
+          Type then "type "
+          Exception then "exception "
+        items
+          Iter.fromStack()
+          Iter.mapping of case [lhs, rhs] then go(lhs) + " = " + go(rhs)
+          Iter.joined(" and ")
       Ternary(keyword, lhs, rhs, body) then fold(+) of
         keyword.name, " ", go(lhs),
         if keyword.name is
@@ -127,6 +143,13 @@ module Tree with
       [..trees] then "[" + trees.map((tree, _, _) => wrap(tree)).join(", ") + "]"
       else "<unexpected:" + tree + ">"
     wrap(tree)
+  
+  fun bracketed(tree, kind) = Bracketed(kind, tree)
+  
+  fun asSequence(tree) = if tree is
+    Empty then Sequence of Nil
+    Sequence then tree
+    else Sequence of tree :: Nil
   
   fun tupleWithHead(tree, head) = if tree is
     Tuple(tail) then Tuple(head :: tail)

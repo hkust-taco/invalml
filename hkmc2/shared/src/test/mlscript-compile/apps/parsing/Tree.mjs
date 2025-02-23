@@ -14,6 +14,23 @@ Tree2 = class Tree {
       constructor() {}
       toString() { return "Tree"; }
     };
+    this.DefineKind = class DefineKind {
+      static {
+        const Type$class = class Type {
+          constructor() {}
+          toString() { return "Type"; }
+        };
+        this.Type = new Type$class;
+        this.Type.class = Type$class;
+        const Exception$class = class Exception {
+          constructor() {}
+          toString() { return "Exception"; }
+        };
+        this.Exception = new Exception$class;
+        this.Exception.class = Exception$class;
+      }
+      static toString() { return "DefineKind"; }
+    };
     this.Empty = function Empty() { return new Empty.class(); };
     this.Empty.class = class Empty extends Tree.Tree {
       constructor() {
@@ -125,6 +142,15 @@ Tree2 = class Tree {
         this.rhs = rhs;
       }
       toString() { return "Infix(" + globalThis.Predef.render(this.op) + ", " + globalThis.Predef.render(this.lhs) + ", " + globalThis.Predef.render(this.rhs) + ")"; }
+    };
+    this.Define = function Define(kind1, items1) { return new Define.class(kind1, items1); };
+    this.Define.class = class Define extends Tree.Tree {
+      constructor(kind, items) {
+        super();
+        this.kind = kind;
+        this.items = items;
+      }
+      toString() { return "Define(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.items) + ")"; }
     };
     this.Ternary = function Ternary(keyword1, lhs1, rhs1, body1) { return new Ternary.class(keyword1, lhs1, rhs1, body1); };
     this.Ternary.class = class Ternary extends Tree.Tree {
@@ -240,127 +266,127 @@ Tree2 = class Tree {
       }
     };
     go = function go(tree1) {
-      let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, param22, op, lhs1, rhs1, param08, param15, callee, arguments1, param09, param16, op1, param010, param17, lhs2, param011, param18, rhs2, scrut2, first1, first0, leftPrec, rightPrec, target, param012, param19, field, scrut3, first11, first01, leftPrec1, param013, param110, scrutinee, branches, param014, param111, value, value1, scrut4, param015, trees1, param016, trees2, param017, param112, modifier, subject, param018, param113, name1, param019, param114, kind, tree3, param020, param115, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, tmp130, tmp131, tmp132, tmp133, tmp134, tmp135, tmp136, tmp137, tmp138, tmp139, tmp140;
+      let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, kind, items, param08, param15, param22, op, lhs1, rhs1, param09, param16, callee, arguments1, param010, param17, op1, param011, param18, lhs2, param012, param19, rhs2, scrut2, first1, first0, leftPrec, rightPrec, target, param013, param110, field, scrut3, first11, first01, leftPrec1, param014, param111, scrutinee, branches, param015, param112, value, value1, scrut4, param016, trees1, param017, trees2, param018, param113, modifier, subject, param019, param114, name1, param020, param115, kind1, tree3, param021, param116, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, tmp130, tmp131, tmp132, tmp133, tmp134, tmp135, tmp136, tmp137, tmp138, tmp139, tmp140, tmp141, tmp142, tmp143, tmp144, tmp145;
       if (tree1 instanceof Tree.Empty.class) {
         return "{}"
-      } else if (tree1 instanceof Tree.Error.class) {
-        param020 = tree1.tree;
-        param115 = tree1.message;
-        if (param020 instanceof Tree.Empty.class) {
-          return "\u26A0"
-        } else {
-          tree4 = param020;
-          tmp = go(tree4);
-          tmp1 = "<\u26A0:" + tmp;
-          return tmp1 + ">"
-        }
-      } else if (tree1 instanceof Tree.Bracketed.class) {
-        param019 = tree1.kind;
-        param114 = tree1.tree;
-        kind = param019;
-        tree3 = param114;
-        if (kind instanceof Token.Round.class) {
-          tmp2 = go(tree3);
-          tmp3 = "(" + tmp2;
-          return tmp3 + ")"
-        } else if (kind instanceof Token.Square.class) {
-          tmp4 = go(tree3);
-          tmp5 = "[" + tmp4;
-          return tmp5 + "]"
-        } else if (kind instanceof Token.Curly.class) {
-          tmp6 = go(tree3);
-          tmp7 = "{" + tmp6;
-          return tmp7 + "}"
-        } else if (kind instanceof Token.Angle.class) {
-          tmp8 = go(tree3);
-          tmp9 = "<" + tmp8;
-          return tmp9 + ">"
-        } else {
-          tmp10 = "<unexpected:" + tree1;
-          return tmp10 + ">"
-        }
-      } else if (tree1 instanceof Tree.Ident.class) {
-        param018 = tree1.name;
-        param113 = tree1.symbolic;
-        name1 = param018;
-        return name1
-      } else if (tree1 instanceof Tree.Underscore.class) {
-        return "_"
-      } else if (tree1 instanceof Tree.Modified.class) {
-        param017 = tree1.modifier;
-        param112 = tree1.subject;
-        modifier = param017;
-        subject = param112;
-        tmp11 = go(modifier);
-        tmp12 = tmp11 + " ";
-        tmp13 = go(subject);
-        return tmp12 + tmp13
-      } else if (tree1 instanceof Tree.Tuple.class) {
-        param016 = tree1.trees;
-        trees2 = param016;
-        tmp14 = Iter.fromStack(trees2);
-        tmp15 = Iter.mapping(tmp14, go);
-        tmp16 = Iter.joined(tmp15, ", ");
-        tmp17 = "(" + tmp16;
-        return tmp17 + ")"
-      } else if (tree1 instanceof Tree.Sequence.class) {
-        param015 = tree1.trees;
-        trees1 = param015;
-        tmp18 = Iter.fromStack(trees1);
-        tmp19 = Iter.mapping(tmp18, go);
-        return Iter.joined(tmp19, "; ")
-      } else if (tree1 instanceof Tree.Literal.class) {
-        param014 = tree1.kind;
-        param111 = tree1.value;
-        if (param014 instanceof Token.LiteralKind.String.class) {
-          value1 = param111;
-          scrut4 = value1.length > 5;
-          if (scrut4 === true) {
-            tmp20 = value1.slice(0, 5);
-            tmp21 = runtime.safeCall(globalThis.JSON.stringify(tmp20));
-            tmp22 = - 1;
-            tmp23 = tmp21.slice(0, tmp22);
-            return tmp23 + "\u2026\""
-          } else {
-            return runtime.safeCall(globalThis.JSON.stringify(value1))
-          }
-        } else {
-          value = param111;
-          return value
-        }
-      } else if (tree1 instanceof Tree.Match.class) {
-        param013 = tree1.scrutinee;
-        param110 = tree1.branches;
-        scrutinee = param013;
-        branches = param110;
-        tmp24 = Predef.fold((arg1, arg2) => {
-          return arg1 + arg2
-        });
-        tmp25 = go(scrutinee);
-        tmp26 = Iter.fromStack(branches);
-        tmp27 = Iter.mapping(tmp26, go);
-        tmp28 = Iter.joined(tmp27, " | ");
-        return runtime.safeCall(tmp24("match ", tmp25, " with ", tmp28))
       } else {
-        if (tree1 instanceof Tree.App.class) {
-          param08 = tree1.callee;
-          param15 = tree1.arguments;
-          if (param08 instanceof Tree.Ident.class) {
-            param09 = param08.name;
-            param16 = param08.symbolic;
-            if (param09 === ".") {
-              if (param15 instanceof Stack.Cons.class) {
-                param010 = param15.head;
-                param17 = param15.tail;
-                target = param010;
-                if (param17 instanceof Stack.Cons.class) {
-                  param011 = param17.head;
-                  param18 = param17.tail;
-                  if (param011 instanceof Tree.Ident.class) {
-                    param012 = param011.name;
-                    param19 = param011.symbolic;
-                    field = param012;
-                    if (param18 instanceof Stack.Nil.class) {
+        if (tree1 instanceof Tree.Error.class) {
+          param021 = tree1.tree;
+          param116 = tree1.message;
+          if (param021 instanceof Tree.Empty.class) {
+            return "\u26A0"
+          } else {
+            tree4 = param021;
+            tmp = go(tree4);
+            tmp1 = "<\u26A0:" + tmp;
+            return tmp1 + ">"
+          }
+        } else if (tree1 instanceof Tree.Bracketed.class) {
+          param020 = tree1.kind;
+          param115 = tree1.tree;
+          kind1 = param020;
+          tree3 = param115;
+          if (kind1 instanceof Token.Round.class) {
+            tmp2 = go(tree3);
+            tmp3 = "(" + tmp2;
+            return tmp3 + ")"
+          } else if (kind1 instanceof Token.Square.class) {
+            tmp4 = go(tree3);
+            tmp5 = "[" + tmp4;
+            return tmp5 + "]"
+          } else if (kind1 instanceof Token.Curly.class) {
+            tmp6 = go(tree3);
+            tmp7 = "{" + tmp6;
+            return tmp7 + "}"
+          } else if (kind1 instanceof Token.Angle.class) {
+            tmp8 = go(tree3);
+            tmp9 = "<" + tmp8;
+            return tmp9 + ">"
+          } else {
+            tmp10 = "<unexpected:" + tree1;
+            return tmp10 + ">"
+          }
+        } else if (tree1 instanceof Tree.Ident.class) {
+          param019 = tree1.name;
+          param114 = tree1.symbolic;
+          name1 = param019;
+          return name1
+        } else if (tree1 instanceof Tree.Underscore.class) {
+          return "_"
+        } else if (tree1 instanceof Tree.Modified.class) {
+          param018 = tree1.modifier;
+          param113 = tree1.subject;
+          modifier = param018;
+          subject = param113;
+          tmp11 = go(modifier);
+          tmp12 = tmp11 + " ";
+          tmp13 = go(subject);
+          return tmp12 + tmp13
+        } else if (tree1 instanceof Tree.Tuple.class) {
+          param017 = tree1.trees;
+          trees2 = param017;
+          tmp14 = Iter.fromStack(trees2);
+          tmp15 = Iter.mapping(tmp14, go);
+          tmp16 = Iter.joined(tmp15, ", ");
+          tmp17 = "(" + tmp16;
+          return tmp17 + ")"
+        } else if (tree1 instanceof Tree.Sequence.class) {
+          param016 = tree1.trees;
+          trees1 = param016;
+          tmp18 = Iter.fromStack(trees1);
+          tmp19 = Iter.mapping(tmp18, go);
+          return Iter.joined(tmp19, "; ")
+        } else if (tree1 instanceof Tree.Literal.class) {
+          param015 = tree1.kind;
+          param112 = tree1.value;
+          if (param015 instanceof Token.LiteralKind.String.class) {
+            value1 = param112;
+            scrut4 = value1.length > 5;
+            if (scrut4 === true) {
+              tmp20 = value1.slice(0, 5);
+              tmp21 = runtime.safeCall(globalThis.JSON.stringify(tmp20));
+              tmp22 = - 1;
+              tmp23 = tmp21.slice(0, tmp22);
+              return tmp23 + "\u2026\""
+            } else {
+              return runtime.safeCall(globalThis.JSON.stringify(value1))
+            }
+          } else {
+            value = param112;
+            return value
+          }
+        } else if (tree1 instanceof Tree.Match.class) {
+          param014 = tree1.scrutinee;
+          param111 = tree1.branches;
+          scrutinee = param014;
+          branches = param111;
+          tmp24 = Predef.fold((arg1, arg2) => {
+            return arg1 + arg2
+          });
+          tmp25 = go(scrutinee);
+          tmp26 = Iter.fromStack(branches);
+          tmp27 = Iter.mapping(tmp26, go);
+          tmp28 = Iter.joined(tmp27, " | ");
+          return runtime.safeCall(tmp24("match ", tmp25, " with ", tmp28))
+        } else if (tree1 instanceof Tree.App.class) {
+          param09 = tree1.callee;
+          param16 = tree1.arguments;
+          if (param09 instanceof Tree.Ident.class) {
+            param010 = param09.name;
+            param17 = param09.symbolic;
+            if (param010 === ".") {
+              if (param16 instanceof Stack.Cons.class) {
+                param011 = param16.head;
+                param18 = param16.tail;
+                target = param011;
+                if (param18 instanceof Stack.Cons.class) {
+                  param012 = param18.head;
+                  param19 = param18.tail;
+                  if (param012 instanceof Tree.Ident.class) {
+                    param013 = param012.name;
+                    param110 = param012.symbolic;
+                    field = param013;
+                    if (param19 instanceof Stack.Nil.class) {
                       scrut3 = Precedence.opPrec(".");
                       if (globalThis.Array.isArray(scrut3) && scrut3.length === 2) {
                         first01 = scrut3[0];
@@ -378,12 +404,12 @@ Tree2 = class Tree {
                         throw new globalThis.Error("match error");
                       }
                     } else {
-                      op1 = param09;
-                      if (param16 === true) {
-                        lhs2 = param010;
-                        rhs2 = param011;
-                        callee = param08;
-                        arguments1 = param15;
+                      op1 = param010;
+                      if (param17 === true) {
+                        lhs2 = param011;
+                        rhs2 = param012;
+                        callee = param09;
+                        arguments1 = param16;
                         tmp34 = Predef.fold((arg1, arg2) => {
                           return arg1 + arg2
                         });
@@ -393,8 +419,8 @@ Tree2 = class Tree {
                         tmp38 = Iter.joined(tmp37, ", ");
                         return runtime.safeCall(tmp34(tmp35, "(", tmp38, ")"))
                       } else {
-                        callee = param08;
-                        arguments1 = param15;
+                        callee = param09;
+                        arguments1 = param16;
                         tmp39 = Predef.fold((arg1, arg2) => {
                           return arg1 + arg2
                         });
@@ -406,11 +432,11 @@ Tree2 = class Tree {
                       }
                     }
                   } else {
-                    op1 = param09;
-                    if (param16 === true) {
-                      lhs2 = param010;
-                      rhs2 = param011;
-                      if (param18 instanceof Stack.Nil.class) {
+                    op1 = param010;
+                    if (param17 === true) {
+                      lhs2 = param011;
+                      rhs2 = param012;
+                      if (param19 instanceof Stack.Nil.class) {
                         scrut2 = Precedence.opPrec(op1);
                         if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                           first0 = scrut2[0];
@@ -433,8 +459,8 @@ Tree2 = class Tree {
                           throw new globalThis.Error("match error");
                         }
                       } else {
-                        callee = param08;
-                        arguments1 = param15;
+                        callee = param09;
+                        arguments1 = param16;
                         tmp53 = Predef.fold((arg1, arg2) => {
                           return arg1 + arg2
                         });
@@ -445,8 +471,8 @@ Tree2 = class Tree {
                         return runtime.safeCall(tmp53(tmp54, "(", tmp57, ")"))
                       }
                     } else {
-                      callee = param08;
-                      arguments1 = param15;
+                      callee = param09;
+                      arguments1 = param16;
                       tmp58 = Predef.fold((arg1, arg2) => {
                         return arg1 + arg2
                       });
@@ -458,11 +484,11 @@ Tree2 = class Tree {
                     }
                   }
                 } else {
-                  op1 = param09;
-                  if (param16 === true) {
-                    lhs2 = param010;
-                    callee = param08;
-                    arguments1 = param15;
+                  op1 = param010;
+                  if (param17 === true) {
+                    lhs2 = param011;
+                    callee = param09;
+                    arguments1 = param16;
                     tmp63 = Predef.fold((arg1, arg2) => {
                       return arg1 + arg2
                     });
@@ -472,8 +498,8 @@ Tree2 = class Tree {
                     tmp67 = Iter.joined(tmp66, ", ");
                     return runtime.safeCall(tmp63(tmp64, "(", tmp67, ")"))
                   } else {
-                    callee = param08;
-                    arguments1 = param15;
+                    callee = param09;
+                    arguments1 = param16;
                     tmp68 = Predef.fold((arg1, arg2) => {
                       return arg1 + arg2
                     });
@@ -485,10 +511,10 @@ Tree2 = class Tree {
                   }
                 }
               } else {
-                op1 = param09;
-                if (param16 === true) {
-                  callee = param08;
-                  arguments1 = param15;
+                op1 = param010;
+                if (param17 === true) {
+                  callee = param09;
+                  arguments1 = param16;
                   tmp73 = Predef.fold((arg1, arg2) => {
                     return arg1 + arg2
                   });
@@ -498,8 +524,8 @@ Tree2 = class Tree {
                   tmp77 = Iter.joined(tmp76, ", ");
                   return runtime.safeCall(tmp73(tmp74, "(", tmp77, ")"))
                 } else {
-                  callee = param08;
-                  arguments1 = param15;
+                  callee = param09;
+                  arguments1 = param16;
                   tmp78 = Predef.fold((arg1, arg2) => {
                     return arg1 + arg2
                   });
@@ -511,17 +537,17 @@ Tree2 = class Tree {
                 }
               }
             } else {
-              op1 = param09;
-              if (param16 === true) {
-                if (param15 instanceof Stack.Cons.class) {
-                  param010 = param15.head;
-                  param17 = param15.tail;
-                  lhs2 = param010;
-                  if (param17 instanceof Stack.Cons.class) {
-                    param011 = param17.head;
-                    param18 = param17.tail;
-                    rhs2 = param011;
-                    if (param18 instanceof Stack.Nil.class) {
+              op1 = param010;
+              if (param17 === true) {
+                if (param16 instanceof Stack.Cons.class) {
+                  param011 = param16.head;
+                  param18 = param16.tail;
+                  lhs2 = param011;
+                  if (param18 instanceof Stack.Cons.class) {
+                    param012 = param18.head;
+                    param19 = param18.tail;
+                    rhs2 = param012;
+                    if (param19 instanceof Stack.Nil.class) {
                       scrut2 = Precedence.opPrec(op1);
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first0 = scrut2[0];
@@ -544,8 +570,8 @@ Tree2 = class Tree {
                         throw new globalThis.Error("match error");
                       }
                     } else {
-                      callee = param08;
-                      arguments1 = param15;
+                      callee = param09;
+                      arguments1 = param16;
                       tmp92 = Predef.fold((arg1, arg2) => {
                         return arg1 + arg2
                       });
@@ -556,8 +582,8 @@ Tree2 = class Tree {
                       return runtime.safeCall(tmp92(tmp93, "(", tmp96, ")"))
                     }
                   } else {
-                    callee = param08;
-                    arguments1 = param15;
+                    callee = param09;
+                    arguments1 = param16;
                     tmp97 = Predef.fold((arg1, arg2) => {
                       return arg1 + arg2
                     });
@@ -568,8 +594,8 @@ Tree2 = class Tree {
                     return runtime.safeCall(tmp97(tmp98, "(", tmp101, ")"))
                   }
                 } else {
-                  callee = param08;
-                  arguments1 = param15;
+                  callee = param09;
+                  arguments1 = param16;
                   tmp102 = Predef.fold((arg1, arg2) => {
                     return arg1 + arg2
                   });
@@ -580,8 +606,8 @@ Tree2 = class Tree {
                   return runtime.safeCall(tmp102(tmp103, "(", tmp106, ")"))
                 }
               } else {
-                callee = param08;
-                arguments1 = param15;
+                callee = param09;
+                arguments1 = param16;
                 tmp107 = Predef.fold((arg1, arg2) => {
                   return arg1 + arg2
                 });
@@ -593,8 +619,8 @@ Tree2 = class Tree {
               }
             }
           } else {
-            callee = param08;
-            arguments1 = param15;
+            callee = param09;
+            arguments1 = param16;
             tmp112 = Predef.fold((arg1, arg2) => {
               return arg1 + arg2
             });
@@ -604,152 +630,199 @@ Tree2 = class Tree {
             tmp116 = Iter.joined(tmp115, ", ");
             return runtime.safeCall(tmp112(tmp113, "(", tmp116, ")"))
           }
-        } else if (tree1 instanceof Tree.Infix.class) {
-          param07 = tree1.op;
-          param14 = tree1.lhs;
-          param22 = tree1.rhs;
-          op = param07;
-          lhs1 = param14;
-          rhs1 = param22;
-          tmp117 = Predef.fold((arg1, arg2) => {
-            return arg1 + arg2
-          });
-          tmp118 = go(lhs1);
-          tmp119 = go(op);
-          tmp120 = go(rhs1);
-          return runtime.safeCall(tmp117(tmp118, " ", tmp119, " ", tmp120))
-        } else if (tree1 instanceof Tree.Ternary.class) {
-          param04 = tree1.keyword;
-          param13 = tree1.lhs;
-          param21 = tree1.rhs;
-          param3 = tree1.body;
-          keyword = param04;
-          lhs = param13;
-          rhs = param21;
-          body1 = param3;
-          tmp121 = Predef.fold((arg1, arg2) => {
-            return arg1 + arg2
-          });
-          tmp122 = go(lhs);
-          scrut = keyword.name;
-          if (scrut === "if") {
-            tmp123 = " then ";
-          } else if (scrut === "type") {
-            tmp123 = " = ";
-          } else if (scrut === "let") {
-            tmp123 = " = ";
-          } else {
-            throw new globalThis.Error("match error");
-          }
-          if (rhs instanceof Option.Some.class) {
-            param05 = rhs.value;
-            rhs$_ = param05;
-            tmp124 = go(rhs$_);
-          } else {
-            tmp124 = go(rhs);
-          }
-          scrut1 = keyword.name;
-          if (scrut1 === "if") {
-            tmp125 = " then ";
-          } else if (scrut1 === "type") {
-            tmp125 = "";
-          } else if (scrut1 === "let") {
-            tmp125 = " in ";
-          } else {
-            throw new globalThis.Error("match error");
-          }
-          if (body1 instanceof Option.Some.class) {
-            param06 = body1.value;
-            body2 = param06;
-            tmp126 = go(body2);
-          } else {
-            tmp126 = go(body1);
-          }
-          return runtime.safeCall(tmp121(keyword.name, " ", tmp122, tmp123, tmp124, tmp125, tmp126))
-        } else if (tree1 instanceof Tree.Lambda.class) {
-          param03 = tree1.params;
-          param12 = tree1.body;
-          params = param03;
-          body = param12;
-          tmp127 = Predef.fold((arg1, arg2) => {
-            return arg1 + arg2
-          });
-          tmp128 = Iter.fromStack(params);
-          tmp129 = Iter.mapping(tmp128, go);
-          tmp130 = Iter.joined(tmp129, " ");
-          tmp131 = go(body);
-          return runtime.safeCall(tmp127("fun ", tmp130, " -> ", tmp131))
-        } else if (tree1 instanceof Keyword.Keyword.class) {
-          param02 = tree1.name;
-          param11 = tree1.leftPrec;
-          param2 = tree1.rightPrec;
-          name = param02;
-          return name
-        } else if (tree1 instanceof Option.Some.class) {
-          param01 = tree1.value;
-          tree2 = param01;
-          tmp132 = wrap(tree2);
-          tmp133 = "Some(" + tmp132;
-          return tmp133 + ")"
-        } else if (tree1 instanceof Option.None.class) {
-          return "None"
-        } else if (tree1 instanceof Stack.Cons.class) {
-          param0 = tree1.head;
-          param1 = tree1.tail;
-          tmp134 = Iter.fromStack(tree1);
-          tmp135 = Iter.mapping(tmp134, wrap);
-          tmp136 = Iter.joined(tmp135, " :: ");
-          return tmp136 + " :: Nil"
-        } else if (tree1 instanceof Stack.Nil.class) {
-          return "Nil"
-        } else if (globalThis.Array.isArray(tree1) && tree1.length >= 0) {
-          rest = runtime.safeCall(globalThis.Predef.tupleSlice(tree1, 0, 0));
-          trees = rest;
-          tmp137 = runtime.safeCall(trees.map((tree5, _, _1) => {
-            return wrap(tree5)
-          }));
-          tmp138 = runtime.safeCall(tmp137.join(", "));
-          tmp139 = "[" + tmp138;
-          return tmp139 + "]"
         } else {
-          tmp140 = "<unexpected:" + tree1;
-          return tmp140 + ">"
+          if (tree1 instanceof Tree.Infix.class) {
+            param08 = tree1.op;
+            param15 = tree1.lhs;
+            param22 = tree1.rhs;
+            op = param08;
+            lhs1 = param15;
+            rhs1 = param22;
+            tmp117 = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp118 = go(lhs1);
+            tmp119 = go(op);
+            tmp120 = go(rhs1);
+            return runtime.safeCall(tmp117(tmp118, " ", tmp119, " ", tmp120))
+          } else if (tree1 instanceof Tree.Define.class) {
+            param07 = tree1.kind;
+            param14 = tree1.items;
+            kind = param07;
+            items = param14;
+            if (kind instanceof Tree.DefineKind.Type.class) {
+              tmp121 = "type ";
+            } else if (kind instanceof Tree.DefineKind.Exception.class) {
+              tmp121 = "exception ";
+            } else {
+              throw new globalThis.Error("match error");
+            }
+            tmp122 = Iter.fromStack(items);
+            tmp123 = (caseScrut) => {
+              let first12, first02, lhs3, rhs3, tmp146, tmp147, tmp148;
+              if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+                first02 = caseScrut[0];
+                first12 = caseScrut[1];
+                lhs3 = first02;
+                rhs3 = first12;
+                tmp146 = go(lhs3);
+                tmp147 = tmp146 + " = ";
+                tmp148 = go(rhs3);
+                return tmp147 + tmp148
+              } else {
+                throw new globalThis.Error("match error");
+              }
+            };
+            tmp124 = Iter.mapping(tmp122, tmp123);
+            tmp125 = Iter.joined(tmp124, " and ");
+            return Predef.mkStr(tmp121, tmp125)
+          } else if (tree1 instanceof Tree.Ternary.class) {
+            param04 = tree1.keyword;
+            param13 = tree1.lhs;
+            param21 = tree1.rhs;
+            param3 = tree1.body;
+            keyword = param04;
+            lhs = param13;
+            rhs = param21;
+            body1 = param3;
+            tmp126 = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp127 = go(lhs);
+            scrut = keyword.name;
+            if (scrut === "if") {
+              tmp128 = " then ";
+            } else if (scrut === "type") {
+              tmp128 = " = ";
+            } else if (scrut === "let") {
+              tmp128 = " = ";
+            } else {
+              throw new globalThis.Error("match error");
+            }
+            if (rhs instanceof Option.Some.class) {
+              param05 = rhs.value;
+              rhs$_ = param05;
+              tmp129 = go(rhs$_);
+            } else {
+              tmp129 = go(rhs);
+            }
+            scrut1 = keyword.name;
+            if (scrut1 === "if") {
+              tmp130 = " then ";
+            } else if (scrut1 === "type") {
+              tmp130 = "";
+            } else if (scrut1 === "let") {
+              tmp130 = " in ";
+            } else {
+              throw new globalThis.Error("match error");
+            }
+            if (body1 instanceof Option.Some.class) {
+              param06 = body1.value;
+              body2 = param06;
+              tmp131 = go(body2);
+            } else {
+              tmp131 = go(body1);
+            }
+            return runtime.safeCall(tmp126(keyword.name, " ", tmp127, tmp128, tmp129, tmp130, tmp131))
+          } else if (tree1 instanceof Tree.Lambda.class) {
+            param03 = tree1.params;
+            param12 = tree1.body;
+            params = param03;
+            body = param12;
+            tmp132 = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp133 = Iter.fromStack(params);
+            tmp134 = Iter.mapping(tmp133, go);
+            tmp135 = Iter.joined(tmp134, " ");
+            tmp136 = go(body);
+            return runtime.safeCall(tmp132("fun ", tmp135, " -> ", tmp136))
+          } else if (tree1 instanceof Keyword.Keyword.class) {
+            param02 = tree1.name;
+            param11 = tree1.leftPrec;
+            param2 = tree1.rightPrec;
+            name = param02;
+            return name
+          } else if (tree1 instanceof Option.Some.class) {
+            param01 = tree1.value;
+            tree2 = param01;
+            tmp137 = wrap(tree2);
+            tmp138 = "Some(" + tmp137;
+            return tmp138 + ")"
+          } else if (tree1 instanceof Option.None.class) {
+            return "None"
+          } else if (tree1 instanceof Stack.Cons.class) {
+            param0 = tree1.head;
+            param1 = tree1.tail;
+            tmp139 = Iter.fromStack(tree1);
+            tmp140 = Iter.mapping(tmp139, wrap);
+            tmp141 = Iter.joined(tmp140, " :: ");
+            return tmp141 + " :: Nil"
+          } else if (tree1 instanceof Stack.Nil.class) {
+            return "Nil"
+          } else if (globalThis.Array.isArray(tree1) && tree1.length >= 0) {
+            rest = runtime.safeCall(globalThis.Predef.tupleSlice(tree1, 0, 0));
+            trees = rest;
+            tmp142 = runtime.safeCall(trees.map((tree5, _, _1) => {
+              return wrap(tree5)
+            }));
+            tmp143 = runtime.safeCall(tmp142.join(", "));
+            tmp144 = "[" + tmp143;
+            return tmp144 + "]"
+          } else {
+            tmp145 = "<unexpected:" + tree1;
+            return tmp145 + ">"
+          }
         }
       }
     };
     return wrap(tree)
   } 
-  static tupleWithHead(tree1, head) {
+  static bracketed(tree1, kind) {
+    return Tree.Bracketed(kind, tree1)
+  } 
+  static asSequence(tree2) {
+    let tmp;
+    if (tree2 instanceof Tree.Empty.class) {
+      return Tree.Sequence(Stack.Nil)
+    } else if (tree2 instanceof Tree.Sequence.class) {
+      return tree2
+    } else {
+      tmp = Stack.Cons(tree2, Stack.Nil);
+      return Tree.Sequence(tmp)
+    }
+  } 
+  static tupleWithHead(tree3, head) {
     let param0, tail, tmp, tmp1, tmp2;
-    if (tree1 instanceof Tree.Tuple.class) {
-      param0 = tree1.trees;
+    if (tree3 instanceof Tree.Tuple.class) {
+      param0 = tree3.trees;
       tail = param0;
       tmp = Stack.Cons(head, tail);
       return Tree.Tuple(tmp)
     } else {
-      tmp1 = Stack.Cons(tree1, Stack.Nil);
+      tmp1 = Stack.Cons(tree3, Stack.Nil);
       tmp2 = Stack.Cons(head, tmp1);
       return Tree.Tuple(tmp2)
     }
   } 
-  static sequenceWithHead(tree2, head1) {
+  static sequenceWithHead(tree4, head1) {
     let param0, tail, tmp, tmp1, tmp2;
-    if (tree2 instanceof Tree.Sequence.class) {
-      param0 = tree2.trees;
+    if (tree4 instanceof Tree.Sequence.class) {
+      param0 = tree4.trees;
       tail = param0;
       tmp = Stack.Cons(head1, tail);
       return Tree.Sequence(tmp)
     } else {
-      tmp1 = Stack.Cons(tree2, Stack.Nil);
+      tmp1 = Stack.Cons(tree4, Stack.Nil);
       tmp2 = Stack.Cons(head1, tmp1);
       return Tree.Sequence(tmp2)
     }
   } 
-  static nonEmptyError(tree3) {
+  static nonEmptyError(tree5) {
     let param0, param1;
-    if (tree3 instanceof Tree.Error.class) {
-      param0 = tree3.tree;
-      param1 = tree3.message;
+    if (tree5 instanceof Tree.Error.class) {
+      param0 = tree5.tree;
+      param1 = tree5.message;
       if (param0 instanceof Tree.Empty.class) {
         return false
       } else {

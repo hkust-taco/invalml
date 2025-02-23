@@ -56,11 +56,13 @@ fun summary(token) = if token is
   Semicolon then ";"
   Error then "⚠"
   Open(kind) and kind is
+    Angle then "<"
     Round then "("
     Square then "["
     Curly then "{"
     BeginEnd then "begin"
   Close(kind) and kind is
+    Angle then ">"
     Round then ")"
     Square then "]"
     Curly then "}"

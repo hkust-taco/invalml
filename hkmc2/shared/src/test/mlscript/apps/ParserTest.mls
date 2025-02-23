@@ -3,7 +3,6 @@
 import "../../mlscript-compile/apps/Lexer.mls"
 import "../../mlscript-compile/apps/parsing/Precedence.mls"
 import "../../mlscript-compile/apps/parsing/ParseRule.mls"
-import "../../mlscript-compile/apps/parsing/Keyword.mls"
 import "../../mlscript-compile/apps/parsing/Token.mls"
 import "../../mlscript-compile/apps/parsing/Tree.mls"
 import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
@@ -16,9 +15,8 @@ import "../../mlscript-compile/Stack.mls"
 open Token { LiteralKind }
 open Parser { parse, tracer }
 open Option { Some, None }
-open Precedence { Keywords, opPrec }
+open Precedence { Keywords, opPrec, TypeKeywords }
 open Stack
-open Keyword { allKeywords }
 open TreeHelpers { showAsTree }
 
 Keywords.maxPrec
@@ -39,7 +37,7 @@ opPrec("::")
 opPrec of "+"
 //│ = [19, 19]
 
-print of allKeywords.values.join("\n")
+print of Keywords.all.values.join("\n")
 //│ > Keyword(`;;`, 0, 0)
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`begin`, N/A, 0)
@@ -68,6 +66,22 @@ print of allKeywords.values.join("\n")
 //│ > Keyword(`type`, 9, N/A)
 //│ > Keyword(`exception`, 9, N/A)
 //│ > Keyword(`rec`, 9, 3)
+
+print of TypeKeywords.all.values.join("\n")
+//│ > Keyword(`type`, N/A, N/A)
+//│ > Keyword(`exception`, N/A, N/A)
+//│ > Keyword(`let`, N/A, N/A)
+//│ > Keyword(`and`, N/A, N/A)
+//│ > Keyword(`;`, 1, 1)
+//│ > Keyword(`,`, 2, 2)
+//│ > Keyword(`|`, 3, 3)
+//│ > Keyword(``, 4, 4)
+//│ > Keyword(`->`, 5, 4)
+//│ > Keyword(`of`, 6, 6)
+//│ > Keyword(`*`, 7, 7)
+//│ > Keyword(`#`, 8, 8)
+//│ > Keyword(`:`, 9, 9)
+//│ > Keyword(`.`, 11, 11)
 
 print of Parser.exprRules.display
 //│ > <prefix rules for expressions> ::= `let` [`rec` ] 
@@ -183,7 +197,7 @@ let compose f g = fun x -> f (g x) in
 
 :todo
 example of "type sign = Positive | Negative"
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > {type sign = Positive | Negative}
 
 example of "true"
 //│ > {true}
@@ -380,14 +394,160 @@ let f x = x
 //│ > {let f(x) = x in {}}
 //│ > {1 + 2 * 3}
 
-:todo
 example of """
+type a = b
+type b = int * int
+type f = int -> int
+"""
+//│ > {type a = b}
+//│ > {type b = int * int}
+//│ > {type f = int -> int}
+
+example of """
+:tree
+type f = int * string -> float
+type g = int * (string -> float)
+"""
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Ident of "f"
+//│ >       second = Infix:
+//│ >         op = Keyword(`->`, 5, 4)
+//│ >         lhs = Infix:
+//│ >           op = Keyword(`*`, 7, 7)
+//│ >           lhs = Ident of "int"
+//│ >           rhs = Ident of "string"
+//│ >         rhs = Ident of "float"
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Ident of "g"
+//│ >       second = Infix:
+//│ >         op = Keyword(`*`, 7, 7)
+//│ >         lhs = Ident of "int"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`->`, 5, 4)
+//│ >           lhs = Ident of "string"
+//│ >           rhs = Ident of "float"
+//│ > {type f = int * string -> float}
+//│ > {type g = int * string -> float}
+
+example of """
+type 'a f = 'a * 'a
+"""
+//│ > {type f(a) = a * a}
+
+example of """
+type foo = Bar | Qux
+let double n = n * 2
+"""
+//│ > {type foo = Bar | Qux}
+//│ > {let double(n) = n * 2 in {}}
+
+example of """
+:tree
+type foo = Bar of int | Qux of int * int
+"""
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Ident of "foo"
+//│ >       second = Infix:
+//│ >         op = Keyword(`|`, 3, 3)
+//│ >         lhs = Infix:
+//│ >           op = Keyword(`of`, 6, 6)
+//│ >           lhs = Ident of "Bar"
+//│ >           rhs = Ident of "int"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`of`, 6, 6)
+//│ >           lhs = Ident of "Qux"
+//│ >           rhs = Infix:
+//│ >             op = Keyword(`*`, 7, 7)
+//│ >             lhs = Ident of "int"
+//│ >             rhs = Ident of "int"
+//│ > {type foo = Bar of int | Qux of int * int}
+
+example of """
+:tree
+type 'a option = Some of 'a | None
+"""
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = App:
+//│ >         callee = Ident of "option"
+//│ >         arguments = Stack of 
+//│ >           Ident of "a"
+//│ >       second = Infix:
+//│ >         op = Keyword(`|`, 3, 3)
+//│ >         lhs = Infix:
+//│ >           op = Keyword(`of`, 6, 6)
+//│ >           lhs = Ident of "Some"
+//│ >           rhs = Ident of "a"
+//│ >         rhs = Ident of "None"
+//│ > {type option(a) = Some of a | None}
+
+example of """
+:tree
 type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 """
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = App:
+//│ >         callee = Ident of "tree"
+//│ >         arguments = Stack of 
+//│ >           Ident of "a"
+//│ >       second = Infix:
+//│ >         op = Keyword(`|`, 3, 3)
+//│ >         lhs = Ident of "Leaf"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`of`, 6, 6)
+//│ >           lhs = Ident of "Node"
+//│ >           rhs = Infix:
+//│ >             op = Keyword(`*`, 7, 7)
+//│ >             lhs = Infix:
+//│ >               op = Keyword(`*`, 7, 7)
+//│ >               lhs = App:
+//│ >                 callee = Ident of "tree"
+//│ >                 arguments = Stack of 
+//│ >                   Ident of "a"
+//│ >               rhs = Ident of "a"
+//│ >             rhs = App:
+//│ >               callee = Ident of "tree"
+//│ >               arguments = Stack of 
+//│ >                 Ident of "a"
+//│ > {type tree(a) = Leaf | Node of tree(a) * a * tree(a)}
 
-:todo
 example of """
-type 'a 'b twist = a list * b list
+type ('a, 'b) twist = a list * b list
 """
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > {type twist((a, b)) = list(a) * list(b)}
+
+example of """
+type empty = < >
+type more = < .. >
+"""
+//│ > {type empty = <>}
+//│ > {type more = <..>}
+
+example of """
+type test_type = < a : int >
+type test_type = < a : int; b : string >
+type test_type = < a : int; b : string; .. >
+"""
+//│ > {type test_type = <a : int>}
+//│ > {type test_type = <a : int; b : string>}
+//│ > {type test_type = <a : int; b : string; ..>}
+
+:todo polymorphic type expressions
+example of """
+type tool = < cool : 'a . 'a wool >
+"""
+//│ > {type tool = <cool : wool(a . a)>}

@@ -52,6 +52,7 @@ fun showAsTree(thing) =
     Tree.App(c, a) then tuple of "App", [["callee", go(c)], ["arguments", go(a)]]
     Tree.Infix(op, lhs, rhs) then tuple of
       "Infix", [["op", go(op)], ["lhs", go(lhs)], ["rhs", go(rhs)]]
+    Tree.Define(k, i) then tuple of "Define", [["kind", k.toString()], ["items", go(i)]]
     Tree.Ternary(n, l, r, b) then tuple of
       "Ternary", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
     Tree.Lambda(p, b) then tuple of "Lambda", [["params", go(p)], ["body", go(b)]]
@@ -60,6 +61,7 @@ fun showAsTree(thing) =
     LiteralKind.Decimal then tuple of "Decimal", []
     LiteralKind.String then tuple of "String", []
     LiteralKind.Boolean then tuple of "Boolean", []
+    [x, y] then tuple of "Pair", [["first", go(x)], ["second", go(y)]]
     else tuple of "Unknown", [["JSON.stringify(_)", JSON.stringify(something)]]
   fun go(something) = if itemize(something) is
     [intro, []] then intro

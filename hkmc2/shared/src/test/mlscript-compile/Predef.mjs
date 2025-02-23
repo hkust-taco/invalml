@@ -192,15 +192,20 @@ Predef1 = class Predef {
       return runtime.safeCall(f9(xs[0], xs[1], xs[2]))
     }
   } 
+  static tap(x4, f10) {
+    let tmp;
+    tmp = runtime.safeCall(f10(x4));
+    return x4
+  } 
   static print(...xs) {
     let tmp, tmp1;
     tmp = Predef.map(Predef.renderAsStr);
     tmp1 = runtime.safeCall(tmp(...xs));
     return runtime.safeCall(globalThis.console.log(...tmp1))
   } 
-  static printRaw(x4) {
+  static printRaw(x5) {
     let tmp;
-    tmp = Predef.render(x4);
+    tmp = Predef.render(x5);
     return runtime.safeCall(globalThis.console.log(tmp))
   } 
   static interleave(sep) {
@@ -348,14 +353,14 @@ Predef1 = class Predef {
   static tupleGet(xs3, i1) {
     return globalThis.Array.prototype.at.call(xs3, i1)
   } 
-  static map(f10) {
+  static map(f11) {
     return (...xs4) => {
       let tmp;
-      tmp = Predef.pass1(f10);
+      tmp = Predef.pass1(f11);
       return runtime.safeCall(xs4.map(tmp))
     }
   } 
-  static fold(f11) {
+  static fold(f12) {
     return (init, ...rest) => {
       let i2, len, scrut, tmp, tmp1, tmp2, tmp3;
       i2 = 0;
@@ -364,7 +369,7 @@ Predef1 = class Predef {
         scrut = i2 < len;
         if (scrut === true) {
           tmp = runtime.safeCall(rest.at(i2));
-          tmp1 = runtime.safeCall(f11(init, tmp));
+          tmp1 = runtime.safeCall(f12(init, tmp));
           init = tmp1;
           tmp2 = i2 + 1;
           i2 = tmp2;
@@ -378,7 +383,7 @@ Predef1 = class Predef {
       return init
     }
   } 
-  static foldr(f12) {
+  static foldr(f13) {
     return (first, ...rest) => {
       let len, i2, init, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
       len = rest.length;
@@ -396,7 +401,7 @@ Predef1 = class Predef {
             tmp2 = i2 - 1;
             i2 = tmp2;
             tmp3 = runtime.safeCall(rest.at(i2));
-            tmp4 = runtime.safeCall(f12(tmp3, init));
+            tmp4 = runtime.safeCall(f13(tmp3, init));
             init = tmp4;
             tmp5 = runtime.Unit;
             continue tmp6;
@@ -405,21 +410,21 @@ Predef1 = class Predef {
           }
           break;
         }
-        return runtime.safeCall(f12(first, init))
+        return runtime.safeCall(f13(first, init))
       }
     }
   } 
   static mkStr(...xs4) {
     let tmp, tmp1;
-    tmp = (acc, x5) => {
+    tmp = (acc, x6) => {
       let tmp2, tmp3, tmp4;
-      if (typeof x5 === 'string') {
+      if (typeof x6 === 'string') {
         tmp2 = true;
       } else {
         tmp2 = false;
       }
       tmp3 = runtime.safeCall(Predef.assert(tmp2));
-      tmp4 = acc + x5;
+      tmp4 = acc + x6;
       return (tmp3 , tmp4)
     };
     tmp1 = Predef.fold(tmp);

@@ -16,72 +16,81 @@ Precedence1 = class Precedence {
       static #ascPrec;
       static #thenPrec;
       static {
-        let tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30;
+        let tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31;
+        tmp3 = new BetterMap.Map();
+        this.all = tmp3;
         Keywords.#prec = 0;
         Keywords.#basePrec = Keywords.currPrec;
-        tmp3 = Keyword.Keyword(";;", Keywords.#basePrec, Keywords.#basePrec);
-        this._terminator = tmp3;
-        tmp4 = Keyword.Keyword("class", Option.None, Keywords.#basePrec);
-        this._class = tmp4;
-        tmp5 = Keyword.Keyword("begin", Option.None, Keywords.#basePrec);
-        this._begin = tmp5;
-        tmp6 = Keyword.Keyword("end", Keywords.#basePrec, Option.None);
-        this._end = tmp6;
+        tmp4 = Keywords.keyword(";;", Keywords.#basePrec, Keywords.#basePrec);
+        this._terminator = tmp4;
+        tmp5 = Keywords.keyword("class", Option.None, Keywords.#basePrec);
+        this._class = tmp5;
+        tmp6 = Keywords.keyword("begin", Option.None, Keywords.#basePrec);
+        this._begin = tmp6;
+        tmp7 = Keywords.keyword("end", Keywords.#basePrec, Option.None);
+        this._end = tmp7;
         Keywords.#semiPrec = Keywords.nextPrec;
         Keywords.#commaPrec = Keywords.nextPrec;
-        tmp7 = Keyword.Keyword(";", Keywords.#semiPrec, Keywords.#basePrec);
-        this._semicolon = tmp7;
-        tmp8 = Keyword.Keyword(",", Keywords.#commaPrec, Keywords.#semiPrec);
-        this._comma = tmp8;
+        tmp8 = Keywords.keyword(";", Keywords.#semiPrec, Keywords.#basePrec);
+        this._semicolon = tmp8;
+        tmp9 = Keywords.keyword(",", Keywords.#commaPrec, Keywords.#semiPrec);
+        this._comma = tmp9;
         Keywords.#eqPrec = Keywords.nextPrec;
         Keywords.#ascPrec = Keywords.nextPrec;
-        tmp9 = Keyword.Keyword("=", Keywords.#eqPrec, Keywords.#eqPrec);
-        this._equal = tmp9;
-        tmp10 = Keyword.Keyword("|", Option.None, Keywords.currPrec);
-        this._bar = tmp10;
-        tmp11 = Keyword.Keyword("and", Option.None, Keywords.currPrec);
-        this._and = tmp11;
-        tmp12 = Keyword.Keyword(":", Keywords.#ascPrec, Keywords.#eqPrec);
-        this._colon = tmp12;
-        tmp13 = Keyword.Keyword("match", Keywords.nextPrec, Keywords.currPrec);
-        this._match = tmp13;
-        tmp14 = Keyword.Keyword("with", Option.None, Keywords.currPrec);
-        this._with = tmp14;
-        tmp15 = Keyword.Keyword("case", Option.None, Keywords.currPrec);
-        this._case = tmp15;
+        tmp10 = Keywords.keyword("=", Keywords.#eqPrec, Keywords.#eqPrec);
+        this._equal = tmp10;
+        tmp11 = Keywords.keyword("|", Option.None, Keywords.currPrec);
+        this._bar = tmp11;
+        tmp12 = Keywords.keyword("and", Option.None, Keywords.currPrec);
+        this._and = tmp12;
+        tmp13 = Keywords.keyword(":", Keywords.#ascPrec, Keywords.#eqPrec);
+        this._colon = tmp13;
+        tmp14 = Keywords.keyword("match", Keywords.nextPrec, Keywords.currPrec);
+        this._match = tmp14;
+        tmp15 = Keywords.keyword("with", Option.None, Keywords.currPrec);
+        this._with = tmp15;
+        tmp16 = Keywords.keyword("case", Option.None, Keywords.currPrec);
+        this._case = tmp16;
         Keywords.#thenPrec = Keywords.nextPrec;
-        tmp16 = Keyword.Keyword("if", Keywords.nextPrec, Keywords.#thenPrec);
-        this._if = tmp16;
-        tmp17 = Keyword.Keyword("then", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._then = tmp17;
-        tmp18 = Keyword.Keyword("do", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._do = tmp18;
-        tmp19 = Keyword.Keyword("else", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._else = tmp19;
-        tmp20 = Keyword.Keyword("let", Keywords.#eqPrec, Keywords.#semiPrec);
-        this._let = tmp20;
-        tmp21 = Keyword.Keyword("in", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._in = tmp21;
-        tmp22 = Keyword.Keyword("true", Option.None, Option.None);
-        this._true = tmp22;
-        tmp23 = Keyword.Keyword("false", Option.None, Option.None);
-        this._false = tmp23;
-        tmp24 = Keyword.Keyword("as", Keywords.nextPrec, Keywords.currPrec);
-        this._as = tmp24;
-        tmp25 = Keyword.Keyword("->", Keywords.nextPrec, Keywords.#eqPrec);
-        this._thinArrow = tmp25;
-        tmp26 = Keyword.Keyword("fun", Keywords.currPrec, Option.None);
-        this._fun = tmp26;
-        tmp27 = Keyword.Keyword("function", Keywords.currPrec, Option.None);
-        this._function = tmp27;
-        tmp28 = Keyword.Keyword("type", Keywords.currPrec, Option.None);
-        this._type = tmp28;
-        tmp29 = Keyword.Keyword("exception", Keywords.currPrec, Option.None);
-        this._exception = tmp29;
-        tmp30 = Keyword.Keyword("rec", Keywords.currPrec, Keywords.#eqPrec);
-        this._rec = tmp30;
+        tmp17 = Keywords.keyword("if", Keywords.nextPrec, Keywords.#thenPrec);
+        this._if = tmp17;
+        tmp18 = Keywords.keyword("then", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._then = tmp18;
+        tmp19 = Keywords.keyword("do", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._do = tmp19;
+        tmp20 = Keywords.keyword("else", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._else = tmp20;
+        tmp21 = Keywords.keyword("let", Keywords.#eqPrec, Keywords.#semiPrec);
+        this._let = tmp21;
+        tmp22 = Keywords.keyword("in", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._in = tmp22;
+        tmp23 = Keywords.keyword("true", Option.None, Option.None);
+        this._true = tmp23;
+        tmp24 = Keywords.keyword("false", Option.None, Option.None);
+        this._false = tmp24;
+        tmp25 = Keywords.keyword("as", Keywords.nextPrec, Keywords.currPrec);
+        this._as = tmp25;
+        tmp26 = Keywords.keyword("->", Keywords.nextPrec, Keywords.#eqPrec);
+        this._thinArrow = tmp26;
+        tmp27 = Keywords.keyword("fun", Keywords.currPrec, Option.None);
+        this._fun = tmp27;
+        tmp28 = Keywords.keyword("function", Keywords.currPrec, Option.None);
+        this._function = tmp28;
+        tmp29 = Keywords.keyword("type", Keywords.currPrec, Option.None);
+        this._type = tmp29;
+        tmp30 = Keywords.keyword("exception", Keywords.currPrec, Option.None);
+        this._exception = tmp30;
+        tmp31 = Keywords.keyword("rec", Keywords.currPrec, Keywords.#eqPrec);
+        this._rec = tmp31;
         this.maxPrec = Keywords.#prec;
       }
+      static keyword(name, leftPrec, rightPrec) {
+        let result, tmp3, tmp4;
+        tmp3 = Keyword.Keyword(name, leftPrec, rightPrec);
+        result = tmp3;
+        tmp4 = Keywords.all.insert(name, result);
+        return result
+      } 
       static get currPrec() {
         return Option.Some(Keywords.#prec);
       } 
@@ -317,6 +326,64 @@ Precedence1 = class Precedence {
     };
     this.RightAssociative = new RightAssociative$class;
     this.RightAssociative.class = RightAssociative$class;
+    this.TypeKeywords = class TypeKeywords {
+      static #prec;
+      static #arrowPrec;
+      static {
+        let tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18;
+        tmp3 = new BetterMap.Map();
+        this.all = tmp3;
+        TypeKeywords.#prec = 0;
+        tmp4 = TypeKeywords.keyword("type", Option.None, Option.None);
+        this._type = tmp4;
+        tmp5 = TypeKeywords.keyword("exception", Option.None, Option.None);
+        this._exception = tmp5;
+        tmp6 = TypeKeywords.keyword("let", Option.None, Option.None);
+        this._let = tmp6;
+        tmp7 = TypeKeywords.keyword("and", Option.None, Option.None);
+        this._and = tmp7;
+        tmp8 = TypeKeywords.keyword(";", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._semicolon = tmp8;
+        tmp9 = TypeKeywords.keyword(",", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._comma = tmp9;
+        tmp10 = TypeKeywords.keyword("|", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._bar = tmp10;
+        tmp11 = TypeKeywords.keyword("", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._as = tmp11;
+        TypeKeywords.#arrowPrec = TypeKeywords.currPrec;
+        tmp12 = TypeKeywords.keyword("->", TypeKeywords.nextPrec, TypeKeywords.#arrowPrec);
+        this._arrow = tmp12;
+        tmp13 = TypeKeywords.keyword("of", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._of = tmp13;
+        tmp14 = TypeKeywords.keyword("*", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._asterisk = tmp14;
+        tmp15 = TypeKeywords.keyword("#", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._sharp = tmp15;
+        tmp16 = TypeKeywords.keyword(":", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._colon = tmp16;
+        tmp17 = Option.unsafe.get(TypeKeywords.nextPrec);
+        this.appPrec = tmp17;
+        tmp18 = TypeKeywords.keyword(".", TypeKeywords.nextPrec, TypeKeywords.currPrec);
+        this._period = tmp18;
+      }
+      static keyword(name, leftPrec, rightPrec) {
+        let result, tmp3, tmp4;
+        tmp3 = Keyword.Keyword(name, leftPrec, rightPrec);
+        result = tmp3;
+        tmp4 = TypeKeywords.all.insert(name, result);
+        return result
+      } 
+      static get currPrec() {
+        return Option.Some(TypeKeywords.#prec);
+      } 
+      static get nextPrec() {
+        let tmp3;
+        tmp3 = TypeKeywords.#prec + 1;
+        TypeKeywords.#prec = tmp3;
+        return Option.Some(TypeKeywords.#prec);
+      }
+      static toString() { return "TypeKeywords"; }
+    };
   }
   static makePrecMap(...ops) {
     let m, i, scrut, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;

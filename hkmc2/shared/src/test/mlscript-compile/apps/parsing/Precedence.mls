@@ -17,46 +17,51 @@ open Keyword { Keyword, INT_MIN, INT_MAX }
 module Precedence with ...
 
 module Keywords with
+  val all = new Map()
+  fun keyword(name, leftPrec, rightPrec) =
+    let result = Keyword(name, leftPrec, rightPrec)
+    all.insert(name, result)
+    result
   let prec = 0 
   fun currPrec = Some(prec)
   fun nextPrec =
     set prec = prec + 1
     Some(prec)
   let basePrec = currPrec // the lowest precedence
-  val _terminator = Keyword(";;", basePrec, basePrec)
-  val _class = Keyword("class", None, basePrec)
-  val _begin = Keyword("begin", None, basePrec)
-  val _end = Keyword("end", basePrec, None)
+  val _terminator = keyword(";;", basePrec, basePrec)
+  val _class = keyword("class", None, basePrec)
+  val _begin = keyword("begin", None, basePrec)
+  val _end = keyword("end", basePrec, None)
   let semiPrec = nextPrec
   let commaPrec = nextPrec
-  val _semicolon = Keyword(";", semiPrec, basePrec)
-  val _comma = Keyword(",", commaPrec, semiPrec)
+  val _semicolon = keyword(";", semiPrec, basePrec)
+  val _comma = keyword(",", commaPrec, semiPrec)
   let eqPrec = nextPrec
   let ascPrec = nextPrec
-  val _equal = Keyword("=", eqPrec, eqPrec)
-  val _bar = Keyword("|", None, currPrec)
-  val _and = Keyword("and", None, currPrec)
-  val _colon = Keyword(":", ascPrec, eqPrec)
-  val _match = Keyword("match", nextPrec, currPrec)
-  val _with = Keyword("with", None, currPrec)
-  val _case = Keyword("case", None, currPrec)
+  val _equal = keyword("=", eqPrec, eqPrec)
+  val _bar = keyword("|", None, currPrec)
+  val _and = keyword("and", None, currPrec)
+  val _colon = keyword(":", ascPrec, eqPrec)
+  val _match = keyword("match", nextPrec, currPrec)
+  val _with = keyword("with", None, currPrec)
+  val _case = keyword("case", None, currPrec)
   let thenPrec = nextPrec
-  val _if = Keyword("if", nextPrec, thenPrec)
-  val _then = Keyword("then", thenPrec, thenPrec)
-  val _do = Keyword("do", thenPrec, thenPrec)
-  val _else = Keyword("else", thenPrec, thenPrec)
-  val _let = Keyword("let", eqPrec, semiPrec)
-  val _in = Keyword("in", thenPrec, thenPrec)
-  val _true = Keyword("true", None, None)
-  val _false = Keyword("false", None, None)
-  // val _fatArrow = Keyword of "=>", nextPrec, eqPrec
-  val _as = Keyword("as", nextPrec, currPrec)
-  val _thinArrow = Keyword of "->", nextPrec, eqPrec
-  val _fun = Keyword("fun", currPrec, None)
-  val _function = Keyword("function", currPrec, None)
-  val _type = Keyword("type", currPrec, None)
-  val _exception = Keyword("exception", currPrec, None)
-  val _rec = Keyword("rec", currPrec, eqPrec)
+  val _if = keyword("if", nextPrec, thenPrec)
+  val _then = keyword("then", thenPrec, thenPrec)
+  val _do = keyword("do", thenPrec, thenPrec)
+  val _else = keyword("else", thenPrec, thenPrec)
+  val _let = keyword("let", eqPrec, semiPrec)
+  val _in = keyword("in", thenPrec, thenPrec)
+  val _true = keyword("true", None, None)
+  val _false = keyword("false", None, None)
+  // val _fatArrow = keyword of "=>", nextPrec, eqPrec
+  val _as = keyword("as", nextPrec, currPrec)
+  val _thinArrow = keyword of "->", nextPrec, eqPrec
+  val _fun = keyword("fun", currPrec, None)
+  val _function = keyword("function", currPrec, None)
+  val _type = keyword("type", currPrec, None)
+  val _exception = keyword("exception", currPrec, None)
+  val _rec = keyword("rec", currPrec, eqPrec)
   val maxPrec = prec
 
 fun makePrecMap(...ops) =
@@ -113,3 +118,36 @@ fun opPrec(opStr) = if
   let rightPrec = charPrec of rightOp
   rightOp is RightAssociative then [leftPrec, rightPrec - 1]
   else [leftPrec, rightPrec]
+
+module TypeKeywords with
+  // TODO: BEGIN deduplicate with Keywords (maybe use class extension?)
+  val all = new Map()
+  fun keyword(name, leftPrec, rightPrec) =
+    let result = Keyword(name, leftPrec, rightPrec)
+    all.insert(name, result)
+    result
+  let prec = 0
+  fun currPrec = Some(prec)
+  fun nextPrec =
+    set prec = prec + 1
+    Some(prec)
+  // TODO: END deduplicate with Keywords (maybe use class extension?)
+  
+  // * These keywords basically only serve as stop signs.
+  val _type = keyword("type", None, None)
+  val _exception = keyword("exception", None, None)
+  val _let = keyword("let", None, None)
+  val _and = keyword("and", None, None)
+  
+  val _semicolon = keyword(";", nextPrec, currPrec)
+  val _comma = keyword(",", nextPrec, currPrec) // * Only used for separating type parameters
+  val _bar = keyword("|", nextPrec, currPrec)
+  val _as = keyword("", nextPrec, currPrec)
+  let arrowPrec = currPrec
+  val _arrow = keyword("->", nextPrec, arrowPrec)
+  val _of = keyword("of", nextPrec, currPrec)
+  val _asterisk = keyword("*", nextPrec, currPrec)
+  val _sharp = keyword("#", nextPrec, currPrec)
+  val _colon = keyword(":", nextPrec, currPrec)
+  val appPrec = nextPrec Option.unsafe.get()
+  val _period = keyword(".", nextPrec, currPrec)

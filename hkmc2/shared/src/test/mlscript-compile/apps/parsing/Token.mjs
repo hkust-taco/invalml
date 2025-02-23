@@ -275,7 +275,9 @@ Token1 = class Token {
       } else if (token instanceof Token.Open.class) {
         param06 = token.kind;
         kind1 = param06;
-        if (kind1 instanceof Token.Round.class) {
+        if (kind1 instanceof Token.Angle.class) {
+          return "<"
+        } else if (kind1 instanceof Token.Round.class) {
           return "("
         } else if (kind1 instanceof Token.Square.class) {
           return "["
@@ -289,7 +291,9 @@ Token1 = class Token {
       } else if (token instanceof Token.Close.class) {
         param05 = token.kind;
         kind = param05;
-        if (kind instanceof Token.Round.class) {
+        if (kind instanceof Token.Angle.class) {
+          return ">"
+        } else if (kind instanceof Token.Round.class) {
           return ")"
         } else if (kind instanceof Token.Square.class) {
           return "]"
@@ -322,6 +326,7 @@ Token1 = class Token {
         literal4 = param1;
         return literal4
       } else {
+        console.log(token);
         throw new globalThis.Error("match error");
       }
     }

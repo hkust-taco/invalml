@@ -1,10 +1,8 @@
 import "../../Predef.mls"
 import "../../Option.mls"
-import "../../BetterMap.mls"
 
 open Predef { fold }
 open Option { Some, None }
-open BetterMap { Map }
 
 //  _  __                                _
 // | |/ /___ _   ___      _____  _ __ __| |
@@ -21,11 +19,7 @@ module Keyword with ...
 val INT_MIN = -2147483648
 val INT_MAX = 2147483647
 
-val allKeywords = new Map()
-
-class Keyword(val name: Str, val leftPrec, val rightPrec) with
-  allKeywords.insert(name, this)
-  
+class Keyword(val name: Str, val leftPrec, val rightPrec) with  
   fun leftPrecOrMin = if leftPrec is Some(prec) then prec else INT_MIN
   fun rightPrecOrMin = if rightPrec is Some(prec) then prec else INT_MIN
   fun leftPrecOrMax = if leftPrec is Some(prec) then prec else INT_MAX
