@@ -438,7 +438,7 @@ type g = int * (string -> float)
 example of """
 type 'a f = 'a * 'a
 """
-//│ > {type f(a) = a * a}
+//│ > {type f('a) = 'a * 'a}
 
 example of """
 type foo = Bar | Qux
@@ -482,15 +482,15 @@ type 'a option = Some of 'a | None
 //│ >       first = App:
 //│ >         callee = Ident of "option"
 //│ >         arguments = Stack of 
-//│ >           Ident of "a"
+//│ >           Ident of "'a"
 //│ >       second = Infix:
 //│ >         op = Keyword(`|`, 3, 3)
 //│ >         lhs = Infix:
 //│ >           op = Keyword(`of`, 6, 6)
 //│ >           lhs = Ident of "Some"
-//│ >           rhs = Ident of "a"
+//│ >           rhs = Ident of "'a"
 //│ >         rhs = Ident of "None"
-//│ > {type option(a) = Some of a | None}
+//│ > {type option('a) = Some of 'a | None}
 
 example of """
 :tree
@@ -503,7 +503,7 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >       first = App:
 //│ >         callee = Ident of "tree"
 //│ >         arguments = Stack of 
-//│ >           Ident of "a"
+//│ >           Ident of "'a"
 //│ >       second = Infix:
 //│ >         op = Keyword(`|`, 3, 3)
 //│ >         lhs = Ident of "Leaf"
@@ -517,18 +517,18 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >               lhs = App:
 //│ >                 callee = Ident of "tree"
 //│ >                 arguments = Stack of 
-//│ >                   Ident of "a"
-//│ >               rhs = Ident of "a"
+//│ >                   Ident of "'a"
+//│ >               rhs = Ident of "'a"
 //│ >             rhs = App:
 //│ >               callee = Ident of "tree"
 //│ >               arguments = Stack of 
-//│ >                 Ident of "a"
-//│ > {type tree(a) = Leaf | Node of tree(a) * a * tree(a)}
+//│ >                 Ident of "'a"
+//│ > {type tree('a) = Leaf | Node of tree('a) * 'a * tree('a)}
 
 example of """
 type ('a, 'b) twist = a list * b list
 """
-//│ > {type twist((a, b)) = list(a) * list(b)}
+//│ > {type twist(('a, 'b)) = list(a) * list(b)}
 
 example of """
 type empty = < >
@@ -550,4 +550,9 @@ type test_type = < a : int; b : string; .. >
 example of """
 type tool = < cool : 'a . 'a wool >
 """
-//│ > {type tool = <cool : wool(a . a)>}
+//│ > {type tool = <cool : wool('a . 'a)>}
+
+example of """
+type pv = [ `A | `B of int | `C of int * int ]
+"""
+//│ > {type pv = `A | `B of int | `C of int * int}

@@ -556,10 +556,14 @@ fun parse(tokens) =
     result => "typeExpr >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
+      // * Only allow polymorphic variant tags in the beginning.
+      Token.TagName(name) :: _ then
+        consume
+        typeExprCont(Tree.Ident("`" + name), prec, bracket)
       Token.TypeVariable(name) :: _ then
         consume
         // What's the corresponding tree of type variables?
-        typeExprCont(Tree.Ident(name), prec, bracket)
+        typeExprCont(Tree.Ident("'" + name), prec, bracket)
       Token.Identifier("_", _) :: _ then
         consume
         typeExprCont(Tree.Underscore(), prec, bracket)
