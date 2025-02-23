@@ -326,7 +326,6 @@ Token1 = class Token {
         literal4 = param1;
         return literal4
       } else {
-        console.log(token);
         throw new globalThis.Error("match error");
       }
     }
