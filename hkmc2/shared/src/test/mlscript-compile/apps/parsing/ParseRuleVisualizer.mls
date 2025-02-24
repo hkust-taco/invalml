@@ -14,7 +14,7 @@ open ParseRule { ParseRule, Choice }
 open TreeTracer
 open XML { html, tag, elem, style }
 
-object RecursiveKnot
+class RecursiveKnot(val getName: () -> Str)
 
 class LinkOpts(val href: Str)
 
@@ -48,7 +48,7 @@ fun libraryPath = ensurePath of path.resolve of
 
 val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
 
-let tracer = new TreeTracer()
+val tracer = new TreeTracer()
 
 fun render(title: Str, rule: ParseRule) =
   let helperRules = []
@@ -76,31 +76,30 @@ fun render(title: Str, rule: ParseRule) =
       tracer.print of "found Choice.Ref to " + kind
       Some of rr.NonTerminal(kind) sequence(renderRule(rest, currentRule))
     Choice.Lazy(get, make) and
-      renderCache.has(choice) then
+      renderCache.has(make) then
         tracer.print of "found Choice.Lazy in cache"
-        let ruleName = renderCache.get(choice)
+        let ruleName = renderCache.get(make)
         Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
-      currentRule is
-        Some(ruleName) then
-          tracer.print of "found Choice.Lazy in recursion"
-          let rule = get()
-          if rule is RecursiveKnot then
-            tracer.print of "found RecursiveKnot"
-            Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
-          else
-            tracer.print of "expect RecursiveKnot, found " + String(rule)
-            ???
-        None then
-          tracer.print of "found Choice.Lazy in top-level"
-          let proxyRule = make(() => RecursiveKnot)
-          let ruleName = parentRule.name
+      else
+        let rule = get()
+        if rule is RecursiveKnot(getName) then
+          tracer.print of "found RecursiveKnot of \"" + getName() + "\""
+          Some of rr.NonTerminal(getName(), LinkOpts("#" + getName()))
+        else
+          tracer.print of "found Choice.Lazy not in cache"
+          let proxyChoice = null
+          let getProxyChoiceName = () => if Choice.rest(proxyChoice) is
+            Some(rule) then rule.name
+            else "???"
+          set proxyChoice = make(() => RecursiveKnot(getProxyChoiceName))
+          let ruleName = getProxyChoiceName()
+          renderCache.set(make, ruleName)
           helperRules.push of tuple of
-            ruleName, diagram of renderChoice(parentRule, proxyRule, Some(ruleName))
-          renderCache.set(choice, ruleName)
+            ruleName, diagram of renderChoice(parentRule, proxyChoice, None)
           Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
     do console.log("unexpected choice: " + choice)
   fun renderRule(rule: ParseRule, currentRule) = tracer.trace of
-    "renderRule <<< "
+    "renderRule <<< " + rule.name
     result => "renderRule >>> "
     () => ...
     let

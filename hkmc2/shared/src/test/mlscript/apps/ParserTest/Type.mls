@@ -5,6 +5,11 @@ import "../../../mlscript-compile/apps/parsing/Test.mls"
 open Test { example }
 
 example of """
+type b = p * q * (r * s)
+"""
+//│ > «type b = p * q * r * s»
+
+example of """
 type a = b
 type b = p * q * (r * s)
 type f = int -> int
@@ -58,7 +63,7 @@ type g = int * (string -> float)
 //│ >       second = Infix:
 //│ >         op = Keyword(`->`, 5, 4)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`*`, 7, 7)
+//│ >           op = Keyword(`*`, 6, 6)
 //│ >           lhs = Ident of "int"
 //│ >           rhs = Ident of "string"
 //│ >         rhs = Ident of "float"
@@ -68,7 +73,7 @@ type g = int * (string -> float)
 //│ >     Pair:
 //│ >       first = Ident of "g"
 //│ >       second = Infix:
-//│ >         op = Keyword(`*`, 7, 7)
+//│ >         op = Keyword(`*`, 6, 6)
 //│ >         lhs = Ident of "int"
 //│ >         rhs = Infix:
 //│ >           op = Keyword(`->`, 5, 4)
@@ -90,27 +95,8 @@ let double n = n * 2
 //│ > «let double(n) = n * 2»
 
 example of """
-:tree
 type foo = Bar of int | Qux of int * int
 """
-//│ > Define:
-//│ >   kind = Type
-//│ >   items = Stack of 
-//│ >     Pair:
-//│ >       first = Ident of "foo"
-//│ >       second = Infix:
-//│ >         op = Keyword(`|`, 3, 3)
-//│ >         lhs = Infix:
-//│ >           op = Keyword(`of`, 6, 6)
-//│ >           lhs = Ident of "Bar"
-//│ >           rhs = Ident of "int"
-//│ >         rhs = Infix:
-//│ >           op = Keyword(`of`, 6, 6)
-//│ >           lhs = Ident of "Qux"
-//│ >           rhs = Infix:
-//│ >             op = Keyword(`*`, 7, 7)
-//│ >             lhs = Ident of "int"
-//│ >             rhs = Ident of "int"
 //│ > «type foo = Bar of int | Qux of int * int»
 
 example of """
@@ -128,7 +114,7 @@ type 'a option = Some of 'a | None
 //│ >       second = Infix:
 //│ >         op = Keyword(`|`, 3, 3)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`of`, 6, 6)
+//│ >           op = Keyword(`of`, 9, 9)
 //│ >           lhs = Ident of "Some"
 //│ >           rhs = Ident of "'a"
 //│ >         rhs = Ident of "None"
@@ -150,22 +136,22 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >         op = Keyword(`|`, 3, 3)
 //│ >         lhs = Ident of "Leaf"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`of`, 6, 6)
-//│ >           lhs = Ident of "Node"
-//│ >           rhs = Infix:
-//│ >             op = Keyword(`*`, 7, 7)
-//│ >             lhs = Infix:
-//│ >               op = Keyword(`*`, 7, 7)
-//│ >               lhs = App:
-//│ >                 callee = Ident of "tree"
-//│ >                 arguments = Stack of 
-//│ >                   Ident of "'a"
-//│ >               rhs = Ident of "'a"
-//│ >             rhs = App:
+//│ >           op = Keyword(`*`, 6, 6)
+//│ >           lhs = Infix:
+//│ >             op = Keyword(`*`, 6, 6)
+//│ >             lhs = App:
 //│ >               callee = Ident of "tree"
 //│ >               arguments = Stack of 
-//│ >                 Ident of "'a"
-//│ > «type tree('a) = Leaf | Node of tree('a) * 'a * tree('a)»
+//│ >                 Infix:
+//│ >                   op = Keyword(`of`, 9, 9)
+//│ >                   lhs = Ident of "Node"
+//│ >                   rhs = Ident of "'a"
+//│ >             rhs = Ident of "'a"
+//│ >           rhs = App:
+//│ >             callee = Ident of "tree"
+//│ >             arguments = Stack of 
+//│ >               Ident of "'a"
+//│ > «type tree('a) = Leaf | tree(Node of 'a) * 'a * tree('a)»
 
 example of """
 type ('a, 'b) twist = a list * b list
@@ -199,11 +185,11 @@ and t' = Int of int | List of t list
 //│ >       first = Ident of "t"
 //│ >       second = Bracketed#Curly of Sequence of Stack of 
 //│ >         Infix:
-//│ >           op = Keyword(`:`, 9, 9)
+//│ >           op = Keyword(`:`, 7, 7)
 //│ >           lhs = Ident of "decoration"
 //│ >           rhs = Ident of "string"
 //│ >         Infix:
-//│ >           op = Keyword(`:`, 9, 9)
+//│ >           op = Keyword(`:`, 7, 7)
 //│ >           lhs = Ident of "substance"
 //│ >           rhs = Ident of "t'"
 //│ >     Pair:
@@ -211,17 +197,17 @@ and t' = Int of int | List of t list
 //│ >       second = Infix:
 //│ >         op = Keyword(`|`, 3, 3)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`of`, 6, 6)
+//│ >           op = Keyword(`of`, 9, 9)
 //│ >           lhs = Ident of "Int"
 //│ >           rhs = Ident of "int"
-//│ >         rhs = Infix:
-//│ >           op = Keyword(`of`, 6, 6)
-//│ >           lhs = Ident of "List"
-//│ >           rhs = App:
-//│ >             callee = Ident of "list"
-//│ >             arguments = Stack of 
-//│ >               Ident of "t"
-//│ > «type t = {decoration : string; substance : t'} and t' = Int of int | List of list(t)»
+//│ >         rhs = App:
+//│ >           callee = Ident of "list"
+//│ >           arguments = Stack of 
+//│ >             Infix:
+//│ >               op = Keyword(`of`, 9, 9)
+//│ >               lhs = Ident of "List"
+//│ >               rhs = Ident of "t"
+//│ > «type t = {decoration : string; substance : t'} and t' = Int of int | list(List of t)»
 
 example of """
 :tree
@@ -232,12 +218,12 @@ exception E of int * string
 //│ >   items = Stack of 
 //│ >     Pair:
 //│ >       first = Infix:
-//│ >         op = Keyword(`of`, 6, 6)
-//│ >         lhs = Ident of "E"
-//│ >         rhs = Infix:
-//│ >           op = Keyword(`*`, 7, 7)
-//│ >           lhs = Ident of "int"
-//│ >           rhs = Ident of "string"
+//│ >         op = Keyword(`*`, 6, 6)
+//│ >         lhs = Infix:
+//│ >           op = Keyword(`of`, 9, 9)
+//│ >           lhs = Ident of "E"
+//│ >           rhs = Ident of "int"
+//│ >         rhs = Ident of "string"
 //│ >       second = Empty
 //│ > «exception E of int * string = {}»
 

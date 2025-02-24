@@ -16,15 +16,13 @@ module LiteralKind with
     String
     Boolean
 
-type Token = Space | Error | Open | Close | Comment | Identifier | TypeVariable | Literal
+type Token = Space | Error | Comment | Identifier | TypeVariable | Literal
 
 object
   Space
   Error
 
 class
-  Open(kind: BracketKind)
-  Close(kind: BracketKind)
   Comment(content: Str)
   Identifier(name: Str, symbolic: Bool)
   TypeVariable(name: Str)
@@ -33,8 +31,6 @@ class
 
 fun same(a, b) = if
   a is Space and b is Space then true
-  a is Open(k) and b is Open(k') then k == k'
-  a is Close(k) and b is Close(k') then k == k'
   a is Comment(c) and b is Comment(c') then c == c'
   a is Identifier(n, s) and b is Identifier(n', s') then n == n' and s == s'
   a is TypeVariable(n) and b is TypeVariable(n') then n == n'
@@ -49,18 +45,6 @@ fun boolean(literal) = Literal(LiteralKind.Boolean, literal)
 fun summary(token) = if token is
   Space then "␠"
   Error then "⚠"
-  Open(kind) and kind is
-    Angle then "<"
-    Round then "("
-    Square then "["
-    Curly then "{"
-    BeginEnd then "begin"
-  Close(kind) and kind is
-    Angle then ">"
-    Round then ")"
-    Square then "]"
-    Curly then "}"
-    BeginEnd then "end"
   Comment(_) then "\uD83D\uDCAC" // The text ballon emoji.
   Identifier(name, _) then name
   TypeVariable(name) then "'" + name

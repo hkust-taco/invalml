@@ -9,3 +9,16 @@
 
 
 
+:pt
+:parseOnly
+x +: y > 0
+//│ Parsed tree:
+//│ App:
+//│   lhs = Ident of "+:"
+//│   rhs = Tup of Ls of 
+//│     Ident of "x"
+//│     App:
+//│       lhs = Ident of ">"
+//│       rhs = Tup of Ls of 
+//│         Ident of "y"
+//│         IntLit of 0

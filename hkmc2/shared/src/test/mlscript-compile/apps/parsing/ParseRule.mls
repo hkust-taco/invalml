@@ -129,6 +129,13 @@ module Choice with
   class Optional(rule: ParseRule, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
   
+  fun rest(choice) = if choice is
+    Lazy(get, _) then get() rest()
+    Keyword(_, rest) then Some(rest)
+    Ref(_, _, rest) then Some(rest)
+    Optional(_, rest) then Some(rest)
+    End then None
+  
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice
   // Shorthands for constructing rule choices.
   fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))

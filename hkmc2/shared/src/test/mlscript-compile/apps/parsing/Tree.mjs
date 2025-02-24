@@ -265,13 +265,13 @@ Tree2 = class Tree {
                   return leftPrec
                 }
               } else {
-                return Precedence.appPrec
+                return Precedence.Keywords.appPrec
               }
             } else {
-              return Precedence.appPrec
+              return Precedence.Keywords.appPrec
             }
           } else {
-            return Precedence.appPrec
+            return Precedence.Keywords.appPrec
           }
         } else if (tree1 instanceof Tree.Infix.class) {
           param0 = tree1.op;

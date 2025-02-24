@@ -49,12 +49,12 @@ fun parse(tokens) =
       Token.Literal(LiteralKind.Integer, literal) then
         consume
         BasicExpr.Lit(parseInt(literal, 10))
+      Token.Identifier("(", true) then
+        consume
+        expr require of Token.Identifier(")", true)
       Token.Identifier(name, false) then
         consume
         BasicExpr.Var(name)
-      Token.Open(Round) then
-        consume
-        expr require of Token.Close(Round)
       token then BasicExpr.justErr of "Unexpected token " + token Token.summary()
     None then BasicExpr.justErr of "Unexpected end of input"
   

@@ -73,20 +73,6 @@ Token1 = class Token {
     };
     this.Error = new Error$class;
     this.Error.class = Error$class;
-    this.Open = function Open(kind1) { return new Open.class(kind1); };
-    this.Open.class = class Open {
-      constructor(kind) {
-        this.kind = kind;
-      }
-      toString() { return "Open(" + globalThis.Predef.render(this.kind) + ")"; }
-    };
-    this.Close = function Close(kind1) { return new Close.class(kind1); };
-    this.Close.class = class Close {
-      constructor(kind) {
-        this.kind = kind;
-      }
-      toString() { return "Close(" + globalThis.Predef.render(this.kind) + ")"; }
-    };
     this.Comment = function Comment(content1) { return new Comment.class(content1); };
     this.Comment.class = class Comment {
       constructor(content) {
@@ -126,30 +112,10 @@ Token1 = class Token {
     };
   }
   static same(a, b) {
-    let param0, param1, k, l, param01, param11, k$_, l$_, scrut, scrut1, param02, n, param03, n$_, param04, param12, n1, s, param05, param13, n$_1, s$_, scrut2, scrut3, param06, c, param07, c$_, param08, k1, param09, k$_1, param010, k2, param011, k$_2;
+    let param0, param1, k, l, param01, param11, k$_, l$_, scrut, scrut1, param02, n, param03, n$_, param04, param12, n1, s, param05, param13, n$_1, s$_, scrut2, scrut3, param06, c, param07, c$_;
     if (a instanceof Token.Space.class) {
       if (b instanceof Token.Space.class) {
         return true
-      } else {
-        return false
-      }
-    } else if (a instanceof Token.Open.class) {
-      param010 = a.kind;
-      k2 = param010;
-      if (b instanceof Token.Open.class) {
-        param011 = b.kind;
-        k$_2 = param011;
-        return k2 == k$_2
-      } else {
-        return false
-      }
-    } else if (a instanceof Token.Close.class) {
-      param08 = a.kind;
-      k1 = param08;
-      if (b instanceof Token.Close.class) {
-        param09 = b.kind;
-        k$_1 = param09;
-        return k1 == k$_1
       } else {
         return false
       }
@@ -238,43 +204,11 @@ Token1 = class Token {
     return Token.Literal(Token.LiteralKind.Boolean, literal3)
   } 
   static summary(token) {
-    let param0, param1, literal4, param01, name, param02, name1, param03, param11, name2, param04, param05, kind, param06, kind1;
+    let param0, param1, literal4, param01, name, param02, name1, param03, param11, name2, param04;
     if (token instanceof Token.Space.class) {
       return "\u2420"
     } else if (token instanceof Token.Error.class) {
       return "\u26A0"
-    } else if (token instanceof Token.Open.class) {
-      param06 = token.kind;
-      kind1 = param06;
-      if (kind1 instanceof Token.Angle.class) {
-        return "<"
-      } else if (kind1 instanceof Token.Round.class) {
-        return "("
-      } else if (kind1 instanceof Token.Square.class) {
-        return "["
-      } else if (kind1 instanceof Token.Curly.class) {
-        return "{"
-      } else if (kind1 instanceof Token.BeginEnd.class) {
-        return "begin"
-      } else {
-        throw new globalThis.Error("match error");
-      }
-    } else if (token instanceof Token.Close.class) {
-      param05 = token.kind;
-      kind = param05;
-      if (kind instanceof Token.Angle.class) {
-        return ">"
-      } else if (kind instanceof Token.Round.class) {
-        return ")"
-      } else if (kind instanceof Token.Square.class) {
-        return "]"
-      } else if (kind instanceof Token.Curly.class) {
-        return "}"
-      } else if (kind instanceof Token.BeginEnd.class) {
-        return "end"
-      } else {
-        throw new globalThis.Error("match error");
-      }
     } else if (token instanceof Token.Comment.class) {
       param04 = token.content;
       return "\uD83D\uDCAC"

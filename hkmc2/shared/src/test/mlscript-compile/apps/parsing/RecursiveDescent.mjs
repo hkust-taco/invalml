@@ -62,13 +62,13 @@ RecursiveDescent1 = class RecursiveDescent {
       }
     };
     atom = function atom() {
-      let param01, token1, param02, param03, param1, name, param04, param11, literal, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17;
+      let param01, token1, param02, param1, name, param03, param11, literal, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18;
       if (peek instanceof Option.Some.class) {
         param01 = peek.value;
         if (param01 instanceof Token.Literal.class) {
-          param04 = param01.kind;
+          param03 = param01.kind;
           param11 = param01.literal;
-          if (param04 instanceof Token.LiteralKind.Integer.class) {
+          if (param03 instanceof Token.LiteralKind.Integer.class) {
             literal = param11;
             tmp4 = consume();
             tmp5 = globalThis.parseInt(literal, 10);
@@ -80,36 +80,41 @@ RecursiveDescent1 = class RecursiveDescent {
             return BasicExpr.justErr(tmp7)
           }
         } else if (param01 instanceof Token.Identifier.class) {
-          param03 = param01.name;
+          param02 = param01.name;
           param1 = param01.symbolic;
-          name = param03;
-          if (param1 === false) {
-            tmp8 = consume();
-            return BasicExpr.Var(name)
+          if (param02 === "(") {
+            name = param02;
+            if (param1 === true) {
+              tmp8 = consume();
+              tmp9 = expr();
+              tmp10 = Token.Identifier(")", true);
+              return require(tmp9, tmp10)
+            } else if (param1 === false) {
+              tmp11 = consume();
+              return BasicExpr.Var(name)
+            } else {
+              token1 = param01;
+              tmp12 = Token.summary(token1);
+              tmp13 = "Unexpected token " + tmp12;
+              return BasicExpr.justErr(tmp13)
+            }
           } else {
-            token1 = param01;
-            tmp9 = Token.summary(token1);
-            tmp10 = "Unexpected token " + tmp9;
-            return BasicExpr.justErr(tmp10)
-          }
-        } else if (param01 instanceof Token.Open.class) {
-          param02 = param01.kind;
-          if (param02 instanceof Token.Round.class) {
-            tmp11 = consume();
-            tmp12 = expr();
-            tmp13 = Token.Close(Token.Round);
-            return require(tmp12, tmp13)
-          } else {
-            token1 = param01;
-            tmp14 = Token.summary(token1);
-            tmp15 = "Unexpected token " + tmp14;
-            return BasicExpr.justErr(tmp15)
+            name = param02;
+            if (param1 === false) {
+              tmp14 = consume();
+              return BasicExpr.Var(name)
+            } else {
+              token1 = param01;
+              tmp15 = Token.summary(token1);
+              tmp16 = "Unexpected token " + tmp15;
+              return BasicExpr.justErr(tmp16)
+            }
           }
         } else {
           token1 = param01;
-          tmp16 = Token.summary(token1);
-          tmp17 = "Unexpected token " + tmp16;
-          return BasicExpr.justErr(tmp17)
+          tmp17 = Token.summary(token1);
+          tmp18 = "Unexpected token " + tmp17;
+          return BasicExpr.justErr(tmp18)
         }
       } else if (peek instanceof Option.None.class) {
         return BasicExpr.justErr("Unexpected end of input")

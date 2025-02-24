@@ -14,7 +14,7 @@ import "./parsing/Token.mls"
 open Stack
 open Str
 open Option { Some, None}
-open Token { Round, Curly, Square, BeginEnd, LiteralKind }
+open Token { LiteralKind }
 
 type Opt[T] = Some[T] | None
 
@@ -34,6 +34,8 @@ pattern Operator =
   "," | ";" |
   "!" | "#" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<" |
   "=" | ">" | "?" | "@" | "\\" | "^" | "|" | "~" | "."
+
+pattern Bracket = "(" | ")" | "[" | "]" | "{" | "}"
 
 fun lex(str: Str) =
   fun char(idx: Int) = if idx < str.length
@@ -75,8 +77,6 @@ fun lex(str: Str) =
     else tuple of
       idx
       if acc is
-        "begin" then Token.Open(BeginEnd)
-        "end" then Token.Close(BeginEnd)
         "true" then Token.boolean("true")
         "false" then Token.boolean("false")
         else Token.Identifier(acc, false)
@@ -201,12 +201,7 @@ fun lex(str: Str) =
       None then reverse of acc
       Some(Char.Whitespace) then go(whitespace(idx + 1), Token.Space)
       Some("\"") then go(..string(idx + 1))
-      Some("(") then go(idx + 1, Token.Open(Round))
-      Some("[") then go(idx + 1, Token.Open(Square))
-      Some("{") then go(idx + 1, Token.Open(Curly))
-      Some(")") then go(idx + 1, Token.Close(Round))
-      Some("]") then go(idx + 1, Token.Close(Square))
-      Some("}") then go(idx + 1, Token.Close(Curly))
+      Some(Bracket as b) then go(idx + 1, Token.Identifier(b, true))
       Some("/") then go(..comment(idx + 1))
       Some(Operator as ch) then go(..operator(idx + 1, ch))
       Some(Char.Digit as ch) then go(..number(idx + 1, ch))

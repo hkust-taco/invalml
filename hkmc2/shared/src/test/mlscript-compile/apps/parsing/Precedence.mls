@@ -1,8 +1,10 @@
 import "../../Option.mls"
+import "../../Predef.mls"
 import "../../BetterMap.mls"
 import "./Keyword.mls"
 
 open Option { Some, None }
+open Predef { tuple }
 open BetterMap
 open Keyword { Keyword, INT_MIN, INT_MAX }
 
@@ -15,6 +17,17 @@ open Keyword { Keyword, INT_MIN, INT_MAX }
 // ===================================================
 
 module Precedence with ...
+
+fun makePrecMap(startPrec: Int, ...ops) =
+  let
+    m = new Map
+    i = 0
+  while i < ops.length do
+    ops.at(i).split(" ").forEach of (op, _, _) =>
+      if op.length > 0 do
+        m.insert of op, i + startPrec
+    set i += 1
+  m
 
 module Keywords with
   val all = new Map()
@@ -30,8 +43,6 @@ module Keywords with
   let basePrec = currPrec // the lowest precedence
   val _terminator = keyword(";;", basePrec, basePrec)
   val _class = keyword("class", None, basePrec)
-  val _begin = keyword("begin", None, basePrec)
-  val _end = keyword("end", basePrec, None)
   let semiPrec = nextPrec
   let commaPrec = nextPrec
   val _semicolon = keyword(";", semiPrec, basePrec)
@@ -50,6 +61,7 @@ module Keywords with
   val _downto = keyword of "downto", None, None
   val _do = keyword of "do", None, None
   val _done = keyword of "done", None, None
+  val _of = keyword of "of", None, None
   val _with = keyword("with", None, currPrec)
   val _case = keyword("case", None, currPrec)
   let thenPrec = nextPrec
@@ -63,49 +75,50 @@ module Keywords with
   // val _fatArrow = keyword of "=>", nextPrec, eqPrec
   val _as = keyword("as", nextPrec, currPrec)
   val _fun = keyword("fun", currPrec, _thinArrow.leftPrec)
-  val _function = keyword("function", currPrec, None)
+  val _function = keyword("function", currPrec, eqPrec)
   val _type = keyword("type", currPrec, None)
   val _exception = keyword("exception", currPrec, None)
   val _rec = keyword("rec", currPrec, eqPrec)
-  val maxPrec = prec
+  val maxKeywordPrec = prec
 
-fun makePrecMap(...ops) =
-  let
-    m = new Map
-    i = 0
-  while i < ops.length do
-    ops.at(i).split(" ").forEach of (op, _, _) =>
-      if op.length > 0 do
-        m.insert of op, i + Keywords.maxPrec
-    set i += 1
-  m
+  let precMap = makePrecMap of
+    maxKeywordPrec
+    ","
+    "@"
+    ":"
+    "|"
+    "&"
+    "="
+    "/ \\"
+    "^"
+    "!"
+    "< >"
+    "+ -"
+    "* %"
+    "~"
+    "" // perfix operators
+    "" // applications
+    "."
 
-let precMap = makePrecMap of
-  ","
-  "@"
-  ":"
-  "|"
-  "&"
-  "="
-  "/ \\"
-  "^"
-  "!"
-  "< >"
-  "+ -"
-  "* %"
-  "~"
-  "" // perfix operators
-  "" // applications
-  "."
+  // The largest precedence value of all operators.
+  val maxOperatorPrec = precMap.get(".") Option.unsafe.get()
 
-val appPrec = if precMap.get(".") is Some(prec) then prec - 1
-val prefixPrec = appPrec - 1
-
-fun orMaxPrec(precOpt) = if precOpt is
-  Some(prec) then prec
-  None then INT_MAX
-
-fun charPrec(op) = if precMap.get(op) is Some(prec) then prec else INT_MAX
+  val appPrec = maxOperatorPrec - 1
+  val prefixPrec = appPrec - 1
+  
+  // Get the precedence of a single character operator.
+  fun charPrec(op) = precMap.get(op) Option.unsafe.get()
+  
+  let bracketPrec = Some(maxOperatorPrec + 1)
+  
+  val _leftRound = keyword of "(", bracketPrec, basePrec
+  val _rightRound = keyword of ")", basePrec, None
+  val _leftSquare = keyword of "[", bracketPrec, basePrec
+  val _rightSquare = keyword of "]", basePrec, None
+  val _leftCurly = keyword of "{", bracketPrec, basePrec
+  val _rightCurly = keyword of "}", basePrec, None
+  val _begin = keyword of "begin", bracketPrec, basePrec
+  val _end = keyword of "end", basePrec, None
 
 pattern Letter = "a" ..= "z" | "A" ..= "Z"
 
@@ -116,13 +129,18 @@ pattern FloatOperator = "+." | "-." | "*." | "/."
 pattern RightAssociative = "@" | "/" | "," | ":"
 
 fun opPrec(opStr) = if
-  opStr is FloatOperator then [charPrec(opStr.at(0)), charPrec(opStr.at(0))]
-  opStr hasLetter() then [Keywords.maxPrec, Keywords.maxPrec]
-  let leftPrec = charPrec of opStr.at(0)
-  let rightOp = opStr.at(-1)
-  let rightPrec = charPrec of rightOp
-  rightOp is RightAssociative then [leftPrec, rightPrec - 1]
-  else [leftPrec, rightPrec]
+  opStr is FloatOperator then tuple of
+    Keywords.charPrec of opStr.at(0)
+    Keywords.charPrec of opStr.at(0)
+  opStr hasLetter() then tuple of
+    Keywords.maxKeywordPrec
+    Keywords.maxKeywordPrec
+  let lastChar = opStr.at(-1)
+  let rightPrec = Keywords.charPrec of lastChar
+  else tuple of
+    Keywords.charPrec of opStr.at(0)
+    (Keywords.charPrec of lastChar) +
+      if lastChar is RightAssociative then -1 else 0
 
 module TypeKeywords with
   // TODO: BEGIN deduplicate with Keywords (maybe use class extension?)
@@ -138,11 +156,13 @@ module TypeKeywords with
     Some(prec)
   // TODO: END deduplicate with Keywords (maybe use class extension?)
   
+  let basePrec = currPrec
+  
   // * These keywords basically only serve as stop signs.
   val _type = keyword("type", None, None)
   val _exception = keyword("exception", None, None)
-  val _let = keyword("let", None, None)
-  val _and = keyword("and", None, None)
+  val _let = keyword of "let", None, None
+  val _and = keyword of "and", None, None
   
   // * The semicolon is right associative.
   let semiPrec = currPrec
@@ -153,9 +173,14 @@ module TypeKeywords with
   val _as = keyword("", nextPrec, currPrec)
   let arrowPrec = currPrec
   val _arrow = keyword("->", nextPrec, arrowPrec)
-  val _of = keyword("of", nextPrec, currPrec)
   val _asterisk = keyword("*", nextPrec, currPrec)
-  val _sharp = keyword("#", nextPrec, currPrec)
   val _colon = keyword(":", nextPrec, currPrec)
   val appPrec = nextPrec Option.unsafe.get()
+  val _of = keyword of "of", nextPrec, currPrec
   val _period = keyword(".", nextPrec, currPrec)
+  
+  val bracketPrec = nextPrec
+  val _leftRound = keyword of "(", bracketPrec, basePrec
+  val _rightRound = keyword of ")", basePrec, None
+  val _leftCurly = keyword of "{", bracketPrec, basePrec
+  val _rightCurly = keyword of "}", basePrec, None

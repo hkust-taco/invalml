@@ -63,13 +63,13 @@ PrattParsing1 = class PrattParsing {
       }
     };
     expr = function expr(prec) {
-      let param01, token1, param02, param03, param1, name, param04, param11, literal, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20;
+      let param01, token1, param02, param1, name, param03, param11, literal, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20;
       if (peek instanceof Option.Some.class) {
         param01 = peek.value;
         if (param01 instanceof Token.Literal.class) {
-          param04 = param01.kind;
+          param03 = param01.kind;
           param11 = param01.literal;
-          if (param04 instanceof Token.LiteralKind.Integer.class) {
+          if (param03 instanceof Token.LiteralKind.Integer.class) {
             literal = param11;
             tmp4 = consume();
             tmp5 = globalThis.parseInt(literal, 10);
@@ -82,32 +82,33 @@ PrattParsing1 = class PrattParsing {
             return Expr.justErr(tmp8)
           }
         } else if (param01 instanceof Token.Identifier.class) {
-          param03 = param01.name;
+          param02 = param01.name;
           param1 = param01.symbolic;
-          name = param03;
+          name = param02;
           if (param1 === false) {
             tmp9 = consume();
             tmp10 = Expr.Var(name);
             return exprCont(tmp10, prec)
           } else {
-            token1 = param01;
-            tmp11 = Token.summary(token1);
-            tmp12 = "Unexpected token " + tmp11;
-            return Expr.justErr(tmp12)
-          }
-        } else if (param01 instanceof Token.Open.class) {
-          param02 = param01.kind;
-          if (param02 instanceof Token.Round.class) {
-            tmp13 = consume();
-            tmp14 = expr(0);
-            tmp15 = Token.Close(Token.Round);
-            tmp16 = require(tmp14, tmp15);
-            return exprCont(tmp16, prec)
-          } else {
-            token1 = param01;
-            tmp17 = Token.summary(token1);
-            tmp18 = "Unexpected token " + tmp17;
-            return Expr.justErr(tmp18)
+            if (param02 === "(") {
+              if (param1 === true) {
+                tmp11 = consume();
+                tmp12 = expr(0);
+                tmp13 = Token.Identifier(")", true);
+                tmp14 = require(tmp12, tmp13);
+                return exprCont(tmp14, prec)
+              } else {
+                token1 = param01;
+                tmp15 = Token.summary(token1);
+                tmp16 = "Unexpected token " + tmp15;
+                return Expr.justErr(tmp16)
+              }
+            } else {
+              token1 = param01;
+              tmp17 = Token.summary(token1);
+              tmp18 = "Unexpected token " + tmp17;
+              return Expr.justErr(tmp18)
+            }
           }
         } else {
           token1 = param01;
@@ -122,7 +123,7 @@ PrattParsing1 = class PrattParsing {
       }
     };
     exprCont = function exprCont(acc, prec) {
-      let param01, param02, param1, op, scrut, first1, first0, leftPrec, rightPrec, scrut1, right, tmp4, tmp5, tmp6;
+      let param01, param02, param1, op, scrut, scrut1, first1, first0, leftPrec, rightPrec, scrut2, right, tmp4, tmp5, tmp6;
       if (peek instanceof Option.Some.class) {
         param01 = peek.value;
         if (param01 instanceof Token.Identifier.class) {
@@ -130,19 +131,24 @@ PrattParsing1 = class PrattParsing {
           param1 = param01.symbolic;
           op = param02;
           if (param1 === true) {
-            scrut = runtime.safeCall(Expr.opPrec(op));
-            if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
-              first0 = scrut[0];
-              first1 = scrut[1];
-              leftPrec = first0;
-              rightPrec = first1;
-              scrut1 = leftPrec > prec;
-              if (scrut1 === true) {
-                tmp4 = consume();
-                tmp5 = expr(rightPrec);
-                right = tmp5;
-                tmp6 = Expr.Inf(op, acc, right);
-                return exprCont(tmp6, prec)
+            scrut = op !== ")";
+            if (scrut === true) {
+              scrut1 = runtime.safeCall(Expr.opPrec(op));
+              if (globalThis.Array.isArray(scrut1) && scrut1.length === 2) {
+                first0 = scrut1[0];
+                first1 = scrut1[1];
+                leftPrec = first0;
+                rightPrec = first1;
+                scrut2 = leftPrec > prec;
+                if (scrut2 === true) {
+                  tmp4 = consume();
+                  tmp5 = expr(rightPrec);
+                  right = tmp5;
+                  tmp6 = Expr.Inf(op, acc, right);
+                  return exprCont(tmp6, prec)
+                } else {
+                  return acc
+                }
               } else {
                 return acc
               }

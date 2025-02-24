@@ -11,7 +11,7 @@ open Stack
 open Option { Some, None }
 open Token { LiteralKind, BracketKind }
 open Keyword { Keyword, INT_MAX }
-open Precedence { appPrec, opPrec }
+open Precedence { Keywords, opPrec }
 
 //  _____
 // |_   _| __ ___  ___
@@ -73,7 +73,7 @@ module Tree with
         Ident(op, true) and opPrec(op) is [leftPrec, rightPrec] and
           side then rightPrec
           else leftPrec
-        else appPrec
+        else Keywords.appPrec
       Infix(op, _, _) and
         side then op.rightPrecOrMax
         else op.leftPrecOrMax

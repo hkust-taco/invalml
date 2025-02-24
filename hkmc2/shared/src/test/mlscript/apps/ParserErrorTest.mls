@@ -11,7 +11,7 @@ example of ":tree ((x) ==> x"
 //│ >     arguments = Stack of 
 //│ >       Ident of "x"
 //│ >       Ident of "x"
-//│ >   message = "Expected a close bracket, but found the end of input"
+//│ >   message = "unexpected end of input"
 //│ > «<⚠:x ==> x>»
 
 example of ":tree ((x) ==> x))"
@@ -20,7 +20,7 @@ example of ":tree ((x) ==> x))"
 //│ >   arguments = Stack of 
 //│ >     Ident of "x"
 //│ >     Ident of "x"
-//│ > Error of "unexpected close bracket `Round`"
+//│ > Error of "unexpected keyword )"
 //│ > «x ==> x»
 //│ > «⚠»
 

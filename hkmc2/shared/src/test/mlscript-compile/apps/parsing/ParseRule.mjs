@@ -491,15 +491,45 @@ ParseRule2 = class ParseRule {
           toString() { return "Lazy(" + globalThis.Predef.render(this.get) + ", " + globalThis.Predef.render(this.make) + ")"; }
         };
       }
-      static forced(choice) {
-        let param0, param1, get;
+      static rest(choice) {
+        let param0, param1, rest, param01, param11, param2, rest1, param02, param12, rest2, param03, param13, get, tmp;
         if (choice instanceof Choice.Lazy.class) {
-          param0 = choice.get;
-          param1 = choice.make;
+          param03 = choice.get;
+          param13 = choice.make;
+          get = param03;
+          tmp = runtime.safeCall(get());
+          return Choice.rest(tmp)
+        } else if (choice instanceof Choice.Keyword.class) {
+          param02 = choice.keyword;
+          param12 = choice.rest;
+          rest2 = param12;
+          return Option.Some(rest2)
+        } else if (choice instanceof Choice.Ref.class) {
+          param01 = choice.kind;
+          param11 = choice.process;
+          param2 = choice.rest;
+          rest1 = param2;
+          return Option.Some(rest1)
+        } else if (choice instanceof Choice.Optional.class) {
+          param0 = choice.rule;
+          param1 = choice.rest;
+          rest = param1;
+          return Option.Some(rest)
+        } else if (choice instanceof Choice.End.class) {
+          return Option.None
+        } else {
+          throw new globalThis.Error("match error");
+        }
+      } 
+      static forced(choice1) {
+        let param0, param1, get;
+        if (choice1 instanceof Choice.Lazy.class) {
+          param0 = choice1.get;
+          param1 = choice1.make;
           get = param0;
           return runtime.safeCall(get())
         } else {
-          return choice
+          return choice1
         }
       } 
       static keyword(keyword, name, ...choices) {
@@ -528,11 +558,11 @@ ParseRule2 = class ParseRule {
       static lazy(makeChoice) {
         let getChoice, cache;
         getChoice = function getChoice() {
-          let param0, choice1, tmp;
+          let param0, choice2, tmp;
           if (cache instanceof Option.Some.class) {
             param0 = cache.value;
-            choice1 = param0;
-            return choice1
+            choice2 = param0;
+            return choice2
           } else {
             tmp = runtime.safeCall(makeChoice(getChoice));
             cache = tmp;

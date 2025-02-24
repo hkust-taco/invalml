@@ -104,12 +104,12 @@ printLexed of """let v' =
 //│ > Space
 //│ > Identifier("=", true)
 //│ > Space
-//│ > Open(Round)
+//│ > Identifier("(", true)
 //│ > Literal(Integer, "1")
 //│ > Identifier(",", true)
 //│ > Space
 //│ > Literal(Integer, "2")
-//│ > Close(Round)
+//│ > Identifier(")", true)
 //│ > Space
 //│ > Identifier("in", false)
 //│ > Space
@@ -159,13 +159,13 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier("factorial", false)
 //│ > Space
-//│ > Open(Round)
+//│ > Identifier("(", true)
 //│ > Identifier("x", false)
 //│ > Space
 //│ > Identifier("-", true)
 //│ > Space
 //│ > Literal(Integer, "1")
-//│ > Close(Round)
+//│ > Identifier(")", true)
 //│ > Space
 //│ > Identifier("let", false)
 //│ > Space
@@ -199,11 +199,11 @@ printLexed of lines of
 //│ > Space
 //│ > Identifier("raise", false)
 //│ > Space
-//│ > Open(Round)
+//│ > Identifier("(", true)
 //│ > Identifier("Invalid_argument", false)
 //│ > Space
 //│ > Literal(String, "bool_of_string")
-//│ > Close(Round)
+//│ > Identifier(")", true)
 
 // It turns out that OCaml identifiers' apostrophes are not limited to the end.
 printLexed of "a'b"
@@ -212,10 +212,10 @@ printLexed of "'a"
 //│ > TypeVariable("a")
 
 printLexed of "[< ] < .. ... >"
-//│ > Open(Square)
+//│ > Identifier("[", true)
 //│ > Identifier("<", true)
 //│ > Space
-//│ > Close(Square)
+//│ > Identifier("]", true)
 //│ > Space
 //│ > Identifier("<", true)
 //│ > Space

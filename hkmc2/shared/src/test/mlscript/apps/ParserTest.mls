@@ -7,11 +7,11 @@ import "../../mlscript-compile/apps/parsing/Test.mls"
 open Precedence { Keywords, opPrec, TypeKeywords }
 open Test { example }
 
-Keywords.maxPrec
+Keywords.maxKeywordPrec
 //│ = 11
 
-opPrec(";")
-//│ = [2147483647, 2147483647]
+Keywords.maxOperatorPrec
+//│ = 26
 
 opPrec("|>")
 //│ = [14, 20]
@@ -28,8 +28,6 @@ opPrec of "+"
 print of Keywords.all.values.join("\n")
 //│ > Keyword(`;;`, 0, 0)
 //│ > Keyword(`class`, N/A, 0)
-//│ > Keyword(`begin`, N/A, 0)
-//│ > Keyword(`end`, 0, N/A)
 //│ > Keyword(`;`, 1, 0)
 //│ > Keyword(`,`, 2, 1)
 //│ > Keyword(`=`, 3, 3)
@@ -55,10 +53,18 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`false`, N/A, N/A)
 //│ > Keyword(`as`, 11, 11)
 //│ > Keyword(`fun`, 11, 5)
-//│ > Keyword(`function`, 11, N/A)
+//│ > Keyword(`function`, 11, 3)
 //│ > Keyword(`type`, 11, N/A)
 //│ > Keyword(`exception`, 11, N/A)
 //│ > Keyword(`rec`, 11, 3)
+//│ > Keyword(`(`, 27, 0)
+//│ > Keyword(`)`, 0, N/A)
+//│ > Keyword(`[`, 27, 0)
+//│ > Keyword(`]`, 0, N/A)
+//│ > Keyword(`{`, 27, 0)
+//│ > Keyword(`}`, 0, N/A)
+//│ > Keyword(`begin`, 27, 0)
+//│ > Keyword(`end`, 0, N/A)
 
 print of TypeKeywords.all.values.join("\n")
 //│ > Keyword(`type`, N/A, N/A)
@@ -104,6 +110,10 @@ print of Parser.termRule.display
 //│ >   `=` <term>
 //│ >     `to` <term>`do` <term>`done` 
 //│ >     `downto` <term>`do` <term>`done` 
+//│ > `(` <term>`)` 
+//│ > `[` <term>`]` 
+//│ > `{` <term>`}` 
+//│ > `begin` <term>`end` 
 //│ > <term>
 //│ >   `,` <term>
 //│ >   `;` <term>
@@ -186,9 +196,10 @@ example of "let square x = x *. x"
 example of "square (sin pi) +. square (cos pi)"
 //│ > «square(sin(pi)) +. square(cos(pi))»
 
-:todo
 example of "(1 < 2) = false"
-//│ ═══[RUNTIME ERROR] Error: Not implemented
+//│ > «1 < 2»
+//│ > «⚠»
+//│ > «⚠»
 
 example of "let cat s1 s2 = s1 ^ \" \" ^ s2"
 //│ > «let cat(s1)(s2) = s1 ^ " " ^ s2»
@@ -298,12 +309,12 @@ match x with | 0 -> 1
 //│ > «match x with 0 -> 1»
 
 example of """
-let fullname ?title first second =
+let fullname title first second =
   match title with
   | Some t -> t ^ " " ^ first ^ " " ^ second
   | None -> first ^ " " ^ second
 """
-//│ > «let fullname ? title(first)(second) = match title with Some(t) -> t ^ " " ^ first ^ " " ^ second | None -> first ^ " " ^ second»
+//│ > «let fullname(title)(first)(second) = match title with Some(t) -> t ^ " " ^ first ^ " " ^ second | None -> first ^ " " ^ second»
 
 example of """
 let a = if x then 1 else 0 in
