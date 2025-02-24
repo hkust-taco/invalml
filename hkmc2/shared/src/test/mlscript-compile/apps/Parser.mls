@@ -26,68 +26,6 @@ type Opt[A] = Some[A] | None
 
 module Parser with ...
 
-//  _     _     _
-// | |   (_)___| |_
-// | |   | / __| __|
-// | |___| \__ \ |_
-// |_____|_|___/\__|
-// 
-// =================
-
-fun at(target, index) = target.at(index)
-
-fun toStack(array) =
-  let
-    length = array.length
-    i = length - 1
-    reserve = Nil
-  while i >= 0 do
-    set reserve = array.at(i) :: reserve
-    set i = i - 1
-  reserve
-
-fun stack(...args) = args toStack()
-
-fun mapJoin[A](stack: Stack[A], op: A -> Str, sep: Str) =
-  let buffer = ""
-  while stack is head :: tail do
-    set buffer = buffer + op(head)
-    if tail is _ :: _ do
-      set buffer = buffer + sep
-    set stack = tail
-  buffer
-
-fun collectFirst[A, B](stack: Stack[A], op) =
-  let lastResult = None
-  while stack is head :: tail and
-    do set lastResult = op(head)
-    lastResult is None do
-      set stack = tail
-  lastResult
-
-fun collectToArray[A, B](stack: Stack[A], p) =
-  let elements = []
-  while stack is head :: tail do
-    if p(head) is Some(value) do
-      elements.push of value
-    set stack = tail
-  elements
-
-fun map(xs, op) = if xs is
-  Nil then Nil
-  head :: tail then ...
-  let
-    result = op(head) :: Nil
-    current = result
-    rest = tail
-  while rest is head :: tail do
-    let next = op(head) :: Nil
-    set
-      current.tail = next
-      current = next
-      rest = tail
-  result
-
 //  ____       _
 // |  _ \  ___| |__  _   _  __ _
 // | | | |/ _ \ '_ \| | | |/ _` |
@@ -463,11 +401,6 @@ fun parse(tokens) =
         consume
         acc
       else Tree.error("Mismatched bracket")
-    Token.Identifier(">", _) :: _ and
-      kind is Token.Angle then
-        consume
-        acc
-      else acc Tree.Error("Mismatched bracket")
     token :: _ then
       acc Tree.Error of "Expect a close bracket instead of " + token
     Nil then acc Tree.Error("Expected a close bracket, but found the end of input")
@@ -637,10 +570,6 @@ fun parse(tokens) =
       Token.Identifier("|", _) :: _ then
         consume
         typeExpr(prec)
-      // * Only allow polymorphic variant tags in the beginning.
-      Token.TagName(name) :: _ then
-        consume
-        typeExprCont(Tree.Ident("`" + name), prec)
       Token.TypeVariable(name) :: _ then
         consume
         // What's the corresponding tree of type variables?
@@ -648,29 +577,9 @@ fun parse(tokens) =
       Token.Identifier("_", _) :: _ then
         consume
         typeExprCont(Tree.Underscore(), prec)
-      Token.Identifier("..", _) :: _ then
-        consume
-        typeExprCont(Tree.Ident(".."), prec)
       Token.Identifier(name, false) :: _ then
         consume
         typeExprCont(Tree.Ident(name), prec)
-      // '[' is special because of the open/close variant markers.
-      Token.Open(Token.Square) :: _ then
-        consume
-        // OCaml disallows spaces between '[' and '<'/'>'.
-        let openness = if current is
-          (Token.Identifier(">", _) as marker) :: _ then
-            consume
-            Some(marker)
-          (Token.Identifier("<", _) as marker) :: _ then
-            consume
-            // An optional `|` is allowed only after "<".
-            if yeetSpaces is Token.Identifier("|", _) :: _ do consume
-            Some(marker)
-          else None
-        typeExpr(0, Some(Token.Square))
-          closeBy(Token.Square)
-          typeExprCont of prec
       // Handle opening brackets (mostly round and curly)
       Token.Open(kind) :: _ then
         tracer.print of "found an open ", kind, " bracket", source.line
@@ -681,23 +590,12 @@ fun parse(tokens) =
           typeExprCont of prec
       // Handle closing brackets.
       Token.Close(kind) :: _ then Tree.Empty()
-      // `<` and `>` in type expressions are not infix operators
-      Token.Identifier("<", _) :: _ then
-        consume
-        typeExpr(0, Some(Token.Angle))
-          Tree.asSequence()
-          Tree.bracketed of Token.Angle
-          closeBy(Token.Angle)
-          typeExprCont of prec
-      // Closing ">" is handled in the same way as closing other brackets.
-      Token.Identifier(">", _) :: _ then Tree.Empty()
       else Tree.empty
   
   fun typeExprCont(acc: Tree, prec: Int) =
     tracer.print of ">>> typeExprCont " + prec + " " + acc Tree.summary() + " <<<", source.line
     if yeetSpaces is
       Token.Close :: _ then acc
-      Token.Identifier(">", _) :: _ then acc
       do tracer.print of "check keyword " + TokenHelpers.preview(current), source.line
       Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is Some(keyword) and
         typeInfixRules.keywordChoices.get(name) is Some(rule) and
