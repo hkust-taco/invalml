@@ -6,7 +6,7 @@ import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
 
 open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
-open Parser { exprRules, moduleRules, typeRules }
+open Parser { termRule, declRule, typeRule }
 open XML { html, tag, elem, style }
 
 fun toHTML(...elements) = html(["lang", "en"]) of
@@ -16,10 +16,7 @@ fun toHTML(...elements) = html(["lang", "en"]) of
       ["name", "viewport"]
       ["content", "width=device-width, initial-scale=1.0"]
     elem("title") of "Parse Rules"
-  elem("body", style of
-    ["margin", "0"]
-    ["padding", "1em"]
-  ) of
+  elem("body", style of ["padding", "1em"]) of
     elem("div", style of
       ["display", "flex"]
       ["flex-direction", "column"]
@@ -27,18 +24,25 @@ fun toHTML(...elements) = html(["lang", "en"]) of
     ) of
       ...elements
     elem("style") of
-      "body{margin:0;font-family:system-ui,sans-serif}"
+      "body{margin:0;font-family:system-ui,sans-serif;font-size:16px}"
       CSS_CONTENT
+
+fun toElements(diagrams) =
+  diagrams
+    Iter.mapping of case [caption, svg] then
+      elem("figure", ["id", caption], style(["text-align", "center"])) of
+        svg
+        elem("figcaption") of caption
+    Iter.toArray()
 
 fs.writeFileSync of
   filePath of "rule.html"
   toHTML of
-    ...render("Expression Rules", exprRules)
-      Iter.appended of render("Type Rules", typeRules)
-      Iter.appended of render("Module Rules", moduleRules)
-      Iter.mapping of case [caption, svg] then
-        elem("figure", style(["text-align", "center"])) of
-          svg
-          elem("figcaption", ["id", caption]) of caption
-      Iter.toArray()
+    elem("h1") of "Parse Rules"
+    elem("h2") of "Terms"
+    ...toElements of render("Term Rules", termRule)
+    elem("h2") of "Types"
+    ...toElements of render("Type Rules", typeRule)
+    elem("h2") of "Definitions"
+    ...toElements of render("Definition Rules", declRule)
   "utf-8"

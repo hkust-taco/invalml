@@ -29,7 +29,7 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
       Iter.fromStack()
       Iter.mapping of case
         Choice.Keyword(keyword, rest') then [Choice.Keyword(keyword, rest'.andThen(rest))]
-        Choice.Expr(isType, process, rest') then [Choice.Expr(isType, process, rest'.andThen(rest))]
+        Choice.Ref(isType, process, rest') then [Choice.Ref(isType, process, rest'.andThen(rest))]
         Choice.End then rest.choices Iter.fromStack()
         Choice.Optional(rule, rest') then [Choice.Optional(process, rule, rest'.andThen(rest))]
         Choice.Lazy(get, make) then
@@ -73,7 +73,7 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
   fun exprChoice = choices
     Iter.fromStack()
     Iter.firstDefined of choice => if choice Choice.forced() is
-      Choice.Expr(isType, process, rest) then Some([isType, process, rest])
+      Choice.Ref(isType, process, rest) then Some([isType, process, rest])
       Choice.Optional(rule, rest) and
         rule.exprChoice is Some([process, rest']) then
           Some([process, rest'.andThen(rest)])
@@ -89,8 +89,8 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, [head, ..tail']] then [prefix + head, ..tail']
-      Choice.Expr(isType, _, rest) and
-        let prefix = if isType then "<typexpr> " else "<expr> "
+      Choice.Ref(kind, _, rest) and
+        let prefix = "<" + kind + ">"
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
@@ -124,7 +124,7 @@ fun rule(name, ...choices) = ParseRule(name, choices Iter.toStack())
 
 module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
-  class Expr(isType: Bool, process: Tree -> Tree, rest: ParseRule)
+  class Ref(kind: Str, process: Tree -> Tree, rest: ParseRule)
   class End(value: Tree)
   class Optional(rule: ParseRule, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
@@ -132,8 +132,9 @@ module Choice with
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice
   // Shorthands for constructing rule choices.
   fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
-  fun expr(process, name, ...choices) = Expr(false, process, rule(name, ...choices))
-  fun typeExpr(process, name, ...choices) = Expr(true, process, rule(name, ...choices))
+  fun reference(kind, process, name, ...choices) = Ref(kind, process, rule(name, ...choices))
+  fun term(process, name, ...choices) = Ref("term", process, rule(name, ...choices))
+  fun typeExpr(process, name, ...choices) = Ref("type", process, rule(name, ...choices))
   fun end(value) = End(value)
   fun lazy(makeChoice) =
     let cache = None

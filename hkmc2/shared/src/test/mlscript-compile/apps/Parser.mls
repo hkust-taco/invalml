@@ -32,7 +32,7 @@ val tracer = new TreeTracer
 
 fun letBinding(hasInClause: Bool) =
   let intro = "let binding: "
-  fun makeBinding(bindingBody) = Choice.expr of
+  fun makeBinding(bindingBody) = Choice.term of
     if hasInClause then
       (head, bodyAndLetIn) => if bodyAndLetIn is
         [body, Tree.LetIn(bindings, letBody)] then
@@ -46,7 +46,7 @@ fun letBinding(hasInClause: Bool) =
       Keywords._equal
       intro + "right-hand side"
       bindingBody
-  fun makeItems(get) = Choice.expr of
+  fun makeItems(get) = Choice.term of
     (body, defLike) => [body, defLike]
     intro + "right-hand side"
     Choice.keyword of
@@ -57,7 +57,7 @@ fun letBinding(hasInClause: Bool) =
       Choice.keyword of
         Keywords._in
         intro + "`in` keyword"
-        Choice.expr of
+        Choice.term of
           (body, _) => Tree.LetIn(Nil, body)
           intro + "body"
           Choice.end of ()
@@ -86,20 +86,20 @@ fun ifThenElse() =
   Choice.keyword of
     Keywords._if
     intro + "`if` keyword"
-    Choice.expr of
+    Choice.term of
       (tst, conAndAlt) => if conAndAlt is [con, alt] then
         Tree.Ternary(Keywords._if, tst, con, alt)
       intro + "condition"
       Choice.keyword of
         Keywords._then
         intro + "`then` keyword"
-        Choice.expr of
+        Choice.term of
           (con, optAlt) => [con, optAlt]
           intro + "consequent"
           Choice.keyword of
             Keywords._else
             intro + "`else` keyword"
-            Choice.expr of
+            Choice.term of
               (alt, _) => Some(alt)
               intro + "alternative"
               Choice.end of None
@@ -110,26 +110,26 @@ fun funChoice() =
   Choice.keyword of
     Keywords._fun
     intro + "keyword"
-    Choice.expr of
+    Choice.term of
       (params, body) => Tree.Lambda(params :: Nil, body)
       intro + "parameters"
       Choice.keyword of
         Keywords._thinArrow
         intro + "arrow"
-        Choice.expr of
+        Choice.term of
           (body, _) => body
           intro + "body"
           Choice.end of None
 
 fun patternMatchingBody(intro, cons, nil) =
-  fun makeMatchArms(get) = Choice.expr of
+  fun makeMatchArms(get) = Choice.term of
     (pat, rhsAndRest) => if rhsAndRest is [rhs, rest] then
       cons of Tree.Infix(Keywords._thinArrow, pat, rhs), rest
     intro + "pattern"
     Choice.keyword of
       Keywords._thinArrow
       intro + "arrow"
-      Choice.expr of
+      Choice.term of
         (curr, next) => [curr, next]
         intro + "body"
         Choice.end of nil
@@ -155,7 +155,7 @@ fun matchWithChoice() =
   Choice.keyword of
     Keywords._match
     intro + "keyword"
-    Choice.expr of
+    Choice.term of
       (scrutinee, branches) => Tree.Match(scrutinee, branches)
       intro + "scrutinee"
       Choice.keyword of
@@ -177,13 +177,13 @@ fun matchFunctionChoice() =
 let whileTerm = Choice.keyword of
   Keywords._while
   "while condition"
-  Choice.expr of
+  Choice.term of
     Tree.While
     "while body"
     Choice.keyword of
       Keywords._do
       "while body"
-      Choice.expr of
+      Choice.term of
         (body, _) => body
         "while end"
         Choice.keyword of
@@ -193,13 +193,13 @@ let whileTerm = Choice.keyword of
 
 fun forTerm =
   let intro = "for: "
-  let innerPart = Choice.expr of
+  let innerPart = Choice.term of
     (end, body) => [end, body]
     intro + "`do` keyword"
     Choice.keyword of
       Keywords._do
       intro + "body expression"
-      Choice.expr of
+      Choice.term of
         (body, _) => body
         intro + "`done` keyword"
         Choice.keyword of
@@ -209,7 +209,7 @@ fun forTerm =
   Choice.keyword of
     Keywords._for
     intro + "left-hand side"
-    Choice.expr of
+    Choice.term of
       (head, startEndBody) => if startEndBody is
         [start, end, body] then
           Tree.For(head, start, end, body)
@@ -217,7 +217,7 @@ fun forTerm =
       Choice.keyword of
         Keywords._equal
         intro + "start expression"
-        Choice.expr of
+        Choice.term of
           (start, endBody) => if endBody is [end, body] then
             [start, end, body]
           intro + "`to` or `downto` keyword"
@@ -230,23 +230,24 @@ fun forTerm =
             "end expression"
             innerPart
 
-fun makeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
+fun makeInfixChoice(keyword: Keyword, rhsKind: Str, compose: (Tree, Tree) -> Tree) =
   Choice.keyword of
     keyword
     "operator `" + keyword.name + "`"
-    Choice.expr of
+    Choice.reference of
+      rhsKind
       (rhs, _) => lhs => compose(lhs, rhs)
       "operator `" + keyword.name + "` right-hand side"
       Choice.end of ()
 
-val exprInfixRules = rule of
+val termInfixRule = rule of
   "infix rules for expressions"
   // Tuple (separated by commas)
-  makeInfixChoice of Keywords._comma, (lhs, rhs) => if rhs is
+  makeInfixChoice of Keywords._comma, "term", (lhs, rhs) => if rhs is
     Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
     else Tree.Tuple(lhs :: rhs :: Nil)
   // Sequence (separated by semicolons)
-  makeInfixChoice of Keywords._semicolon, (lhs, rhs) => if rhs is
+  makeInfixChoice of Keywords._semicolon, "term", (lhs, rhs) => if rhs is
     Tree.Sequence(tail) then Tree.Sequence(lhs :: tail)
     else Tree.Sequence(lhs :: rhs :: Nil)
   // Type ascription: <expr> ":" <typexpr>
@@ -259,7 +260,7 @@ val exprInfixRules = rule of
       Choice.end of ()
 
 // Prefix rules and infix rules for expressions.
-val exprRules = rule of
+val termRule = rule of
   "prefix rules for expressions"
   letExpression
   funChoice()
@@ -268,40 +269,30 @@ val exprRules = rule of
   ifThenElse()
   whileTerm
   forTerm
-  // We put the infix rules here just for the railroad diagrams.
-  Choice.Expr of
-    false
+  // We put the infix rules here for the railroad diagrams.
+  Choice.Ref of
+    "term"
     (lhs, compose) => compose(lhs)
-    exprInfixRules
+    termInfixRule
 
-// TODO: merge with `makeInfixChoice` after we change `isType` to category names.
-fun makeTypeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
-  Choice.keyword of
-    keyword
-    "operator `" + keyword.name + "`"
-    Choice.typeExpr of
-      (rhs, _) => lhs => compose(lhs, rhs)
-      "operator `" + keyword.name + "` right-hand side"
-      Choice.end of ()
-
-val typeInfixRules = rule of
+val typeInfixRule = rule of
   "infix rules for types"
   // Tuple (separated by commas)
-  makeTypeInfixChoice of TypeKeywords._comma, (lhs, rhs) => if rhs is
+  makeInfixChoice of TypeKeywords._comma, "type", (lhs, rhs) => if rhs is
     Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
     else Tree.Tuple(lhs :: rhs :: Nil)
   // Sequence (separated by semicolons)
-  makeTypeInfixChoice of TypeKeywords._semicolon, (lhs, rhs) => if rhs is
+  makeInfixChoice of TypeKeywords._semicolon, "type", (lhs, rhs) => if rhs is
     Tree.Sequence(tail) then Tree.Sequence(lhs :: tail)
     else Tree.Sequence(lhs :: rhs :: Nil)
 
 // Prefix rules and infix rules for types.
-val typeRules = rule of
+val typeRule = rule of
   "rules for types"
-  Choice.Expr of
-    true
+  Choice.Ref of
+    "type"
     (lhs, compose) => compose(lhs)
-    typeInfixRules
+    typeInfixRule
 
 fun typeDefinition() =
   let intro = "type definition: "
@@ -346,7 +337,7 @@ fun exceptionDefinition() =
           Choice.end of ()
       Choice.end of Tree.empty
 
-val moduleRules = rule of
+val declRule = rule of
   "prefix rules for module items"
   letDefinition
   typeDefinition()
@@ -425,9 +416,9 @@ fun parse(tokens) =
             None and
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
-              rule.exprChoice is Some([isType, process, rest]) and
+              rule.exprChoice is Some([kind, process, rest]) and
                 true then
-                  let acc = (if isType then typeExpr else term) of prec
+                  let acc = getParsingByKind(kind) of prec
                   let tree = parseRule(prec, rest)
                   process(acc, tree)
               do tracer.print of "no exprChoice or the prec is less than " + prec, source.line
@@ -438,8 +429,8 @@ fun parse(tokens) =
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
         do tracer.print of "try parse an expression from " + TokenHelpers.preview(current), source.line
-        rule.exprChoice is Some([isType, process, rest]) and
-          let acc = (if isType then typeExpr else term)(prec)
+        rule.exprChoice is Some([kind, process, rest]) and
+          let acc = getParsingByKind(kind)(prec)
           acc Tree.nonEmptyError() then
             let tree = parseRule(prec, rest)
             tracer.print of "acc: " + acc Tree.summary(), source.line
@@ -464,13 +455,18 @@ fun parse(tokens) =
       Token.Square then Tree.Bracketed(Token.Square, content)
       else content
   
+  // TODO: make kinds extensible
+  fun getParsingByKind(kind: Str): Int -> Tree = if kind is
+    "type" then typeExpr
+    "term" then term
+  
   fun term(prec: Int) = tracer.trace of
     "term <<< " + prec + " " + TokenHelpers.preview(current)
     result => "term >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
       Token.Identifier(name, symbolic) :: _ and Keywords.all.get(name) is
-        Some(keyword) and exprRules.keywordChoices.get(name) is
+        Some(keyword) and termRule.keywordChoices.get(name) is
           Some(rule) and
             keyword.leftPrecOrMin > prec then
               consume
@@ -503,14 +499,14 @@ fun parse(tokens) =
     // Look up the infix rules.
     Token.Identifier(name, _) :: _ and Keywords.all.get(name) is Some(keyword) and
       do tracer.print of "found a keyword: " + name, source.line
-      // Note: we can also get the infix rules from `exprRules.exprChoice` but
+      // Note: we can also get the infix rules from `termRule.exprChoice` but
       // that just adds another pattern matching.
-      exprInfixRules.keywordChoices.get(name) is Some(rule) and
+      termInfixRule.keywordChoices.get(name) is Some(rule) and
         do tracer.print of "the keyword is found in infix rules" + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
-          Some([isType, process, rest]) then
+          Some([kind, process, rest]) then
             consume
-            let rhs = (if isType then typeExpr else term) of keyword.rightPrecOrMin
+            let rhs = getParsingByKind(kind) of keyword.rightPrecOrMin
             let acc' = process(rhs)(acc)
             termCont(acc', prec)
           None then acc
@@ -576,12 +572,12 @@ fun parse(tokens) =
       Token.Close :: _ then acc
       do tracer.print of "check keyword " + TokenHelpers.preview(current), source.line
       Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is Some(keyword) and
-        typeInfixRules.keywordChoices.get(name) is Some(rule) and
+        typeInfixRule.keywordChoices.get(name) is Some(rule) and
           do tracer.print of "the keyword is found in infix rules" + name, source.line
           keyword.leftPrecOrMin > prec and rule.exprChoice is
-            Some([isType, process, rest]) then
+            Some([kind, process, rest]) then
               consume
-              let rhs = (if isType then typeExpr else term) of keyword.rightPrecOrMin
+              let rhs = getParsingByKind(kind) of keyword.rightPrecOrMin
               let acc' = process(rhs)(acc)
               typeExprCont(acc', prec)
             None then acc
@@ -616,7 +612,7 @@ fun parse(tokens) =
       mod
     Token.Identifier(name, _) :: _ and
       Keywords.all.get(name) is Some(keyword) and
-        exprRules.keywordChoices.get(name) is Some(rule) then
+        termRule.keywordChoices.get(name) is Some(rule) then
           consume
           let tree = parseRule(0, rule, None)
           if tree is Tree.LetIn(bindings, Tree.Empty) then
@@ -624,7 +620,7 @@ fun parse(tokens) =
             modCont of Tree.Define(Tree.DefineKind.Let(false), bindings) :: acc
           else
             modCont of tree :: acc
-        moduleRules.keywordChoices.get(name) is Some(rule) then
+        declRule.keywordChoices.get(name) is Some(rule) then
           consume
           let tree = parseRule(0, rule, None)
           modCont(tree :: acc)
@@ -636,7 +632,7 @@ fun parse(tokens) =
     Token.Identifier(";;", _) :: _ then
       consume
       acc mod()
-    _ :: _ then modCont of parseRule(0, moduleRules, None) :: acc
+    _ :: _ then modCont of parseRule(0, declRule, None) :: acc
     Nil then acc reverse()
   
   let tree = tracer.trace of

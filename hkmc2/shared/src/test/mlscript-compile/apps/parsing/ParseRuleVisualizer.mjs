@@ -106,7 +106,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return runtime.safeCall(ParseRuleVisualizer.rr.Diagram(tmp3))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
-      let doTemp, param0, param1, get, make, proxyRule, ruleName, param01, ruleName1, rule1, scrut, ruleName2, param02, param11, param2, isType, rest, param03, param12, rule2, rest1, scrut1, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42;
+      let doTemp, param0, param1, get, make, proxyRule, ruleName, param01, ruleName1, rule1, scrut, ruleName2, param02, param11, param2, kind, rest, param03, param12, rule2, rest1, scrut1, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp3 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.End"));
         return Option.None
@@ -139,19 +139,15 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
           throw new globalThis.Error("match error");
         }
         return Option.Some(tmp10)
-      } else if (choice instanceof ParseRule.Choice.Expr.class) {
-        param02 = choice.isType;
+      } else if (choice instanceof ParseRule.Choice.Ref.class) {
+        param02 = choice.kind;
         param11 = choice.process;
         param2 = choice.rest;
-        isType = param02;
+        kind = param02;
         rest = param2;
-        tmp11 = runtime.safeCall(ParseRuleVisualizer.#tracer.print("found Choice.Expr"));
-        if (isType === true) {
-          tmp12 = "type";
-        } else {
-          tmp12 = "expr";
-        }
-        tmp13 = runtime.safeCall(ParseRuleVisualizer.rr.NonTerminal(tmp12));
+        tmp11 = "found Choice.Ref to " + kind;
+        tmp12 = runtime.safeCall(ParseRuleVisualizer.#tracer.print(tmp11));
+        tmp13 = runtime.safeCall(ParseRuleVisualizer.rr.NonTerminal(kind));
         tmp14 = renderRule(rest, currentRule);
         tmp15 = sequence(tmp13, tmp14);
         return Option.Some(tmp15)

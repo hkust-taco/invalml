@@ -76,38 +76,38 @@ print of TypeKeywords.all.values.join("\n")
 //│ > Keyword(`:`, 9, 9)
 //│ > Keyword(`.`, 11, 11)
 
-print of Parser.exprRules.display
+print of Parser.termRule.display
 //│ > <prefix rules for expressions> ::= `let` [`rec` ] 
-//│ >   <expr> 
-//│ >     `=` <expr> 
-//│ >       `and` <expr> `=` <rec>
-//│ >       `in` <expr> 
+//│ >   <term>
+//│ >     `=` <term>
+//│ >       `and` <term>`=` <rec>
+//│ >       `in` <term>
 //│ >       
-//│ > `fun` <expr> `->` <expr> 
-//│ > `match` <expr> 
+//│ > `fun` <term>`->` <term>
+//│ > `match` <term>
 //│ >   `with` [`|` ] 
-//│ >     <expr> 
-//│ >       `->` <expr> 
+//│ >     <term>
+//│ >       `->` <term>
 //│ >         
 //│ >         `|` <rec>
 //│ > `function` [`|` ] 
-//│ >   <expr> 
-//│ >     `->` <expr> 
+//│ >   <term>
+//│ >     `->` <term>
 //│ >       
 //│ >       `|` <rec>
-//│ > `if` <expr> 
-//│ >   `then` <expr> 
-//│ >     `else` <expr> 
+//│ > `if` <term>
+//│ >   `then` <term>
+//│ >     `else` <term>
 //│ >     
-//│ > `while` <expr> `do` <expr> `done` 
-//│ > `for` <expr> 
-//│ >   `=` <expr> 
-//│ >     `to` <expr> `do` <expr> `done` 
-//│ >     `downto` <expr> `do` <expr> `done` 
-//│ > <expr> 
-//│ >   `,` <expr> 
-//│ >   `;` <expr> 
-//│ >   `:` <typexpr> 
+//│ > `while` <term>`do` <term>`done` 
+//│ > `for` <term>
+//│ >   `=` <term>
+//│ >     `to` <term>`do` <term>`done` 
+//│ >     `downto` <term>`do` <term>`done` 
+//│ > <term>
+//│ >   `,` <term>
+//│ >   `;` <term>
+//│ >   `:` <type>
 
 example of "(x) => x"
 //│ > «x => x»
