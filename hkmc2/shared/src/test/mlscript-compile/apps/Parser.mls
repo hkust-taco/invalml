@@ -349,6 +349,19 @@ fun parse(tokens) =
       expected Token.summary()
       ", but found end of input"
   
+  fun closeBy(acc: Tree, kind) = if yeetSpaces is
+    Token.Close(kind') :: _ and
+      kind == kind' then
+        consume
+        acc
+      else Tree.error("Mismatched bracket")
+    Token.Identifier(">", _) :: _ and
+      kind is Token.Angle then
+        consume
+        acc
+      else acc Tree.Error("Mismatched bracket")
+    Nil then acc Tree.Error("Expected a close bracket, but found the end of input")
+  
   fun parseRule(prec: Int, rule: ParseRule, opened) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
     result => "parsed: " + result Tree.summary()
@@ -561,32 +574,32 @@ fun parse(tokens) =
       Some then acc Tree.Error("expect a close bracket instead of EOF")
       None then acc
   
-  fun typeExpr(prec: Int, bracket: Opt[BracketKind]): Tree = tracer.trace of
-    "typeExpr <<< " + prec + " " + bracket + " " + TokenHelpers.preview(current)
+  fun typeExpr(prec: Int): Tree = tracer.trace of
+    "typeExpr <<< " + prec + " " + TokenHelpers.preview(current)
     result => "typeExpr >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
       // * Type expressions that begin with a single bar are allowed.
       Token.Identifier("|", _) :: _ then
         consume
-        typeExpr(prec, bracket)
+        typeExpr(prec)
       // * Only allow polymorphic variant tags in the beginning.
       Token.TagName(name) :: _ then
         consume
-        typeExprCont(Tree.Ident("`" + name), prec, bracket)
+        typeExprCont(Tree.Ident("`" + name), prec)
       Token.TypeVariable(name) :: _ then
         consume
         // What's the corresponding tree of type variables?
-        typeExprCont(Tree.Ident("'" + name), prec, bracket)
+        typeExprCont(Tree.Ident("'" + name), prec)
       Token.Identifier("_", _) :: _ then
         consume
-        typeExprCont(Tree.Underscore(), prec, bracket)
+        typeExprCont(Tree.Underscore(), prec)
       Token.Identifier("..", _) :: _ then
         consume
-        typeExprCont(Tree.Ident(".."), prec, bracket)
+        typeExprCont(Tree.Ident(".."), prec)
       Token.Identifier(name, false) :: _ then
         consume
-        typeExprCont(Tree.Ident(name), prec, bracket)
+        typeExprCont(Tree.Ident(name), prec)
       // '[' is special because of the open/close variant markers.
       Token.Open(Token.Square) :: _ then
         consume
@@ -602,57 +615,44 @@ fun parse(tokens) =
             Some(marker)
           else None
         typeExpr(0, Some(Token.Square))
-          require of Token.Close(Token.Square)
-          typeExprCont of prec, bracket
+          closeBy(Token.Square)
+          typeExprCont of prec
       // Handle opening brackets (mostly round and curly)
       Token.Open(kind) :: _ then
         tracer.print of "found an open ", kind, " bracket", source.line
         consume
         typeExpr(0, Some(kind))
           (if kind is Token.Curly then Tree.Bracketed(Token.Curly, _) else id)()
-          require of Token.Close(kind)
-          typeExprCont of prec, bracket
+          closeBy(kind)
+          typeExprCont of prec
       // Handle closing brackets.
-      Token.Close(kind) :: _ and bracket is
-        Some(kind') then Tree.Empty()
-        Some(kind) then Tree.error("mismatched brackets")
-        None then Tree.error("unexpected close bracket")
+      Token.Close(kind) :: _ then Tree.Empty()
       // `<` and `>` in type expressions are not infix operators
       Token.Identifier("<", _) :: _ then
         consume
         typeExpr(0, Some(Token.Angle))
           Tree.asSequence()
           Tree.bracketed of Token.Angle
-          require of Token.Identifier(">", true)
-          typeExprCont of prec, bracket
+          closeBy(Token.Angle)
+          typeExprCont of prec
       // Closing ">" is handled in the same way as closing other brackets.
-      Token.Identifier(">", _) :: _ and bracket is
-        Some(Token.Angle) then Tree.Empty()
-        Some(kind) then Tree.error("mismatched brackets")
-        None then Tree.error("unexpected close bracket")
+      Token.Identifier(">", _) :: _ then Tree.Empty()
       else Tree.empty
   
-  fun typeExprCont(acc: Tree, prec: Int, bracket: Opt[BracketKind]) =
+  fun typeExprCont(acc: Tree, prec: Int) =
     tracer.print of ">>> typeExprCont " + prec + " " + acc Tree.summary() + " <<<", source.line
     if yeetSpaces is
-      Token.Close(kind) :: _ and bracket is
-        Some(kind') and
-          kind == kind' then acc
-          else Tree.error("mismatched brackets")
-        None then Tree.error("unexpected close bracket")
-      Token.Identifier(">", _) :: _ and bracket is
-        Some(Token.Angle) then acc
-        Some(kind) then Tree.error("mismatched brackets")
-        None then Tree.error("unexpected close bracket")
+      Token.Close :: _ then acc
+      Token.Identifier(">", _) :: _ then acc
       // TODO: BEGIN deduplication
       Token.Semicolon :: _ and
         do tracer.print of "found a semicolon", source.line
         TypeKeywords._semicolon.leftPrec Option.unsafe.get() > prec then
           consume
-          typeExpr(TypeKeywords._semicolon.rightPrec Option.unsafe.get(), bracket)
+          typeExpr(TypeKeywords._semicolon.rightPrec Option.unsafe.get())
             Tree.sequenceWithHead of acc
             tap of x => tracer.print of "bruh: " + x
-            typeExprCont of prec, bracket
+            typeExprCont of prec
         else
           tracer.print of "cannot consume the semicolon", source.line
           acc
@@ -660,9 +660,9 @@ fun parse(tokens) =
         do tracer.print of "found a comma", source.line
         TypeKeywords._comma.leftPrec Option.unsafe.get() > prec then
           consume
-          typeExpr(TypeKeywords._comma.rightPrec Option.unsafe.get(), bracket)
+          typeExpr(TypeKeywords._comma.rightPrec Option.unsafe.get())
             Tree.tupleWithHead of acc
-            typeExprCont of prec, bracket
+            typeExprCont of prec
         else
           tracer.print of "cannot consume the comma", source.line
           acc
@@ -673,8 +673,8 @@ fun parse(tokens) =
           do tracer.print of "found a keyword " + name, source.line
           keyword.leftPrecOrMin > prec then
             consume
-            let rhs = typeExpr(keyword.rightPrecOrMax, bracket)
-            typeExprCont(Tree.Infix(keyword, acc, rhs), prec, bracket)
+            let rhs = typeExpr(keyword.rightPrecOrMax)
+            typeExprCont(Tree.Infix(keyword, acc, rhs), prec)
           else
             acc
       // * the case of type application
@@ -682,10 +682,10 @@ fun parse(tokens) =
       Token.Identifier(name, false) :: _ and
         TypeKeywords.appPrec > prec then
           do tracer.print of "found an application", source.line
-          if typeExpr(TypeKeywords.appPrec, bracket) is
+          if typeExpr(TypeKeywords.appPrec) is
             Tree.Empty then acc
             Tree.Error then acc
-            rhs then typeExprCont(Tree.App(rhs, acc :: Nil), prec, bracket)
+            rhs then typeExprCont(Tree.App(rhs, acc :: Nil), prec)
       token :: _ then
         tracer.print of "cannot consume " + token, source.line
         acc
