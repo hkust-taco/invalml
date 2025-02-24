@@ -242,6 +242,26 @@ fun matchFunctionChoice() =
         Tree.Match(scrut, arms) then Tree.Match(scrut, x :: arms)
       Tree.Match(Tree.empty, Nil)
 
+fun makeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
+  Choice.keyword of
+    keyword
+    "operator `" + keyword.name + "`"
+    Choice.expr of
+      (rhs, _) => lhs => compose(lhs, rhs)
+      "operator `" + keyword.name + "` right-hand side"
+      Choice.end of ()
+
+val infixRules = rule of
+  "the continuation of expressions"
+  Choice.keyword of
+    Keywords._colon
+    "type ascription"
+    Choice.typeExpr of
+      (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
+      "right-hand side type"
+      Choice.end of ()
+
+// Prefix rules and infix rules for expressions.
 val exprRules = rule of
   "prefix rules for expressions"
   letExpression
@@ -249,6 +269,11 @@ val exprRules = rule of
   matchWithChoice()
   matchFunctionChoice()
   ifThenElse()
+  // We put the infix rules here just for the railroad diagrams.
+  Choice.Expr of
+    false
+    (lhs, compose) => compose(lhs)
+    infixRules
 
 fun typeDefinition() =
   let intro = "type definition: "
@@ -298,25 +323,6 @@ val moduleRules = rule of
   letDefinition
   typeDefinition()
   exceptionDefinition()
-
-fun makeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
-  Choice.keyword of
-    keyword
-    "operator `" + keyword.name + "`"
-    Choice.expr of
-      (rhs, _) => lhs => compose(lhs, rhs)
-      "operator `" + keyword.name + "` right-hand side"
-      Choice.end of ()
-
-val infixRules = rule of
-  "the continuation of expressions"
-  Choice.keyword of
-    Keywords._colon
-    "type ascription"
-    Choice.typeExpr of
-      (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
-      "right-hand side type"
-      Choice.end of ()
 
 fun parse(tokens) =
   let
