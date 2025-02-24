@@ -58,27 +58,21 @@ fun example(...lines) =
 
 example of ":tree ((x) ==> x"
 //│ > Error:
-//│ >   tree = Error:
-//│ >     tree = App:
-//│ >       callee = Ident of "==>"
-//│ >       arguments = Stack of 
-//│ >         Ident of "x"
-//│ >         Error:
-//│ >           tree = Ident of "x"
-//│ >           message = "expect a close bracket instead of EOF"
-//│ >     message = "expect a close bracket instead of EOF"
-//│ >   message = "expect a close bracket instead of EOF"
-//│ > «<⚠:<⚠:x ==> <⚠:x>>>»
-
-example of ":tree ((x) ==> x))"
-//│ > Error:
 //│ >   tree = App:
 //│ >     callee = Ident of "==>"
 //│ >     arguments = Stack of 
 //│ >       Ident of "x"
 //│ >       Ident of "x"
-//│ >   message = "missing close bracket"
-//│ > Error of "unexpected bracket: Round"
+//│ >   message = "Expected a close bracket, but found the end of input"
 //│ > «<⚠:x ==> x>»
+
+example of ":tree ((x) ==> x))"
+//│ > App:
+//│ >   callee = Ident of "==>"
+//│ >   arguments = Stack of 
+//│ >     Ident of "x"
+//│ >     Ident of "x"
+//│ > Error of "unexpected close bracket `Round`"
+//│ > «x ==> x»
 //│ > «⚠»
 
