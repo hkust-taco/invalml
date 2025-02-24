@@ -1,0 +1,84 @@
+:js
+
+import "../../mlscript-compile/apps/Lexer.mls"
+import "../../mlscript-compile/apps/parsing/Precedence.mls"
+import "../../mlscript-compile/apps/parsing/ParseRule.mls"
+import "../../mlscript-compile/apps/parsing/Token.mls"
+import "../../mlscript-compile/apps/parsing/Tree.mls"
+import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
+import "../../mlscript-compile/apps/parsing/TreeHelpers.mls"
+import "../../mlscript-compile/apps/Parser.mls"
+import "../../mlscript-compile/Iter.mls"
+import "../../mlscript-compile/Option.mls"
+import "../../mlscript-compile/Stack.mls"
+
+open Token { LiteralKind }
+open Parser { parse, tracer }
+open Option { Some, None }
+open Precedence { Keywords, opPrec, TypeKeywords }
+open Stack
+open TreeHelpers { showAsTree }
+
+pattern Flag = "tree" | "trace" | "tokens"
+
+fun flags(tokens) =
+  let result = new Set
+  while tokens is
+    Token.Space :: Token.Identifier(":", _) :: Token.Identifier(Flag as flag, _) :: tail then
+      result.add(flag)
+      set tokens = tail
+    Token.Identifier(":", _) :: Token.Identifier(Flag as flag, _) :: tail then
+      result.add(flag)
+      set tokens = tail
+    else [result, tokens]
+
+fun example(...lines) =
+  let
+    source = lines.join("\n")
+    tokens = Lexer.lex(source)
+  if flags(tokens) is [flags, tokens] then ...
+  if flags.has("tokens") do
+    print of TokenHelpers.panorama(tokens)
+  tracer.reset()
+  set tracer.enabled = flags.has("trace")
+  let trees = parse(tokens)
+  set tracer.enabled = false
+  if flags.has("tree") do
+    print of trees
+      Iter.fromStack()
+      Iter.mapping of showAsTree
+      Iter.joined of "\n"
+  print of trees
+    Iter.fromStack()
+    Iter.mapping of Tree.summary
+    Iter.joined of "\n"
+
+// * ^ TODO deduplicate all the above with ParserTest.mls!
+
+
+example of ":tree ((x) ==> x"
+//│ > Error:
+//│ >   tree = Error:
+//│ >     tree = App:
+//│ >       callee = Ident of "==>"
+//│ >       arguments = Stack of 
+//│ >         Ident of "x"
+//│ >         Error:
+//│ >           tree = Ident of "x"
+//│ >           message = "expect a close bracket instead of EOF"
+//│ >     message = "expect a close bracket instead of EOF"
+//│ >   message = "expect a close bracket instead of EOF"
+//│ > «<⚠:<⚠:x ==> <⚠:x>>>»
+
+example of ":tree ((x) ==> x))"
+//│ > Error:
+//│ >   tree = App:
+//│ >     callee = Ident of "==>"
+//│ >     arguments = Stack of 
+//│ >       Ident of "x"
+//│ >       Ident of "x"
+//│ >   message = "missing close bracket"
+//│ > Error of "unexpected bracket: Round"
+//│ > «<⚠:x ==> x>»
+//│ > «⚠»
+

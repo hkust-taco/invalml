@@ -603,7 +603,7 @@ Parser1 = class Parser {
       tmp5 = tmp4 + "\" with precedence ";
       tmp6 = tmp5 + prec;
       tmp7 = () => {
-        let scrut1, scrut2, param01, value, param02, param11, other, doTemp, doTemp1, doTemp2, scrut3, param03, value1, scrut4, param04, first2, first1, first0, isType, process, rest, acc, doTemp3, scrut5, tree1, param05, param12, name, doTemp4, doTemp5, scrut6, param06, keyword1, doTemp6, doTemp7, scrut7, doTemp8, doTemp9, doTemp10, scrut8, param07, value2, scrut9, param08, first21, first11, first01, isType1, process1, rest1, scrut10, acc1, tree2, param09, rest2, param010, encountered, doTemp11, param011, expected, scrut11, scrut12, param012, value3, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93;
+        let scrut1, scrut2, param01, value, param02, param11, other, doTemp, doTemp1, doTemp2, scrut3, param03, value1, scrut4, param04, first2, first1, first0, isType, process, rest, acc, doTemp3, scrut5, tree1, param05, param12, name, doTemp4, doTemp5, scrut6, param06, keyword1, doTemp6, doTemp7, scrut7, doTemp8, doTemp9, doTemp10, scrut8, param07, value2, scrut9, param08, first21, first11, first01, isType1, process1, rest1, scrut10, acc1, tree2, param09, rest2, param010, encountered, doTemp11, param011, expected, scrut11, scrut12, param012, value3, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97;
         tmp8 = yeetSpaces();
         scrut1 = tmp8;
         if (scrut1 instanceof Stack.Cons.class) {
@@ -624,23 +624,27 @@ Parser1 = class Parser {
                   value3 = param012;
                   return value3
                 } else if (scrut12 instanceof Option.None.class) {
-                  tmp9 = "unexpected close bracket `" + encountered;
-                  tmp10 = tmp9 + "`";
-                  return Tree.error(tmp10)
+                  tmp9 = consume();
+                  tmp10 = "unexpected close bracket `" + encountered;
+                  tmp11 = tmp10 + "`";
+                  return Tree.error(tmp11)
                 } else {
+                  tmp12 = consume();
                   return Tree.error("mismatched brackets")
                 }
               } else {
+                tmp13 = consume();
                 return Tree.error("mismatched brackets")
               }
             } else if (opened instanceof Option.None.class) {
-              tmp11 = "unexpected bracket: " + encountered;
-              return Tree.error(tmp11)
+              tmp14 = consume();
+              tmp15 = "unexpected bracket: " + encountered;
+              return Tree.error(tmp15)
             } else {
               other = param02;
-              tmp12 = TokenHelpers.preview(current);
-              tmp13 = "try parse an expression from " + tmp12;
-              doTemp = Parser.tracer.print(tmp13, 399);
+              tmp16 = TokenHelpers.preview(current);
+              tmp17 = "try parse an expression from " + tmp16;
+              doTemp = Parser.tracer.print(tmp17, 403);
               scrut4 = rule.exprChoice;
               if (scrut4 instanceof Option.Some.class) {
                 param04 = scrut4.value;
@@ -652,59 +656,59 @@ Parser1 = class Parser {
                   process = first1;
                   rest = first2;
                   if (isType === true) {
-                    tmp14 = typeExpr;
+                    tmp18 = typeExpr;
                   } else {
-                    tmp14 = simpleExpr;
+                    tmp18 = simpleExpr;
                   }
-                  acc = runtime.safeCall(tmp14(prec, opened));
+                  acc = runtime.safeCall(tmp18(prec, opened));
                   scrut5 = Tree.nonEmptyError(acc);
                   if (scrut5 === true) {
-                    tmp15 = parseRule(prec, rest, opened);
-                    tree1 = tmp15;
-                    tmp16 = Tree.summary(acc);
-                    tmp17 = "acc: " + tmp16;
-                    tmp18 = Parser.tracer.print(tmp17, 418);
-                    tmp19 = Tree.summary(tree1);
-                    tmp20 = "tree: " + tmp19;
-                    tmp21 = Parser.tracer.print(tmp20, 419);
+                    tmp19 = parseRule(prec, rest, opened);
+                    tree1 = tmp19;
+                    tmp20 = Tree.summary(acc);
+                    tmp21 = "acc: " + tmp20;
+                    tmp22 = Parser.tracer.print(tmp21, 422);
+                    tmp23 = Tree.summary(tree1);
+                    tmp24 = "tree: " + tmp23;
+                    tmp25 = Parser.tracer.print(tmp24, 423);
                     return runtime.safeCall(process(acc, tree1))
                   } else {
-                    doTemp3 = Parser.tracer.print("fallback to end choice", 421);
-                    doTemp1 = Parser.tracer.print("no expression choice", 422);
+                    doTemp3 = Parser.tracer.print("fallback to end choice", 425);
+                    doTemp1 = Parser.tracer.print("no expression choice", 426);
                     scrut3 = rule.endChoice;
                     if (scrut3 instanceof Option.Some.class) {
                       param03 = scrut3.value;
                       value1 = param03;
-                      tmp22 = Parser.tracer.print("found end choice", 424);
+                      tmp26 = Parser.tracer.print("found end choice", 428);
                       return value1
                     } else {
-                      doTemp2 = Parser.tracer.print("no end choice", 426);
+                      doTemp2 = Parser.tracer.print("no end choice", 430);
                       throw new globalThis.Error("match error");
                     }
                   }
                 } else {
-                  doTemp1 = Parser.tracer.print("no expression choice", 422);
+                  doTemp1 = Parser.tracer.print("no expression choice", 426);
                   scrut3 = rule.endChoice;
                   if (scrut3 instanceof Option.Some.class) {
                     param03 = scrut3.value;
                     value1 = param03;
-                    tmp23 = Parser.tracer.print("found end choice", 424);
+                    tmp27 = Parser.tracer.print("found end choice", 428);
                     return value1
                   } else {
-                    doTemp2 = Parser.tracer.print("no end choice", 426);
+                    doTemp2 = Parser.tracer.print("no end choice", 430);
                     throw new globalThis.Error("match error");
                   }
                 }
               } else {
-                doTemp1 = Parser.tracer.print("no expression choice", 422);
+                doTemp1 = Parser.tracer.print("no expression choice", 426);
                 scrut3 = rule.endChoice;
                 if (scrut3 instanceof Option.Some.class) {
                   param03 = scrut3.value;
                   value1 = param03;
-                  tmp24 = Parser.tracer.print("found end choice", 424);
+                  tmp28 = Parser.tracer.print("found end choice", 428);
                   return value1
                 } else {
-                  doTemp2 = Parser.tracer.print("no end choice", 426);
+                  doTemp2 = Parser.tracer.print("no end choice", 430);
                   throw new globalThis.Error("match error");
                 }
               }
@@ -713,50 +717,50 @@ Parser1 = class Parser {
             param05 = param02.name;
             param12 = param02.symbolic;
             name = param05;
-            tmp25 = "found an identifier \"" + name;
-            tmp26 = tmp25 + "\"";
-            doTemp4 = Parser.tracer.print(tmp26, 370);
+            tmp29 = "found an identifier \"" + name;
+            tmp30 = tmp29 + "\"";
+            doTemp4 = Parser.tracer.print(tmp30, 374);
             scrut6 = runtime.safeCall(Precedence.Keywords.all.get(name));
             if (scrut6 instanceof Option.Some.class) {
               param06 = scrut6.value;
               keyword1 = param06;
-              tmp27 = runtime.safeCall(keyword1.toString());
-              doTemp6 = Parser.tracer.print(tmp27, 372);
-              tmp28 = (caseScrut) => {
-                let first12, first02, k, v, tmp94;
+              tmp31 = runtime.safeCall(keyword1.toString());
+              doTemp6 = Parser.tracer.print(tmp31, 376);
+              tmp32 = (caseScrut) => {
+                let first12, first02, k, v, tmp98;
                 if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
                   first02 = caseScrut[0];
                   first12 = caseScrut[1];
                   k = first02;
                   v = first12;
-                  tmp94 = "`" + k;
-                  return tmp94 + "`"
+                  tmp98 = "`" + k;
+                  return tmp98 + "`"
                 } else {
                   throw new globalThis.Error("match error");
                 }
               };
-              tmp29 = Iter.mapping(rule.keywordChoices, tmp28);
-              tmp30 = Iter.joined(tmp29, ", ");
-              doTemp7 = Parser.tracer.print("keyword choices: ", tmp30);
+              tmp33 = Iter.mapping(rule.keywordChoices, tmp32);
+              tmp34 = Iter.joined(tmp33, ", ");
+              doTemp7 = Parser.tracer.print("keyword choices: ", tmp34);
               scrut7 = runtime.safeCall(rule.keywordChoices.get(name));
               if (scrut7 instanceof Option.Some.class) {
                 param09 = scrut7.value;
                 rest2 = param09;
-                tmp31 = "found a rule starting with `" + name;
-                tmp32 = tmp31 + "`";
-                tmp33 = Parser.tracer.print(tmp32, 378);
-                tmp34 = "the rest of the rule: " + rest2.display;
-                tmp35 = Parser.tracer.print(tmp34, 379);
-                tmp36 = consume();
+                tmp35 = "found a rule starting with `" + name;
+                tmp36 = tmp35 + "`";
+                tmp37 = Parser.tracer.print(tmp36, 382);
+                tmp38 = "the rest of the rule: " + rest2.display;
+                tmp39 = Parser.tracer.print(tmp38, 383);
+                tmp40 = consume();
                 return parseRule(0, rest2, opened)
               } else if (scrut7 instanceof Option.None.class) {
-                tmp37 = "no rule starting with `" + name;
-                tmp38 = tmp37 + "` was found";
-                doTemp8 = Parser.tracer.print(tmp38, 384);
-                tmp39 = "the left prec of `" + name;
-                tmp40 = tmp39 + "` is ";
-                tmp41 = tmp40 + keyword1.leftPrec;
-                doTemp9 = Parser.tracer.print(tmp41, 385);
+                tmp41 = "no rule starting with `" + name;
+                tmp42 = tmp41 + "` was found";
+                doTemp8 = Parser.tracer.print(tmp42, 388);
+                tmp43 = "the left prec of `" + name;
+                tmp44 = tmp43 + "` is ";
+                tmp45 = tmp44 + keyword1.leftPrec;
+                doTemp9 = Parser.tracer.print(tmp45, 389);
                 scrut9 = rule.exprChoice;
                 if (scrut9 instanceof Option.Some.class) {
                   param08 = scrut9.value;
@@ -770,62 +774,62 @@ Parser1 = class Parser {
                     scrut10 = true;
                     if (scrut10 === true) {
                       if (isType1 === true) {
-                        tmp42 = typeExpr;
+                        tmp46 = typeExpr;
                       } else {
-                        tmp42 = simpleExpr;
+                        tmp46 = simpleExpr;
                       }
-                      tmp43 = runtime.safeCall(tmp42(prec, opened));
-                      acc1 = tmp43;
-                      tmp44 = parseRule(prec, rest1, opened);
-                      tree2 = tmp44;
+                      tmp47 = runtime.safeCall(tmp46(prec, opened));
+                      acc1 = tmp47;
+                      tmp48 = parseRule(prec, rest1, opened);
+                      tree2 = tmp48;
                       return runtime.safeCall(process1(acc1, tree2))
                     } else {
-                      tmp45 = "no exprChoice or the prec is less than " + prec;
-                      doTemp10 = Parser.tracer.print(tmp45, 392);
+                      tmp49 = "no exprChoice or the prec is less than " + prec;
+                      doTemp10 = Parser.tracer.print(tmp49, 396);
                       scrut8 = rule.endChoice;
                       if (scrut8 instanceof Option.Some.class) {
                         param07 = scrut8.value;
                         value2 = param07;
-                        tmp46 = Parser.tracer.print("found end choice", 394);
+                        tmp50 = Parser.tracer.print("found end choice", 398);
                         return value2
                       } else {
                         return Predef.notImplementedError
                       }
                     }
                   } else {
-                    tmp47 = "no exprChoice or the prec is less than " + prec;
-                    doTemp10 = Parser.tracer.print(tmp47, 392);
+                    tmp51 = "no exprChoice or the prec is less than " + prec;
+                    doTemp10 = Parser.tracer.print(tmp51, 396);
                     scrut8 = rule.endChoice;
                     if (scrut8 instanceof Option.Some.class) {
                       param07 = scrut8.value;
                       value2 = param07;
-                      tmp48 = Parser.tracer.print("found end choice", 394);
+                      tmp52 = Parser.tracer.print("found end choice", 398);
                       return value2
                     } else {
                       return Predef.notImplementedError
                     }
                   }
                 } else {
-                  tmp49 = "no exprChoice or the prec is less than " + prec;
-                  doTemp10 = Parser.tracer.print(tmp49, 392);
+                  tmp53 = "no exprChoice or the prec is less than " + prec;
+                  doTemp10 = Parser.tracer.print(tmp53, 396);
                   scrut8 = rule.endChoice;
                   if (scrut8 instanceof Option.Some.class) {
                     param07 = scrut8.value;
                     value2 = param07;
-                    tmp50 = Parser.tracer.print("found end choice", 394);
+                    tmp54 = Parser.tracer.print("found end choice", 398);
                     return value2
                   } else {
                     return Predef.notImplementedError
                   }
                 }
               } else {
-                tmp51 = "\"" + name;
-                tmp52 = tmp51 + "\" is not a keyword";
-                doTemp5 = Parser.tracer.print(tmp52, 397);
+                tmp55 = "\"" + name;
+                tmp56 = tmp55 + "\" is not a keyword";
+                doTemp5 = Parser.tracer.print(tmp56, 401);
                 other = param02;
-                tmp53 = TokenHelpers.preview(current);
-                tmp54 = "try parse an expression from " + tmp53;
-                doTemp = Parser.tracer.print(tmp54, 399);
+                tmp57 = TokenHelpers.preview(current);
+                tmp58 = "try parse an expression from " + tmp57;
+                doTemp = Parser.tracer.print(tmp58, 403);
                 scrut4 = rule.exprChoice;
                 if (scrut4 instanceof Option.Some.class) {
                   param04 = scrut4.value;
@@ -837,71 +841,71 @@ Parser1 = class Parser {
                     process = first1;
                     rest = first2;
                     if (isType === true) {
-                      tmp55 = typeExpr;
+                      tmp59 = typeExpr;
                     } else {
-                      tmp55 = simpleExpr;
+                      tmp59 = simpleExpr;
                     }
-                    acc = runtime.safeCall(tmp55(prec, opened));
+                    acc = runtime.safeCall(tmp59(prec, opened));
                     scrut5 = Tree.nonEmptyError(acc);
                     if (scrut5 === true) {
-                      tmp56 = parseRule(prec, rest, opened);
-                      tree1 = tmp56;
-                      tmp57 = Tree.summary(acc);
-                      tmp58 = "acc: " + tmp57;
-                      tmp59 = Parser.tracer.print(tmp58, 418);
-                      tmp60 = Tree.summary(tree1);
-                      tmp61 = "tree: " + tmp60;
-                      tmp62 = Parser.tracer.print(tmp61, 419);
+                      tmp60 = parseRule(prec, rest, opened);
+                      tree1 = tmp60;
+                      tmp61 = Tree.summary(acc);
+                      tmp62 = "acc: " + tmp61;
+                      tmp63 = Parser.tracer.print(tmp62, 422);
+                      tmp64 = Tree.summary(tree1);
+                      tmp65 = "tree: " + tmp64;
+                      tmp66 = Parser.tracer.print(tmp65, 423);
                       return runtime.safeCall(process(acc, tree1))
                     } else {
-                      doTemp3 = Parser.tracer.print("fallback to end choice", 421);
-                      doTemp1 = Parser.tracer.print("no expression choice", 422);
+                      doTemp3 = Parser.tracer.print("fallback to end choice", 425);
+                      doTemp1 = Parser.tracer.print("no expression choice", 426);
                       scrut3 = rule.endChoice;
                       if (scrut3 instanceof Option.Some.class) {
                         param03 = scrut3.value;
                         value1 = param03;
-                        tmp63 = Parser.tracer.print("found end choice", 424);
+                        tmp67 = Parser.tracer.print("found end choice", 428);
                         return value1
                       } else {
-                        doTemp2 = Parser.tracer.print("no end choice", 426);
+                        doTemp2 = Parser.tracer.print("no end choice", 430);
                         throw new globalThis.Error("match error");
                       }
                     }
                   } else {
-                    doTemp1 = Parser.tracer.print("no expression choice", 422);
+                    doTemp1 = Parser.tracer.print("no expression choice", 426);
                     scrut3 = rule.endChoice;
                     if (scrut3 instanceof Option.Some.class) {
                       param03 = scrut3.value;
                       value1 = param03;
-                      tmp64 = Parser.tracer.print("found end choice", 424);
+                      tmp68 = Parser.tracer.print("found end choice", 428);
                       return value1
                     } else {
-                      doTemp2 = Parser.tracer.print("no end choice", 426);
+                      doTemp2 = Parser.tracer.print("no end choice", 430);
                       throw new globalThis.Error("match error");
                     }
                   }
                 } else {
-                  doTemp1 = Parser.tracer.print("no expression choice", 422);
+                  doTemp1 = Parser.tracer.print("no expression choice", 426);
                   scrut3 = rule.endChoice;
                   if (scrut3 instanceof Option.Some.class) {
                     param03 = scrut3.value;
                     value1 = param03;
-                    tmp65 = Parser.tracer.print("found end choice", 424);
+                    tmp69 = Parser.tracer.print("found end choice", 428);
                     return value1
                   } else {
-                    doTemp2 = Parser.tracer.print("no end choice", 426);
+                    doTemp2 = Parser.tracer.print("no end choice", 430);
                     throw new globalThis.Error("match error");
                   }
                 }
               }
             } else {
-              tmp66 = "\"" + name;
-              tmp67 = tmp66 + "\" is not a keyword";
-              doTemp5 = Parser.tracer.print(tmp67, 397);
+              tmp70 = "\"" + name;
+              tmp71 = tmp70 + "\" is not a keyword";
+              doTemp5 = Parser.tracer.print(tmp71, 401);
               other = param02;
-              tmp68 = TokenHelpers.preview(current);
-              tmp69 = "try parse an expression from " + tmp68;
-              doTemp = Parser.tracer.print(tmp69, 399);
+              tmp72 = TokenHelpers.preview(current);
+              tmp73 = "try parse an expression from " + tmp72;
+              doTemp = Parser.tracer.print(tmp73, 403);
               scrut4 = rule.exprChoice;
               if (scrut4 instanceof Option.Some.class) {
                 param04 = scrut4.value;
@@ -913,68 +917,68 @@ Parser1 = class Parser {
                   process = first1;
                   rest = first2;
                   if (isType === true) {
-                    tmp70 = typeExpr;
+                    tmp74 = typeExpr;
                   } else {
-                    tmp70 = simpleExpr;
+                    tmp74 = simpleExpr;
                   }
-                  acc = runtime.safeCall(tmp70(prec, opened));
+                  acc = runtime.safeCall(tmp74(prec, opened));
                   scrut5 = Tree.nonEmptyError(acc);
                   if (scrut5 === true) {
-                    tmp71 = parseRule(prec, rest, opened);
-                    tree1 = tmp71;
-                    tmp72 = Tree.summary(acc);
-                    tmp73 = "acc: " + tmp72;
-                    tmp74 = Parser.tracer.print(tmp73, 418);
-                    tmp75 = Tree.summary(tree1);
-                    tmp76 = "tree: " + tmp75;
-                    tmp77 = Parser.tracer.print(tmp76, 419);
+                    tmp75 = parseRule(prec, rest, opened);
+                    tree1 = tmp75;
+                    tmp76 = Tree.summary(acc);
+                    tmp77 = "acc: " + tmp76;
+                    tmp78 = Parser.tracer.print(tmp77, 422);
+                    tmp79 = Tree.summary(tree1);
+                    tmp80 = "tree: " + tmp79;
+                    tmp81 = Parser.tracer.print(tmp80, 423);
                     return runtime.safeCall(process(acc, tree1))
                   } else {
-                    doTemp3 = Parser.tracer.print("fallback to end choice", 421);
-                    doTemp1 = Parser.tracer.print("no expression choice", 422);
+                    doTemp3 = Parser.tracer.print("fallback to end choice", 425);
+                    doTemp1 = Parser.tracer.print("no expression choice", 426);
                     scrut3 = rule.endChoice;
                     if (scrut3 instanceof Option.Some.class) {
                       param03 = scrut3.value;
                       value1 = param03;
-                      tmp78 = Parser.tracer.print("found end choice", 424);
+                      tmp82 = Parser.tracer.print("found end choice", 428);
                       return value1
                     } else {
-                      doTemp2 = Parser.tracer.print("no end choice", 426);
+                      doTemp2 = Parser.tracer.print("no end choice", 430);
                       throw new globalThis.Error("match error");
                     }
                   }
                 } else {
-                  doTemp1 = Parser.tracer.print("no expression choice", 422);
+                  doTemp1 = Parser.tracer.print("no expression choice", 426);
                   scrut3 = rule.endChoice;
                   if (scrut3 instanceof Option.Some.class) {
                     param03 = scrut3.value;
                     value1 = param03;
-                    tmp79 = Parser.tracer.print("found end choice", 424);
+                    tmp83 = Parser.tracer.print("found end choice", 428);
                     return value1
                   } else {
-                    doTemp2 = Parser.tracer.print("no end choice", 426);
+                    doTemp2 = Parser.tracer.print("no end choice", 430);
                     throw new globalThis.Error("match error");
                   }
                 }
               } else {
-                doTemp1 = Parser.tracer.print("no expression choice", 422);
+                doTemp1 = Parser.tracer.print("no expression choice", 426);
                 scrut3 = rule.endChoice;
                 if (scrut3 instanceof Option.Some.class) {
                   param03 = scrut3.value;
                   value1 = param03;
-                  tmp80 = Parser.tracer.print("found end choice", 424);
+                  tmp84 = Parser.tracer.print("found end choice", 428);
                   return value1
                 } else {
-                  doTemp2 = Parser.tracer.print("no end choice", 426);
+                  doTemp2 = Parser.tracer.print("no end choice", 430);
                   throw new globalThis.Error("match error");
                 }
               }
             }
           } else {
             other = param02;
-            tmp81 = TokenHelpers.preview(current);
-            tmp82 = "try parse an expression from " + tmp81;
-            doTemp = Parser.tracer.print(tmp82, 399);
+            tmp85 = TokenHelpers.preview(current);
+            tmp86 = "try parse an expression from " + tmp85;
+            doTemp = Parser.tracer.print(tmp86, 403);
             scrut4 = rule.exprChoice;
             if (scrut4 instanceof Option.Some.class) {
               param04 = scrut4.value;
@@ -986,59 +990,59 @@ Parser1 = class Parser {
                 process = first1;
                 rest = first2;
                 if (isType === true) {
-                  tmp83 = typeExpr;
+                  tmp87 = typeExpr;
                 } else {
-                  tmp83 = simpleExpr;
+                  tmp87 = simpleExpr;
                 }
-                acc = runtime.safeCall(tmp83(prec, opened));
+                acc = runtime.safeCall(tmp87(prec, opened));
                 scrut5 = Tree.nonEmptyError(acc);
                 if (scrut5 === true) {
-                  tmp84 = parseRule(prec, rest, opened);
-                  tree1 = tmp84;
-                  tmp85 = Tree.summary(acc);
-                  tmp86 = "acc: " + tmp85;
-                  tmp87 = Parser.tracer.print(tmp86, 418);
-                  tmp88 = Tree.summary(tree1);
-                  tmp89 = "tree: " + tmp88;
-                  tmp90 = Parser.tracer.print(tmp89, 419);
+                  tmp88 = parseRule(prec, rest, opened);
+                  tree1 = tmp88;
+                  tmp89 = Tree.summary(acc);
+                  tmp90 = "acc: " + tmp89;
+                  tmp91 = Parser.tracer.print(tmp90, 422);
+                  tmp92 = Tree.summary(tree1);
+                  tmp93 = "tree: " + tmp92;
+                  tmp94 = Parser.tracer.print(tmp93, 423);
                   return runtime.safeCall(process(acc, tree1))
                 } else {
-                  doTemp3 = Parser.tracer.print("fallback to end choice", 421);
-                  doTemp1 = Parser.tracer.print("no expression choice", 422);
+                  doTemp3 = Parser.tracer.print("fallback to end choice", 425);
+                  doTemp1 = Parser.tracer.print("no expression choice", 426);
                   scrut3 = rule.endChoice;
                   if (scrut3 instanceof Option.Some.class) {
                     param03 = scrut3.value;
                     value1 = param03;
-                    tmp91 = Parser.tracer.print("found end choice", 424);
+                    tmp95 = Parser.tracer.print("found end choice", 428);
                     return value1
                   } else {
-                    doTemp2 = Parser.tracer.print("no end choice", 426);
+                    doTemp2 = Parser.tracer.print("no end choice", 430);
                     throw new globalThis.Error("match error");
                   }
                 }
               } else {
-                doTemp1 = Parser.tracer.print("no expression choice", 422);
+                doTemp1 = Parser.tracer.print("no expression choice", 426);
                 scrut3 = rule.endChoice;
                 if (scrut3 instanceof Option.Some.class) {
                   param03 = scrut3.value;
                   value1 = param03;
-                  tmp92 = Parser.tracer.print("found end choice", 424);
+                  tmp96 = Parser.tracer.print("found end choice", 428);
                   return value1
                 } else {
-                  doTemp2 = Parser.tracer.print("no end choice", 426);
+                  doTemp2 = Parser.tracer.print("no end choice", 430);
                   throw new globalThis.Error("match error");
                 }
               }
             } else {
-              doTemp1 = Parser.tracer.print("no expression choice", 422);
+              doTemp1 = Parser.tracer.print("no expression choice", 426);
               scrut3 = rule.endChoice;
               if (scrut3 instanceof Option.Some.class) {
                 param03 = scrut3.value;
                 value1 = param03;
-                tmp93 = Parser.tracer.print("found end choice", 424);
+                tmp97 = Parser.tracer.print("found end choice", 428);
                 return value1
               } else {
-                doTemp2 = Parser.tracer.print("no end choice", 426);
+                doTemp2 = Parser.tracer.print("no end choice", 430);
                 throw new globalThis.Error("match error");
               }
             }
@@ -1098,12 +1102,12 @@ Parser1 = class Parser {
                   return exprCont(acc, prec, bracket)
                 } else {
                   tmp12 = "the left precedence is less" + name;
-                  tmp13 = Parser.tracer.print(tmp12, 444);
+                  tmp13 = Parser.tracer.print(tmp12, 448);
                   return Tree.empty
                 }
               } else if (scrut6 instanceof Option.None.class) {
                 tmp14 = "no rule starting with " + name;
-                tmp15 = Parser.tracer.print(tmp14, 447);
+                tmp15 = Parser.tracer.print(tmp14, 451);
                 return Tree.empty
               } else {
                 token1 = param01;
@@ -1144,7 +1148,7 @@ Parser1 = class Parser {
                 scrut4 = kind1 == kind$_1;
                 if (scrut4 === true) {
                   tmp25 = "closing bracket " + kind1;
-                  tmp26 = Parser.tracer.print(tmp25, 462);
+                  tmp26 = Parser.tracer.print(tmp25, 466);
                   tmp27 = consume();
                   if (content1 instanceof Tree.Empty.class) {
                     if (kind1 instanceof Token.Round.class) {
@@ -1172,12 +1176,12 @@ Parser1 = class Parser {
                 token2 = param05;
                 tmp31 = "expect a close bracket instead of " + token2;
                 message2 = tmp31;
-                tmp32 = Parser.tracer.print(message2, 475);
+                tmp32 = Parser.tracer.print(message2, 479);
                 tmp30 = Tree.Error(content1, message2);
               }
             } else if (scrut3 instanceof Stack.Nil.class) {
               message1 = "expect a close bracket instead of EOF";
-              tmp33 = Parser.tracer.print(message1, 479);
+              tmp33 = Parser.tracer.print(message1, 483);
               tmp30 = Tree.Error(content1, message1);
             } else {
               throw new globalThis.Error("match error");
@@ -1197,7 +1201,7 @@ Parser1 = class Parser {
                 return Tree.error("mismatched brackets")
               }
             } else if (bracket instanceof Option.None.class) {
-              tmp34 = Parser.tracer.print("missing close bracket", 487);
+              tmp34 = Parser.tracer.print("missing close bracket", 491);
               return Tree.error("missing close bracket")
             } else {
               token1 = param01;
@@ -1230,7 +1234,7 @@ Parser1 = class Parser {
       tmp7 = Tree.summary(acc);
       tmp8 = tmp6 + tmp7;
       tmp9 = tmp8 + " <<<";
-      doTemp = Parser.tracer.print(tmp9, 493);
+      doTemp = Parser.tracer.print(tmp9, 497);
       if (scrut1 instanceof Stack.Cons.class) {
         param01 = scrut1.head;
         param11 = scrut1.tail;
@@ -1243,13 +1247,13 @@ Parser1 = class Parser {
             param05 = scrut10.value;
             keyword1 = param05;
             tmp10 = "found a keyword: " + name1;
-            doTemp7 = Parser.tracer.print(tmp10, 495);
+            doTemp7 = Parser.tracer.print(tmp10, 499);
             scrut11 = runtime.safeCall(Parser.infixRules.keywordChoices.get(name1));
             if (scrut11 instanceof Option.Some.class) {
               param06 = scrut11.value;
               rule = param06;
               tmp11 = "found an infix keyword " + name1;
-              doTemp9 = Parser.tracer.print(tmp11, 497);
+              doTemp9 = Parser.tracer.print(tmp11, 501);
               scrut12 = keyword1.leftPrecOrMin > prec;
               if (scrut12 === true) {
                 scrut13 = rule.exprChoice;
@@ -1271,14 +1275,14 @@ Parser1 = class Parser {
                   } else {
                     tmp15 = "keyword `" + name1;
                     tmp16 = tmp15 + "` does not have infix rules";
-                    doTemp8 = Parser.tracer.print(tmp16, 505);
+                    doTemp8 = Parser.tracer.print(tmp16, 509);
                     name = param04;
                     if (param12 === true) {
                       scrut7 = runtime.safeCall(Precedence.Keywords.all.get(name));
                       if (scrut7 instanceof Option.None.class) {
                         tmp17 = "found an operator \"" + name;
                         tmp18 = tmp17 + "\"";
-                        doTemp5 = Parser.tracer.print(tmp18, 507);
+                        doTemp5 = Parser.tracer.print(tmp18, 511);
                         scrut8 = Precedence.opPrec(name);
                         if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
                           first0 = scrut8[0];
@@ -1286,7 +1290,7 @@ Parser1 = class Parser {
                           leftPrec = first0;
                           rightPrec = first1;
                           tmp19 = "its precedence is " + leftPrec;
-                          doTemp6 = Parser.tracer.print(tmp19, 509);
+                          doTemp6 = Parser.tracer.print(tmp19, 513);
                           scrut9 = leftPrec > prec;
                           if (scrut9 === true) {
                             tmp20 = consume();
@@ -1305,7 +1309,7 @@ Parser1 = class Parser {
                           token1 = param01;
                           scrut2 = Precedence.appPrec > prec;
                           if (scrut2 === true) {
-                            tmp26 = Parser.tracer.print("found an application", 547);
+                            tmp26 = Parser.tracer.print("found an application", 551);
                             scrut3 = simpleExpr(Precedence.appPrec, bracket);
                             if (scrut3 instanceof Tree.Empty.class) {
                               return acc
@@ -1319,7 +1323,7 @@ Parser1 = class Parser {
                             }
                           } else {
                             tmp29 = "cannot consume " + token1;
-                            tmp30 = Parser.tracer.print(tmp29, 553);
+                            tmp30 = Parser.tracer.print(tmp29, 557);
                             return acc
                           }
                         }
@@ -1327,7 +1331,7 @@ Parser1 = class Parser {
                         token1 = param01;
                         scrut2 = Precedence.appPrec > prec;
                         if (scrut2 === true) {
-                          tmp31 = Parser.tracer.print("found an application", 547);
+                          tmp31 = Parser.tracer.print("found an application", 551);
                           scrut3 = simpleExpr(Precedence.appPrec, bracket);
                           if (scrut3 instanceof Tree.Empty.class) {
                             return acc
@@ -1341,7 +1345,7 @@ Parser1 = class Parser {
                           }
                         } else {
                           tmp34 = "cannot consume " + token1;
-                          tmp35 = Parser.tracer.print(tmp34, 553);
+                          tmp35 = Parser.tracer.print(tmp34, 557);
                           return acc
                         }
                       }
@@ -1349,7 +1353,7 @@ Parser1 = class Parser {
                       token1 = param01;
                       scrut2 = Precedence.appPrec > prec;
                       if (scrut2 === true) {
-                        tmp36 = Parser.tracer.print("found an application", 547);
+                        tmp36 = Parser.tracer.print("found an application", 551);
                         scrut3 = simpleExpr(Precedence.appPrec, bracket);
                         if (scrut3 instanceof Tree.Empty.class) {
                           return acc
@@ -1363,7 +1367,7 @@ Parser1 = class Parser {
                         }
                       } else {
                         tmp39 = "cannot consume " + token1;
-                        tmp40 = Parser.tracer.print(tmp39, 553);
+                        tmp40 = Parser.tracer.print(tmp39, 557);
                         return acc
                       }
                     }
@@ -1373,14 +1377,14 @@ Parser1 = class Parser {
                 } else {
                   tmp41 = "keyword `" + name1;
                   tmp42 = tmp41 + "` does not have infix rules";
-                  doTemp8 = Parser.tracer.print(tmp42, 505);
+                  doTemp8 = Parser.tracer.print(tmp42, 509);
                   name = param04;
                   if (param12 === true) {
                     scrut7 = runtime.safeCall(Precedence.Keywords.all.get(name));
                     if (scrut7 instanceof Option.None.class) {
                       tmp43 = "found an operator \"" + name;
                       tmp44 = tmp43 + "\"";
-                      doTemp5 = Parser.tracer.print(tmp44, 507);
+                      doTemp5 = Parser.tracer.print(tmp44, 511);
                       scrut8 = Precedence.opPrec(name);
                       if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
                         first0 = scrut8[0];
@@ -1388,7 +1392,7 @@ Parser1 = class Parser {
                         leftPrec = first0;
                         rightPrec = first1;
                         tmp45 = "its precedence is " + leftPrec;
-                        doTemp6 = Parser.tracer.print(tmp45, 509);
+                        doTemp6 = Parser.tracer.print(tmp45, 513);
                         scrut9 = leftPrec > prec;
                         if (scrut9 === true) {
                           tmp46 = consume();
@@ -1407,7 +1411,7 @@ Parser1 = class Parser {
                         token1 = param01;
                         scrut2 = Precedence.appPrec > prec;
                         if (scrut2 === true) {
-                          tmp52 = Parser.tracer.print("found an application", 547);
+                          tmp52 = Parser.tracer.print("found an application", 551);
                           scrut3 = simpleExpr(Precedence.appPrec, bracket);
                           if (scrut3 instanceof Tree.Empty.class) {
                             return acc
@@ -1421,7 +1425,7 @@ Parser1 = class Parser {
                           }
                         } else {
                           tmp55 = "cannot consume " + token1;
-                          tmp56 = Parser.tracer.print(tmp55, 553);
+                          tmp56 = Parser.tracer.print(tmp55, 557);
                           return acc
                         }
                       }
@@ -1429,7 +1433,7 @@ Parser1 = class Parser {
                       token1 = param01;
                       scrut2 = Precedence.appPrec > prec;
                       if (scrut2 === true) {
-                        tmp57 = Parser.tracer.print("found an application", 547);
+                        tmp57 = Parser.tracer.print("found an application", 551);
                         scrut3 = simpleExpr(Precedence.appPrec, bracket);
                         if (scrut3 instanceof Tree.Empty.class) {
                           return acc
@@ -1443,7 +1447,7 @@ Parser1 = class Parser {
                         }
                       } else {
                         tmp60 = "cannot consume " + token1;
-                        tmp61 = Parser.tracer.print(tmp60, 553);
+                        tmp61 = Parser.tracer.print(tmp60, 557);
                         return acc
                       }
                     }
@@ -1451,7 +1455,7 @@ Parser1 = class Parser {
                     token1 = param01;
                     scrut2 = Precedence.appPrec > prec;
                     if (scrut2 === true) {
-                      tmp62 = Parser.tracer.print("found an application", 547);
+                      tmp62 = Parser.tracer.print("found an application", 551);
                       scrut3 = simpleExpr(Precedence.appPrec, bracket);
                       if (scrut3 instanceof Tree.Empty.class) {
                         return acc
@@ -1465,7 +1469,7 @@ Parser1 = class Parser {
                       }
                     } else {
                       tmp65 = "cannot consume " + token1;
-                      tmp66 = Parser.tracer.print(tmp65, 553);
+                      tmp66 = Parser.tracer.print(tmp65, 557);
                       return acc
                     }
                   }
@@ -1473,14 +1477,14 @@ Parser1 = class Parser {
               } else {
                 tmp67 = "keyword `" + name1;
                 tmp68 = tmp67 + "` does not have infix rules";
-                doTemp8 = Parser.tracer.print(tmp68, 505);
+                doTemp8 = Parser.tracer.print(tmp68, 509);
                 name = param04;
                 if (param12 === true) {
                   scrut7 = runtime.safeCall(Precedence.Keywords.all.get(name));
                   if (scrut7 instanceof Option.None.class) {
                     tmp69 = "found an operator \"" + name;
                     tmp70 = tmp69 + "\"";
-                    doTemp5 = Parser.tracer.print(tmp70, 507);
+                    doTemp5 = Parser.tracer.print(tmp70, 511);
                     scrut8 = Precedence.opPrec(name);
                     if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
                       first0 = scrut8[0];
@@ -1488,7 +1492,7 @@ Parser1 = class Parser {
                       leftPrec = first0;
                       rightPrec = first1;
                       tmp71 = "its precedence is " + leftPrec;
-                      doTemp6 = Parser.tracer.print(tmp71, 509);
+                      doTemp6 = Parser.tracer.print(tmp71, 513);
                       scrut9 = leftPrec > prec;
                       if (scrut9 === true) {
                         tmp72 = consume();
@@ -1507,7 +1511,7 @@ Parser1 = class Parser {
                       token1 = param01;
                       scrut2 = Precedence.appPrec > prec;
                       if (scrut2 === true) {
-                        tmp78 = Parser.tracer.print("found an application", 547);
+                        tmp78 = Parser.tracer.print("found an application", 551);
                         scrut3 = simpleExpr(Precedence.appPrec, bracket);
                         if (scrut3 instanceof Tree.Empty.class) {
                           return acc
@@ -1521,7 +1525,7 @@ Parser1 = class Parser {
                         }
                       } else {
                         tmp81 = "cannot consume " + token1;
-                        tmp82 = Parser.tracer.print(tmp81, 553);
+                        tmp82 = Parser.tracer.print(tmp81, 557);
                         return acc
                       }
                     }
@@ -1529,7 +1533,7 @@ Parser1 = class Parser {
                     token1 = param01;
                     scrut2 = Precedence.appPrec > prec;
                     if (scrut2 === true) {
-                      tmp83 = Parser.tracer.print("found an application", 547);
+                      tmp83 = Parser.tracer.print("found an application", 551);
                       scrut3 = simpleExpr(Precedence.appPrec, bracket);
                       if (scrut3 instanceof Tree.Empty.class) {
                         return acc
@@ -1543,7 +1547,7 @@ Parser1 = class Parser {
                       }
                     } else {
                       tmp86 = "cannot consume " + token1;
-                      tmp87 = Parser.tracer.print(tmp86, 553);
+                      tmp87 = Parser.tracer.print(tmp86, 557);
                       return acc
                     }
                   }
@@ -1551,7 +1555,7 @@ Parser1 = class Parser {
                   token1 = param01;
                   scrut2 = Precedence.appPrec > prec;
                   if (scrut2 === true) {
-                    tmp88 = Parser.tracer.print("found an application", 547);
+                    tmp88 = Parser.tracer.print("found an application", 551);
                     scrut3 = simpleExpr(Precedence.appPrec, bracket);
                     if (scrut3 instanceof Tree.Empty.class) {
                       return acc
@@ -1565,7 +1569,7 @@ Parser1 = class Parser {
                     }
                   } else {
                     tmp91 = "cannot consume " + token1;
-                    tmp92 = Parser.tracer.print(tmp91, 553);
+                    tmp92 = Parser.tracer.print(tmp91, 557);
                     return acc
                   }
                 }
@@ -1573,14 +1577,14 @@ Parser1 = class Parser {
             } else {
               tmp93 = "keyword `" + name1;
               tmp94 = tmp93 + "` does not have infix rules";
-              doTemp8 = Parser.tracer.print(tmp94, 505);
+              doTemp8 = Parser.tracer.print(tmp94, 509);
               name = param04;
               if (param12 === true) {
                 scrut7 = runtime.safeCall(Precedence.Keywords.all.get(name));
                 if (scrut7 instanceof Option.None.class) {
                   tmp95 = "found an operator \"" + name;
                   tmp96 = tmp95 + "\"";
-                  doTemp5 = Parser.tracer.print(tmp96, 507);
+                  doTemp5 = Parser.tracer.print(tmp96, 511);
                   scrut8 = Precedence.opPrec(name);
                   if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
                     first0 = scrut8[0];
@@ -1588,7 +1592,7 @@ Parser1 = class Parser {
                     leftPrec = first0;
                     rightPrec = first1;
                     tmp97 = "its precedence is " + leftPrec;
-                    doTemp6 = Parser.tracer.print(tmp97, 509);
+                    doTemp6 = Parser.tracer.print(tmp97, 513);
                     scrut9 = leftPrec > prec;
                     if (scrut9 === true) {
                       tmp98 = consume();
@@ -1607,7 +1611,7 @@ Parser1 = class Parser {
                     token1 = param01;
                     scrut2 = Precedence.appPrec > prec;
                     if (scrut2 === true) {
-                      tmp104 = Parser.tracer.print("found an application", 547);
+                      tmp104 = Parser.tracer.print("found an application", 551);
                       scrut3 = simpleExpr(Precedence.appPrec, bracket);
                       if (scrut3 instanceof Tree.Empty.class) {
                         return acc
@@ -1621,7 +1625,7 @@ Parser1 = class Parser {
                       }
                     } else {
                       tmp107 = "cannot consume " + token1;
-                      tmp108 = Parser.tracer.print(tmp107, 553);
+                      tmp108 = Parser.tracer.print(tmp107, 557);
                       return acc
                     }
                   }
@@ -1629,7 +1633,7 @@ Parser1 = class Parser {
                   token1 = param01;
                   scrut2 = Precedence.appPrec > prec;
                   if (scrut2 === true) {
-                    tmp109 = Parser.tracer.print("found an application", 547);
+                    tmp109 = Parser.tracer.print("found an application", 551);
                     scrut3 = simpleExpr(Precedence.appPrec, bracket);
                     if (scrut3 instanceof Tree.Empty.class) {
                       return acc
@@ -1643,7 +1647,7 @@ Parser1 = class Parser {
                     }
                   } else {
                     tmp112 = "cannot consume " + token1;
-                    tmp113 = Parser.tracer.print(tmp112, 553);
+                    tmp113 = Parser.tracer.print(tmp112, 557);
                     return acc
                   }
                 }
@@ -1651,7 +1655,7 @@ Parser1 = class Parser {
                 token1 = param01;
                 scrut2 = Precedence.appPrec > prec;
                 if (scrut2 === true) {
-                  tmp114 = Parser.tracer.print("found an application", 547);
+                  tmp114 = Parser.tracer.print("found an application", 551);
                   scrut3 = simpleExpr(Precedence.appPrec, bracket);
                   if (scrut3 instanceof Tree.Empty.class) {
                     return acc
@@ -1665,7 +1669,7 @@ Parser1 = class Parser {
                   }
                 } else {
                   tmp117 = "cannot consume " + token1;
-                  tmp118 = Parser.tracer.print(tmp117, 553);
+                  tmp118 = Parser.tracer.print(tmp117, 557);
                   return acc
                 }
               }
@@ -1677,7 +1681,7 @@ Parser1 = class Parser {
               if (scrut7 instanceof Option.None.class) {
                 tmp119 = "found an operator \"" + name;
                 tmp120 = tmp119 + "\"";
-                doTemp5 = Parser.tracer.print(tmp120, 507);
+                doTemp5 = Parser.tracer.print(tmp120, 511);
                 scrut8 = Precedence.opPrec(name);
                 if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
                   first0 = scrut8[0];
@@ -1685,7 +1689,7 @@ Parser1 = class Parser {
                   leftPrec = first0;
                   rightPrec = first1;
                   tmp121 = "its precedence is " + leftPrec;
-                  doTemp6 = Parser.tracer.print(tmp121, 509);
+                  doTemp6 = Parser.tracer.print(tmp121, 513);
                   scrut9 = leftPrec > prec;
                   if (scrut9 === true) {
                     tmp122 = consume();
@@ -1704,7 +1708,7 @@ Parser1 = class Parser {
                   token1 = param01;
                   scrut2 = Precedence.appPrec > prec;
                   if (scrut2 === true) {
-                    tmp128 = Parser.tracer.print("found an application", 547);
+                    tmp128 = Parser.tracer.print("found an application", 551);
                     scrut3 = simpleExpr(Precedence.appPrec, bracket);
                     if (scrut3 instanceof Tree.Empty.class) {
                       return acc
@@ -1718,7 +1722,7 @@ Parser1 = class Parser {
                     }
                   } else {
                     tmp131 = "cannot consume " + token1;
-                    tmp132 = Parser.tracer.print(tmp131, 553);
+                    tmp132 = Parser.tracer.print(tmp131, 557);
                     return acc
                   }
                 }
@@ -1726,7 +1730,7 @@ Parser1 = class Parser {
                 token1 = param01;
                 scrut2 = Precedence.appPrec > prec;
                 if (scrut2 === true) {
-                  tmp133 = Parser.tracer.print("found an application", 547);
+                  tmp133 = Parser.tracer.print("found an application", 551);
                   scrut3 = simpleExpr(Precedence.appPrec, bracket);
                   if (scrut3 instanceof Tree.Empty.class) {
                     return acc
@@ -1740,7 +1744,7 @@ Parser1 = class Parser {
                   }
                 } else {
                   tmp136 = "cannot consume " + token1;
-                  tmp137 = Parser.tracer.print(tmp136, 553);
+                  tmp137 = Parser.tracer.print(tmp136, 557);
                   return acc
                 }
               }
@@ -1748,7 +1752,7 @@ Parser1 = class Parser {
               token1 = param01;
               scrut2 = Precedence.appPrec > prec;
               if (scrut2 === true) {
-                tmp138 = Parser.tracer.print("found an application", 547);
+                tmp138 = Parser.tracer.print("found an application", 551);
                 scrut3 = simpleExpr(Precedence.appPrec, bracket);
                 if (scrut3 instanceof Tree.Empty.class) {
                   return acc
@@ -1762,7 +1766,7 @@ Parser1 = class Parser {
                 }
               } else {
                 tmp141 = "cannot consume " + token1;
-                tmp142 = Parser.tracer.print(tmp141, 553);
+                tmp142 = Parser.tracer.print(tmp141, 557);
                 return acc
               }
             }
@@ -1771,7 +1775,7 @@ Parser1 = class Parser {
           param02 = param01.kind;
           kind = param02;
           tmp143 = "found a close bracket of " + kind;
-          doTemp4 = Parser.tracer.print(tmp143, 518);
+          doTemp4 = Parser.tracer.print(tmp143, 522);
           if (bracket instanceof Option.Some.class) {
             param03 = bracket.value;
             kind$_ = param03;
@@ -1787,7 +1791,7 @@ Parser1 = class Parser {
             token1 = param01;
             scrut2 = Precedence.appPrec > prec;
             if (scrut2 === true) {
-              tmp144 = Parser.tracer.print("found an application", 547);
+              tmp144 = Parser.tracer.print("found an application", 551);
               scrut3 = simpleExpr(Precedence.appPrec, bracket);
               if (scrut3 instanceof Tree.Empty.class) {
                 return acc
@@ -1801,12 +1805,12 @@ Parser1 = class Parser {
               }
             } else {
               tmp147 = "cannot consume " + token1;
-              tmp148 = Parser.tracer.print(tmp147, 553);
+              tmp148 = Parser.tracer.print(tmp147, 557);
               return acc
             }
           }
         } else if (param01 instanceof Token.Semicolon.class) {
-          doTemp3 = Parser.tracer.print("found a semicolon", 525);
+          doTemp3 = Parser.tracer.print("found a semicolon", 529);
           tmp149 = Option.unsafe.get(Precedence.Keywords._semicolon.leftPrec);
           scrut5 = tmp149 > prec;
           if (scrut5 === true) {
@@ -1816,11 +1820,11 @@ Parser1 = class Parser {
             tmp153 = Tree.sequenceWithHead(tmp152, acc);
             return exprCont(tmp153, prec, bracket)
           } else {
-            tmp154 = Parser.tracer.print("cannot consume the semicolon", 532);
+            tmp154 = Parser.tracer.print("cannot consume the semicolon", 536);
             return acc
           }
         } else if (param01 instanceof Token.Comma.class) {
-          doTemp2 = Parser.tracer.print("found a comma", 535);
+          doTemp2 = Parser.tracer.print("found a comma", 539);
           tmp155 = Option.unsafe.get(Precedence.Keywords._comma.leftPrec);
           scrut4 = tmp155 > prec;
           if (scrut4 === true) {
@@ -1830,14 +1834,14 @@ Parser1 = class Parser {
             tmp159 = Tree.tupleWithHead(tmp158, acc);
             return exprCont(tmp159, prec, bracket)
           } else {
-            tmp160 = Parser.tracer.print("cannot consume the comma", 542);
+            tmp160 = Parser.tracer.print("cannot consume the comma", 546);
             return acc
           }
         } else {
           token1 = param01;
           scrut2 = Precedence.appPrec > prec;
           if (scrut2 === true) {
-            tmp161 = Parser.tracer.print("found an application", 547);
+            tmp161 = Parser.tracer.print("found an application", 551);
             scrut3 = simpleExpr(Precedence.appPrec, bracket);
             if (scrut3 instanceof Tree.Empty.class) {
               return acc
@@ -1851,12 +1855,12 @@ Parser1 = class Parser {
             }
           } else {
             tmp164 = "cannot consume " + token1;
-            tmp165 = Parser.tracer.print(tmp164, 553);
+            tmp165 = Parser.tracer.print(tmp164, 557);
             return acc
           }
         }
       } else if (scrut1 instanceof Stack.Nil.class) {
-        doTemp1 = Parser.tracer.print("found an EOF", 556);
+        doTemp1 = Parser.tracer.print("found an EOF", 560);
         if (bracket instanceof Option.Some.class) {
           return Tree.Error(acc, "expect a close bracket instead of EOF")
         } else if (bracket instanceof Option.None.class) {
@@ -2001,7 +2005,7 @@ Parser1 = class Parser {
               return typeExprCont(tmp42, prec, bracket)
             } else {
               kind2 = param05;
-              tmp43 = runtime.safeCall(Parser.tracer.print("found an open ", kind2, " bracket", 605));
+              tmp43 = runtime.safeCall(Parser.tracer.print("found an open ", kind2, " bracket", 609));
               tmp44 = consume();
               if (kind2 instanceof Token.Curly.class) {
                 tmp45 = (_) => {
@@ -2049,7 +2053,7 @@ Parser1 = class Parser {
       tmp6 = Tree.summary(acc);
       tmp7 = tmp5 + tmp6;
       tmp8 = tmp7 + " <<<";
-      tmp9 = Parser.tracer.print(tmp8, 632);
+      tmp9 = Parser.tracer.print(tmp8, 636);
       tmp10 = yeetSpaces();
       scrut1 = tmp10;
       if (scrut1 instanceof Stack.Cons.class) {
@@ -2072,11 +2076,11 @@ Parser1 = class Parser {
           } else {
             tmp11 = TokenHelpers.preview(current);
             tmp12 = "check keyword " + tmp11;
-            doTemp = Parser.tracer.print(tmp12, 666);
-            doTemp1 = Parser.tracer.print("not a keyword", 677);
+            doTemp = Parser.tracer.print(tmp12, 670);
+            doTemp1 = Parser.tracer.print("not a keyword", 681);
             token1 = param01;
             tmp13 = "cannot consume " + token1;
-            tmp14 = Parser.tracer.print(tmp13, 686);
+            tmp14 = Parser.tracer.print(tmp13, 690);
             return acc
           }
         } else if (param01 instanceof Token.Identifier.class) {
@@ -2096,14 +2100,14 @@ Parser1 = class Parser {
             } else {
               tmp15 = TokenHelpers.preview(current);
               tmp16 = "check keyword " + tmp15;
-              doTemp = Parser.tracer.print(tmp16, 666);
+              doTemp = Parser.tracer.print(tmp16, 670);
               name1 = param02;
               scrut4 = runtime.safeCall(Precedence.TypeKeywords.all.get(name1));
               if (scrut4 instanceof Option.Some.class) {
                 param03 = scrut4.value;
                 keyword1 = param03;
                 tmp17 = "found a keyword " + name1;
-                doTemp2 = Parser.tracer.print(tmp17, 669);
+                doTemp2 = Parser.tracer.print(tmp17, 673);
                 scrut5 = keyword1.leftPrecOrMin > prec;
                 if (scrut5 === true) {
                   tmp18 = consume();
@@ -2115,12 +2119,12 @@ Parser1 = class Parser {
                   return acc
                 }
               } else {
-                doTemp1 = Parser.tracer.print("not a keyword", 677);
+                doTemp1 = Parser.tracer.print("not a keyword", 681);
                 name = param02;
                 if (param12 === false) {
                   scrut2 = Precedence.TypeKeywords.appPrec > prec;
                   if (scrut2 === true) {
-                    tmp21 = Parser.tracer.print("found an application", 680);
+                    tmp21 = Parser.tracer.print("found an application", 684);
                     scrut3 = typeExpr(Precedence.TypeKeywords.appPrec, bracket);
                     if (scrut3 instanceof Tree.Empty.class) {
                       return acc
@@ -2135,13 +2139,13 @@ Parser1 = class Parser {
                   } else {
                     token1 = param01;
                     tmp24 = "cannot consume " + token1;
-                    tmp25 = Parser.tracer.print(tmp24, 686);
+                    tmp25 = Parser.tracer.print(tmp24, 690);
                     return acc
                   }
                 } else {
                   token1 = param01;
                   tmp26 = "cannot consume " + token1;
-                  tmp27 = Parser.tracer.print(tmp26, 686);
+                  tmp27 = Parser.tracer.print(tmp26, 690);
                   return acc
                 }
               }
@@ -2149,14 +2153,14 @@ Parser1 = class Parser {
           } else {
             tmp28 = TokenHelpers.preview(current);
             tmp29 = "check keyword " + tmp28;
-            doTemp = Parser.tracer.print(tmp29, 666);
+            doTemp = Parser.tracer.print(tmp29, 670);
             name1 = param02;
             scrut4 = runtime.safeCall(Precedence.TypeKeywords.all.get(name1));
             if (scrut4 instanceof Option.Some.class) {
               param03 = scrut4.value;
               keyword1 = param03;
               tmp30 = "found a keyword " + name1;
-              doTemp2 = Parser.tracer.print(tmp30, 669);
+              doTemp2 = Parser.tracer.print(tmp30, 673);
               scrut5 = keyword1.leftPrecOrMin > prec;
               if (scrut5 === true) {
                 tmp31 = consume();
@@ -2168,12 +2172,12 @@ Parser1 = class Parser {
                 return acc
               }
             } else {
-              doTemp1 = Parser.tracer.print("not a keyword", 677);
+              doTemp1 = Parser.tracer.print("not a keyword", 681);
               name = param02;
               if (param12 === false) {
                 scrut2 = Precedence.TypeKeywords.appPrec > prec;
                 if (scrut2 === true) {
-                  tmp34 = Parser.tracer.print("found an application", 680);
+                  tmp34 = Parser.tracer.print("found an application", 684);
                   scrut3 = typeExpr(Precedence.TypeKeywords.appPrec, bracket);
                   if (scrut3 instanceof Tree.Empty.class) {
                     return acc
@@ -2188,19 +2192,19 @@ Parser1 = class Parser {
                 } else {
                   token1 = param01;
                   tmp37 = "cannot consume " + token1;
-                  tmp38 = Parser.tracer.print(tmp37, 686);
+                  tmp38 = Parser.tracer.print(tmp37, 690);
                   return acc
                 }
               } else {
                 token1 = param01;
                 tmp39 = "cannot consume " + token1;
-                tmp40 = Parser.tracer.print(tmp39, 686);
+                tmp40 = Parser.tracer.print(tmp39, 690);
                 return acc
               }
             }
           }
         } else if (param01 instanceof Token.Semicolon.class) {
-          doTemp4 = Parser.tracer.print("found a semicolon", 645);
+          doTemp4 = Parser.tracer.print("found a semicolon", 649);
           tmp41 = Option.unsafe.get(Precedence.TypeKeywords._semicolon.leftPrec);
           scrut7 = tmp41 > prec;
           if (scrut7 === true) {
@@ -2215,11 +2219,11 @@ Parser1 = class Parser {
             });
             return typeExprCont(tmp46, prec, bracket)
           } else {
-            tmp47 = Parser.tracer.print("cannot consume the semicolon", 653);
+            tmp47 = Parser.tracer.print("cannot consume the semicolon", 657);
             return acc
           }
         } else if (param01 instanceof Token.Comma.class) {
-          doTemp3 = Parser.tracer.print("found a comma", 656);
+          doTemp3 = Parser.tracer.print("found a comma", 660);
           tmp48 = Option.unsafe.get(Precedence.TypeKeywords._comma.leftPrec);
           scrut6 = tmp48 > prec;
           if (scrut6 === true) {
@@ -2229,24 +2233,24 @@ Parser1 = class Parser {
             tmp52 = Tree.tupleWithHead(tmp51, acc);
             return typeExprCont(tmp52, prec, bracket)
           } else {
-            tmp53 = Parser.tracer.print("cannot consume the comma", 663);
+            tmp53 = Parser.tracer.print("cannot consume the comma", 667);
             return acc
           }
         } else {
           tmp54 = TokenHelpers.preview(current);
           tmp55 = "check keyword " + tmp54;
-          doTemp = Parser.tracer.print(tmp55, 666);
-          doTemp1 = Parser.tracer.print("not a keyword", 677);
+          doTemp = Parser.tracer.print(tmp55, 670);
+          doTemp1 = Parser.tracer.print("not a keyword", 681);
           token1 = param01;
           tmp56 = "cannot consume " + token1;
-          tmp57 = Parser.tracer.print(tmp56, 686);
+          tmp57 = Parser.tracer.print(tmp56, 690);
           return acc
         }
       } else {
         tmp58 = TokenHelpers.preview(current);
         tmp59 = "check keyword " + tmp58;
-        doTemp = Parser.tracer.print(tmp59, 666);
-        doTemp1 = Parser.tracer.print("not a keyword", 677);
+        doTemp = Parser.tracer.print(tmp59, 670);
+        doTemp1 = Parser.tracer.print("not a keyword", 681);
         if (scrut1 instanceof Stack.Nil.class) {
           return acc
         } else {
@@ -2258,7 +2262,7 @@ Parser1 = class Parser {
       let scrut1, doTemp, param01, param11, param02, param12, name, scrut2, param03, keyword1, scrut3, param04, rule, tree1, scrut4, param05, rule1, tree2, param06, param13, bindings, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21;
       tmp4 = yeetSpaces();
       scrut1 = tmp4;
-      doTemp = Parser.tracer.print(">>>>>> mod <<<<<<", 691);
+      doTemp = Parser.tracer.print(">>>>>> mod <<<<<<", 695);
       if (scrut1 instanceof Stack.Cons.class) {
         param01 = scrut1.head;
         param11 = scrut1.tail;
@@ -2335,7 +2339,7 @@ Parser1 = class Parser {
       let scrut1, doTemp, param01, param11, param02, param12, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
       tmp4 = yeetSpaces();
       scrut1 = tmp4;
-      doTemp = Parser.tracer.print(">>>>>> modCont <<<<<<", 713);
+      doTemp = Parser.tracer.print(">>>>>> modCont <<<<<<", 717);
       if (scrut1 instanceof Stack.Cons.class) {
         param01 = scrut1.head;
         param11 = scrut1.tail;
@@ -2379,7 +2383,7 @@ Parser1 = class Parser {
       token = param0;
       tmp2 = "expect EOF instead of " + token;
       message = tmp2;
-      tmp3 = Parser.tracer.print(message, 728);
+      tmp3 = Parser.tracer.print(message, 732);
       return Tree.Error(tree, message)
     } else if (scrut instanceof Stack.Nil.class) {
       return tree

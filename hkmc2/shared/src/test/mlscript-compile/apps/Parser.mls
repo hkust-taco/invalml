@@ -361,11 +361,15 @@ fun parse(tokens) =
             Some(value) then value
             None then
               // The rule doesn't allow an end here.
+              consume
               Tree.error("unexpected close bracket `" + encountered + "`")
           else
+            consume
             // The rule expects a different close bracket.
             Tree.error("mismatched brackets")
-        None then Tree.error("unexpected bracket: " + encountered)
+        None then
+          consume
+          Tree.error("unexpected bracket: " + encountered)
       Token.Identifier(name, _) :: _ and
         do tracer.print of "found an identifier \"" + name + "\"", source.line
         Keywords.all.get(name) is Some(keyword) and
