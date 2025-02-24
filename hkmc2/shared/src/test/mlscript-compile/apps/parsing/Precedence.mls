@@ -57,7 +57,7 @@ module Keywords with
   val _false = keyword("false", None, None)
   // val _fatArrow = keyword of "=>", nextPrec, eqPrec
   val _as = keyword("as", nextPrec, currPrec)
-  val _fun = keyword("fun", currPrec, None)
+  val _fun = keyword("fun", currPrec, _thinArrow.leftPrec)
   val _function = keyword("function", currPrec, None)
   val _type = keyword("type", currPrec, None)
   val _exception = keyword("exception", currPrec, None)

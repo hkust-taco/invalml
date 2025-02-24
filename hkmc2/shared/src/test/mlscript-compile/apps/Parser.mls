@@ -299,18 +299,24 @@ val moduleRules = rule of
   typeDefinition()
   exceptionDefinition()
 
-fun makeInfixChoice(keyword) =
+fun makeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
   Choice.keyword of
     keyword
     "operator `" + keyword.name + "`"
     Choice.expr of
-      (rhs, _) => lhs => Tree.Infix(keyword, lhs, rhs)
+      (rhs, _) => lhs => compose(lhs, rhs)
       "operator `" + keyword.name + "` right-hand side"
       Choice.end of ()
 
 val infixRules = rule of
   "the continuation of expressions"
-  makeInfixChoice(Keywords._bar)
+  Choice.keyword of
+    Keywords._colon
+    "type ascription"
+    Choice.typeExpr of
+      (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
+      "right-hand side type"
+      Choice.end of ()
 
 fun parse(tokens) =
   let
@@ -481,14 +487,15 @@ fun parse(tokens) =
   
   fun exprCont(acc: Tree, prec: Int) = if yeetSpaces is
     do tracer.print(">>> exprCont " + prec + " " + acc Tree.summary() + " <<<", source.line)
+    // Look up the infix rules.
     Token.Identifier(name, _) :: _ and Keywords.all.get(name) is Some(keyword) and
       do tracer.print of "found a keyword: " + name, source.line
       infixRules.keywordChoices.get(name) is Some(rule) and
-        do tracer.print of "found an infix keyword " + name, source.line
+        do tracer.print of "the keyword is found in infix rules" + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
           Some([isType, process, rest]) then
             consume
-            let rhs = simpleExpr(keyword.rightPrecOrMin)
+            let rhs = (if isType then typeExpr else simpleExpr) of keyword.rightPrecOrMin
             let acc' = Tree.Infix(keyword, acc, rhs)
             exprCont(acc', prec)
           None then acc

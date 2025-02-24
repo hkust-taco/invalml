@@ -61,7 +61,7 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`true`, N/A, N/A)
 //│ > Keyword(`false`, N/A, N/A)
 //│ > Keyword(`as`, 9, 9)
-//│ > Keyword(`fun`, 9, N/A)
+//│ > Keyword(`fun`, 9, 5)
 //│ > Keyword(`function`, 9, N/A)
 //│ > Keyword(`type`, 9, N/A)
 //│ > Keyword(`exception`, 9, N/A)
@@ -108,7 +108,7 @@ print of Parser.exprRules.display
 //│ >     
 
 print of Parser.infixRules.display
-//│ > <the continuation of expressions> ::= `|` <expr> 
+//│ > <the continuation of expressions> ::= `:` <typexpr> 
 
 pattern Flag = "tree" | "trace" | "tokens"
 
@@ -146,6 +146,48 @@ fun example(...lines) =
 
 example of "(x) => x"
 //│ > «x => x»
+
+example of "let x: int = 0"
+//│ > «let x : int = 0»
+
+example of "let x: int -> int = function | 0 -> 1 | x -> x"
+//│ > «let x : int -> int = function 0 -> 1 | x -> x»
+
+example of """
+fun x y -> x + y
+"""
+//│ > «fun x(y) -> x + y»
+
+example of """
+:tree
+let x: int -> int -> int = fun x y -> x + y
+"""
+//│ > Define:
+//│ >   kind = Let(false)
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Infix:
+//│ >         op = Keyword(`:`, 4, 3)
+//│ >         lhs = Ident of "x"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`->`, 5, 4)
+//│ >           lhs = Ident of "int"
+//│ >           rhs = Infix:
+//│ >             op = Keyword(`->`, 5, 4)
+//│ >             lhs = Ident of "int"
+//│ >             rhs = Ident of "int"
+//│ >       second = Lambda:
+//│ >         params = Stack of 
+//│ >           App:
+//│ >             callee = Ident of "x"
+//│ >             arguments = Stack of 
+//│ >               Ident of "y"
+//│ >         body = App:
+//│ >           callee = Ident of "+"
+//│ >           arguments = Stack of 
+//│ >             Ident of "x"
+//│ >             Ident of "y"
+//│ > «let x : int -> int -> int = fun x(y) -> x + y»
 
 example of "(1 + 2) * 3"
 //│ > «(1 + 2) * 3»
