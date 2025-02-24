@@ -26,15 +26,9 @@ type Opt[A] = Some[A] | None
 
 module Parser with ...
 
-//  ____       _
-// |  _ \  ___| |__  _   _  __ _
-// | | | |/ _ \ '_ \| | | |/ _` |
-// | |_| |  __/ |_) | |_| | (_| |
-// |____/ \___|_.__/ \__,_|\__, |
-//                         |___/
-// ==============================
-
 val tracer = new TreeTracer
+
+
 
 fun letBinding(hasInClause: Bool) =
   let intro = "let binding: "
@@ -427,15 +421,13 @@ fun parse(tokens) =
               tracer.print of "found a rule starting with `" + name + "`", source.line
               tracer.print of "the rest of the rule: " + rest.display, source.line
               consume
-              // parseRule(keyword.rightPrecOrMax, rest)
               parseRule(0, rest)
             None and
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
               rule.exprChoice is Some([isType, process, rest]) and
-                // keyword.leftPrecOrMin > prec then
                 true then
-                  let acc = (if isType then typeExpr else simpleExpr) of prec
+                  let acc = (if isType then typeExpr else term) of prec
                   let tree = parseRule(prec, rest)
                   process(acc, tree)
               do tracer.print of "no exprChoice or the prec is less than " + prec, source.line
@@ -446,22 +438,8 @@ fun parse(tokens) =
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
         do tracer.print of "try parse an expression from " + TokenHelpers.preview(current), source.line
-        // simpleExpr(prec) is
-        //   Tree.Error(Tree.Empty(), _) and rule.endChoice is
-        //     Some(value) then value
-        //   reserve and rule.exprChoice is
-        //     Some([isType, process, rest]) then 
-        //       let rhs = parseRule(prec, rest)
-        //       tracer.print of "the reserved expression: " + reserve Tree.summary(), source.line
-        //       tracer.print of "the result from sub-rule: " + rhs Tree.summary(), source.line
-        //       process(reserve, rhs)
-        //     None then
-        //       tracer.print of "the rule doesn't have a choice starting with expressions", source.line
-        //       tracer.print of rule.display, source.line
-        //       Tree.error("unexpected expression")
-        // ----
         rule.exprChoice is Some([isType, process, rest]) and
-          let acc = (if isType then typeExpr else simpleExpr)(prec)
+          let acc = (if isType then typeExpr else term)(prec)
           acc Tree.nonEmptyError() then
             let tree = parseRule(prec, rest)
             tracer.print of "acc: " + acc Tree.summary(), source.line
@@ -486,9 +464,9 @@ fun parse(tokens) =
       Token.Square then Tree.Bracketed(Token.Square, content)
       else content
   
-  fun simpleExpr(prec: Int) = tracer.trace of
-    "simple expression <<< " + prec + " " + TokenHelpers.preview(current)
-    result => "simple expression >>> " + result Tree.summary()
+  fun term(prec: Int) = tracer.trace of
+    "term <<< " + prec + " " + TokenHelpers.preview(current)
+    result => "term >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
       Token.Identifier(name, symbolic) :: _ and Keywords.all.get(name) is
@@ -497,7 +475,7 @@ fun parse(tokens) =
             keyword.leftPrecOrMin > prec then
               consume
               let acc = parseRule(keyword.rightPrecOrMax, rule)
-              exprCont(acc, prec)
+              termCont(acc, prec)
             else
               tracer.print of "the left precedence is less" + name, source.line
               Tree.empty
@@ -506,22 +484,22 @@ fun parse(tokens) =
             Tree.empty
         None then
           consume
-          exprCont(Tree.Ident(name, symbolic), prec)
+          termCont(Tree.Ident(name, symbolic), prec)
       Token.Literal(kind, literal) :: _ then
         consume
-        exprCont(Tree.Literal(kind, literal), prec)
+        termCont(Tree.Literal(kind, literal), prec)
       Token.Open(kind) :: _ then
         consume
-        simpleExpr(0, Some(kind))
+        term(0, Some(kind))
           closeBy(kind)
           bracketed(kind)
-          exprCont(prec)
+          termCont(prec)
       Token.Close(kind) :: _ then Tree.Empty()
       token :: _ then Tree.error("unrecognized token: " + token)
       Nil then Tree.error("unexpected EOF")
   
-  fun exprCont(acc: Tree, prec: Int) = if yeetSpaces is
-    do tracer.print(">>> exprCont " + prec + " " + acc Tree.summary() + " <<<", source.line)
+  fun termCont(acc: Tree, prec: Int) = if yeetSpaces is
+    do tracer.print(">>> termCont " + prec + " " + acc Tree.summary() + " <<<", source.line)
     // Look up the infix rules.
     Token.Identifier(name, _) :: _ and Keywords.all.get(name) is Some(keyword) and
       do tracer.print of "found a keyword: " + name, source.line
@@ -532,9 +510,9 @@ fun parse(tokens) =
         keyword.leftPrecOrMin > prec and rule.exprChoice is
           Some([isType, process, rest]) then
             consume
-            let rhs = (if isType then typeExpr else simpleExpr) of keyword.rightPrecOrMin
+            let rhs = (if isType then typeExpr else term) of keyword.rightPrecOrMin
             let acc' = process(rhs)(acc)
-            exprCont(acc', prec)
+            termCont(acc', prec)
           None then acc
       do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
     Token.Identifier(name, true) :: _ and Keywords.all.get(name) is None and
@@ -544,18 +522,18 @@ fun parse(tokens) =
         leftPrec > prec then
           consume
           let op = Tree.Ident(name, true)
-          let rhs = simpleExpr(rightPrec)
-          exprCont(Tree.App(op, acc :: rhs :: Nil), prec)
+          let rhs = term(rightPrec)
+          termCont(Tree.App(op, acc :: rhs :: Nil), prec)
         else
           acc
     Token.Close(kind) :: _ then acc
     token :: _ and
       appPrec > prec then
         do tracer.print of "found an application", source.line
-        if simpleExpr(appPrec) is
+        if term(appPrec) is
           Tree.Empty then acc
           Tree.Error then acc
-          rhs then exprCont(Tree.App(acc, rhs :: Nil), prec)
+          rhs then termCont(Tree.App(acc, rhs :: Nil), prec)
       else
         tracer.print of "cannot consume " + token, source.line
         acc
@@ -603,7 +581,7 @@ fun parse(tokens) =
           keyword.leftPrecOrMin > prec and rule.exprChoice is
             Some([isType, process, rest]) then
               consume
-              let rhs = (if isType then typeExpr else simpleExpr) of keyword.rightPrecOrMin
+              let rhs = (if isType then typeExpr else term) of keyword.rightPrecOrMin
               let acc' = process(rhs)(acc)
               typeExprCont(acc', prec)
             None then acc
@@ -650,7 +628,7 @@ fun parse(tokens) =
           consume
           let tree = parseRule(0, rule, None)
           modCont(tree :: acc)
-    _ :: _ then modCont of simpleExpr(0, None) :: acc
+    _ :: _ then modCont of term(0, None) :: acc
     Nil then acc reverse()
   
   fun modCont(acc: Stack[Tree]) = if yeetSpaces is
