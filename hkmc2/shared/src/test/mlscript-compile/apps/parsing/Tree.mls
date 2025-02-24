@@ -2,7 +2,6 @@ import "../../Iter.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
 import "../../Option.mls"
-import "../Lexer.mls"
 import "./Keyword.mls"
 import "./Precedence.mls"
 import "./Token.mls"
@@ -50,6 +49,8 @@ module Tree with
     // `items` is separated by `and`
     Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
     LetIn(bindings: Stack[[Tree, Tree]], body: Tree) extends Tree
+    While(cond: Tree, body: Tree) extends Tree
+    For(head: Tree, start: Tree, end: Tree, body: Tree) extends Tree
     // For `if`-`then`-`else`. The last part is optional.
     Ternary(keyword: Keyword, lhs: Tree, rhs: Tree, body) extends Tree
   
@@ -135,6 +136,9 @@ module Tree with
           Iter.joined(" and ")
         " in "
         go(body)
+      While(cond, body) then mkStr of "while ", go(cond), " do ", go(body), " done"
+      For(head, start, end, body) then mkStr of
+        "for ", go(head), " = ", go(start), " to ", go(end), " do ", go(body), " done"
       Ternary(keyword, lhs, rhs, body) then fold(+) of
         keyword.name, " ", go(lhs),
         if keyword.name is

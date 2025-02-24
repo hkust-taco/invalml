@@ -37,10 +37,10 @@ TreeHelpers1 = class TreeHelpers {
   static showAsTree(thing) {
     let itemize, go;
     itemize = function itemize(something) {
-      let first1, first0, x, y, keyword, param0, param1, p, b, param01, param11, param2, param3, n, l, r, b1, param02, param12, bds, b2, param03, param13, k, i, param04, param14, param21, op, lhs, rhs, param05, param15, c, a, param06, param16, scrutinee, branches, param07, param17, k1, v, param08, t, param09, t1, param010, param18, m, s, param011, param19, k2, items, param012, param110, n1, param013, param111, t2, m1, m2, param014, param112, head, tail, items1, remaining, param015, param113, head$_, tail$_, param016, content, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46;
+      let first1, first0, x, y, keyword, param0, param1, p, b, param01, param11, param2, param3, n, l, r, b1, param02, param12, param21, param31, h, s, e, b2, param03, param13, c, b3, param04, param14, bds, b4, param05, param15, k, i, param06, param16, param22, op, lhs, rhs, param07, param17, c1, a, param08, param18, scrutinee, branches, param09, param19, k1, v, param010, t, param011, t1, param012, param110, m, s1, param013, param111, k2, items, param014, param112, n1, param015, param113, t2, m1, m2, param016, param114, head, tail, items1, remaining, param017, param115, head$_, tail$_, param018, content, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52;
       if (something instanceof Option.Some.class) {
-        param016 = something.value;
-        content = param016;
+        param018 = something.value;
+        content = param018;
         tmp = go(content);
         tmp1 = "Some of " + tmp;
         return Predef.tuple([
@@ -49,26 +49,26 @@ TreeHelpers1 = class TreeHelpers {
       } else if (something instanceof Option.None.class) {
         return Predef.tuple("None", [])
       } else if (something instanceof Stack.Cons.class) {
-        param014 = something.head;
-        param112 = something.tail;
-        head = param014;
-        tail = param112;
+        param016 = something.head;
+        param114 = something.tail;
+        head = param016;
+        tail = param114;
         tmp2 = go(head);
         items1 = [
           tmp2
         ];
         remaining = tail;
-        tmp47: while (true) {
+        tmp53: while (true) {
           if (remaining instanceof Stack.Cons.class) {
-            param015 = remaining.head;
-            param113 = remaining.tail;
-            head$_ = param015;
-            tail$_ = param113;
+            param017 = remaining.head;
+            param115 = remaining.tail;
+            head$_ = param017;
+            tail$_ = param115;
             tmp3 = go(head$_);
             tmp4 = runtime.safeCall(items1.push(tmp3));
             remaining = tail$_;
             tmp5 = runtime.Unit;
-            continue tmp47;
+            continue tmp53;
           } else {
             tmp5 = runtime.Unit;
           }
@@ -102,10 +102,10 @@ TreeHelpers1 = class TreeHelpers {
           []
         ]
       } else if (something instanceof Tree.Error.class) {
-        param013 = something.tree;
-        param111 = something.message;
-        if (param013 instanceof Tree.Empty.class) {
-          m2 = param111;
+        param015 = something.tree;
+        param113 = something.message;
+        if (param015 instanceof Tree.Empty.class) {
+          m2 = param113;
           tmp12 = go(m2);
           return Predef.tuple("Error", [
             [
@@ -114,8 +114,8 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         } else {
-          t2 = param013;
-          m1 = param111;
+          t2 = param015;
+          m1 = param113;
           tmp13 = go(t2);
           tmp14 = go(m1);
           return Predef.tuple("Error", [
@@ -129,40 +129,40 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         }
+      } else if (something instanceof Tree.Ident.class) {
+        param014 = something.name;
+        param112 = something.symbolic;
+        n1 = param014;
+        tmp15 = go(n1);
+        return Predef.tuple("Ident", [
+          [
+            "name",
+            tmp15
+          ]
+        ])
+      } else if (something instanceof Tree.Bracketed.class) {
+        param013 = something.kind;
+        param111 = something.tree;
+        k2 = param013;
+        items = param111;
+        tmp16 = "Bracketed#" + k2;
+        tmp17 = go(items);
+        return Predef.tuple(tmp16, [
+          [
+            "items",
+            tmp17
+          ]
+        ])
       } else {
-        if (something instanceof Tree.Ident.class) {
-          param012 = something.name;
-          param110 = something.symbolic;
-          n1 = param012;
-          tmp15 = go(n1);
-          return Predef.tuple("Ident", [
-            [
-              "name",
-              tmp15
-            ]
-          ])
-        } else if (something instanceof Tree.Bracketed.class) {
-          param011 = something.kind;
-          param19 = something.tree;
-          k2 = param011;
-          items = param19;
-          tmp16 = "Bracketed#" + k2;
-          tmp17 = go(items);
-          return Predef.tuple(tmp16, [
-            [
-              "items",
-              tmp17
-            ]
-          ])
-        } else if (something instanceof Tree.Underscore.class) {
+        if (something instanceof Tree.Underscore.class) {
           return Predef.tuple("Underscore", [])
         } else if (something instanceof Tree.Modified.class) {
-          param010 = something.modifier;
-          param18 = something.subject;
-          m = param010;
-          s = param18;
+          param012 = something.modifier;
+          param110 = something.subject;
+          m = param012;
+          s1 = param110;
           tmp18 = go(m);
-          tmp19 = go(s);
+          tmp19 = go(s1);
           return Predef.tuple("Modified", [
             [
               "modifier",
@@ -174,8 +174,8 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         } else if (something instanceof Tree.Tuple.class) {
-          param09 = something.trees;
-          t1 = param09;
+          param011 = something.trees;
+          t1 = param011;
           tmp20 = go(t1);
           return Predef.tuple("Tuple", [
             [
@@ -184,8 +184,8 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         } else if (something instanceof Tree.Sequence.class) {
-          param08 = something.trees;
-          t = param08;
+          param010 = something.trees;
+          t = param010;
           tmp21 = go(t);
           return Predef.tuple("Sequence", [
             [
@@ -194,10 +194,10 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         } else if (something instanceof Tree.Literal.class) {
-          param07 = something.kind;
-          param17 = something.value;
-          k1 = param07;
-          v = param17;
+          param09 = something.kind;
+          param19 = something.value;
+          k1 = param09;
+          v = param19;
           tmp22 = go(k1);
           tmp23 = "Literal#" + tmp22;
           tmp24 = tmp23 + " of ";
@@ -205,10 +205,10 @@ TreeHelpers1 = class TreeHelpers {
           tmp26 = tmp24 + tmp25;
           return Predef.tuple(tmp26, [])
         } else if (something instanceof Tree.Match.class) {
-          param06 = something.scrutinee;
-          param16 = something.branches;
-          scrutinee = param06;
-          branches = param16;
+          param08 = something.scrutinee;
+          param18 = something.branches;
+          scrutinee = param08;
+          branches = param18;
           tmp27 = go(branches);
           return Predef.tuple("Match", [
             [
@@ -221,11 +221,11 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         } else if (something instanceof Tree.App.class) {
-          param05 = something.callee;
-          param15 = something.arguments;
-          c = param05;
-          a = param15;
-          tmp28 = go(c);
+          param07 = something.callee;
+          param17 = something.arguments;
+          c1 = param07;
+          a = param17;
+          tmp28 = go(c1);
           tmp29 = go(a);
           return Predef.tuple("App", [
             [
@@ -238,12 +238,12 @@ TreeHelpers1 = class TreeHelpers {
             ]
           ])
         } else if (something instanceof Tree.Infix.class) {
-          param04 = something.op;
-          param14 = something.lhs;
-          param21 = something.rhs;
-          op = param04;
-          lhs = param14;
-          rhs = param21;
+          param06 = something.op;
+          param16 = something.lhs;
+          param22 = something.rhs;
+          op = param06;
+          lhs = param16;
+          rhs = param22;
           tmp30 = go(op);
           tmp31 = go(lhs);
           tmp32 = go(rhs);
@@ -261,39 +261,87 @@ TreeHelpers1 = class TreeHelpers {
               tmp32
             ]
           ])
+        } else if (something instanceof Tree.Define.class) {
+          param05 = something.kind;
+          param15 = something.items;
+          k = param05;
+          i = param15;
+          tmp33 = runtime.safeCall(k.toString());
+          tmp34 = go(i);
+          return Predef.tuple("Define", [
+            [
+              "kind",
+              tmp33
+            ],
+            [
+              "items",
+              tmp34
+            ]
+          ])
+        } else if (something instanceof Tree.LetIn.class) {
+          param04 = something.bindings;
+          param14 = something.body;
+          bds = param04;
+          b4 = param14;
+          tmp35 = go(bds);
+          tmp36 = go(b4);
+          return Predef.tuple("LetIn", [
+            [
+              "bindings",
+              tmp35
+            ],
+            [
+              "body",
+              tmp36
+            ]
+          ])
         } else {
-          if (something instanceof Tree.Define.class) {
-            param03 = something.kind;
-            param13 = something.items;
-            k = param03;
-            i = param13;
-            tmp33 = runtime.safeCall(k.toString());
-            tmp34 = go(i);
-            return Predef.tuple("Define", [
+          if (something instanceof Tree.While.class) {
+            param03 = something.cond;
+            param13 = something.body;
+            c = param03;
+            b3 = param13;
+            tmp37 = go(c);
+            tmp38 = go(b3);
+            return Predef.tuple("While", [
               [
-                "kind",
-                tmp33
-              ],
-              [
-                "items",
-                tmp34
-              ]
-            ])
-          } else if (something instanceof Tree.LetIn.class) {
-            param02 = something.bindings;
-            param12 = something.body;
-            bds = param02;
-            b2 = param12;
-            tmp35 = go(bds);
-            tmp36 = go(b2);
-            return Predef.tuple("LetIn", [
-              [
-                "bindings",
-                tmp35
+                "condition",
+                tmp37
               ],
               [
                 "body",
-                tmp36
+                tmp38
+              ]
+            ])
+          } else if (something instanceof Tree.For.class) {
+            param02 = something.head;
+            param12 = something.start;
+            param21 = something.end;
+            param31 = something.body;
+            h = param02;
+            s = param12;
+            e = param21;
+            b2 = param31;
+            tmp39 = go(h);
+            tmp40 = go(s);
+            tmp41 = go(e);
+            tmp42 = go(b2);
+            return Predef.tuple("For", [
+              [
+                "head",
+                tmp39
+              ],
+              [
+                "start",
+                tmp40
+              ],
+              [
+                "end",
+                tmp41
+              ],
+              [
+                "body",
+                tmp42
               ]
             ])
           } else if (something instanceof Tree.Ternary.class) {
@@ -305,26 +353,26 @@ TreeHelpers1 = class TreeHelpers {
             l = param11;
             r = param2;
             b1 = param3;
-            tmp37 = go(n);
-            tmp38 = go(l);
-            tmp39 = go(r);
-            tmp40 = go(b1);
+            tmp43 = go(n);
+            tmp44 = go(l);
+            tmp45 = go(r);
+            tmp46 = go(b1);
             return Predef.tuple("Ternary", [
               [
                 "name",
-                tmp37
+                tmp43
               ],
               [
                 "lhs",
-                tmp38
+                tmp44
               ],
               [
                 "rhs",
-                tmp39
+                tmp45
               ],
               [
                 "body",
-                tmp40
+                tmp46
               ]
             ])
           } else if (something instanceof Tree.Lambda.class) {
@@ -332,23 +380,23 @@ TreeHelpers1 = class TreeHelpers {
             param1 = something.body;
             p = param0;
             b = param1;
-            tmp41 = go(p);
-            tmp42 = go(b);
+            tmp47 = go(p);
+            tmp48 = go(b);
             return Predef.tuple("Lambda", [
               [
                 "params",
-                tmp41
+                tmp47
               ],
               [
                 "body",
-                tmp42
+                tmp48
               ]
             ])
           } else if (something instanceof Keyword.Keyword.class) {
             keyword = something;
-            tmp43 = runtime.safeCall(keyword.toString());
+            tmp49 = runtime.safeCall(keyword.toString());
             return [
-              tmp43,
+              tmp49,
               []
             ]
           } else if (something instanceof Token.LiteralKind.Integer.class) {
@@ -364,24 +412,24 @@ TreeHelpers1 = class TreeHelpers {
             first1 = something[1];
             x = first0;
             y = first1;
-            tmp44 = go(x);
-            tmp45 = go(y);
+            tmp50 = go(x);
+            tmp51 = go(y);
             return Predef.tuple("Pair", [
               [
                 "first",
-                tmp44
+                tmp50
               ],
               [
                 "second",
-                tmp45
+                tmp51
               ]
             ])
           } else {
-            tmp46 = runtime.safeCall(globalThis.JSON.stringify(something));
+            tmp52 = runtime.safeCall(globalThis.JSON.stringify(something));
             return Predef.tuple("Unknown", [
               [
                 "JSON.stringify(_)",
-                tmp46
+                tmp52
               ]
             ])
           }

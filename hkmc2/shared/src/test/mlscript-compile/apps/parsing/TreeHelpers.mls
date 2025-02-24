@@ -54,6 +54,9 @@ fun showAsTree(thing) =
       "Infix", [["op", go(op)], ["lhs", go(lhs)], ["rhs", go(rhs)]]
     Tree.Define(k, i) then tuple of "Define", [["kind", k.toString()], ["items", go(i)]]
     Tree.LetIn(bds, b) then tuple of "LetIn", [["bindings", go(bds)], ["body", go(b)]]
+    Tree.While(c, b) then tuple of "While", [["condition", go(c)], ["body", go(b)]]
+    Tree.For(h, s, e, b) then tuple of
+      "For", [["head", go(h)], ["start", go(s)], ["end", go(e)], ["body", go(b)]]
     Tree.Ternary(n, l, r, b) then tuple of
       "Ternary", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
     Tree.Lambda(p, b) then tuple of "Lambda", [["params", go(p)], ["body", go(b)]]

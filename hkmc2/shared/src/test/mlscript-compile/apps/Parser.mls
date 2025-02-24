@@ -242,6 +242,62 @@ fun matchFunctionChoice() =
         Tree.Match(scrut, arms) then Tree.Match(scrut, x :: arms)
       Tree.Match(Tree.empty, Nil)
 
+let whileTerm = Choice.keyword of
+  Keywords._while
+  "while condition"
+  Choice.expr of
+    Tree.While
+    "while body"
+    Choice.keyword of
+      Keywords._do
+      "while body"
+      Choice.expr of
+        (body, _) => body
+        "while end"
+        Choice.keyword of
+          Keywords._done
+          "while end"
+          Choice.end of ()
+
+fun forTerm =
+  let intro = "for: "
+  let innerPart = Choice.expr of
+    (end, body) => [end, body]
+    intro + "`do` keyword"
+    Choice.keyword of
+      Keywords._do
+      intro + "body expression"
+      Choice.expr of
+        (body, _) => body
+        intro + "`done` keyword"
+        Choice.keyword of
+          Keywords._done
+          "the end"
+          Choice.end of ()
+  Choice.keyword of
+    Keywords._for
+    intro + "left-hand side"
+    Choice.expr of
+      (head, startEndBody) => if startEndBody is
+        [start, end, body] then
+          Tree.For(head, start, end, body)
+      intro + "head"
+      Choice.keyword of
+        Keywords._equal
+        intro + "start expression"
+        Choice.expr of
+          (start, endBody) => if endBody is [end, body] then
+            [start, end, body]
+          intro + "`to` or `downto` keyword"
+          Choice.keyword of
+            Keywords._to
+            "end expression"
+            innerPart
+          Choice.keyword of
+            Keywords._downto
+            "end expression"
+            innerPart
+
 fun makeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
   Choice.keyword of
     keyword
@@ -278,6 +334,8 @@ val exprRules = rule of
   matchWithChoice()
   matchFunctionChoice()
   ifThenElse()
+  whileTerm
+  forTerm
   // We put the infix rules here just for the railroad diagrams.
   Choice.Expr of
     false

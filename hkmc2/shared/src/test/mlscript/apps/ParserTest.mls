@@ -1,41 +1,29 @@
 :js
 
-import "../../mlscript-compile/apps/Lexer.mls"
 import "../../mlscript-compile/apps/parsing/Precedence.mls"
-import "../../mlscript-compile/apps/parsing/ParseRule.mls"
-import "../../mlscript-compile/apps/parsing/Token.mls"
-import "../../mlscript-compile/apps/parsing/Tree.mls"
-import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
-import "../../mlscript-compile/apps/parsing/TreeHelpers.mls"
 import "../../mlscript-compile/apps/Parser.mls"
-import "../../mlscript-compile/Iter.mls"
-import "../../mlscript-compile/Option.mls"
-import "../../mlscript-compile/Stack.mls"
+import "../../mlscript-compile/apps/parsing/Test.mls"
 
-open Token { LiteralKind }
-open Parser { parse, tracer }
-open Option { Some, None }
 open Precedence { Keywords, opPrec, TypeKeywords }
-open Stack
-open TreeHelpers { showAsTree }
+open Test { example }
 
 Keywords.maxPrec
-//│ = 9
+//│ = 11
 
 opPrec(";")
 //│ = [2147483647, 2147483647]
 
 opPrec("|>")
-//│ = [12, 18]
+//│ = [14, 20]
 
 opPrec("<:")
-//│ = [18, 10]
+//│ = [20, 12]
 
 opPrec("::")
-//│ = [11, 10]
+//│ = [13, 12]
 
 opPrec of "+"
-//│ = [19, 19]
+//│ = [21, 21]
 
 print of Keywords.all.values.join("\n")
 //│ > Keyword(`;;`, 0, 0)
@@ -50,22 +38,27 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`->`, 5, 3)
 //│ > Keyword(`:`, 4, 3)
 //│ > Keyword(`match`, 6, 6)
-//│ > Keyword(`with`, N/A, 6)
-//│ > Keyword(`case`, N/A, 6)
-//│ > Keyword(`if`, 8, 7)
-//│ > Keyword(`then`, 7, 7)
-//│ > Keyword(`do`, 7, 7)
-//│ > Keyword(`else`, 7, 7)
+//│ > Keyword(`while`, 7, 7)
+//│ > Keyword(`for`, 8, 8)
+//│ > Keyword(`to`, N/A, N/A)
+//│ > Keyword(`downto`, N/A, N/A)
+//│ > Keyword(`do`, N/A, N/A)
+//│ > Keyword(`done`, N/A, N/A)
+//│ > Keyword(`with`, N/A, 8)
+//│ > Keyword(`case`, N/A, 8)
+//│ > Keyword(`if`, 10, 9)
+//│ > Keyword(`then`, 9, 9)
+//│ > Keyword(`else`, 9, 9)
 //│ > Keyword(`let`, 3, 1)
-//│ > Keyword(`in`, 7, 7)
+//│ > Keyword(`in`, 9, 9)
 //│ > Keyword(`true`, N/A, N/A)
 //│ > Keyword(`false`, N/A, N/A)
-//│ > Keyword(`as`, 9, 9)
-//│ > Keyword(`fun`, 9, 5)
-//│ > Keyword(`function`, 9, N/A)
-//│ > Keyword(`type`, 9, N/A)
-//│ > Keyword(`exception`, 9, N/A)
-//│ > Keyword(`rec`, 9, 3)
+//│ > Keyword(`as`, 11, 11)
+//│ > Keyword(`fun`, 11, 5)
+//│ > Keyword(`function`, 11, N/A)
+//│ > Keyword(`type`, 11, N/A)
+//│ > Keyword(`exception`, 11, N/A)
+//│ > Keyword(`rec`, 11, 3)
 
 print of TypeKeywords.all.values.join("\n")
 //│ > Keyword(`type`, N/A, N/A)
@@ -106,44 +99,15 @@ print of Parser.exprRules.display
 //│ >   `then` <expr> 
 //│ >     `else` <expr> 
 //│ >     
+//│ > `while` <expr> `do` <expr> `done` 
+//│ > `for` <expr> 
+//│ >   `=` <expr> 
+//│ >     `to` <expr> `do` <expr> `done` 
+//│ >     `downto` <expr> `do` <expr> `done` 
 //│ > <expr> 
 //│ >   `,` <expr> 
 //│ >   `;` <expr> 
 //│ >   `:` <typexpr> 
-
-pattern Flag = "tree" | "trace" | "tokens"
-
-fun flags(tokens) =
-  let result = new Set
-  while tokens is
-    Token.Space :: Token.Identifier(":", _) :: Token.Identifier(Flag as flag, _) :: tail then
-      result.add(flag)
-      set tokens = tail
-    Token.Identifier(":", _) :: Token.Identifier(Flag as flag, _) :: tail then
-      result.add(flag)
-      set tokens = tail
-    else [result, tokens]
-
-fun example(...lines) =
-  let
-    source = lines.join("\n")
-    tokens = Lexer.lex(source)
-  if flags(tokens) is [flags, tokens] then ...
-  if flags.has("tokens") do
-    print of TokenHelpers.panorama(tokens)
-  tracer.reset()
-  set tracer.enabled = flags.has("trace")
-  let trees = parse(tokens)
-  set tracer.enabled = false
-  if flags.has("tree") do
-    print of trees
-      Iter.fromStack()
-      Iter.mapping of showAsTree
-      Iter.joined of "\n"
-  print of trees
-    Iter.fromStack()
-    Iter.mapping of Tree.summary
-    Iter.joined of "\n"
 
 example of "(x) => x"
 //│ > «x => x»
@@ -262,8 +226,6 @@ function (0, 0) -> "both zero"
        | (_, _) -> "neither zero"
 """
 //│ > «function (0, 0) -> "both …" | (0, _) -> "first…" | (_, 0) -> "secon…" | (_, _) -> "neith…"»
-
-set tracer.enabled = false
 
 example of "if f x then y else z"
 //│ > «if f(x) then y then z»
