@@ -6,7 +6,7 @@ import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
 
 open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
-open Parser { exprRules, moduleRules }
+open Parser { exprRules, moduleRules, typeRules }
 open XML { html, tag, elem, style }
 
 fun toHTML(...elements) = html(["lang", "en"]) of
@@ -34,11 +34,11 @@ fs.writeFileSync of
   filePath of "rule.html"
   toHTML of
     ...render("Expression Rules", exprRules)
+      Iter.appended of render("Type Rules", typeRules)
       Iter.appended of render("Module Rules", moduleRules)
       Iter.mapping of case [caption, svg] then
         elem("figure", style(["text-align", "center"])) of
           svg
           elem("figcaption", ["id", caption]) of caption
-      Iter.flattening()
       Iter.toArray()
   "utf-8"

@@ -139,186 +139,208 @@ Lexer1 = class Lexer {
     const Operator$class = class Operator {
       constructor() {}
       unapply(scrut) {
-        if (scrut === "!") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "#") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "%") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "&") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "*") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "+") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "-") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === "/") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
-        } else if (scrut === ":") {
+        if (scrut === ",") {
           return runtime.safeCall(globalThis.Predef.MatchResult([]))
         } else {
-          if (scrut === "<") {
+          if (scrut === ";") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "=") {
+          } else if (scrut === "!") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === ">") {
+          } else if (scrut === "#") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "?") {
+          } else if (scrut === "%") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "@") {
+          } else if (scrut === "&") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "\\") {
+          } else if (scrut === "*") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "^") {
+          } else if (scrut === "+") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "|") {
+          } else if (scrut === "-") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === "~") {
+          } else if (scrut === "/") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
-          } else if (scrut === ".") {
+          } else if (scrut === ":") {
             return runtime.safeCall(globalThis.Predef.MatchResult([]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            if (scrut === "<") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "=") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === ">") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "?") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "@") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "\\") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "^") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "|") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === "~") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else if (scrut === ".") {
+              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            } else {
+              return runtime.safeCall(globalThis.Predef.MatchFailure())
+            }
           }
         }
       } 
       unapplyStringPrefix(topic) {
-        let cond, sliced, cond1, sliced1, cond2, sliced2, cond3, sliced3, cond4, sliced4, cond5, sliced5, cond6, sliced6, cond7, sliced7, cond8, sliced8, cond9, sliced9, cond10, sliced10, cond11, sliced11, cond12, sliced12, cond13, sliced13, cond14, sliced14, cond15, sliced15, cond16, sliced16, cond17, sliced17, cond18, sliced18;
-        cond = globalThis.Predef.stringStartsWith(topic, "!");
+        let cond, sliced, cond1, sliced1, cond2, sliced2, cond3, sliced3, cond4, sliced4, cond5, sliced5, cond6, sliced6, cond7, sliced7, cond8, sliced8, cond9, sliced9, cond10, sliced10, cond11, sliced11, cond12, sliced12, cond13, sliced13, cond14, sliced14, cond15, sliced15, cond16, sliced16, cond17, sliced17, cond18, sliced18, cond19, sliced19, cond20, sliced20;
+        cond = globalThis.Predef.stringStartsWith(topic, ",");
         if (cond === true) {
           sliced = globalThis.Predef.stringDrop(topic, 1);
           return runtime.safeCall(globalThis.Predef.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, "#");
+          cond1 = globalThis.Predef.stringStartsWith(topic, ";");
           if (cond1 === true) {
             sliced1 = globalThis.Predef.stringDrop(topic, 1);
             return runtime.safeCall(globalThis.Predef.MatchResult([
               sliced1
             ]))
           } else {
-            cond2 = globalThis.Predef.stringStartsWith(topic, "%");
+            cond2 = globalThis.Predef.stringStartsWith(topic, "!");
             if (cond2 === true) {
               sliced2 = globalThis.Predef.stringDrop(topic, 1);
               return runtime.safeCall(globalThis.Predef.MatchResult([
                 sliced2
               ]))
             } else {
-              cond3 = globalThis.Predef.stringStartsWith(topic, "&");
+              cond3 = globalThis.Predef.stringStartsWith(topic, "#");
               if (cond3 === true) {
                 sliced3 = globalThis.Predef.stringDrop(topic, 1);
                 return runtime.safeCall(globalThis.Predef.MatchResult([
                   sliced3
                 ]))
               } else {
-                cond4 = globalThis.Predef.stringStartsWith(topic, "*");
+                cond4 = globalThis.Predef.stringStartsWith(topic, "%");
                 if (cond4 === true) {
                   sliced4 = globalThis.Predef.stringDrop(topic, 1);
                   return runtime.safeCall(globalThis.Predef.MatchResult([
                     sliced4
                   ]))
                 } else {
-                  cond5 = globalThis.Predef.stringStartsWith(topic, "+");
+                  cond5 = globalThis.Predef.stringStartsWith(topic, "&");
                   if (cond5 === true) {
                     sliced5 = globalThis.Predef.stringDrop(topic, 1);
                     return runtime.safeCall(globalThis.Predef.MatchResult([
                       sliced5
                     ]))
                   } else {
-                    cond6 = globalThis.Predef.stringStartsWith(topic, "-");
+                    cond6 = globalThis.Predef.stringStartsWith(topic, "*");
                     if (cond6 === true) {
                       sliced6 = globalThis.Predef.stringDrop(topic, 1);
                       return runtime.safeCall(globalThis.Predef.MatchResult([
                         sliced6
                       ]))
                     } else {
-                      cond7 = globalThis.Predef.stringStartsWith(topic, "/");
+                      cond7 = globalThis.Predef.stringStartsWith(topic, "+");
                       if (cond7 === true) {
                         sliced7 = globalThis.Predef.stringDrop(topic, 1);
                         return runtime.safeCall(globalThis.Predef.MatchResult([
                           sliced7
                         ]))
                       } else {
-                        cond8 = globalThis.Predef.stringStartsWith(topic, ":");
+                        cond8 = globalThis.Predef.stringStartsWith(topic, "-");
                         if (cond8 === true) {
                           sliced8 = globalThis.Predef.stringDrop(topic, 1);
                           return runtime.safeCall(globalThis.Predef.MatchResult([
                             sliced8
                           ]))
                         } else {
-                          cond9 = globalThis.Predef.stringStartsWith(topic, "<");
+                          cond9 = globalThis.Predef.stringStartsWith(topic, "/");
                           if (cond9 === true) {
                             sliced9 = globalThis.Predef.stringDrop(topic, 1);
                             return runtime.safeCall(globalThis.Predef.MatchResult([
                               sliced9
                             ]))
                           } else {
-                            cond10 = globalThis.Predef.stringStartsWith(topic, "=");
+                            cond10 = globalThis.Predef.stringStartsWith(topic, ":");
                             if (cond10 === true) {
                               sliced10 = globalThis.Predef.stringDrop(topic, 1);
                               return runtime.safeCall(globalThis.Predef.MatchResult([
                                 sliced10
                               ]))
                             } else {
-                              cond11 = globalThis.Predef.stringStartsWith(topic, ">");
+                              cond11 = globalThis.Predef.stringStartsWith(topic, "<");
                               if (cond11 === true) {
                                 sliced11 = globalThis.Predef.stringDrop(topic, 1);
                                 return runtime.safeCall(globalThis.Predef.MatchResult([
                                   sliced11
                                 ]))
                               } else {
-                                cond12 = globalThis.Predef.stringStartsWith(topic, "?");
+                                cond12 = globalThis.Predef.stringStartsWith(topic, "=");
                                 if (cond12 === true) {
                                   sliced12 = globalThis.Predef.stringDrop(topic, 1);
                                   return runtime.safeCall(globalThis.Predef.MatchResult([
                                     sliced12
                                   ]))
                                 } else {
-                                  cond13 = globalThis.Predef.stringStartsWith(topic, "@");
+                                  cond13 = globalThis.Predef.stringStartsWith(topic, ">");
                                   if (cond13 === true) {
                                     sliced13 = globalThis.Predef.stringDrop(topic, 1);
                                     return runtime.safeCall(globalThis.Predef.MatchResult([
                                       sliced13
                                     ]))
                                   } else {
-                                    cond14 = globalThis.Predef.stringStartsWith(topic, "\\");
+                                    cond14 = globalThis.Predef.stringStartsWith(topic, "?");
                                     if (cond14 === true) {
                                       sliced14 = globalThis.Predef.stringDrop(topic, 1);
                                       return runtime.safeCall(globalThis.Predef.MatchResult([
                                         sliced14
                                       ]))
                                     } else {
-                                      cond15 = globalThis.Predef.stringStartsWith(topic, "^");
+                                      cond15 = globalThis.Predef.stringStartsWith(topic, "@");
                                       if (cond15 === true) {
                                         sliced15 = globalThis.Predef.stringDrop(topic, 1);
                                         return runtime.safeCall(globalThis.Predef.MatchResult([
                                           sliced15
                                         ]))
                                       } else {
-                                        cond16 = globalThis.Predef.stringStartsWith(topic, "|");
+                                        cond16 = globalThis.Predef.stringStartsWith(topic, "\\");
                                         if (cond16 === true) {
                                           sliced16 = globalThis.Predef.stringDrop(topic, 1);
                                           return runtime.safeCall(globalThis.Predef.MatchResult([
                                             sliced16
                                           ]))
                                         } else {
-                                          cond17 = globalThis.Predef.stringStartsWith(topic, "~");
+                                          cond17 = globalThis.Predef.stringStartsWith(topic, "^");
                                           if (cond17 === true) {
                                             sliced17 = globalThis.Predef.stringDrop(topic, 1);
                                             return runtime.safeCall(globalThis.Predef.MatchResult([
                                               sliced17
                                             ]))
                                           } else {
-                                            cond18 = globalThis.Predef.stringStartsWith(topic, ".");
+                                            cond18 = globalThis.Predef.stringStartsWith(topic, "|");
                                             if (cond18 === true) {
                                               sliced18 = globalThis.Predef.stringDrop(topic, 1);
                                               return runtime.safeCall(globalThis.Predef.MatchResult([
                                                 sliced18
                                               ]))
                                             } else {
-                                              return runtime.safeCall(globalThis.Predef.MatchFailure())
+                                              cond19 = globalThis.Predef.stringStartsWith(topic, "~");
+                                              if (cond19 === true) {
+                                                sliced19 = globalThis.Predef.stringDrop(topic, 1);
+                                                return runtime.safeCall(globalThis.Predef.MatchResult([
+                                                  sliced19
+                                                ]))
+                                              } else {
+                                                cond20 = globalThis.Predef.stringStartsWith(topic, ".");
+                                                if (cond20 === true) {
+                                                  sliced20 = globalThis.Predef.stringDrop(topic, 1);
+                                                  return runtime.safeCall(globalThis.Predef.MatchResult([
+                                                    sliced20
+                                                  ]))
+                                                } else {
+                                                  return runtime.safeCall(globalThis.Predef.MatchFailure())
+                                                }
+                                              }
                                             }
                                           }
                                         }
@@ -1449,11 +1471,11 @@ Lexer1 = class Lexer {
       }
     };
     scan = function scan(idx, acc) {
-      let go, scrut, param0, other, scrut1, param01, ch, matchResult, scrut2, first1, first0, idx$_, token, param02, param1, name, scrut3, param03, ch1, matchResult1, scrut4, first11, first01, idx$_1, token1, param04, param11, name1, ch2, matchResult2, ch3, matchResult3, ch4, matchResult4, scrut5, param05, matchResult5, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65;
+      let go, scrut, param0, other, scrut1, param01, ch, matchResult, scrut2, first1, first0, idx$_, token, param02, param1, name, scrut3, param03, ch1, matchResult1, scrut4, first11, first01, idx$_1, token1, param04, param11, name1, ch2, matchResult2, ch3, matchResult3, ch4, matchResult4, matchResult5, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59;
       go = function go(idx1, tok) {
-        let tmp66;
-        tmp66 = Stack.Cons(tok, acc);
-        return scan(idx1, tmp66)
+        let tmp60;
+        tmp60 = Stack.Cons(tok, acc);
+        return scan(idx1, tmp60)
       };
       scrut = char1(idx);
       if (scrut instanceof Option.None.class) {
@@ -1466,90 +1488,70 @@ Lexer1 = class Lexer {
           tmp1 = whitespace(tmp);
           return go(tmp1, Token.Space)
         } else {
-          if (param0 === ",") {
+          if (param0 === "\"") {
             tmp2 = idx + 1;
-            return go(tmp2, Token.Comma)
-          } else if (param0 === ";") {
-            tmp3 = idx + 1;
-            scrut5 = char1(tmp3);
-            if (scrut5 instanceof Option.Some.class) {
-              param05 = scrut5.value;
-              if (param05 === ";") {
-                tmp4 = idx + 2;
-                tmp5 = Token.Identifier(";;", true);
-                return go(tmp4, tmp5)
-              } else {
-                tmp6 = idx + 1;
-                return go(tmp6, Token.Semicolon)
-              }
-            } else {
-              tmp7 = idx + 1;
-              return go(tmp7, Token.Semicolon)
-            }
-          } else if (param0 === "\"") {
-            tmp8 = idx + 1;
-            tmp9 = string(tmp8);
-            return go(...tmp9)
+            tmp3 = string(tmp2);
+            return go(...tmp3)
           } else if (param0 === "(") {
-            tmp10 = idx + 1;
-            tmp11 = Token.Open(Token.Round);
-            return go(tmp10, tmp11)
+            tmp4 = idx + 1;
+            tmp5 = Token.Open(Token.Round);
+            return go(tmp4, tmp5)
           } else if (param0 === "[") {
-            tmp12 = idx + 1;
-            tmp13 = Token.Open(Token.Square);
-            return go(tmp12, tmp13)
+            tmp6 = idx + 1;
+            tmp7 = Token.Open(Token.Square);
+            return go(tmp6, tmp7)
           } else if (param0 === "{") {
-            tmp14 = idx + 1;
-            tmp15 = Token.Open(Token.Curly);
-            return go(tmp14, tmp15)
+            tmp8 = idx + 1;
+            tmp9 = Token.Open(Token.Curly);
+            return go(tmp8, tmp9)
           } else if (param0 === ")") {
-            tmp16 = idx + 1;
-            tmp17 = Token.Close(Token.Round);
-            return go(tmp16, tmp17)
+            tmp10 = idx + 1;
+            tmp11 = Token.Close(Token.Round);
+            return go(tmp10, tmp11)
           } else if (param0 === "]") {
-            tmp18 = idx + 1;
-            tmp19 = Token.Close(Token.Square);
-            return go(tmp18, tmp19)
+            tmp12 = idx + 1;
+            tmp13 = Token.Close(Token.Square);
+            return go(tmp12, tmp13)
           } else if (param0 === "}") {
-            tmp20 = idx + 1;
-            tmp21 = Token.Close(Token.Curly);
-            return go(tmp20, tmp21)
+            tmp14 = idx + 1;
+            tmp15 = Token.Close(Token.Curly);
+            return go(tmp14, tmp15)
           } else if (param0 === "/") {
-            tmp22 = idx + 1;
-            tmp23 = comment(tmp22);
-            return go(...tmp23)
+            tmp16 = idx + 1;
+            tmp17 = comment(tmp16);
+            return go(...tmp17)
           } else {
             matchResult4 = runtime.safeCall(Lexer.Operator.unapply(param0));
             if (matchResult4 instanceof globalThis.Predef.MatchResult.class) {
               ch4 = param0;
-              tmp24 = idx + 1;
-              tmp25 = operator(tmp24, ch4);
-              return go(...tmp25)
+              tmp18 = idx + 1;
+              tmp19 = operator(tmp18, ch4);
+              return go(...tmp19)
             } else {
               matchResult3 = runtime.safeCall(Char.Digit.unapply(param0));
               if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
                 ch3 = param0;
-                tmp26 = idx + 1;
-                tmp27 = number(tmp26, ch3);
-                return go(...tmp27)
+                tmp20 = idx + 1;
+                tmp21 = number(tmp20, ch3);
+                return go(...tmp21)
               } else {
                 matchResult2 = runtime.safeCall(Lexer.IdentifierStart.unapply(param0));
                 if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
                   ch2 = param0;
-                  tmp28 = idx + 1;
-                  tmp29 = identifier(tmp28, ch2);
-                  return go(...tmp29)
+                  tmp22 = idx + 1;
+                  tmp23 = identifier(tmp22, ch2);
+                  return go(...tmp23)
                 } else {
                   if (param0 === "'") {
-                    tmp30 = idx + 1;
-                    scrut3 = char1(tmp30);
+                    tmp24 = idx + 1;
+                    scrut3 = char1(tmp24);
                     if (scrut3 instanceof Option.Some.class) {
                       param03 = scrut3.value;
                       matchResult1 = runtime.safeCall(Lexer.IdentifierStart.unapply(param03));
                       if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
                         ch1 = param03;
-                        tmp31 = idx + 2;
-                        scrut4 = identifier(tmp31, ch1);
+                        tmp25 = idx + 2;
+                        scrut4 = identifier(tmp25, ch1);
                         if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
                           first01 = scrut4[0];
                           first11 = scrut4[1];
@@ -1559,46 +1561,46 @@ Lexer1 = class Lexer {
                             param04 = token1.name;
                             param11 = token1.symbolic;
                             name1 = param04;
-                            tmp32 = Token.TypeVariable(name1);
-                            return go(idx$_1, tmp32)
+                            tmp26 = Token.TypeVariable(name1);
+                            return go(idx$_1, tmp26)
                           } else {
-                            tmp33 = idx + 1;
-                            return go(tmp33, Token.Error)
+                            tmp27 = idx + 1;
+                            return go(tmp27, Token.Error)
                           }
                         } else {
                           other = param0;
-                          tmp34 = Str.concat2("Unrecognized character: '", other);
-                          tmp35 = Str.concat2(tmp34, "'");
-                          tmp36 = Predef.print(tmp35);
-                          tmp37 = idx + 1;
-                          return go(tmp37, Token.Error)
+                          tmp28 = Str.concat2("Unrecognized character: '", other);
+                          tmp29 = Str.concat2(tmp28, "'");
+                          tmp30 = Predef.print(tmp29);
+                          tmp31 = idx + 1;
+                          return go(tmp31, Token.Error)
                         }
                       } else {
                         other = param0;
-                        tmp38 = Str.concat2("Unrecognized character: '", other);
-                        tmp39 = Str.concat2(tmp38, "'");
-                        tmp40 = Predef.print(tmp39);
-                        tmp41 = idx + 1;
-                        return go(tmp41, Token.Error)
+                        tmp32 = Str.concat2("Unrecognized character: '", other);
+                        tmp33 = Str.concat2(tmp32, "'");
+                        tmp34 = Predef.print(tmp33);
+                        tmp35 = idx + 1;
+                        return go(tmp35, Token.Error)
                       }
                     } else {
                       other = param0;
-                      tmp42 = Str.concat2("Unrecognized character: '", other);
-                      tmp43 = Str.concat2(tmp42, "'");
-                      tmp44 = Predef.print(tmp43);
-                      tmp45 = idx + 1;
-                      return go(tmp45, Token.Error)
+                      tmp36 = Str.concat2("Unrecognized character: '", other);
+                      tmp37 = Str.concat2(tmp36, "'");
+                      tmp38 = Predef.print(tmp37);
+                      tmp39 = idx + 1;
+                      return go(tmp39, Token.Error)
                     }
                   } else if (param0 === "`") {
-                    tmp46 = idx + 1;
-                    scrut1 = char1(tmp46);
+                    tmp40 = idx + 1;
+                    scrut1 = char1(tmp40);
                     if (scrut1 instanceof Option.Some.class) {
                       param01 = scrut1.value;
                       matchResult = runtime.safeCall(Lexer.IdentifierStart.unapply(param01));
                       if (matchResult instanceof globalThis.Predef.MatchResult.class) {
                         ch = param01;
-                        tmp47 = idx + 2;
-                        scrut2 = identifier(tmp47, ch);
+                        tmp41 = idx + 2;
+                        scrut2 = identifier(tmp41, ch);
                         if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                           first0 = scrut2[0];
                           first1 = scrut2[1];
@@ -1608,43 +1610,43 @@ Lexer1 = class Lexer {
                             param02 = token.name;
                             param1 = token.symbolic;
                             name = param02;
-                            tmp48 = Token.TagName(name);
-                            return go(idx$_, tmp48)
+                            tmp42 = Token.TagName(name);
+                            return go(idx$_, tmp42)
                           } else {
-                            tmp49 = idx + 1;
-                            return go(tmp49, Token.Error)
+                            tmp43 = idx + 1;
+                            return go(tmp43, Token.Error)
                           }
                         } else {
                           other = param0;
-                          tmp50 = Str.concat2("Unrecognized character: '", other);
-                          tmp51 = Str.concat2(tmp50, "'");
-                          tmp52 = Predef.print(tmp51);
-                          tmp53 = idx + 1;
-                          return go(tmp53, Token.Error)
+                          tmp44 = Str.concat2("Unrecognized character: '", other);
+                          tmp45 = Str.concat2(tmp44, "'");
+                          tmp46 = Predef.print(tmp45);
+                          tmp47 = idx + 1;
+                          return go(tmp47, Token.Error)
                         }
                       } else {
                         other = param0;
-                        tmp54 = Str.concat2("Unrecognized character: '", other);
-                        tmp55 = Str.concat2(tmp54, "'");
-                        tmp56 = Predef.print(tmp55);
-                        tmp57 = idx + 1;
-                        return go(tmp57, Token.Error)
+                        tmp48 = Str.concat2("Unrecognized character: '", other);
+                        tmp49 = Str.concat2(tmp48, "'");
+                        tmp50 = Predef.print(tmp49);
+                        tmp51 = idx + 1;
+                        return go(tmp51, Token.Error)
                       }
                     } else {
                       other = param0;
-                      tmp58 = Str.concat2("Unrecognized character: '", other);
-                      tmp59 = Str.concat2(tmp58, "'");
-                      tmp60 = Predef.print(tmp59);
-                      tmp61 = idx + 1;
-                      return go(tmp61, Token.Error)
+                      tmp52 = Str.concat2("Unrecognized character: '", other);
+                      tmp53 = Str.concat2(tmp52, "'");
+                      tmp54 = Predef.print(tmp53);
+                      tmp55 = idx + 1;
+                      return go(tmp55, Token.Error)
                     }
                   } else {
                     other = param0;
-                    tmp62 = Str.concat2("Unrecognized character: '", other);
-                    tmp63 = Str.concat2(tmp62, "'");
-                    tmp64 = Predef.print(tmp63);
-                    tmp65 = idx + 1;
-                    return go(tmp65, Token.Error)
+                    tmp56 = Str.concat2("Unrecognized character: '", other);
+                    tmp57 = Str.concat2(tmp56, "'");
+                    tmp58 = Predef.print(tmp57);
+                    tmp59 = idx + 1;
+                    return go(tmp59, Token.Error)
                   }
                 }
               }

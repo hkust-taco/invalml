@@ -31,6 +31,7 @@ pattern IdentifierStart = Char.Letter | "_"
 pattern IdentifierBody = Char.Letter | Char.Digit | "_" | "'"
 
 pattern Operator =
+  "," | ";" |
   "!" | "#" | "%" | "&" | "*" | "+" | "-" | "/" | ":" | "<" |
   "=" | ">" | "?" | "@" | "\\" | "^" | "|" | "~" | "."
 
@@ -199,10 +200,6 @@ fun lex(str: Str) =
     if char(idx) is
       None then reverse of acc
       Some(Char.Whitespace) then go(whitespace(idx + 1), Token.Space)
-      Some(",") then go(idx + 1, Token.Comma)
-      Some(";") and char(idx + 1) is
-        Some(";") then go(idx + 2, Token.Identifier(";;", true))
-        else go(idx + 1, Token.Semicolon)
       Some("\"") then go(..string(idx + 1))
       Some("(") then go(idx + 1, Token.Open(Round))
       Some("[") then go(idx + 1, Token.Open(Square))

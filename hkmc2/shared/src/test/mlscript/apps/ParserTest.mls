@@ -106,9 +106,10 @@ print of Parser.exprRules.display
 //│ >   `then` <expr> 
 //│ >     `else` <expr> 
 //│ >     
-
-print of Parser.infixRules.display
-//│ > <the continuation of expressions> ::= `:` <typexpr> 
+//│ > <expr> 
+//│ >   `,` <expr> 
+//│ >   `;` <expr> 
+//│ >   `:` <typexpr> 
 
 pattern Flag = "tree" | "trace" | "tokens"
 

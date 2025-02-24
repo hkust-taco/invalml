@@ -16,12 +16,10 @@ module LiteralKind with
     String
     Boolean
 
-type Token = Space | Comma | Semicolon | Error | Open | Close | Comment | Identifier | TypeVariable | Literal
+type Token = Space | Error | Open | Close | Comment | Identifier | TypeVariable | Literal
 
 object
   Space
-  Comma
-  Semicolon
   Error
 
 class
@@ -35,8 +33,6 @@ class
 
 fun same(a, b) = if
   a is Space and b is Space then true
-  a is Comma and b is Comma then true
-  a is Semicolon and b is Semicolon then true
   a is Open(k) and b is Open(k') then k == k'
   a is Close(k) and b is Close(k') then k == k'
   a is Comment(c) and b is Comment(c') then c == c'
@@ -52,8 +48,6 @@ fun boolean(literal) = Literal(LiteralKind.Boolean, literal)
   
 fun summary(token) = if token is
   Space then "␠"
-  Comma then ","
-  Semicolon then ";"
   Error then "⚠"
   Open(kind) and kind is
     Angle then "<"

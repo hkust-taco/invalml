@@ -251,8 +251,17 @@ fun makeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
       "operator `" + keyword.name + "` right-hand side"
       Choice.end of ()
 
-val infixRules = rule of
-  "the continuation of expressions"
+val exprInfixRules = rule of
+  "infix rules for expressions"
+  // Tuple (separated by commas)
+  makeInfixChoice of Keywords._comma, (lhs, rhs) => if rhs is
+    Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
+    else Tree.Tuple(lhs :: rhs :: Nil)
+  // Sequence (separated by semicolons)
+  makeInfixChoice of Keywords._semicolon, (lhs, rhs) => if rhs is
+    Tree.Sequence(tail) then Tree.Sequence(lhs :: tail)
+    else Tree.Sequence(lhs :: rhs :: Nil)
+  // Type ascription: <expr> ":" <typexpr>
   Choice.keyword of
     Keywords._colon
     "type ascription"
@@ -273,7 +282,36 @@ val exprRules = rule of
   Choice.Expr of
     false
     (lhs, compose) => compose(lhs)
-    infixRules
+    exprInfixRules
+
+// TODO: merge with `makeInfixChoice` after we change `isType` to category names.
+fun makeTypeInfixChoice(keyword: Keyword, compose: (Tree, Tree) -> Tree) =
+  Choice.keyword of
+    keyword
+    "operator `" + keyword.name + "`"
+    Choice.typeExpr of
+      (rhs, _) => lhs => compose(lhs, rhs)
+      "operator `" + keyword.name + "` right-hand side"
+      Choice.end of ()
+
+val typeInfixRules = rule of
+  "infix rules for types"
+  // Tuple (separated by commas)
+  makeTypeInfixChoice of TypeKeywords._comma, (lhs, rhs) => if rhs is
+    Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
+    else Tree.Tuple(lhs :: rhs :: Nil)
+  // Sequence (separated by semicolons)
+  makeTypeInfixChoice of TypeKeywords._semicolon, (lhs, rhs) => if rhs is
+    Tree.Sequence(tail) then Tree.Sequence(lhs :: tail)
+    else Tree.Sequence(lhs :: rhs :: Nil)
+
+// Prefix rules and infix rules for types.
+val typeRules = rule of
+  "rules for types"
+  Choice.Expr of
+    true
+    (lhs, compose) => compose(lhs)
+    typeInfixRules
 
 fun typeDefinition() =
   let intro = "type definition: "
@@ -496,13 +534,15 @@ fun parse(tokens) =
     // Look up the infix rules.
     Token.Identifier(name, _) :: _ and Keywords.all.get(name) is Some(keyword) and
       do tracer.print of "found a keyword: " + name, source.line
-      infixRules.keywordChoices.get(name) is Some(rule) and
+      // Note: we can also get the infix rules from `exprRules.exprChoice` but
+      // that just adds another pattern matching.
+      exprInfixRules.keywordChoices.get(name) is Some(rule) and
         do tracer.print of "the keyword is found in infix rules" + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
           Some([isType, process, rest]) then
             consume
             let rhs = (if isType then typeExpr else simpleExpr) of keyword.rightPrecOrMin
-            let acc' = Tree.Infix(keyword, acc, rhs)
+            let acc' = process(rhs)(acc)
             exprCont(acc', prec)
           None then acc
       do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
@@ -518,28 +558,6 @@ fun parse(tokens) =
         else
           acc
     Token.Close(kind) :: _ then acc
-    // TODO: BEGIN deduplication
-    Token.Semicolon :: _ and
-      do tracer.print of "found a semicolon", source.line
-      Keywords._semicolon.leftPrec Option.unsafe.get() > prec then
-        consume
-        simpleExpr(Keywords._semicolon.rightPrec Option.unsafe.get())
-          Tree.sequenceWithHead of acc
-          exprCont of prec
-      else
-        tracer.print of "cannot consume the semicolon", source.line
-        acc
-    Token.Comma :: _ and
-      do tracer.print of "found a comma", source.line
-      Keywords._comma.leftPrec Option.unsafe.get() > prec then
-        consume
-        simpleExpr(Keywords._comma.rightPrec Option.unsafe.get())
-          Tree.tupleWithHead of acc
-          exprCont of prec
-      else
-        tracer.print of "cannot consume the comma", source.line
-        acc
-    // TODO: END deduplication
     token :: _ and
       appPrec > prec then
         do tracer.print of "found an application", source.line
@@ -622,30 +640,18 @@ fun parse(tokens) =
     if yeetSpaces is
       Token.Close :: _ then acc
       Token.Identifier(">", _) :: _ then acc
-      // TODO: BEGIN deduplication
-      Token.Semicolon :: _ and
-        do tracer.print of "found a semicolon", source.line
-        TypeKeywords._semicolon.leftPrec Option.unsafe.get() > prec then
-          consume
-          typeExpr(TypeKeywords._semicolon.rightPrec Option.unsafe.get())
-            Tree.sequenceWithHead of acc
-            tap of x => tracer.print of "bruh: " + x
-            typeExprCont of prec
-        else
-          tracer.print of "cannot consume the semicolon", source.line
-          acc
-      Token.Comma :: _ and
-        do tracer.print of "found a comma", source.line
-        TypeKeywords._comma.leftPrec Option.unsafe.get() > prec then
-          consume
-          typeExpr(TypeKeywords._comma.rightPrec Option.unsafe.get())
-            Tree.tupleWithHead of acc
-            typeExprCont of prec
-        else
-          tracer.print of "cannot consume the comma", source.line
-          acc
-      // TODO: END deduplication
       do tracer.print of "check keyword " + TokenHelpers.preview(current), source.line
+      Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is Some(keyword) and
+        typeInfixRules.keywordChoices.get(name) is Some(rule) and
+          do tracer.print of "the keyword is found in infix rules" + name, source.line
+          keyword.leftPrecOrMin > prec and rule.exprChoice is
+            Some([isType, process, rest]) then
+              consume
+              let rhs = (if isType then typeExpr else simpleExpr) of keyword.rightPrecOrMin
+              let acc' = process(rhs)(acc)
+              typeExprCont(acc', prec)
+            None then acc
+          do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
       Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is
         Some(keyword) and
           do tracer.print of "found a keyword " + name, source.line

@@ -98,7 +98,7 @@ printLexed of """let v' =
 //│ > Identifier("let", false)
 //│ > Space
 //│ > Identifier("a", false)
-//│ > Comma
+//│ > Identifier(",", true)
 //│ > Space
 //│ > Identifier("b", false)
 //│ > Space
@@ -106,7 +106,7 @@ printLexed of """let v' =
 //│ > Space
 //│ > Open(Round)
 //│ > Literal(Integer, "1")
-//│ > Comma
+//│ > Identifier(",", true)
 //│ > Space
 //│ > Literal(Integer, "2")
 //│ > Close(Round)
