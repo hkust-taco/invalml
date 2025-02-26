@@ -6,7 +6,7 @@ import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
 
 open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
-open Parser { termRule, declRule, typeRule }
+open Parser { termRule, declRule, typeRule, categories }
 open XML { html, tag, elem, style }
 
 fun toHTML(...elements) = html(["lang", "en"]) of
@@ -15,6 +15,9 @@ fun toHTML(...elements) = html(["lang", "en"]) of
     tag("meta") of
       ["name", "viewport"]
       ["content", "width=device-width, initial-scale=1.0"]
+    tag("link") of
+      ["href", "https://cdn.jsdelivr.net/npm/typeface-inconsolata@1.1.13/index.min.css"]
+      ["rel", "stylesheet"]
     elem("title") of "Parse Rules"
   elem("body", style of ["padding", "1em"]) of
     elem("div", style of
@@ -45,4 +48,8 @@ fs.writeFileSync of
     ...toElements of render("Type Rules", typeRule)
     elem("h2") of "Definitions"
     ...toElements of render("Definition Rules", declRule)
+    ...toElements of categories
+      Iter.mapping of case [name, rule] then render(name, rule)
+      Iter.flattening()
+      Iter.toArray()
   "utf-8"

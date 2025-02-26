@@ -162,6 +162,8 @@ module Tree with
       else "<unexpected:" + tree + ">"
     wrap(tree)
   
+  fun infix(op)(lhs, rhs) = Infix(op, lhs, rhs)
+  
   fun bracketed(tree, kind) = Bracketed(kind, tree)
   
   fun asSequence(tree) = if tree is

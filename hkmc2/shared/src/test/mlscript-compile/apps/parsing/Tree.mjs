@@ -872,6 +872,11 @@ Tree2 = class Tree {
     };
     return wrap(tree)
   } 
+  static infix(op) {
+    return (lhs, rhs) => {
+      return Tree.Infix(op, lhs, rhs)
+    }
+  } 
   static bracketed(tree1, kind) {
     return Tree.Bracketed(kind, tree1)
   } 

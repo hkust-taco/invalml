@@ -24,3 +24,35 @@ example of ":tree ((x) ==> x))"
 //│ > «x ==> x»
 //│ > «⚠»
 
+example of """
+type a = b and b = c
+"""
+//│ > «type a = b and b = c»
+
+example of """
+:tree
+type test = Bar | Test | Foo
+and test' = Bar' | Test' | Foo'
+"""
+//│ > Define:
+//│ >   kind = Type
+//│ >   items = Stack of 
+//│ >     Pair:
+//│ >       first = Ident of "test"
+//│ >       second = Infix:
+//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         lhs = Ident of "Bar"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`|`, N/A, 4)
+//│ >           lhs = Ident of "Test"
+//│ >           rhs = Ident of "Foo"
+//│ >     Pair:
+//│ >       first = Ident of "test'"
+//│ >       second = Infix:
+//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         lhs = Ident of "Bar'"
+//│ >         rhs = Infix:
+//│ >           op = Keyword(`|`, N/A, 4)
+//│ >           lhs = Ident of "Test'"
+//│ >           rhs = Ident of "Foo'"
+//│ > «type test = Bar | Test | Foo and test' = Bar' | Test' | Foo'»

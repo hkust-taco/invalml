@@ -2,12 +2,11 @@ svg.railroad-diagram {
   background-color: hsl(30,20%,95%);
 }
 svg.railroad-diagram path {
-  stroke-width: 3;
-  stroke: black;
-  fill: rgba(0,0,0,0);
+  stroke-width: 2;
+  stroke: rgba(1, 1, 1, 0.80);
+  fill: transparent;
 }
 svg.railroad-diagram text {
-  font: bold 14px monospace;
   text-anchor: middle;
   white-space: pre;
 }
@@ -24,12 +23,17 @@ svg.railroad-diagram text.comment {
   font: italic 12px monospace;
 }
 svg.railroad-diagram g.non-terminal text {
+  font-style: -apple-system, system-ui, sans-serif;
+  font-weight: 600;
   font-style: italic;
 }
+svg.railroad-diagram g.terminal text {
+  font-family: Inconsolata, monospace;
+}
 svg.railroad-diagram rect {
-  stroke-width: 3;
+  stroke-width: 1.5;
   stroke: black;
-  fill: hsl(120,100%,90%);
+  fill: #ffffff;
 }
 svg.railroad-diagram rect.group-box {
   stroke: gray;
@@ -37,7 +41,7 @@ svg.railroad-diagram rect.group-box {
   fill: none;
 }
 svg.railroad-diagram path.diagram-text {
-  stroke-width: 3;
+  stroke-width: 1.5;
   stroke: black;
   fill: white;
   cursor: help;

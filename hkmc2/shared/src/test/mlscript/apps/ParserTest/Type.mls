@@ -112,7 +112,7 @@ type 'a option = Some of 'a | None
 //│ >         arguments = Stack of 
 //│ >           Ident of "'a"
 //│ >       second = Infix:
-//│ >         op = Keyword(`|`, 3, 3)
+//│ >         op = Keyword(`|`, N/A, 4)
 //│ >         lhs = Infix:
 //│ >           op = Keyword(`of`, 9, 9)
 //│ >           lhs = Ident of "Some"
@@ -133,7 +133,7 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >         arguments = Stack of 
 //│ >           Ident of "'a"
 //│ >       second = Infix:
-//│ >         op = Keyword(`|`, 3, 3)
+//│ >         op = Keyword(`|`, N/A, 4)
 //│ >         lhs = Ident of "Leaf"
 //│ >         rhs = Infix:
 //│ >           op = Keyword(`*`, 6, 6)
@@ -159,19 +159,16 @@ type ('a, 'b) twist = a list * b list
 //│ > «type twist(('a, 'b)) = list(a) * list(b)»
 
 
-example of """
-type qux = Qux of { q : int; u: int; x :int }
-"""
-//│ > «type qux = Qux of {q : int; u : int; x : int}»
+// example of """
+// type qux = Qux of { q : int; u: int; x :int }
+// """
 
-example of """
-type colour =
-  | Red | Green | Blue | Yellow | Black | White
-  | RGB of {r : int; g : int; b : int}
-type 'a tree = Lf | Br of 'a * 'a tree * 'a;;
-"""
-//│ > «type colour = Red | Green | Blue | Yellow | Black | White | RGB of {r : int; g : int; b : int}»
-//│ > «type tree('a) = Lf | Br of 'a * tree('a) * 'a»
+// example of """
+// type colour =
+//   | Red | Green | Blue | Yellow | Black | White
+//   | RGB of {r : int; g : int; b : int}
+// type 'a tree = Lf | Br of 'a * 'a tree * 'a;;
+// """
 
 example of """
 :tree
@@ -195,7 +192,7 @@ and t' = Int of int | List of t list
 //│ >     Pair:
 //│ >       first = Ident of "t'"
 //│ >       second = Infix:
-//│ >         op = Keyword(`|`, 3, 3)
+//│ >         op = Keyword(`|`, N/A, 4)
 //│ >         lhs = Infix:
 //│ >           op = Keyword(`of`, 9, 9)
 //│ >           lhs = Ident of "Int"

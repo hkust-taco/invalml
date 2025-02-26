@@ -1789,6 +1789,7 @@ export class Terminal extends FakeSVG {
 		this.height = 0;
 		this.up = 11;
 		this.down = 11;
+		this.textOffsetY = 12;
 		this.needsSpace = true;
 		if(Options.DEBUG) {
 			this.attrs['data-updown'] = this.up + " " + this.height + " " + this.down;
@@ -1802,7 +1803,7 @@ export class Terminal extends FakeSVG {
 		new Path(x+gaps[0]+this.width,y).h(gaps[1]).addTo(this);
 		x += gaps[0];
 
-		new FakeSVG('rect', {x:x, y:y-11, width:this.width, height:this.up+this.down, rx:10, ry:10}).addTo(this);
+		new FakeSVG('rect', {x:x, y:y-this.textOffsetY, width:this.width, height:this.up+this.down, rx:10, ry:10}).addTo(this);
 		var text = new FakeSVG('text', {x:x+this.width/2, y:y+4}, this.text);
 		if(this.href)
 			new FakeSVG('a', {'xlink:href': this.href}, [text]).addTo(this);
@@ -1831,6 +1832,7 @@ export class NonTerminal extends FakeSVG {
 		this.height = 0;
 		this.up = 11;
 		this.down = 11;
+		this.textOffsetY = 12;
 		this.needsSpace = true;
 		if(Options.DEBUG) {
 			this.attrs['data-updown'] = this.up + " " + this.height + " " + this.down;
@@ -1844,7 +1846,7 @@ export class NonTerminal extends FakeSVG {
 		new Path(x+gaps[0]+this.width,y).h(gaps[1]).addTo(this);
 		x += gaps[0];
 
-		new FakeSVG('rect', {x:x, y:y-11, width:this.width, height:this.up+this.down}).addTo(this);
+		new FakeSVG('rect', {x:x, y:y-this.textOffsetY, width:this.width, height:this.up+this.down, rx: 2, ry: 2}).addTo(this);
 		var text = new FakeSVG('text', {x:x+this.width/2, y:y+4}, this.text);
 		if(this.href)
 			new FakeSVG('a', {'xlink:href': this.href}, [text]).addTo(this);

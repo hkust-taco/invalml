@@ -351,3 +351,11 @@ open Stack { Nil, :: }
 //│ ═══[RUNTIME ERROR] TypeError: Stack.:: is not a function
 
 // ——— ——— ———
+
+mkStr of ... // hello
+"oops"
+//│ ╔══[PARSE ERROR] Expected start of statement in this position; found newline instead
+//│ ║  l.355: 	mkStr of ... // hello
+//│ ║         	                     ^
+//│ ║  l.356: 	"oops"
+//│ ╙──       	

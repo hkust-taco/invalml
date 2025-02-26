@@ -83,43 +83,43 @@ let letDefinition = letBinding(false)
 
 fun ifThenElse() =
   let intro = "if-then-else: "
-  Choice.keyword of
-    Keywords._if
-    intro + "`if` keyword"
-    Choice.term of
-      (tst, conAndAlt) => if conAndAlt is [con, alt] then
-        Tree.Ternary(Keywords._if, tst, con, alt)
-      intro + "condition"
-      Choice.keyword of
-        Keywords._then
-        intro + "`then` keyword"
-        Choice.term of
-          (con, optAlt) => [con, optAlt]
-          intro + "consequent"
-          Choice.keyword of
-            Keywords._else
-            intro + "`else` keyword"
-            Choice.term of
-              (alt, _) => Some(alt)
-              intro + "alternative"
-              Choice.end of None
-          Choice.end of None
+  Choice.keyword of ...
+  Keywords._if
+  intro + "`if` keyword"
+  Choice.term of ...
+  (tst, conAlt) => if conAlt is [con, alt] then
+    Tree.Ternary(Keywords._if, tst, con, alt)
+  intro + "condition"
+  Choice.keyword of ...
+  Keywords._then
+  intro + "`then` keyword"
+  Choice.term of ...
+  (con, optAlt) => [con, optAlt]
+  intro + "consequent"
+  Choice.end of None
+  Choice.keyword of ...
+  Keywords._else
+  intro + "`else` keyword"
+  Choice.term of ...
+  (alt, _) => Some(alt)
+  intro + "alternative"
+  Choice.end of None
 
 fun funChoice() =
   let intro = "function expression: "
-  Choice.keyword of
-    Keywords._fun
-    intro + "keyword"
-    Choice.term of
-      (params, body) => Tree.Lambda(params :: Nil, body)
-      intro + "parameters"
-      Choice.keyword of
-        Keywords._thinArrow
-        intro + "arrow"
-        Choice.term of
-          (body, _) => body
-          intro + "body"
-          Choice.end of None
+  Choice.keyword of ...
+  Keywords._fun
+  intro + "keyword"
+  Choice.term of ...
+  (params, body) => Tree.Lambda(params :: Nil, body)
+  intro + "parameters"
+  Choice.keyword of ...
+  Keywords._thinArrow
+  intro + "arrow"
+  Choice.term of ...
+  (body, _) => body
+  intro + "body"
+  Choice.end of None
 
 fun patternMatchingBody(intro, cons, nil) =
   fun makeMatchArms(get) = Choice.term of
@@ -314,38 +314,21 @@ val termRule = rule of
     (lhs, compose) => compose(lhs)
     termInfixRule
 
-// The rule for "{" <label-decl> { ";" <label-decl> } "}"
 fun recordTypeChoice =
   let intro = "record type: "
-  // <label-decl> ::= <ident> ":" <typexpr> { ";" <label-decl> } "}"
-  fun labelDecls(tail) =
-    Choice.typeExpr of ...
-    (lhs, rhsAndMore) => if rhsAndMore is
-      [rhs, Tree.Bracketed(_, Tree.Sequence(more))] then
-        let labelDecl = Tree.Infix(TypeKeywords._colon, lhs, rhs)
-        Tree.Bracketed(Token.Curly, Tree.Sequence(labelDecl :: more))
-    intro + "name" // <ident>
-    Choice.keyword of ...
-    Keywords._colon // ":"
-    intro + "colon"
-    Choice.typeExpr of // "<typexpr>"
-      (rhs, more) => [rhs, more]
-      intro + "body"
-      Choice.keyword of // "}"
-        TypeKeywords._rightCurly
-        intro + "right brace"
-        Choice.end of Tree.Bracketed(Token.Curly, Tree.Sequence(Nil))
-      tail // ";" <label-decl>
-  // ";" <label-decl> { ";" <label-decl> } "}"
-  fun makeLabelDeclsTail(get) = Choice.keyword of
-    Keywords._semicolon
-    intro + "more label-decls"
-    labelDecls of Choice.Lazy(get, makeLabelDeclsTail)
-  let labelDeclsTail = Choice.lazy of makeLabelDeclsTail
-  Choice.keyword of // "{"
-    Keywords._leftCurly
-    intro + "left brace"
-    labelDecls of labelDeclsTail
+  Choice.keyword of ...
+  Keywords._leftCurly
+  intro + "left brace"
+  Choice.reference of ...
+  "label-decls"
+  (content, _) => if content is
+    Nil then Tree.Bracketed(Token.Curly, Tree.Sequence(Nil))
+    else Tree.Bracketed(Token.Curly, Tree.Sequence(content))
+  intro + "label-decl"
+  Choice.keyword of ...
+  Keywords._rightCurly
+  intro + "right brace"
+  Choice.end of Tree.empty
 
 val typeInfixRule = rule of
   "infix rules for types"
@@ -363,7 +346,6 @@ val typeInfixRule = rule of
 // Prefix rules and infix rules for types.
 val typeRule = rule of
   "rules for types"
-  recordTypeChoice
   // Choices for brackets
   makeBracketRule of TypeKeywords._leftRound, TypeKeywords._rightRound, "type", id
   Choice.Ref of
@@ -371,48 +353,115 @@ val typeRule = rule of
     (lhs, compose) => compose(lhs)
     typeInfixRule
 
-// TODO: rewrite with repetition choices.
 fun typeDefinition() =
-  let intro = "type definition: "
-  fun typedefs(typedefsTail) =
-    let variantIntro = "variant type: "
-    fun variants(variantsTail, typedefsTail) =
-      Choice.typeExpr of
-        (currVariant, moreVariantsAndDefine) => if moreVariantsAndDefine is
-          Tree.Define then
-            [currVariant, moreVariantsAndDefine]
-          [Tree.Empty, innerDefine] then [currVariant, innerDefine]
-          [moreVariants, innerDefine] then tuple of
-            Tree.Infix(TypeKeywords._bar, currVariant, moreVariants)
-            innerDefine
-        variantIntro + "variant"
-        typedefsTail
-        variantsTail
-        Choice.end of [Tree.empty, Tree.Define(Tree.DefineKind.Type, Nil)]
-    fun makeVariantsTail(get) = Choice.keyword of
-      Keywords._bar
-      variantIntro + "more variants"
-      variants of Choice.Lazy(get, makeVariantsTail), typedefsTail
-    let variantsTail = Choice.lazy of makeVariantsTail
-    // - - - - -
-    Choice.typeExpr of
-      (head, bodyAndDefine) => if bodyAndDefine is
-        [body, Tree.Define(kind, typedefs)] then
-          Tree.Define(kind, [head, body] :: typedefs)
-      intro + "name"
-      Choice.keyword of
-        Keywords._equal
-        intro + "equal sign"
-        variants(variantsTail, typedefsTail)
-  fun makeTypedefsTail(get) = Choice.keyword of
-    Keywords._and
-    intro + "more typedefs"
-    typedefs of Choice.Lazy(get, makeTypedefsTail)
-  let typedefsTail = Choice.lazy of makeTypedefsTail
+  let intro = "type definition"
   Choice.keyword of
     Keywords._type
-    intro + "`type` keyword"
-    typedefs of typedefsTail
+    intro + "type defs"
+    Choice.reference of
+      "typedefs"
+      (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
+      intro + "end"
+      Choice.end of ()
+
+val categories = new Map()
+
+fun variantsRule =
+  let intro = "variant "
+  rule of ...
+  intro + "variant"
+  Choice.typeExpr of ...
+  (lhs, rhsMore) => if rhsMore is
+    Some(rhs) then Tree.Infix(Keywords._bar, lhs, rhs)
+    else lhs
+  intro + "item"
+  Choice.end of None
+  Choice.keyword of ...
+  Keywords._bar
+  intro + "bar"
+  Choice.reference of ...
+  "variants"
+  (more, _) => Some(more)
+  intro + "end"
+  Choice.end of ()
+
+categories.insert("variants", variantsRule)
+
+fun typedefRule =
+  let intro = "typedef "
+  rule of ...
+  intro + "rule"
+  Choice.typeExpr of ...
+  (lhs, rhsMore) => if rhsMore is [rhs, more] then [lhs, rhs] :: more
+  intro + "name"
+  Choice.keyword of ...
+  Keywords._equal
+  intro + "equal sign"
+  Choice.reference of ...
+  "typedef-rhs"
+  (rhs, more) => [rhs, more]
+  intro + "body"
+  Choice.end of Nil
+  Choice.keyword of ...
+  Keywords._and
+  intro + "and"
+  Choice.reference of ...
+  "typedefs"
+  (more, _) => more
+  intro + "end"
+  Choice.end of ()
+
+categories.insert("typedefs", typedefRule)
+
+fun typedefRhsRule =
+  let intro = "typedef rhs "
+  rule of ...
+  intro + "rule"
+  Choice.reference of
+    "variants"
+    (rhs, _) => rhs
+    intro + "variants"
+    Choice.end of Nil
+  recordTypeChoice
+  
+categories.insert("typedef-rhs", typedefRhsRule)
+
+fun labelDecl =
+  let intro = "label-decl: "
+  rule of ...
+  intro + rule
+  Choice.typeExpr of ...
+  Tree.infix of TypeKeywords._colon
+  intro + "name"
+  Choice.keyword of ...
+  TypeKeywords._colon
+  intro + "colon"
+  Choice.typeExpr of ...
+  (rhs, _) => rhs
+  intro + "body"
+  Choice.end of Tree.empty
+
+categories.insert("label-decl", labelDecl)
+
+fun labelDecls =
+  let intro = "label-decls: "
+  rule of ...
+  intro + rule
+  Choice.reference of ...
+  "label-decl"
+  Cons
+  intro + "label-decl"
+  Choice.end of Nil
+  Choice.keyword of ...
+  Keywords._semicolon
+  intro + "semicolon"
+  Choice.reference of ...
+  "label-decls"
+  (more, _) => more
+  intro + "end"
+  Choice.end of ()
+
+categories.insert("label-decls", labelDecls)
 
 fun exceptionDefinition() =
   let intro = "exception definition: "
@@ -513,6 +562,7 @@ fun parse(tokens) =
           do tracer.print of "parse \"" + kind + "\" kind from " + TokenHelpers.preview(current), source.line
           let acc = getParsingByKind(kind)(prec)
           acc Tree.nonEmptyError() then
+            tracer.print of "the rest rule: " + rest.display, source.line
             let tree = parseRule(prec, rest, allKeywords)
             tracer.print of "acc: " + acc Tree.summary(), source.line
             tracer.print of "tree: " + tree Tree.summary(), source.line
@@ -533,9 +583,12 @@ fun parse(tokens) =
           Tree.error("unexpected end of input")
   
   // TODO: make kinds extensible
-  fun getParsingByKind(kind: Str): Int -> Tree = if kind is
-    "type" then typeExpr
-    "term" then term
+  fun getParsingByKind(kind: Str): Int -> Tree = if
+    kind is "type" then typeExpr
+    kind is "term" then term
+    categories.get(kind) is Some(rule) then
+      prec => parseRule(prec, rule, Keywords.all)
+    else throw new Error("Unknown syntax category: \"" + kind + "\"")
   
   fun term(prec: Int) = tracer.trace of
     "term <<< " + prec + " " + TokenHelpers.preview(current)

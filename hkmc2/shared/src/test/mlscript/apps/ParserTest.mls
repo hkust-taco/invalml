@@ -42,6 +42,7 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`downto`, N/A, N/A)
 //│ > Keyword(`do`, N/A, N/A)
 //│ > Keyword(`done`, N/A, N/A)
+//│ > Keyword(`of`, N/A, N/A)
 //│ > Keyword(`with`, N/A, 8)
 //│ > Keyword(`case`, N/A, 8)
 //│ > Keyword(`if`, 10, 9)
@@ -76,11 +77,14 @@ print of TypeKeywords.all.values.join("\n")
 //│ > Keyword(`|`, 3, 3)
 //│ > Keyword(``, 4, 4)
 //│ > Keyword(`->`, 5, 4)
-//│ > Keyword(`of`, 6, 6)
-//│ > Keyword(`*`, 7, 7)
-//│ > Keyword(`#`, 8, 8)
-//│ > Keyword(`:`, 9, 9)
-//│ > Keyword(`.`, 11, 11)
+//│ > Keyword(`*`, 6, 6)
+//│ > Keyword(`:`, 7, 7)
+//│ > Keyword(`of`, 9, 9)
+//│ > Keyword(`.`, 10, 10)
+//│ > Keyword(`(`, 11, 0)
+//│ > Keyword(`)`, 0, N/A)
+//│ > Keyword(`{`, 11, 0)
+//│ > Keyword(`}`, 0, N/A)
 
 print of Parser.termRule.display
 //│ > <prefix rules for expressions> ::= `let` [`rec` ] 
@@ -103,8 +107,8 @@ print of Parser.termRule.display
 //│ >       `|` <rec>
 //│ > `if` <term>
 //│ >   `then` <term>
-//│ >     `else` <term>
 //│ >     
+//│ >     `else` <term>
 //│ > `while` <term>`do` <term>`done` 
 //│ > `for` <term>
 //│ >   `=` <term>
