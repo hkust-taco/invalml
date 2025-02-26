@@ -10,6 +10,8 @@ open BetterMap { Map, toMap }
 open Option { Some, None }
 open Stack
 
+type Opt[A] = Some[A] | None
+
 module ParseRule with ...
 
 //  ____                     ____        _
@@ -37,7 +39,8 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
       Iter.fromStack()
       Iter.mapping of case
         Choice.Keyword(keyword, rest') then [Choice.Keyword(keyword, rest'.andThen(rest))]
-        Choice.Ref(isType, process, rest') then [Choice.Ref(isType, process, rest'.andThen(rest))]
+        Choice.Ref(isType, process, outerPrec, innerPrec, rest') then
+          [Choice.Ref(isType, process, outerPrec, innerPrec, rest'.andThen(rest))]
         Choice.End then rest.choices Iter.fromStack()
         Choice.Optional(rule, rest') then [Choice.Optional(process, rule, rest'.andThen(rest))]
         Choice.Lazy(get, make) then
@@ -47,8 +50,9 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
       Iter.flattening()
       Iter.toStack()
   
-  // Collect the first end choice in this rule.
-  fun endChoice = choices
+  let _endChoice = None
+  
+  let _computeEndChoice = () => choices
     Iter.fromStack()
     Iter.firstDefined of choice =>
       if choice Choice.forced() is
@@ -56,37 +60,58 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         Choice.Optional(_, rest) then rest.endChoice
         else None
   
+  // Collect the first end choice in this rule.
+  fun endChoice = if _endChoice is
+    None then
+      let computed = _computeEndChoice()
+      set _endChoice = Some(computed)
+      computed
+    Some(cache) then cache
+  
   // Manual memoization for keyword choices.
   let _keywordChoices = None
+  
+  let _computeKeywordsChoices = () =>
+    toMap of choices
+      Iter.fromStack()
+      Iter.mapping of choice => if choice Choice.forced() is
+        Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
+        Choice.Optional(rule, rest) then rule.keywordChoices
+          Iter.mapping of case [keyword, rule] then
+            [keyword, rule.andThen(rest)]
+          Iter.appended of rest.keywordChoices
+          Iter.toArray()
+        else []
+      Iter.flattening()
+      Iter.toArray()
   
   // Collect all keyword choices in this rule.
   fun keywordChoices = if _keywordChoices is
     None then
-      let computed = toMap of choices
-        Iter.fromStack()
-        Iter.mapping of choice => if choice Choice.forced() is
-          Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
-          Choice.Optional(rule, rest) then rule.keywordChoices
-            Iter.mapping of case [keyword, rule] then
-              [keyword, rule.andThen(rest)]
-            Iter.appended of rest.keywordChoices
-            Iter.toArray()
-          else []
-        Iter.flattening()
-        Iter.toArray()
+      let computed = _computeKeywordsChoices()
       set _keywordChoices = Some(computed)
       computed
     Some(cache) then cache
   
-  fun exprChoice = choices
+  let _exprChoice = None
+  
+  let _computeExprChoice = () => choices
     Iter.fromStack()
     Iter.firstDefined of choice => if choice Choice.forced() is
-      Choice.Ref(isType, process, rest) then Some([isType, process, rest])
+      Choice.Ref(isType, process, outerPrec, innerPrec, rest) then
+        Some([isType, process, outerPrec, innerPrec, rest])
       Choice.Optional(rule, rest) and
-        rule.exprChoice is Some([process, rest']) then
-          Some([process, rest'.andThen(rest)])
+        rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest']) then
+          Some([kind, process, outerPrec, innerPrec rest'.andThen(rest)])
         else rest.exprChoice
       else None
+  
+  fun exprChoice = if _exprChoice is
+    None then
+      let computed = _computeExprChoice()
+      set _exprChoice = Some(computed)
+      computed
+    Some(cache) then cache
   
   // Display parse rules as a tree in a BNF-like format.
   fun display =
@@ -97,7 +122,7 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, [head, ..tail']] then [prefix + head, ..tail']
-      Choice.Ref(kind, _, rest) and
+      Choice.Ref(kind, _, _, _, rest) and
         let prefix = "<" + kind + ">"
         go(rest) is
           [name, [line]] then [prefix + line]
@@ -132,7 +157,7 @@ fun rule(name, ...choices) = ParseRule(name, choices Iter.toStack())
 
 module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
-  class Ref(kind: Str, process: Tree -> Tree, rest: ParseRule)
+  class Ref(kind: Str, process: Tree -> Tree, outerPrec: Opt[Int], innerPrec: Opt[Int], rest: ParseRule)
   class End(value: Tree)
   class Optional(rule: ParseRule, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
@@ -140,16 +165,21 @@ module Choice with
   fun rest(choice) = if choice is
     Lazy(get, _) then get() rest()
     Keyword(_, rest) then Some(rest)
-    Ref(_, _, rest) then Some(rest)
+    Ref(_, _, _, _, rest) then Some(rest)
     Optional(_, rest) then Some(rest)
     End then None
   
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice
   // Shorthands for constructing rule choices.
   fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
-  fun reference(kind, process, name, ...choices) = Ref(kind, process, rule(name, ...choices))
-  fun term(process, name, ...choices) = Ref("term", process, rule(name, ...choices))
-  fun typeExpr(process, name, ...choices) = Ref("type", process, rule(name, ...choices))
+  fun reference(kind, process, name, ...choices) =
+    Ref(kind, process, None, None, rule(name, ...choices))
+  fun term(process, name, ...choices) =
+    Ref("term", process, None, None, rule(name, ...choices))
+  fun termWithPrec(process, name, outerPrec, innerPrec, ...choices) =
+    Ref("term", process, outerPrec, innerPrec, rule(name, ...choices))
+  fun typeExpr(process, name, ...choices) =
+    Ref("type", process, None, None, rule(name, ...choices))
   fun end(value) = End(value)
   fun lazy(makeChoice) =
     let cache = None
@@ -160,7 +190,8 @@ module Choice with
     Lazy(getChoice, makeChoice)
   
   fun map(choice: Choice, op: Tree -> Tree) = if choice is
-    Choice.Keyword(keyword, rest) then Choice.Keyword(keyword, rest.map(op))
-    Choice.Ref(kind, process, rest) then Choice.Ref(kind, (x, y) => op(process(x, y)), rest)
-    Choice.Optional(rule, rest) then Choice.Optional(rule.map(op), rest.map(op))
-    Choice.End(value) then Choice.End(op(value))
+    Keyword(keyword, rest) then Keyword(keyword, rest.map(op))
+    Ref(kind, process, outerPrec, innerPrec, rest) then
+      Ref(kind, (x, y) => op(process(x, y)), outerPrec, innerPrec, rest)
+    Optional(rule, rest) then Optional(rule.map(op), rest.map(op))
+    End(value) then End(op(value))

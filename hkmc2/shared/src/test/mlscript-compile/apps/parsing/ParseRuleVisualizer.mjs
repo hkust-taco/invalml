@@ -113,7 +113,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return runtime.safeCall(ParseRuleVisualizer.rr.Diagram(tmp10))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
-      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, kind, rest, scrut2, param03, param12, rule2, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53;
+      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, rule2, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp10 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.End"));
         return Option.None
@@ -149,9 +149,13 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       } else if (choice instanceof ParseRule.Choice.Ref.class) {
         param02 = choice.kind;
         param11 = choice.process;
-        param2 = choice.rest;
+        param2 = choice.outerPrec;
+        param3 = choice.innerPrec;
+        param4 = choice.rest;
         kind = param02;
-        rest = param2;
+        outerPrec = param2;
+        innerPrec = param3;
+        rest = param4;
         tmp18 = "found Choice.Ref to " + kind;
         tmp19 = runtime.safeCall(ParseRuleVisualizer.tracer.print(tmp18));
         scrut2 = runtime.safeCall(ParseRuleVisualizer.#renderedKinds.has(kind));

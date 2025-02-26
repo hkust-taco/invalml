@@ -1822,7 +1822,7 @@ funcs.Terminal = (...args)=>new Terminal(...args);
 
 
 export class NonTerminal extends FakeSVG {
-	constructor(text, {href, title, cls=""}={}) {
+	constructor(text, {href, title, cls="", attrs}={}) {
 		super('g', {'class': ['non-terminal', cls].join(" ")});
 		this.text = ""+text;
 		this.href = href;
@@ -1834,6 +1834,9 @@ export class NonTerminal extends FakeSVG {
 		this.down = 11;
 		this.textOffsetY = 12;
 		this.needsSpace = true;
+		if (typeof attrs === "object" && attrs !== null) {
+			Object.assign(this.attrs, attrs);
+		}
 		if(Options.DEBUG) {
 			this.attrs['data-updown'] = this.up + " " + this.height + " " + this.down;
 			this.attrs['data-type'] = "nonterminal";

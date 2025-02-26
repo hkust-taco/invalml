@@ -8,7 +8,7 @@ example of ":tree ((x) ==> x"
 //│ > Error:
 //│ >   tree = App:
 //│ >     callee = Ident of "==>"
-//│ >     arguments = Stack of 
+//│ >     argument = Stack of 
 //│ >       Ident of "x"
 //│ >       Ident of "x"
 //│ >   message = "unexpected end of input"
@@ -17,7 +17,7 @@ example of ":tree ((x) ==> x"
 example of ":tree ((x) ==> x))"
 //│ > App:
 //│ >   callee = Ident of "==>"
-//│ >   arguments = Stack of 
+//│ >   argument = Stack of 
 //│ >     Ident of "x"
 //│ >     Ident of "x"
 //│ > Error of "unexpected keyword )"

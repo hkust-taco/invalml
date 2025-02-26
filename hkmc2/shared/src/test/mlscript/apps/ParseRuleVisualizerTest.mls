@@ -28,14 +28,19 @@ fun toHTML(...elements) = html(["lang", "en"]) of
       ...elements
     elem("style") of
       "body{margin:0;font-family:system-ui,sans-serif;font-size:16px}"
+      "figure{margin:0;display:flex;flex-direction:column;gap:0.5em}"
+      "figcaption{font-style:italic;font-weight:600}"
+      "figure:target figcaption{color:#007bff}"
+      "figure:target figcaption::before{font-style:normal;content:'⯈ '}"
+      "figure:target figcaption::after{font-style:normal;content:' ⯇'}"
       CSS_CONTENT
 
 fun toElements(diagrams) =
   diagrams
     Iter.mapping of case [caption, svg] then
-      elem("figure", ["id", caption], style(["text-align", "center"])) of
-        svg
+      elem("figure", ["id", caption]) of
         elem("figcaption") of caption
+        svg
     Iter.toArray()
 
 fs.writeFileSync of

@@ -85,14 +85,14 @@ type g = int * (string -> float)
 example of """
 type 'a f = 'a * 'a
 """
-//│ > «type f('a) = 'a * 'a»
+//│ > «type f «'a» :: Nil = 'a * 'a»
 
 example of """
 type foo = Bar | Qux
 let double n = n * 2
 """
 //│ > «type foo = Bar | Qux»
-//│ > «let double(n) = n * 2»
+//│ > «let double n = n * 2»
 
 example of """
 type foo = Bar of int | Qux of int * int
@@ -109,7 +109,7 @@ type 'a option = Some of 'a | None
 //│ >     Pair:
 //│ >       first = App:
 //│ >         callee = Ident of "option"
-//│ >         arguments = Stack of 
+//│ >         argument = Stack of 
 //│ >           Ident of "'a"
 //│ >       second = Infix:
 //│ >         op = Keyword(`|`, N/A, 4)
@@ -118,7 +118,7 @@ type 'a option = Some of 'a | None
 //│ >           lhs = Ident of "Some"
 //│ >           rhs = Ident of "'a"
 //│ >         rhs = Ident of "None"
-//│ > «type option('a) = Some of 'a | None»
+//│ > «type option «'a» :: Nil = Some of 'a | None»
 
 example of """
 :tree
@@ -130,7 +130,7 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >     Pair:
 //│ >       first = App:
 //│ >         callee = Ident of "tree"
-//│ >         arguments = Stack of 
+//│ >         argument = Stack of 
 //│ >           Ident of "'a"
 //│ >       second = Infix:
 //│ >         op = Keyword(`|`, N/A, 4)
@@ -141,7 +141,7 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >             op = Keyword(`*`, 6, 6)
 //│ >             lhs = App:
 //│ >               callee = Ident of "tree"
-//│ >               arguments = Stack of 
+//│ >               argument = Stack of 
 //│ >                 Infix:
 //│ >                   op = Keyword(`of`, 9, 9)
 //│ >                   lhs = Ident of "Node"
@@ -149,14 +149,14 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >             rhs = Ident of "'a"
 //│ >           rhs = App:
 //│ >             callee = Ident of "tree"
-//│ >             arguments = Stack of 
+//│ >             argument = Stack of 
 //│ >               Ident of "'a"
-//│ > «type tree('a) = Leaf | tree(Node of 'a) * 'a * tree('a)»
+//│ > «type tree «'a» :: Nil = Leaf | tree «Node of 'a» :: Nil * 'a * tree «'a» :: Nil»
 
 example of """
 type ('a, 'b) twist = a list * b list
 """
-//│ > «type twist(('a, 'b)) = list(a) * list(b)»
+//│ > «type twist «('a, 'b)» :: Nil = list «a» :: Nil * list «b» :: Nil»
 
 
 // example of """
@@ -199,12 +199,12 @@ and t' = Int of int | List of t list
 //│ >           rhs = Ident of "int"
 //│ >         rhs = App:
 //│ >           callee = Ident of "list"
-//│ >           arguments = Stack of 
+//│ >           argument = Stack of 
 //│ >             Infix:
 //│ >               op = Keyword(`of`, 9, 9)
 //│ >               lhs = Ident of "List"
 //│ >               rhs = Ident of "t"
-//│ > «type t = {decoration : string; substance : t'} and t' = Int of int | list(List of t)»
+//│ > «type t = {decoration : string; substance : t'} and t' = Int of int | list «List of t» :: Nil»
 
 example of """
 :tree
@@ -248,8 +248,6 @@ let rec remove x = function
             let m = min_elt r in
             N (m, l, remove m r)
 """
-//│ > «type bst('a) = E | N of 'a * bst('a) * bst('a)»
-//│ > «let insert(x) = function E -> N((x, E, E)) | N((y, l, r)) -> if x < y then N((y, insert(x)(l), r)) then N((y, l, insert(x)(r)))»
-//│ > «let min_elt = function E -> failwith("min_e…") | N((x, E, _)) -> x | N((_, l, _)) -> min_elt(l)»
-//│ > «let remove(x) = function E -> E | N((y, l, r)) -> if x < y then N((y, remove(x)(l), r)) then if x > y then N((y, l, remove(x)(r))) then match (l, r) with (E, _) -> r | (_, E) -> l | _ -> let m = min_elt(r) in N((m, l, remove(m)(r)))»
+//│ > «type bst «'a» :: Nil = E | N of 'a * bst «'a» :: Nil * bst «'a» :: Nil»
+//│ > «let insert x = function E -> N (x, E, E) | N (y, l, r) -> if x < y then N (y, insert x (l, r)) then N (y, l, insert x r) let min_elt = function E -> failwith "min_e…" | N (x, E, _) -> x | N (_, l, _) -> min_elt l let remove x = function E -> E | N (y, l, r) -> if x < y then N (y, remove x (l, r)) then if x > y then N (y, l, remove x r) then match (l, r) with (E, _) -> r | (_, E) -> l | _ -> let m = min_elt r in N (m, l, remove m r)»
 

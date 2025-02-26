@@ -176,9 +176,13 @@ defineKind of
   (rhs, _) => rhs
   "the right-hand side of the arrow"
   Choice.end of Nil
+  Choice.keyword of ...
+  Keywords._bar
+  "separator"
   Choice.reference of ...
   "multiple-matching"
   (tail, _) => tail
+  "multiple-matching tail"
   Choice.end of ()
 
 fun matchTerm() =
@@ -300,6 +304,13 @@ val termInfixRule = rule of
       (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
       "right-hand side type"
       Choice.end of ()
+  // Application: <expr> <expr>
+  Choice.Ref of
+    "term"
+    (argument, _) => callee => Tree.App(callee, argument)
+    Some(Keywords.appPrec)
+    None
+    Choice.end of ()
 
 fun makeBracketRule(opening, closing, contentKind, wrapContent) =
   // Pass the error message of closing bracket to the content.
@@ -354,6 +365,8 @@ val termRule = rule of
   Choice.Ref of
     "term"
     (lhs, compose) => compose(lhs)
+    None
+    None
     termInfixRule
 
 fun recordTypeChoice =
@@ -393,6 +406,8 @@ val typeRule = rule of
   Choice.Ref of
     "type"
     (lhs, compose) => compose(lhs)
+    None
+    None
     typeInfixRule
 
 fun typeDefinition() =
@@ -581,7 +596,8 @@ fun parse(tokens) =
             None and
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
-              rule.exprChoice is Some([kind, process, rest]) then
+              rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) then
+                // TODO: use `outerPrec` and `innerPrec`
                 tracer.print of "found an expression choice", source.line
                 let acc = parseKind(kind, prec)
                 let tree = parseRule(prec, rest, allKeywords)
@@ -596,7 +612,8 @@ fun parse(tokens) =
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
         do tracer.print of "the current rule is " + rule.display
-        rule.exprChoice is Some([kind, process, rest]) and
+        rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
+          // TODO: use `outerPrec` and `innerPrec`
           do tracer.print of "parse \"" + kind + "\" kind from " + TokenHelpers.preview(current), source.line
           let acc = parseKind(kind, prec)
           acc Tree.nonEmptyError() then
@@ -658,10 +675,11 @@ fun parse(tokens) =
       termInfixRule.keywordChoices.get(name) is Some(rule) and
         do tracer.print of "the keyword is found in infix rules" + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
-          Some([kind, process, rest]) then
+          Some([kind, process, outerPrec, innerPrec, rest]) then
+            // TODO: use `outerPrec` and `innerPrec`
             consume
             let rhs = parseKind(kind, keyword.rightPrecOrMin)
-            let acc' = process(rhs)(acc)
+            let acc' = process(rhs, ())(acc)
             termCont(acc', prec)
           None then acc
       do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
@@ -676,14 +694,21 @@ fun parse(tokens) =
           termCont(Tree.App(op, acc :: rhs :: Nil), prec)
         else
           acc
-    token :: _ and
-      Keywords.appPrec > prec then
-        do tracer.print of "found an application", source.line
-        if term(Keywords.appPrec) is
-          Tree.Empty then acc
-          Tree.Error then acc
-          rhs then termCont(Tree.App(acc, rhs :: Nil), prec)
-      else
+    token :: _ and termInfixRule.exprChoice is
+      Some([kind, process, outerPrec, innerPrec, rest]) and
+        do tracer.print of "found an exprChoice with outerPrec = " + outerPrec, source.line
+        let outerPrec' = outerPrec Option.getOrElse(Keywords.maxOperatorPrec)
+        outerPrec' > prec and
+          parseKind(kind, innerPrec Option.getOrElse(outerPrec')) is
+            Tree.Empty then
+              do tracer.print of "nothing was parsed", source.line
+              acc
+            rhs then
+              do tracer.print of "parsed " + rhs Tree.summary(), source.line
+              termCont(process(rhs, ())(acc), prec)
+        do tracer.print of "the outer precedence is less than " + prec, source.line
+        else acc
+      None then
         tracer.print of "cannot consume " + token, source.line
         acc
     Nil then acc
@@ -732,7 +757,8 @@ fun parse(tokens) =
         typeInfixRule.keywordChoices.get(name) is Some(rule) and
           do tracer.print of "the keyword is found in infix rules" + name, source.line
           keyword.leftPrecOrMin > prec and rule.exprChoice is
-            Some([kind, process, rest]) then
+            Some([kind, process, outerPrec, innerPrec, rest]) then
+              // TODO: use `outerPrec` and `innerPrec`
               consume
               let rhs = parseKind(kind, keyword.rightPrecOrMin)
               let acc' = process(rhs)(acc)

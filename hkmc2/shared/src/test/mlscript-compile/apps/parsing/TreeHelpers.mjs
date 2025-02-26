@@ -222,7 +222,7 @@ TreeHelpers1 = class TreeHelpers {
           ])
         } else if (something instanceof Tree.App.class) {
           param07 = something.callee;
-          param17 = something.arguments;
+          param17 = something.argument;
           c1 = param07;
           a = param17;
           tmp28 = go(c1);
@@ -233,7 +233,7 @@ TreeHelpers1 = class TreeHelpers {
               tmp28
             ],
             [
-              "arguments",
+              "argument",
               tmp29
             ]
           ])

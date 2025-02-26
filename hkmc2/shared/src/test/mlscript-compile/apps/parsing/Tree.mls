@@ -44,7 +44,7 @@ module Tree with
     Literal(kind, value) extends Tree
     Match(scrutinee: Tree, branches: Stack[Tree]) extends Tree
     Lambda(params: Stack[Tree], body: Tree) extends Tree
-    App(callee: Tree, arguments: Stack[Tree]) extends Tree
+    App(callee: Tree, argument: Tree) extends Tree
     Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
     // `items` is separated by `and`
     Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
@@ -114,8 +114,8 @@ module Tree with
           par of go(lhs), prec(lhs, false) < leftPrec
           " ", op, " "
           par of go(rhs), prec(rhs, true) < rightPrec
-      App(callee, arguments) then fold(+) of
-        go(callee), "(", arguments Iter.fromStack() Iter.mapping(go) Iter.joined(", "), ")"
+      App(callee, argument) then fold(+) of
+        go(callee), " ", go(argument)
       Infix(op, lhs, rhs) then fold(+) of
         go(lhs), " ", go(op), " ", go(rhs)
       Define(kind, items) then mkStr of
