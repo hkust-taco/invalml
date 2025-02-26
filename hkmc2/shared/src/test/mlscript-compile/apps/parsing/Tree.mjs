@@ -679,8 +679,11 @@ Tree2 = class Tree {
           }
           tmp97 = Iter.fromStack(items);
           tmp98 = (caseScrut) => {
-            let first12, first02, lhs3, rhs3, tmp132, tmp133, tmp134;
-            if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+            let first12, first02, lhs3, rhs3, tree5, tmp132, tmp133, tmp134;
+            if (caseScrut instanceof Tree.Tree) {
+              tree5 = caseScrut;
+              return go(tree5)
+            } else if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
               first02 = caseScrut[0];
               first12 = caseScrut[1];
               lhs3 = first02;

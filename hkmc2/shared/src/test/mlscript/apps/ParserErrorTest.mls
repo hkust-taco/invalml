@@ -37,18 +37,20 @@ and test' = Bar' | Test' | Foo'
 //│ > Define:
 //│ >   kind = Type
 //│ >   items = Stack of 
-//│ >     Pair:
-//│ >       first = Ident of "test"
-//│ >       second = Infix:
+//│ >     Infix:
+//│ >       op = Keyword(`=`, 3, 3)
+//│ >       lhs = Ident of "test"
+//│ >       rhs = Infix:
 //│ >         op = Keyword(`|`, N/A, 4)
 //│ >         lhs = Ident of "Bar"
 //│ >         rhs = Infix:
 //│ >           op = Keyword(`|`, N/A, 4)
 //│ >           lhs = Ident of "Test"
 //│ >           rhs = Ident of "Foo"
-//│ >     Pair:
-//│ >       first = Ident of "test'"
-//│ >       second = Infix:
+//│ >     Infix:
+//│ >       op = Keyword(`=`, 3, 3)
+//│ >       lhs = Ident of "test'"
+//│ >       rhs = Infix:
 //│ >         op = Keyword(`|`, N/A, 4)
 //│ >         lhs = Ident of "Bar'"
 //│ >         rhs = Infix:

@@ -58,6 +58,7 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`type`, 11, N/A)
 //│ > Keyword(`exception`, 11, N/A)
 //│ > Keyword(`rec`, 11, 3)
+//│ > Keyword(`==`, N/A, N/A)
 //│ > Keyword(`(`, 27, 0)
 //│ > Keyword(`)`, 0, N/A)
 //│ > Keyword(`[`, 27, 0)
@@ -278,15 +279,61 @@ end
 """
 //│ > «print_string "hello"; print_string "world"»
 
+example of ":trace a == b"
+//│ > ┍ module <<< 
+//│ > ├ skipped a space at 0
+//│ > ├ >>>>>> mod <<<<<< [Ln 829]
+//│ > ├─┮ term <<< 0 ┃a│␠│==│␠│b┃
+//│ > │ ├ consumed `a` at 1
+//│ > │ ├ skipped a space at 2
+//│ > │ ├ >>> termCont 0 «a» <<< [Ln 712]
+//│ > │ ├ found a keyword: == [Ln 715]
+//│ > │ ├ keyword `==` does not have infix rules [Ln 728]
+//│ > │ ├ found an exprChoice with outerPrec = Some(25) [Ln 742]
+//│ > │ ├─┮ term <<< 25 ┃==│␠│b┃
+//│ > │ │ ├ no rule starting with == [Ln 700]
+//│ > │ │ ┕ term >>> «{}»
+//│ > │ ├ nothing was parsed [Ln 747]
+//│ > │ ┕ term >>> «a»
+//│ > ├ >>>>>> modCont <<<<<< [Ln 850]
+//│ > ├─┮ parsing rule "prefix rules for module items" with precedence 0
+//│ > │ ├ found an identifier "==" [Ln 627]
+//│ > │ ├ Keyword(`==`, N/A, N/A) [Ln 629]
+//│ > │ ├ keyword choices: `let`, `type`, `exception`
+//│ > │ ├ no rule starting with `==` was found [Ln 640]
+//│ > │ ├ the left prec of `==` is None [Ln 641]
+//│ > │ ├ no exprChoice or the prec is less than 0 [Ln 648]
+//│ > │ ├ consumed `==` at 3
+//│ > │ ┕ parsed rule "prefix rules for module items": «⚠»
+//│ > ├ skipped a space at 4
+//│ > ├ >>>>>> modCont <<<<<< [Ln 850]
+//│ > ├─┮ parsing rule "prefix rules for module items" with precedence 0
+//│ > │ ├ found an identifier "b" [Ln 627]
+//│ > │ ├ "b" is not a keyword [Ln 655]
+//│ > │ ├ the current rule is <prefix rules for module items> ::= `let` [`rec` ] <let-bindings> ↵
+//│ > │ │ `type` <typedefs> ↵
+//│ > │ │ `exception` <constr-decls>
+//│ > │ ├ no expression choice [Ln 670]
+//│ > │ ├ no end choice [Ln 674]
+//│ > │ ├ consumed `b` at 5
+//│ > │ ┕ parsed rule "prefix rules for module items": «⚠»
+//│ > ├ >>>>>> modCont <<<<<< [Ln 850]
+//│ > ┕ module >>> «a» :: «⚠» :: «⚠» :: Nil
+//│ > «a»
+//│ > «⚠»
+//│ > «⚠»
+
 // TODO: comment on this syntax design smell in the paper
+:todo
 example of """
 if a == b then
   a
 else
   b
 """
-//│ > «if a == b then a then b»
+//│ ═══[RUNTIME ERROR] Error: match error
 
+:todo
 example of """
 let f a b =
   if a == b then
@@ -299,7 +346,7 @@ let f a b =
     print_newline ()
   end
 """
-//│ > «let f a b = if a == b then print_endline "Equal" then print_string "Not E…"; print_int a; print_string " and "; print_int b; print_newline ()»
+//│ ═══[RUNTIME ERROR] Error: match error
 
 example of """
 let foo = y; x
@@ -385,7 +432,10 @@ let b = 0
 let f x = x + 1
 let g x = f (f x)
 """
-//│ > «let a = 0 let b = 0 let f x = x + 1 let g x = f f x»
+//│ > «let a = 0»
+//│ > «let b = 0»
+//│ > «let f x = x + 1»
+//│ > «let g x = f f x»
 
 example of """
 :tree
@@ -394,20 +444,20 @@ example of """
 ~2 * 3
 """
 //│ > App:
-//│ >   callee = Ident of "-"
-//│ >   argument = App:
-//│ >     callee = Ident of "*"
-//│ >     argument = Stack of 
-//│ >       Literal#Integer of "2"
-//│ >       Literal#Integer of "3"
+//│ >   callee = Ident of "*"
+//│ >   argument = Stack of 
+//│ >     App:
+//│ >       callee = Ident of "-"
+//│ >       argument = Literal#Integer of "2"
+//│ >     Literal#Integer of "3"
 //│ > App:
-//│ >   callee = Ident of "~"
-//│ >   argument = App:
-//│ >     callee = Ident of "*"
-//│ >     argument = Stack of 
-//│ >       Literal#Integer of "2"
-//│ >       Literal#Integer of "3"
-//│ > «- 2 * 3»
+//│ >   callee = Ident of "*"
+//│ >   argument = Stack of 
+//│ >     App:
+//│ >       callee = Ident of "~"
+//│ >       argument = Literal#Integer of "2"
+//│ >     Literal#Integer of "3"
+//│ > «(- 2) * 3»
 //│ > «~ 2 * 3»
 
 :todo

@@ -395,8 +395,13 @@ val typeInfixRule = rule of
     Tree.Infix(TypeKeywords._arrow, lhs, rhs)
   makeInfixChoice of TypeKeywords._asterisk, "type", (lhs, rhs) =>
     Tree.Infix(TypeKeywords._asterisk, lhs, rhs)
-  makeInfixChoice of TypeKeywords._of, "type", (lhs, rhs) =>
-    Tree.Infix(TypeKeywords._of, lhs, rhs)
+  // Application: <type> <type>
+  Choice.Ref of
+    "type"
+    (callee, _) => argument => Tree.App(callee, argument)
+    Some(TypeKeywords.appPrec)
+    None
+    Choice.end of ()
 
 // Prefix rules and infix rules for types.
 val typeRule = rule of
@@ -420,11 +425,29 @@ fun typeDefinition() =
   (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
   intro + "end"
   Choice.end of ()
+  
+defineKind of
+  "constr-decl"
+  Choice.typeExpr of
+    (ctor, argOpt) => if argOpt is
+      Some(arg) then Tree.Infix(TypeKeywords._of, ctor, arg)
+      None then ctor
+    "the variant constructor's name"
+    Choice.end of None
+    Choice.keyword of ...
+    Keywords._of
+    "the `of` operator"
+    Choice.reference of ...
+    "type"
+    (argument, _) => Some(argument)
+    "the variant constructor's argument"
+    Choice.end of ()
 
 fun variantsRule =
   let intro = "variant "
-  Choice.typeExpr of ...
-  (lhs, rhsMore) => if rhsMore is
+  Choice.reference of ...
+  "constr-decl"
+  (lhs, rhsOpt) => if rhsOpt is
     Some(rhs) then Tree.Infix(Keywords._bar, lhs, rhs)
     else lhs
   intro + "item"
@@ -443,11 +466,9 @@ defineKind of "variants", variantsRule
 fun typedefRule =
   let intro = "typedef "
   Choice.typeExpr of ...
-  (lhs, rhsMore) => if rhsMore is [rhs, more] then [lhs, rhs] :: more
+  (lhs, rhsMore) => if rhsMore is [rhs, more] then
+    rhs(lhs) :: more
   intro + "name"
-  Choice.keyword of ...
-  Keywords._equal
-  intro + "equal sign"
   Choice.reference of ...
   "typedef-rhs"
   (rhs, more) => [rhs, more]
@@ -466,12 +487,24 @@ defineKind of "typedefs", typedefRule
   
 defineKind of
   "typedef-rhs"
-  Choice.reference of
-    "variants"
-    (rhs, _) => rhs
-    "variants"
-    Choice.end of Nil
-  recordTypeChoice
+  Choice.keyword of
+    Keywords._equal
+    "`=` operator"
+    Choice.reference of
+      "variants"
+      (rhs, _) => lhs => Tree.Infix(Keywords._equal, lhs, rhs)
+      "typedef-rhs: variants"
+      Choice.end of ()
+    recordTypeChoice Choice.map of rhs =>
+      lhs => Tree.Infix(Keywords._equal, lhs, rhs) 
+  Choice.keyword of
+    Keywords._equalequal
+    "`==` operator"
+    Choice.reference of ...
+    "type"
+    (rhs, _) => lhs => Tree.Infix(Keywords._equalequal, lhs, rhs)
+    "type alias body"
+    Choice.end of ()
 
 fun labelDecl =
   let intro = "label-decl: "
@@ -506,21 +539,31 @@ fun labelDecls =
 
 defineKind of "label-decls", labelDecls
 
+defineKind of
+  "constr-decls"
+  Choice.reference of ...
+  "constr-decl"
+  Cons
+  "the first constructor declaration"
+  Choice.end of Nil
+  Choice.keyword of ...
+  Keywords._bar
+  "separator `and`"
+  Choice.reference of ...
+  "constr-decls"
+  (tail, _) => tail
+  "more constructor declarations"
+  Choice.end of ()
+
 fun exceptionDefinition() =
   let intro = "exception definition: "
   Choice.keyword of ...
   Keywords._exception
   intro + "keyword"
-  Choice.typeExpr of ...
-  (name, body) => Tree.Define(Tree.DefineKind.Exception, [name, body] :: Nil)
-  intro + "name"
-  Choice.end of Tree.empty
-  Choice.keyword of ...
-  Keywords._equal
-  intro + "equal sign"
-  Choice.typeExpr of ...
-  (body, _) => body
-  intro + "body"
+  Choice.reference of ...
+  "constr-decls"
+  (decls, _) => Tree.Define(Tree.DefineKind.Exception, decls)
+  "constructor declarations"
   Choice.end of ()
 
 val declRule = rule of
@@ -718,10 +761,6 @@ fun parse(tokens) =
     result => "typeExpr >>> " + result Tree.summary()
     () => ...
     if yeetSpaces is
-      // * Type expressions that begin with a single bar are allowed.
-      Token.Identifier("|", _) :: _ then
-        consume
-        typeExpr(prec)
       Token.TypeVariable(name) :: _ then
         consume
         // What's the corresponding tree of type variables?
@@ -741,7 +780,6 @@ fun parse(tokens) =
             Tree.empty
         None and
           symbolic then
-            consume
             Tree.error("unexpected symbolic identifier: " + name)
           else
             consume
@@ -765,27 +803,26 @@ fun parse(tokens) =
               typeExprCont(acc', prec)
             None then acc
           do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
-      // Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is
-      //   Some(keyword) and
-      //     do tracer.print of "found a keyword " + name, source.line
-      //     keyword.leftPrecOrMin > prec then
-      //       consume
-      //       let rhs = typeExpr(keyword.rightPrecOrMax)
-      //       typeExprCont(Tree.Infix(keyword, acc, rhs), prec)
-      //     else
-      //       acc
       // * the case of type application
       do tracer.print of "not a keyword", source.line
-      Token.Identifier(name, false) :: _ and
-        TypeKeywords.appPrec > prec then
-          do tracer.print of "found an application", source.line
-          if typeExpr(TypeKeywords.appPrec) is
-            Tree.Empty then acc
-            Tree.Error then acc
-            rhs then typeExprCont(Tree.App(rhs, acc :: Nil), prec)
-      token :: _ then
-        tracer.print of "cannot consume " + token, source.line
-        acc
+      token :: _ and typeInfixRule.exprChoice is
+        Some([kind, process, outerPrec, innerPrec, rest]) and
+          do tracer.print of "found an exprChoice with outerPrec = " + outerPrec, source.line
+          let outerPrec' = outerPrec Option.getOrElse(Keywords.maxOperatorPrec)
+          outerPrec' > prec and
+            parseKind(kind, innerPrec Option.getOrElse(outerPrec')) is
+              Tree.Empty then
+                do tracer.print of "nothing was parsed", source.line
+                acc
+              Tree.Error then
+                do tracer.print of "cannot parse more", source.line
+                acc
+              rhs then
+                do tracer.print of "parsed " + rhs Tree.summary(), source.line
+                typeExprCont(process(rhs)(acc), prec)
+          do tracer.print of "the outer precedence is less than " + prec, source.line
+          else acc
+        None then acc
       Nil then acc
   
   fun mod(acc: Stack[Tree]) = if yeetSpaces is
