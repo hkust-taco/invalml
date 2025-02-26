@@ -15,10 +15,11 @@ done
 """
 //│ > LetIn:
 //│ >   bindings = Stack of 
-//│ >     Pair:
-//│ >       first = Ident of "x"
-//│ >       second = Literal#Integer of "0"
-//│ >   body = While:
+//│ >     Infix:
+//│ >       op = Keyword(`=`, 3, 3)
+//│ >       lhs = Ident of "x"
+//│ >       rhs = Literal#Integer of "0"
+//│ >   body = Some of While:
 //│ >     condition = App:
 //│ >       callee = Ident of "<"
 //│ >       arguments = Stack of 

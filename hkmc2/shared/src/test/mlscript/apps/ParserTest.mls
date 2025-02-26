@@ -88,11 +88,9 @@ print of TypeKeywords.all.values.join("\n")
 
 print of Parser.termRule.display
 //│ > <prefix rules for expressions> ::= `let` [`rec` ] 
-//│ >   <term>
-//│ >     `=` <term>
-//│ >       `and` <term>`=` <rec>
-//│ >       `in` <term>
-//│ >       
+//│ >   <let-bindings>
+//│ >     `in` <term>
+//│ >     
 //│ > `fun` <term>`->` <term>
 //│ > `match` <term>
 //│ >   `with` [`|` ] 
@@ -141,11 +139,11 @@ example of """
 :tree
 let x: int -> int -> int = fun x y -> x + y
 """
-//│ > Define:
-//│ >   kind = Let(false)
-//│ >   items = Stack of 
-//│ >     Pair:
-//│ >       first = Infix:
+//│ > LetIn:
+//│ >   bindings = Stack of 
+//│ >     Infix:
+//│ >       op = Keyword(`=`, 3, 3)
+//│ >       lhs = Infix:
 //│ >         op = Keyword(`:`, 4, 3)
 //│ >         lhs = Ident of "x"
 //│ >         rhs = Infix:
@@ -155,7 +153,7 @@ let x: int -> int -> int = fun x y -> x + y
 //│ >             op = Keyword(`->`, 5, 4)
 //│ >             lhs = Ident of "int"
 //│ >             rhs = Ident of "int"
-//│ >       second = Lambda:
+//│ >       rhs = Lambda:
 //│ >         params = Stack of 
 //│ >           App:
 //│ >             callee = Ident of "x"
@@ -166,6 +164,7 @@ let x: int -> int -> int = fun x y -> x + y
 //│ >           arguments = Stack of 
 //│ >             Ident of "x"
 //│ >             Ident of "y"
+//│ >   body = None
 //│ > «let x : int -> int -> int = fun x(y) -> x + y»
 
 example of "(1 + 2) * 3"
@@ -215,7 +214,7 @@ example of """
 let compose f g = fun x -> f (g x) in
   let cos2 = compose square cos
 """
-//│ > «let compose(f)(g) = fun x -> f(g(x)) in let cos2 = compose(square)(cos) in {}»
+//│ > «let compose(f)(g) = fun x -> f(g(x)) in let cos2 = compose(square)(cos)»
 
 example of "type sign = Positive | Negative"
 //│ > «type sign = Positive | Negative»
@@ -323,7 +322,7 @@ example of """
 let a = if x then 1 else 0 in
 let b = 0
 """
-//│ > «let a = if x then 1 then 0 in let b = 0 in {}»
+//│ > «let a = if x then 1 then 0 in let b = 0»
 
 example of """
 let rec factorial x =

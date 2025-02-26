@@ -1,6 +1,8 @@
 import "./ParseRule.mls"
+import "../Parser.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
+import "../../Iter.mls"
 import "../../Option.mls"
 import "../../TreeTracer.mls"
 import "../../XML.mls"
@@ -11,6 +13,7 @@ open Predef
 open Stack
 open Option
 open ParseRule { ParseRule, Choice }
+open Parser { syntaxKinds }
 open TreeTracer
 open XML { html, tag, elem, style }
 
@@ -50,8 +53,11 @@ val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "ut
 
 val tracer = new TreeTracer()
 
+let renderedKinds = new Set of tuple of "type", "term"
+
 fun render(title: Str, rule: ParseRule) =
   let helperRules = []
+  let referencedKinds = new Set()
   let renderCache = new globalThis.Map()
   fun sequence(lhs, rhsOpt) =
     if rhsOpt is
@@ -74,7 +80,10 @@ fun render(title: Str, rule: ParseRule) =
         None then latterPart
     Choice.Ref(kind, _, rest) then
       tracer.print of "found Choice.Ref to " + kind
-      Some of rr.NonTerminal(kind) sequence(renderRule(rest, currentRule))
+      if renderedKinds.has(kind) is false do
+        referencedKinds.add of kind
+      Some of rr.NonTerminal(kind, LinkOpts("#" + kind))
+        sequence(renderRule(rest, currentRule))
     Choice.Lazy(get, make) and
       renderCache.has(make) then
         tracer.print of "found Choice.Lazy in cache"
@@ -117,4 +126,15 @@ fun render(title: Str, rule: ParseRule) =
       let choice = rr.Choice(0, ...nodes)
       optional is true then Some(rr.Optional(choice))
       else Some(choice)
-  [[title, diagram of renderRule(rule, None)], ...helperRules]
+  // Iteratively render the rule and its dependencies.
+  let diagrams = [[title, diagram of renderRule(rule, None)]]
+  while referencedKinds.size > 0 do
+    let currentKinds = referencedKinds
+    set renderedKinds = renderedKinds.union of currentKinds
+    referencedKinds = new Set()
+    diagrams.push of ...currentKinds
+      Iter.mapping of kind =>
+        let theRule = syntaxKinds.get(kind) Option.unsafe.get()
+        [kind, diagram of renderRule of theRule]
+      Iter.toArray()
+  diagrams

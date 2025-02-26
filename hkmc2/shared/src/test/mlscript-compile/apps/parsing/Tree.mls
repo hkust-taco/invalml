@@ -48,7 +48,7 @@ module Tree with
     Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
     // `items` is separated by `and`
     Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
-    LetIn(bindings: Stack[[Tree, Tree]], body: Tree) extends Tree
+    LetIn(bindings: Stack[Tree], body: Tree) extends Tree
     While(cond: Tree, body: Tree) extends Tree
     For(head: Tree, start: Tree, end: Tree, body: Tree) extends Tree
     // For `if`-`then`-`else`. The last part is optional.
@@ -132,10 +132,11 @@ module Tree with
         "let "
         bindings
           Iter.fromStack()
-          Iter.mapping of case [lhs, rhs] then go(lhs) + " = " + go(rhs)
+          Iter.mapping of go
           Iter.joined(" and ")
-        " in "
-        go(body)
+        ...if body is
+          Some(body) then [" in ", go(body)]
+          None then []
       While(cond, body) then mkStr of "while ", go(cond), " do ", go(body), " done"
       For(head, start, end, body) then mkStr of
         "for ", go(head), " = ", go(start), " to ", go(end), " do ", go(body), " done"

@@ -35,40 +35,30 @@ fun getRuleByKind(kind: Str) = syntaxKinds.get(kind) Option.unsafe.get()
 fun defineKind(name: Str, ...choices) =
   syntaxKinds.insert of name, rule(name, ...choices)
 
+defineKind of
+  "let-bindings"
+  Choice.term of ...
+  (lhs, rhsBindings) => if rhsBindings is [rhs, bindings] then
+    Tree.Infix(Keywords._equal, lhs, rhs) :: bindings
+  "left-hand side"
+  Choice.keyword of ...
+  Keywords._equal
+  "equal sign"
+  Choice.term of ...
+  (rhs, tail) => [rhs, tail]
+  "right-hand side"
+  Choice.end of Nil
+  Choice.keyword of ...
+  Keywords._and
+  "separator"
+  Choice.reference of ...
+  "let-bindings"
+  (tail, _) => tail
+  "let-bindings tail"
+  Choice.end of ()
+
 fun letBinding(hasInClause: Bool) =
   let intro = "let binding: "
-  fun makeBinding(bindingBody) = Choice.term of
-    if hasInClause then
-      (head, bodyAndLetIn) => if bodyAndLetIn is
-        [body, Tree.LetIn(bindings, letBody)] then
-          Tree.LetIn([head, body] :: bindings, letBody)
-    else
-      (head, bodyAndDefine) => if bodyAndDefine is
-        [body, Tree.Define(kind, defs)] then
-          Tree.Define(kind, [head, body] :: defs)
-    intro + "left-hand side"
-    Choice.keyword of
-      Keywords._equal
-      intro + "right-hand side"
-      bindingBody
-  fun makeItems(get) = Choice.term of
-    (body, defLike) => [body, defLike]
-    intro + "right-hand side"
-    Choice.keyword of
-      Keywords._and
-      intro + "`and` keyword"
-      makeBinding of Choice.Lazy(get, makeItems)
-    ...if hasInClause then tuple of
-      Choice.keyword of
-        Keywords._in
-        intro + "`in` keyword"
-        Choice.term of
-          (body, _) => Tree.LetIn(Nil, body)
-          intro + "body"
-          Choice.end of ()
-      Choice.end of Tree.LetIn(Nil, Tree.empty)
-    else tuple of Choice.end of Tree.Define(Tree.DefineKind.Let(false), Nil)
-  let items = Choice.lazy of makeItems
   Choice.keyword of
     Keywords._let
     intro + "keyword"
@@ -81,7 +71,21 @@ fun letBinding(hasInClause: Bool) =
           Choice.end of ()
       rule of
         intro + "body"
-        makeBinding of items
+        Choice.reference of
+          "let-bindings"
+          (bindings, body) => Tree.LetIn(bindings, body)
+          "let-bindings"
+          ...if hasInClause then tuple of
+            Choice.keyword of
+              Keywords._in
+              intro + "`in` keyword"
+              Choice.term of
+                (body, _) => Some(body)
+                intro + "body"
+                Choice.end of ()
+            Choice.end of None
+          else
+            tuple of Choice.end of None
 
 let letExpression = letBinding(true)
 let letDefinition = letBinding(false)
