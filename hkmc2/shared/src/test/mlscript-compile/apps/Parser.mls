@@ -28,7 +28,12 @@ module Parser with ...
 
 val tracer = new TreeTracer
 
+val syntaxKinds = new Map()
 
+fun getRuleByKind(kind: Str) = syntaxKinds.get(kind) Option.unsafe.get()
+
+fun defineKind(name: Str, ...choices) =
+  syntaxKinds.insert of name, rule(name, ...choices)
 
 fun letBinding(hasInClause: Bool) =
   let intro = "let binding: "
@@ -105,7 +110,7 @@ fun ifThenElse() =
   intro + "alternative"
   Choice.end of None
 
-fun funChoice() =
+fun funTerm() =
   let intro = "function expression: "
   Choice.keyword of ...
   Keywords._fun
@@ -121,75 +126,108 @@ fun funChoice() =
   intro + "body"
   Choice.end of None
 
-fun patternMatchingBody(intro, cons, nil) =
-  fun makeMatchArms(get) = Choice.term of
-    (pat, rhsAndRest) => if rhsAndRest is [rhs, rest] then
-      cons of Tree.Infix(Keywords._thinArrow, pat, rhs), rest
-    intro + "pattern"
-    Choice.keyword of
-      Keywords._thinArrow
-      intro + "arrow"
-      Choice.term of
-        (curr, next) => [curr, next]
-        intro + "body"
-        Choice.end of nil
-        Choice.keyword of
-          Keywords._bar
-          intro + "leading bar"
-          Choice.Lazy(get, makeMatchArms)
-  let matchArms = Choice.lazy of makeMatchArms
-  tuple of
-    Choice.Optional of
-      rule of
-        intro + "body"
-        Choice.keyword of
-          Keywords._bar
-          intro + "leading bar"
-          Choice.end of ()
-      rule of
-        intro + "body"
-        matchArms
+defineKind of
+  "simple-matching"
+  Choice.term of ...
+  (lhs, rhsTail) => if rhsTail is [rhs, tail] then
+    Tree.Infix(Keywords._thinArrow, lhs, rhs) :: tail
+  "pattern"
+  Choice.keyword of ...
+  Keywords._thinArrow
+  "arrow"
+  Choice.term of ...
+  (rhs, tail) => [rhs, tail]
+  "rhs"
+  Choice.end of Nil
+  Choice.keyword of ...
+  Keywords._bar
+  "separator"
+  Choice.reference of ...
+  "simple-matching"
+  (tail, _) => tail
+  "simple-matching tail"
+  Choice.end of ()
 
-fun matchWithChoice() =
+defineKind of
+  "pattern-list"
+  Choice.term of ...
+  (head, tail) => head :: tail
+  "pattern"
+  Choice.reference of ...
+  "pattern-list"
+  (tail, _) => tail
+  "pattern list tail"
+  Choice.end of ()
+
+defineKind of
+  "multiple-matching"
+  Choice.reference of ...
+  "pattern-list"
+  Tree.infix of Keywords._thinArrow
+  "the list of pattern"
+  Choice.keyword of ...
+  Keywords._thinArrow
+  "the arrow symbol"
+  Choice.term of ...
+  (rhs, _) => rhs
+  "the right-hand side of the arrow"
+  Choice.end of Nil
+  Choice.reference of ...
+  "multiple-matching"
+  (tail, _) => tail
+  Choice.end of ()
+
+fun matchTerm() =
   let intro = "`match` expression: "
-  Choice.keyword of
-    Keywords._match
-    intro + "keyword"
-    Choice.term of
-      (scrutinee, branches) => Tree.Match(scrutinee, branches)
-      intro + "scrutinee"
+  Choice.keyword of ...
+  Keywords._match
+  intro + "keyword"
+  Choice.term of ...
+  (scrutinee, branches) => Tree.Match(scrutinee, branches)
+  intro + "scrutinee"
+  Choice.keyword of ...
+  Keywords._with
+  intro + "with"
+  Choice.Optional of
+    rule of
+      intro + "body"
       Choice.keyword of
-        Keywords._with
-        intro + "with"
-        ...patternMatchingBody(intro, (x, xs) => x :: xs, Nil)
+        Keywords._bar
+        intro + "leading bar"
+        Choice.end of ()
+    getRuleByKind("simple-matching")
 
-fun matchFunctionChoice() =
+fun functionTerm() =
   let intro = "`function` definition: "
-  Choice.keyword of
-    Keywords._function
-    intro + "`function` keyword"
-    ...patternMatchingBody of
-      intro
-      (x, xs) => if xs is
-        Tree.Match(scrut, arms) then Tree.Match(scrut, x :: arms)
-      Tree.Match(Tree.empty, Nil)
+  let body = Choice.Optional of
+    rule of
+      intro + "body"
+      Choice.keyword of
+        Keywords._bar
+        intro + "leading bar"
+        Choice.end of ()
+    getRuleByKind("simple-matching")
+  Choice.keyword of ...
+  Keywords._function
+  intro + "`function` keyword"
+  body Choice.map(branches => Tree.Match(Tree.empty, branches))
 
 let whileTerm = Choice.keyword of
   Keywords._while
   "while condition"
-  Choice.term of
-    Tree.While
-    "while body"
-    Choice.keyword of
-      Keywords._do
-      "while body"
-      Choice.term of
-        (body, _) => body
-        "while end"
-        Choice.keyword of
-          Keywords._done
-          "while end"
-          Choice.end of ()
+  Choice.term of ...
+  Tree.While
+  "while body"
+  Choice.keyword of ...
+  Keywords._do
+  "while body"
+  Choice.term of ...
+  (body, _) => body
+  "while end"
+  Choice.keyword of ...
+  Keywords._done
+  "while end"
+  Choice.end of ()
 
 fun forTerm =
   let intro = "for: "
@@ -231,14 +269,14 @@ fun forTerm =
             innerPart
 
 fun makeInfixChoice(keyword: Keyword, rhsKind: Str, compose: (Tree, Tree) -> Tree) =
-  Choice.keyword of
-    keyword
-    "operator `" + keyword.name + "`"
-    Choice.reference of
-      rhsKind
-      (rhs, _) => lhs => compose(lhs, rhs)
-      "operator `" + keyword.name + "` right-hand side"
-      Choice.end of ()
+  Choice.keyword of ...
+  keyword
+  "operator `" + keyword.name + "`"
+  Choice.reference of ...
+  rhsKind
+  (rhs, _) => lhs => compose(lhs, rhs)
+  "operator `" + keyword.name + "` right-hand side"
+  Choice.end of ()
 
 val termInfixRule = rule of
   "infix rules for expressions"
@@ -279,9 +317,9 @@ fun makeBracketRule(opening, closing, contentKind, wrapContent) =
 val termRule = rule of
   "prefix rules for expressions"
   letExpression
-  funChoice()
-  matchWithChoice()
-  matchFunctionChoice()
+  funTerm()
+  matchTerm()
+  functionTerm()
   ifThenElse()
   whileTerm
   forTerm
@@ -355,21 +393,17 @@ val typeRule = rule of
 
 fun typeDefinition() =
   let intro = "type definition"
-  Choice.keyword of
-    Keywords._type
-    intro + "type defs"
-    Choice.reference of
-      "typedefs"
-      (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
-      intro + "end"
-      Choice.end of ()
-
-val categories = new Map()
+  Choice.keyword of ...
+  Keywords._type
+  intro + "type defs"
+  Choice.reference of ...
+  "typedefs"
+  (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
+  intro + "end"
+  Choice.end of ()
 
 fun variantsRule =
   let intro = "variant "
-  rule of ...
-  intro + "variant"
   Choice.typeExpr of ...
   (lhs, rhsMore) => if rhsMore is
     Some(rhs) then Tree.Infix(Keywords._bar, lhs, rhs)
@@ -385,12 +419,10 @@ fun variantsRule =
   intro + "end"
   Choice.end of ()
 
-categories.insert("variants", variantsRule)
+defineKind of "variants", variantsRule
 
 fun typedefRule =
   let intro = "typedef "
-  rule of ...
-  intro + "rule"
   Choice.typeExpr of ...
   (lhs, rhsMore) => if rhsMore is [rhs, more] then [lhs, rhs] :: more
   intro + "name"
@@ -411,25 +443,19 @@ fun typedefRule =
   intro + "end"
   Choice.end of ()
 
-categories.insert("typedefs", typedefRule)
-
-fun typedefRhsRule =
-  let intro = "typedef rhs "
-  rule of ...
-  intro + "rule"
+defineKind of "typedefs", typedefRule
+  
+defineKind of
+  "typedef-rhs"
   Choice.reference of
     "variants"
     (rhs, _) => rhs
-    intro + "variants"
+    "variants"
     Choice.end of Nil
   recordTypeChoice
-  
-categories.insert("typedef-rhs", typedefRhsRule)
 
 fun labelDecl =
   let intro = "label-decl: "
-  rule of ...
-  intro + rule
   Choice.typeExpr of ...
   Tree.infix of TypeKeywords._colon
   intro + "name"
@@ -439,14 +465,12 @@ fun labelDecl =
   Choice.typeExpr of ...
   (rhs, _) => rhs
   intro + "body"
-  Choice.end of Tree.empty
+  Choice.end of ()
 
-categories.insert("label-decl", labelDecl)
+defineKind of "label-decl", labelDecl
 
 fun labelDecls =
   let intro = "label-decls: "
-  rule of ...
-  intro + rule
   Choice.reference of ...
   "label-decl"
   Cons
@@ -461,24 +485,24 @@ fun labelDecls =
   intro + "end"
   Choice.end of ()
 
-categories.insert("label-decls", labelDecls)
+defineKind of "label-decls", labelDecls
 
 fun exceptionDefinition() =
   let intro = "exception definition: "
-  Choice.keyword of
-    Keywords._exception
-    intro + "keyword"
-    Choice.typeExpr of
-      (name, body) => Tree.Define(Tree.DefineKind.Exception, [name, body] :: Nil)
-      intro + "name"
-      Choice.keyword of
-        Keywords._equal
-        intro + "equal sign"
-        Choice.typeExpr of
-          (body, _) => body
-          intro + "body"
-          Choice.end of ()
-      Choice.end of Tree.empty
+  Choice.keyword of ...
+  Keywords._exception
+  intro + "keyword"
+  Choice.typeExpr of ...
+  (name, body) => Tree.Define(Tree.DefineKind.Exception, [name, body] :: Nil)
+  intro + "name"
+  Choice.end of Tree.empty
+  Choice.keyword of ...
+  Keywords._equal
+  intro + "equal sign"
+  Choice.typeExpr of ...
+  (body, _) => body
+  intro + "body"
+  Choice.end of ()
 
 val declRule = rule of
   "prefix rules for module items"
@@ -523,9 +547,18 @@ fun parse(tokens) =
       expected Token.summary()
       ", but found end of input"
   
+  fun parseKind(kind: Str, prec: Int): Tree = if
+    kind is "type" then typeExpr(prec, TypeKeywords.all)
+    kind is "term" then term(prec, Keywords.all)
+    // * other kinds are rule-only and does not have operator-based parsing.
+    syntaxKinds.get(kind) is Some(rule) then
+      parseRule(prec, rule, Keywords.all)
+    else
+      throw Error("Unknown syntax kind: \"" + kind + "\"")
+  
   fun parseRule(prec: Int, rule: ParseRule, allKeywords) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
-    result => "parsed: " + result Tree.summary()
+    result => "parsed rule \"" + rule.name + "\": " + result Tree.summary()
     () => ...
     if yeetSpaces is
       Token.Identifier(name, _) :: _ and
@@ -546,7 +579,7 @@ fun parse(tokens) =
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
               rule.exprChoice is Some([kind, process, rest]) then
                 tracer.print of "found an expression choice", source.line
-                let acc = getParsingByKind(kind) of prec
+                let acc = parseKind(kind, prec)
                 let tree = parseRule(prec, rest, allKeywords)
                 process(acc, tree)
               do tracer.print of "no exprChoice or the prec is less than " + prec, source.line
@@ -558,14 +591,16 @@ fun parse(tokens) =
                 Tree.error("unexpected keyword " + keyword.name)
         do tracer.print of "\"" + name + "\" is not a keyword", source.line
       other :: _ and
+        do tracer.print of "the current rule is " + rule.display
         rule.exprChoice is Some([kind, process, rest]) and
           do tracer.print of "parse \"" + kind + "\" kind from " + TokenHelpers.preview(current), source.line
-          let acc = getParsingByKind(kind)(prec)
+          let acc = parseKind(kind, prec)
           acc Tree.nonEmptyError() then
             tracer.print of "the rest rule: " + rest.display, source.line
             let tree = parseRule(prec, rest, allKeywords)
             tracer.print of "acc: " + acc Tree.summary(), source.line
             tracer.print of "tree: " + tree Tree.summary(), source.line
+            tracer.print of "tree AST is: " + tree, source.line
             process(acc, tree)
           do tracer.print of "fallback to end choice", source.line
         do tracer.print of "no expression choice", source.line
@@ -581,14 +616,6 @@ fun parse(tokens) =
         None then
           tracer.print of "no end choice but found the end of input", source.line
           Tree.error("unexpected end of input")
-  
-  // TODO: make kinds extensible
-  fun getParsingByKind(kind: Str): Int -> Tree = if
-    kind is "type" then typeExpr
-    kind is "term" then term
-    categories.get(kind) is Some(rule) then
-      prec => parseRule(prec, rule, Keywords.all)
-    else throw new Error("Unknown syntax category: \"" + kind + "\"")
   
   fun term(prec: Int) = tracer.trace of
     "term <<< " + prec + " " + TokenHelpers.preview(current)
@@ -629,7 +656,7 @@ fun parse(tokens) =
         keyword.leftPrecOrMin > prec and rule.exprChoice is
           Some([kind, process, rest]) then
             consume
-            let rhs = getParsingByKind(kind) of keyword.rightPrecOrMin
+            let rhs = parseKind(kind, keyword.rightPrecOrMin)
             let acc' = process(rhs)(acc)
             termCont(acc', prec)
           None then acc
@@ -703,7 +730,7 @@ fun parse(tokens) =
           keyword.leftPrecOrMin > prec and rule.exprChoice is
             Some([kind, process, rest]) then
               consume
-              let rhs = getParsingByKind(kind) of keyword.rightPrecOrMin
+              let rhs = parseKind(kind, keyword.rightPrecOrMin)
               let acc' = process(rhs)(acc)
               typeExprCont(acc', prec)
             None then acc

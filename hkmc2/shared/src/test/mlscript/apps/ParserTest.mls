@@ -99,12 +99,12 @@ print of Parser.termRule.display
 //│ >     <term>
 //│ >       `->` <term>
 //│ >         
-//│ >         `|` <rec>
+//│ >         `|` <simple-matching>
 //│ > `function` [`|` ] 
 //│ >   <term>
 //│ >     `->` <term>
 //│ >       
-//│ >       `|` <rec>
+//│ >       `|` <simple-matching>
 //│ > `if` <term>
 //│ >   `then` <term>
 //│ >     
@@ -217,7 +217,6 @@ let compose f g = fun x -> f (g x) in
 """
 //│ > «let compose(f)(g) = fun x -> f(g(x)) in let cos2 = compose(square)(cos) in {}»
 
-:todo
 example of "type sign = Positive | Negative"
 //│ > «type sign = Positive | Negative»
 

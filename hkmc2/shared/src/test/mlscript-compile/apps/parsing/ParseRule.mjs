@@ -17,6 +17,15 @@ ParseRule2 = class ParseRule {
         this.choices = choices;
         this.#_keywordChoices = Option.None;
       }
+      map(op) {
+        let tmp, tmp1, tmp2;
+        tmp = Iter.fromStack(this.choices);
+        tmp1 = Iter.mapping(tmp, (choice) => {
+          return ParseRule.Choice.map(choice, op)
+        });
+        tmp2 = Iter.toStack(tmp1);
+        return ParseRule.ParseRule(this.name, tmp2)
+      } 
       andThen(rest) {
         let tmp, tmp1, tmp2, tmp3, tmp4;
         tmp = Iter.fromStack(this.choices);
@@ -571,6 +580,44 @@ ParseRule2 = class ParseRule {
         };
         cache = Option.None;
         return Choice.Lazy(getChoice, makeChoice)
+      } 
+      static map(choice2, op) {
+        let param0, value1, param01, param1, rule, rest, param02, param11, param2, kind1, process3, rest1, param03, param12, keyword1, rest2, tmp, tmp1, tmp2, tmp3;
+        if (choice2 instanceof ParseRule.Choice.Keyword.class) {
+          param03 = choice2.keyword;
+          param12 = choice2.rest;
+          keyword1 = param03;
+          rest2 = param12;
+          tmp = runtime.safeCall(rest2.map(op));
+          return ParseRule.Choice.Keyword(keyword1, tmp)
+        } else if (choice2 instanceof ParseRule.Choice.Ref.class) {
+          param02 = choice2.kind;
+          param11 = choice2.process;
+          param2 = choice2.rest;
+          kind1 = param02;
+          process3 = param11;
+          rest1 = param2;
+          return ParseRule.Choice.Ref(kind1, (x, y) => {
+            let tmp4;
+            tmp4 = runtime.safeCall(process3(x, y));
+            return runtime.safeCall(op(tmp4))
+          }, rest1)
+        } else if (choice2 instanceof ParseRule.Choice.Optional.class) {
+          param01 = choice2.rule;
+          param1 = choice2.rest;
+          rule = param01;
+          rest = param1;
+          tmp1 = runtime.safeCall(rule.map(op));
+          tmp2 = runtime.safeCall(rest.map(op));
+          return ParseRule.Choice.Optional(tmp1, tmp2)
+        } else if (choice2 instanceof ParseRule.Choice.End.class) {
+          param0 = choice2.value;
+          value1 = param0;
+          tmp3 = runtime.safeCall(op(value1));
+          return ParseRule.Choice.End(tmp3)
+        } else {
+          throw new globalThis.Error("match error");
+        }
       }
       static toString() { return "Choice"; }
     };

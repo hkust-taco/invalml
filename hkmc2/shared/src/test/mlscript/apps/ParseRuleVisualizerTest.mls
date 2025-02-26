@@ -6,7 +6,7 @@ import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
 
 open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
-open Parser { termRule, declRule, typeRule, categories }
+open Parser { termRule, declRule, typeRule, syntaxKinds }
 open XML { html, tag, elem, style }
 
 fun toHTML(...elements) = html(["lang", "en"]) of
@@ -48,7 +48,7 @@ fs.writeFileSync of
     ...toElements of render("Type Rules", typeRule)
     elem("h2") of "Definitions"
     ...toElements of render("Definition Rules", declRule)
-    ...toElements of categories
+    ...toElements of syntaxKinds
       Iter.mapping of case [name, rule] then render(name, rule)
       Iter.flattening()
       Iter.toArray()

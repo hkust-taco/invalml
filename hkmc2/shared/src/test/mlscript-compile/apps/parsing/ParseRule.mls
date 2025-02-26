@@ -22,6 +22,14 @@ module ParseRule with ...
 
 class ParseRule(val name: Str, val choices: Stack[Choice]) with
   
+  fun map(op: Tree -> Tree) =
+    ParseRule of
+      name
+      choices
+        Iter.fromStack()
+        Iter.mapping of choice => choice Choice.map(op)
+        Iter.toStack()
+  
   // Append a rule to the end of all choices in this rule.
   fun andThen(rest: ParseRule) = ParseRule of
     name
@@ -150,3 +158,9 @@ module Choice with
       set cache = makeChoice(getChoice)
       cache
     Lazy(getChoice, makeChoice)
+  
+  fun map(choice: Choice, op: Tree -> Tree) = if choice is
+    Choice.Keyword(keyword, rest) then Choice.Keyword(keyword, rest.map(op))
+    Choice.Ref(kind, process, rest) then Choice.Ref(kind, (x, y) => op(process(x, y)), rest)
+    Choice.Optional(rule, rest) then Choice.Optional(rule.map(op), rest.map(op))
+    Choice.End(value) then Choice.End(op(value))
