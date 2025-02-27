@@ -51,12 +51,12 @@ PrattParsing1 = class PrattParsing {
         } else {
           tmp5 = Token.summary(expected);
           tmp6 = Token.summary(actual);
-          tmp7 = Predef.mkStr("Expected token ", tmp5, ", but found ", tmp6);
+          tmp7 = runtime.safeCall(globalThis.Str.concat("Expected token ", tmp5, ", but found ", tmp6));
           return Expr.withErr(result1, tmp7)
         }
       } else if (peek instanceof Option.None.class) {
         tmp8 = Token.summary(expected);
-        tmp9 = Predef.mkStr("Expected token ", tmp8, ", but found end of input");
+        tmp9 = runtime.safeCall(globalThis.Str.concat("Expected token ", tmp8, ", but found end of input"));
         return Expr.withErr(result1, tmp9)
       } else {
         throw new globalThis.Error("match error");

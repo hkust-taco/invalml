@@ -16,7 +16,7 @@ open Str
 open Option { Some, None}
 open Token { LiteralKind }
 
-type Opt[T] = Some[T] | None
+type Option[T] = Some[T] | None
 
 module Lexer with ...
 
@@ -123,7 +123,7 @@ fun lex(str: Str) =
       else scanHexDigits(idx + 1, lim, acc, cnt + 1)
     else [idx, acc, cnt]
   
-  fun escape(idx: Int): [Int, Opt[Str]] = if char(idx) is
+  fun escape(idx: Int): [Int, Option[Str]] = if char(idx) is
     Some("n") then [idx + 1, Some("\n")]
     Some("r") then [idx + 1, Some("\r")]
     Some("t") then [idx + 1, Some("\t")]

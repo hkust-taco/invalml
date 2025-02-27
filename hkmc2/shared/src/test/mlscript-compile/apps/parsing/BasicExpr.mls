@@ -2,7 +2,7 @@ import "../../Str.mls"
 import "../../Option.mls"
 import "../../Predef.mls"
 
-open Str { parenthesized }
+open Str { parenthesizedIf }
 open Option { Some, None }
 open Predef { mkStr }
 
@@ -25,10 +25,9 @@ module BasicExpr with
     Lit(value) then value.toString()
     Var(name) then name
     Add(left, right) then left prettyPrint() + " + " + right prettyPrint()
-    Mul(left, right) then mkStr of
-      left prettyPrint() parenthesized(left is Add)
+    Mul(left, right) then Str.concat of
+      left prettyPrint() parenthesizedIf(left is Add)
       " * "
-      right prettyPrint() parenthesized(right is Add)
-    Err(Some(expr), msg) then mkStr of
-      "{ ", expr prettyPrint() + " | " + JSON.stringify(msg) + " }"
+      right prettyPrint() parenthesizedIf(right is Add)
+    Err(Some(expr), msg) then "{ " + expr prettyPrint() + " | " + JSON.stringify(msg) + " }"
     Err(None, msg) then "{ " + JSON.stringify(msg) + " }"

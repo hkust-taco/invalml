@@ -11,7 +11,7 @@ Str1 = class Str {
   static from(value) {
     return runtime.safeCall(globalThis.String(value))
   } 
-  static parenthesized(x, cond) {
+  static parenthesizedIf(x, cond) {
     let tmp;
     if (cond === true) {
       tmp = "(" + x;

@@ -8,4 +8,6 @@ fun concat(...xs) = xs.join("")
 
 fun from(value) = globalThis.String(value)
 
-fun parenthesized(x, cond) = if cond then "(" + x + ")" else x
+fun parenthesizedIf(x, cond) = if cond then "(" + x + ")" else x
+
+

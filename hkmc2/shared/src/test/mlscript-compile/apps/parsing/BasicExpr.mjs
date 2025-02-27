@@ -82,15 +82,15 @@ BasicExpr1 = class BasicExpr {
       } else {
         tmp4 = false;
       }
-      tmp5 = Str.parenthesized(tmp3, tmp4);
+      tmp5 = Str.parenthesizedIf(tmp3, tmp4);
       tmp6 = BasicExpr.prettyPrint(right);
       if (right instanceof BasicExpr.Add.class) {
         tmp7 = true;
       } else {
         tmp7 = false;
       }
-      tmp8 = Str.parenthesized(tmp6, tmp7);
-      return Predef.mkStr(tmp5, " * ", tmp8)
+      tmp8 = Str.parenthesizedIf(tmp6, tmp7);
+      return Str.concat(tmp5, " * ", tmp8)
     } else if (tree instanceof BasicExpr.Err.class) {
       param0 = tree.expr;
       param1 = tree.msg;
@@ -99,11 +99,11 @@ BasicExpr1 = class BasicExpr {
         expr1 = param01;
         msg3 = param1;
         tmp9 = BasicExpr.prettyPrint(expr1);
-        tmp10 = tmp9 + " | ";
-        tmp11 = runtime.safeCall(globalThis.JSON.stringify(msg3));
-        tmp12 = tmp10 + tmp11;
-        tmp13 = tmp12 + " }";
-        return Predef.mkStr("{ ", tmp13)
+        tmp10 = "{ " + tmp9;
+        tmp11 = tmp10 + " | ";
+        tmp12 = runtime.safeCall(globalThis.JSON.stringify(msg3));
+        tmp13 = tmp11 + tmp12;
+        return tmp13 + " }"
       } else if (param0 instanceof Option.None.class) {
         msg2 = param1;
         tmp14 = runtime.safeCall(globalThis.JSON.stringify(msg2));

@@ -123,7 +123,7 @@ Expr1 = class Expr {
         } else {
           tmp1 = false;
         }
-        tmp2 = Str.parenthesized(tmp, tmp1);
+        tmp2 = Str.parenthesizedIf(tmp, tmp1);
         tmp3 = Expr.prettyPrint(right);
         if (right instanceof Expr.Inf.class) {
           param04 = right.op;
@@ -147,8 +147,8 @@ Expr1 = class Expr {
         } else {
           tmp4 = false;
         }
-        tmp5 = Str.parenthesized(tmp3, tmp4);
-        return Predef.mkStr(tmp2, " ", op, " ", tmp5)
+        tmp5 = Str.parenthesizedIf(tmp3, tmp4);
+        return Str.concat(tmp2, " ", op, " ", tmp5)
       } else {
         throw new globalThis.Error("match error");
       }
@@ -160,11 +160,11 @@ Expr1 = class Expr {
         expr1 = param01;
         msg3 = param1;
         tmp6 = Expr.prettyPrint(expr1);
-        tmp7 = tmp6 + " | ";
-        tmp8 = runtime.safeCall(globalThis.JSON.stringify(msg3));
-        tmp9 = tmp7 + tmp8;
-        tmp10 = tmp9 + " }";
-        return Predef.mkStr("{ ", tmp10)
+        tmp7 = "{ " + tmp6;
+        tmp8 = tmp7 + " | ";
+        tmp9 = runtime.safeCall(globalThis.JSON.stringify(msg3));
+        tmp10 = tmp8 + tmp9;
+        return tmp10 + " }"
       } else if (param0 instanceof Option.None.class) {
         msg2 = param1;
         tmp11 = runtime.safeCall(globalThis.JSON.stringify(msg2));

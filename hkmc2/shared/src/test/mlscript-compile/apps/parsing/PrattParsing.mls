@@ -6,7 +6,6 @@ import "../Lexer.mls"
 import "./Token.mls"
 import "./Expr.mls"
 
-open Predef { mkStr }
 open Stack
 open Option { Some, None }
 open Token { Round, LiteralKind }
@@ -34,12 +33,12 @@ fun parse(tokens) =
       expected Token.same(actual) then
         consume
         result
-      else result Expr.withErr of mkStr of
+      else result Expr.withErr of Str.concat of
         "Expected token "
         expected Token.summary()
         ", but found "
         actual Token.summary() 
-    None then result Expr.withErr of mkStr of
+    None then result Expr.withErr of Str.concat of
       "Expected token "
       expected Token.summary()
       ", but found end of input"
