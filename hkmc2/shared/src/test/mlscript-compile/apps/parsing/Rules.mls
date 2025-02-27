@@ -53,7 +53,7 @@ defineKind of
   "let-bindings tail"
   Choice.end of ()
 
-fun letBinding(hasInClause: Bool) =
+fun makeLetBindings(hasInClause: Bool) =
   let intro = "let binding: "
   Choice.keyword of
     Keywords._let
@@ -83,8 +83,7 @@ fun letBinding(hasInClause: Bool) =
           else
             tuple of Choice.end of None
 
-let letExpression = letBinding(true)
-let letDefinition = letBinding(false)
+let letExpression = makeLetBindings(true)
 
 let ifThenElse =
   Choice.keyword of ...
@@ -365,21 +364,6 @@ val termRule = rule of
     None
     termInfixRule
 
-let recordTypeChoice =
-  Choice.keyword of ...
-  Keywords._leftCurly
-  "left brace"
-  Choice.reference of ...
-  "label-decls"
-  (content, _) => if content is
-    Nil then Tree.Bracketed(Token.Curly, Tree.Sequence(Nil))
-    else Tree.Bracketed(Token.Curly, Tree.Sequence(content))
-  "label-decl"
-  Choice.keyword of ...
-  Keywords._rightCurly
-  "right brace"
-  Choice.end of Tree.empty
-
 val typeInfixRule = rule of
   "infix rules for types"
   // Tuple (separated by commas)
@@ -409,16 +393,6 @@ val typeRule = rule of
     None
     None
     typeInfixRule
-
-let typeDefinition =
-  Choice.keyword of ...
-  Keywords._type
-  "`type` keyword"
-  Choice.reference of ...
-  "typedefs"
-  (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
-  "more typedefs"
-  Choice.end of ()
   
 defineKind of
   "constr-decl"
@@ -474,7 +448,7 @@ defineKind of
   (more, _) => more
   "typedef end"
   Choice.end of ()
-  
+
 defineKind of
   "typedef-rhs"
   Choice.keyword of
@@ -485,8 +459,21 @@ defineKind of
       (rhs, _) => lhs => Tree.Infix(Keywords._equal, lhs, rhs)
       "typedef-rhs: variants"
       Choice.end of ()
-    recordTypeChoice Choice.map of rhs =>
-      lhs => Tree.Infix(Keywords._equal, lhs, rhs) 
+    Choice.map of
+      Choice.keyword of
+        Keywords._leftCurly
+        "left brace"
+        Choice.reference of ...
+        "label-decls"
+        (content, _) => if content is
+          Nil then Tree.Bracketed(Token.Curly, Tree.Sequence(Nil))
+          else Tree.Bracketed(Token.Curly, Tree.Sequence(content))
+        "label-decl"
+        Choice.keyword of ...
+        Keywords._rightCurly
+        "right brace"
+        Choice.end of Tree.empty
+      rhs => lhs => Tree.Infix(Keywords._equal, lhs, rhs) 
   Choice.keyword of
     Keywords._equalequal
     "`==` operator"
@@ -509,23 +496,21 @@ defineKind of
   "label-decl body"
   Choice.end of ()
 
-fun labelDecls =
-  let intro = "label-decls: "
+defineKind of
+  "label-decls"
   Choice.reference of ...
   "label-decl"
   Cons
-  intro + "label-decl"
+  "the first label-decl"
   Choice.end of Nil
   Choice.keyword of ...
   Keywords._semicolon
-  intro + "semicolon"
+  "the `;` separator"
   Choice.reference of ...
   "label-decls"
   (more, _) => more
-  intro + "end"
+  "more label-decls"
   Choice.end of ()
-
-defineKind of "label-decls", labelDecls
 
 defineKind of
   "constr-decls"
@@ -543,18 +528,22 @@ defineKind of
   "more constructor declarations"
   Choice.end of ()
 
-let exceptionDefinition =
-  Choice.keyword of ...
-  Keywords._exception
-  "`exception` keyword"
-  Choice.reference of ...
-  "constr-decls"
-  (decls, _) => Tree.Define(Tree.DefineKind.Exception, decls)
-  "constructor declarations"
-  Choice.end of ()
-
 val declRule = rule of
   "prefix rules for module items"
-  letDefinition
-  typeDefinition
-  exceptionDefinition
+  makeLetBindings(false) // let definition
+  Choice.keyword of
+    Keywords._type
+    "`type` keyword"
+    Choice.reference of ...
+    "typedefs"
+    (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
+    "more typedefs"
+    Choice.end of ()
+  Choice.keyword of
+    Keywords._exception
+    "`exception` keyword"
+    Choice.reference of ...
+    "constr-decls"
+    (decls, _) => Tree.Define(Tree.DefineKind.Exception, decls)
+    "constructor declarations"
+    Choice.end of ()
