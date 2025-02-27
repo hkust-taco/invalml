@@ -29,6 +29,11 @@ fun true false -> false | false true -> true
 //│ > «⚠»
 
 example of """
+id (fun x y -> x + y)
+"""
+//│ > «id fun x y -> x + y»
+
+example of """
 :tree
 let x: int -> int -> int = fun x y -> x + y
 """
@@ -40,10 +45,10 @@ let x: int -> int -> int = fun x y -> x + y
 //│ >         op = Keyword(`:`, 4, 3)
 //│ >         lhs = Ident of "x"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`->`, 5, 4)
+//│ >           op = Keyword(`->`, 4, 3)
 //│ >           lhs = Ident of "int"
 //│ >           rhs = Infix:
-//│ >             op = Keyword(`->`, 5, 4)
+//│ >             op = Keyword(`->`, 4, 3)
 //│ >             lhs = Ident of "int"
 //│ >             rhs = Ident of "int"
 //│ >       rhs = Lambda:
@@ -134,6 +139,9 @@ function (0, 0) -> "both zero"
 
 example of "if f x then y else z"
 //│ > «if f x then y then z»
+
+example of "id (if f x then y else z)"
+//│ > «id if f x then y then z»
 
 example of "if f x then if g x then z else w else if h x then y else w"
 //│ > «if f x then if g x then z then w then if h x then y then w»

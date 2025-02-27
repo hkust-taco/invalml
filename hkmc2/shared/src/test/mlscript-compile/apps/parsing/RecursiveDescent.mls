@@ -38,7 +38,7 @@ fun parse(tokens) =
         "Expected token "
         expected Token.summary()
         ", but found "
-        actual Token.summary() 
+        actual Token.summary()
     None then result BasicExpr.withErr of mkStr of
       "Expected token "
       expected Token.summary()

@@ -58,3 +58,95 @@ and test' = Bar' | Test' | Foo'
 //│ >           lhs = Ident of "Test'"
 //│ >           rhs = Ident of "Foo'"
 //│ > «type test = Bar | Test | Foo and test' = Bar' | Test' | Foo'»
+
+example of """
+:tree
+-2 * 3
+~2 * 3
+"""
+//│ > App:
+//│ >   callee = Ident of "*"
+//│ >   argument = Stack of 
+//│ >     App:
+//│ >       callee = Ident of "*"
+//│ >       argument = Stack of 
+//│ >         App:
+//│ >           callee = Ident of "-"
+//│ >           argument = Literal#Integer of "2"
+//│ >         App:
+//│ >           callee = Ident of "~"
+//│ >           argument = Stack of 
+//│ >             Literal#Integer of "3"
+//│ >             Literal#Integer of "2"
+//│ >     Literal#Integer of "3"
+//│ > «(- 2) * 3 ~ 2 * 3»
+
+example of """
+:tree
+let foo = -2 * 3
+2 * 3
+"""
+//│ > LetIn:
+//│ >   bindings = Stack of 
+//│ >     Infix:
+//│ >       op = Keyword(`=`, 3, 3)
+//│ >       lhs = Ident of "foo"
+//│ >       rhs = App:
+//│ >         callee = Ident of "*"
+//│ >         argument = Stack of 
+//│ >           App:
+//│ >             callee = Ident of "*"
+//│ >             argument = Stack of 
+//│ >               App:
+//│ >                 callee = Ident of "-"
+//│ >                 argument = Literal#Integer of "2"
+//│ >               App:
+//│ >                 callee = Literal#Integer of "3"
+//│ >                 argument = Literal#Integer of "2"
+//│ >           Literal#Integer of "3"
+//│ >   body = None
+//│ > «let foo = (- 2) * 3 2 * 3»
+
+
+
+// TODO should fail
+example of """
+=> xx
+"""
+//│ > «=> xx»
+
+example of """
+:tree
+id fun x -> x
+"""
+//│ > Ident of "id"
+//│ > Error of "unexpected keyword fun"
+//│ > Error of "unexpected token Identifier(\"x\", false)"
+//│ > Error of "unexpected keyword ->"
+//│ > Error of "unexpected token Identifier(\"x\", false)"
+//│ > «id»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+
+example of """
+:tree
+id if true then 1 else 0
+"""
+//│ > Ident of "id"
+//│ > Error of "unexpected keyword if"
+//│ > Error of "unexpected token Literal(Boolean, \"true\")"
+//│ > Error of "unexpected keyword then"
+//│ > Error of "unexpected token Literal(Integer, \"1\")"
+//│ > Error of "unexpected keyword else"
+//│ > Error of "unexpected token Literal(Integer, \"0\")"
+//│ > «id»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+
+

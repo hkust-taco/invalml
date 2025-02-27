@@ -100,7 +100,7 @@ Rules1 = class Rules {
       return rhs
     }, "the right-hand side of the arrow", tmp26, tmp29);
     tmp31 = ParseRule.Choice.keyword(Precedence.Keywords._thinArrow, "the arrow symbol", tmp30);
-    tmp32 = ParseRule.Choice.reference("pattern-list", tmp25, "the list of pattern", tmp31);
+    tmp32 = ParseRule.Choice.reference("pattern-list", tmp25, "the list of patterns", tmp31);
     tmp33 = Rules.defineKind("multiple-matching", tmp32);
     tmp34 = ParseRule.Choice.end(runtime.Unit);
     tmp35 = ParseRule.Choice.keyword(Precedence.Keywords._done, "while end", tmp34);

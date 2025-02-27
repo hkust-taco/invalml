@@ -164,7 +164,7 @@ defineKind of
   Choice.reference of ...
   "pattern-list"
   Tree.infix of Keywords._thinArrow
-  "the list of pattern"
+  "the list of patterns"
   Choice.keyword of ...
   Keywords._thinArrow
   "the arrow symbol"

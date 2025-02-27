@@ -190,7 +190,7 @@ module TypeKeywords with
   val _semicolon = keyword(";", nextPrec, semiPrec)
   
   val _comma = keyword(",", nextPrec, currPrec) // * Only used for separating type parameters
-  val _bar = keyword("|", nextPrec, currPrec)
+  val _bar = keyword("|", None, None)
   val _as = keyword("", nextPrec, currPrec)
   let arrowPrec = currPrec
   val _arrow = keyword("->", nextPrec, arrowPrec)
