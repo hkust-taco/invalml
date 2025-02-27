@@ -159,7 +159,21 @@ val termInfixRule = rule of
   // Assignment: <expr> <- <expr>
   makeInfixChoice of Keywords._leftArrow, "term", (lhs, rhs) =>
     Tree.Infix(Keywords._leftArrow, lhs, rhs)
-  // Array access
+  // Selection: <expr> "." <identifier>
+  // Access: <expr> "." "(" <expr> ")"
+  Choice.keyword of
+    Keywords._period
+    Choice.keyword of
+      Keywords._leftRound
+      Choice.term of ...
+      (argument, _) => lhs => Tree.Infix(Keywords._period, lhs, Tree.Bracketed(Token.Round, argument))
+      "application argument"
+      Choice.keyword(Keywords._rightRound)
+    Choice.reference of
+      "term"
+      (rhs, _) => lhs => Tree.Infix(Keywords._period, lhs, rhs)
+      "operator `.` right-hand side"
+  // Type ascription: <expr> : <type>
   Choice.keyword of
     Keywords._colon
     Choice.typeExpr of

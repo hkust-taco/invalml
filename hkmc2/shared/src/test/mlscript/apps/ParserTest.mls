@@ -31,7 +31,7 @@ fun true false -> false | false true -> true
 example of """
 id (fun x y -> x + y)
 """
-//│ > «id fun x y -> x + y»
+//│ > «id (fun x y -> x + y)»
 
 example of """
 :tree
@@ -94,7 +94,7 @@ example of "let square x = x *. x"
 //│ > «let square x = x *. x»
 
 example of "square (sin pi) +. square (cos pi)"
-//│ > «square sin pi +. square cos pi»
+//│ > «square (sin pi) +. square (cos pi)»
 
 example of "(1 < 2) = false"
 //│ > «1 < 2»
@@ -111,7 +111,7 @@ example of """
 let compose f g = fun x -> f (g x) in
   let cos2 = compose square cos
 """
-//│ > «let compose f g = fun x -> f g x in let cos2 = compose square cos»
+//│ > «let compose f g = fun x -> f (g x) in let cos2 = compose square cos»
 
 example of "type sign = Positive | Negative"
 //│ > «type sign = Positive | Negative»
@@ -141,7 +141,7 @@ example of "if f x then y else z"
 //│ > «if f x then y then z»
 
 example of "id (if f x then y else z)"
-//│ > «id if f x then y then z»
+//│ > «id (if f x then y then z)»
 
 example of "if f x then if g x then z else w else if h x then y else w"
 //│ > «if f x then if g x then z then w then if h x then y then w»
@@ -205,27 +205,53 @@ let foo = y; x
 
 example of """
 let translate p dx dy =
-    p.x <- p.x +. dx; p.y <- p.y +. dy
+  p.x <- p.x +. dx;
+  p.y <- p.y +. dy
 """
-//│ > «let translate p dx dy = p»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
+//│ > «let translate p dx dy = p.x <- p.x +. dx; p.y <- p.y +. dy»
+
+example of """:tree f x.y """
+//│ > App:
+//│ >   callee = Ident of "f"
+//│ >   argument = Infix:
+//│ >     op = Keyword(`.`, 26, 26)
+//│ >     lhs = Ident of "x"
+//│ >     rhs = Ident of "y"
+//│ > «f x.y»
+
+example of """:tree f x.y.z x.y """
+//│ > App:
+//│ >   callee = App:
+//│ >     callee = Ident of "f"
+//│ >     argument = Infix:
+//│ >       op = Keyword(`.`, 26, 26)
+//│ >       lhs = Infix:
+//│ >         op = Keyword(`.`, 26, 26)
+//│ >         lhs = Ident of "x"
+//│ >         rhs = Ident of "y"
+//│ >       rhs = Ident of "z"
+//│ >   argument = Infix:
+//│ >     op = Keyword(`.`, 26, 26)
+//│ >     lhs = Ident of "x"
+//│ >     rhs = Ident of "y"
+//│ > «f x.y.z x.y»
+
+example of """:tree f x.y.z x.y """
+//│ > App:
+//│ >   callee = App:
+//│ >     callee = Ident of "f"
+//│ >     argument = Infix:
+//│ >       op = Keyword(`.`, 26, 26)
+//│ >       lhs = Infix:
+//│ >         op = Keyword(`.`, 26, 26)
+//│ >         lhs = Ident of "x"
+//│ >         rhs = Ident of "y"
+//│ >       rhs = Ident of "z"
+//│ >   argument = Infix:
+//│ >     op = Keyword(`.`, 26, 26)
+//│ >     lhs = Ident of "x"
+//│ >     rhs = Ident of "y"
+//│ > «f x.y.z x.y»
 
 example of "()"
 //│ > «()»
@@ -259,7 +285,7 @@ and sum l =
 in
   factorial 5 + sum [1; 2; 3]
 """
-//│ > «let factorial x = if x <= 1 then 1 then x * factorial x - 1 and sum l = match l with [] -> 0 | h :: t -> h + sum t in factorial 5 + sum [1; 2; 3]»
+//│ > «let factorial x = if x <= 1 then 1 then x * factorial (x - 1) and sum l = match l with [] -> 0 | h :: t -> h + sum t in factorial 5 + sum [1; 2; 3]»
 
 example of "begin end"
 //│ > «»
@@ -284,7 +310,7 @@ and odd =
 in
   even 1000
 """
-//│ > «let even = function 0 -> true | n -> odd n - 1 and odd = function 0 -> false | n -> even n - 1 in even 1000»
+//│ > «let even = function 0 -> true | n -> odd (n - 1) and odd = function 0 -> false | n -> even (n - 1) in even 1000»
 
 example of """
 let rec even =
@@ -292,7 +318,7 @@ let rec even =
 and odd =
   function 0 -> false | n -> even (n - 1)
 """
-//│ > «let even = function 0 -> true | n -> odd n - 1 and odd = function 0 -> false | n -> even n - 1»
+//│ > «let even = function 0 -> true | n -> odd (n - 1) and odd = function 0 -> false | n -> even (n - 1)»
 
 example of """
 let a = 0
@@ -303,13 +329,14 @@ let g x = f (f x)
 //│ > «let a = 0»
 //│ > «let b = 0»
 //│ > «let f x = x + 1»
-//│ > «let g x = f f x»
+//│ > «let g x = f (f x)»
 
 example of """
 :tree
 -2 * 3
 ;;
 ~2 * 3
+let x = !true
 """
 //│ > App:
 //│ >   callee = Ident of "*"
@@ -325,10 +352,19 @@ example of """
 //│ >       callee = Ident of "~"
 //│ >       argument = Literal#Integer of "2"
 //│ >     Literal#Integer of "3"
-//│ > «(- 2) * 3»
-//│ > «~ 2 * 3»
+//│ > LetIn:
+//│ >   bindings = Stack of 
+//│ >     Infix:
+//│ >       op = Keyword(`=`, 3, 3)
+//│ >       lhs = Ident of "x"
+//│ >       rhs = App:
+//│ >         callee = Ident of "!"
+//│ >         argument = Literal#Boolean of "true"
+//│ >   body = None
+//│ > «(-2) * 3»
+//│ > «~2 * 3»
+//│ > «let x = !true»
 
-:todo
 example of """
 let f x = x
 ;;
@@ -341,59 +377,42 @@ example of """
 :tree
 x.y <- 0
 """
-//│ > Ident of "x"
-//│ > Error of "unexpected keyword ."
-//│ > Error of "unexpected token Identifier(\"y\", false)"
-//│ > Error of "unexpected keyword <-"
-//│ > Error of "unexpected token Literal(Integer, \"0\")"
-//│ > «x»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
+//│ > Infix:
+//│ >   op = Keyword(`<-`, 9, 9)
+//│ >   lhs = Infix:
+//│ >     op = Keyword(`.`, 26, 26)
+//│ >     lhs = Ident of "x"
+//│ >     rhs = Ident of "y"
+//│ >   rhs = Literal#Integer of "0"
+//│ > «x.y <- 0»
 
 example of """
 :tree
 f expr .( expr ) <- expr
 """
-//│ > App:
-//│ >   callee = Ident of "f"
-//│ >   argument = Ident of "expr"
-//│ > Error of "unexpected keyword ."
-//│ > Error of "unexpected keyword ("
-//│ > Error of "unexpected token Identifier(\"expr\", false)"
-//│ > Error of "unexpected keyword )"
-//│ > Error of "unexpected keyword <-"
-//│ > Error of "unexpected token Identifier(\"expr\", false)"
-//│ > «f expr»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
+//│ > Infix:
+//│ >   op = Keyword(`<-`, 9, 9)
+//│ >   lhs = App:
+//│ >     callee = Ident of "f"
+//│ >     argument = Infix:
+//│ >       op = Keyword(`.`, 26, 26)
+//│ >       lhs = Ident of "expr"
+//│ >       rhs = Ident of "expr"
+//│ >   rhs = Ident of "expr"
+//│ > «f expr.expr <- expr»
 
 example of """
 :tree
 f (expr .( expr ) <- expr)
 """
-//│ > Ident of "f"
-//│ > Error of "unexpected keyword ("
-//│ > Error of "unexpected token Identifier(\"expr\", false)"
-//│ > Error of "unexpected keyword )"
-//│ > Error of "unexpected keyword <-"
-//│ > Error of "unexpected token Identifier(\"expr\", false)"
-//│ > Error of "unexpected keyword )"
-//│ > «f»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-//│ > «⚠»
-
-// TODO add tests for
-// f expr .( expr ) <- expr
-// f (expr .( expr ) <- expr)
-
+//│ > App:
+//│ >   callee = Ident of "f"
+//│ >   argument = Infix:
+//│ >     op = Keyword(`<-`, 9, 9)
+//│ >     lhs = Infix:
+//│ >       op = Keyword(`.`, 26, 26)
+//│ >       lhs = Ident of "expr"
+//│ >       rhs = Ident of "expr"
+//│ >     rhs = Ident of "expr"
+//│ > «f (expr.expr <- expr)»
 

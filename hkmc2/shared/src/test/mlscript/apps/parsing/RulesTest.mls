@@ -104,7 +104,7 @@ print of Rules.termRule.display
 //│ >   | "[" <term> "]"
 //│ >   | "{" <term> "}"
 //│ >   | "begin" <term> "end"
-//│ >   | <term> ("," <term> | ";" <term> | "<-" <term> | ":" <type> | <term>)
+//│ >   | <term> ("," <term> | ";" <term> | "<-" <term> | "." ("(" <term> ")" | <term>) | ":" <type> | <term>)
 
 print of Rules.typeRule.display
 //│ > <rules for types> ::= 

@@ -229,10 +229,10 @@ Tree2 = class Tree {
         param03 = tree1.kind;
         param13 = tree1.tree;
         return Keyword.INT_MAX
+      } else if (tree1 instanceof Tree.Ident.class) {
+        return Keyword.INT_MAX
       } else {
-        if (tree1 instanceof Tree.Ident.class) {
-          return Keyword.INT_MAX
-        } else if (tree1 instanceof Tree.Underscore.class) {
+        if (tree1 instanceof Tree.Underscore.class) {
           return Keyword.INT_MAX
         } else if (tree1 instanceof Tree.Modified.class) {
           return 1
@@ -285,6 +285,8 @@ Tree2 = class Tree {
           }
         } else if (tree1 instanceof Tree.Ternary.class) {
           return 3
+        } else if (tree1 instanceof Tree.Lambda.class) {
+          return Precedence.Keywords._fun.leftPrecOrMax
         } else {
           throw new globalThis.Error("match error");
         }
@@ -301,25 +303,25 @@ Tree2 = class Tree {
       }
     };
     go = function go(tree1) {
-      let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, param22, param31, head, start, end, body3, param08, param15, cond, body4, param09, param16, bindings, body5, param010, body6, param011, param17, kind, items, param012, param013, param18, param23, op, lhs1, rhs1, param014, param19, callee, argument, param015, param110, op1, param016, param111, lhs2, param017, param112, rhs2, scrut2, first1, first0, leftPrec, rightPrec, target, param018, param113, field, scrut3, first11, first01, leftPrec1, param019, param114, scrutinee, branches, param020, param115, value, value1, scrut4, param021, trees1, param022, trees2, param023, param116, modifier, subject, param024, param117, name1, param025, param118, kind1, tree3, param026, param119, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, tmp130, tmp131;
+      let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, param22, param31, head, start, end, body3, param08, param15, cond, body4, param09, param16, bindings, body5, param010, body6, param011, param17, kind, items, param012, param013, param18, param23, op, lhs1, rhs1, param014, param19, param24, target, param015, param110, field, scrut2, first1, first0, leftPrec, param016, param111, callee, argument, param017, param112, op1, arg, op2, param018, param113, lhs2, param019, param114, rhs2, scrut3, first11, first01, leftPrec1, rightPrec, param020, param115, scrutinee, branches, param021, param116, value, value1, scrut4, param022, trees1, param023, trees2, param024, param117, modifier, subject, param025, param118, name1, param026, param119, kind1, tree3, param027, param120, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112;
       if (tree1 instanceof Tree.Empty.class) {
         return "{}"
       } else if (tree1 instanceof Tree.Error.class) {
-        param026 = tree1.tree;
-        param119 = tree1.message;
-        if (param026 instanceof Tree.Empty.class) {
+        param027 = tree1.tree;
+        param120 = tree1.message;
+        if (param027 instanceof Tree.Empty.class) {
           return "\u26A0"
         } else {
-          tree4 = param026;
+          tree4 = param027;
           tmp = go(tree4);
           tmp1 = "<\u26A0:" + tmp;
           return tmp1 + ">"
         }
       } else if (tree1 instanceof Tree.Bracketed.class) {
-        param025 = tree1.kind;
-        param118 = tree1.tree;
-        kind1 = param025;
-        tree3 = param118;
+        param026 = tree1.kind;
+        param119 = tree1.tree;
+        kind1 = param026;
+        tree3 = param119;
         if (kind1 instanceof Token.Round.class) {
           tmp2 = go(tree3);
           tmp3 = "(" + tmp2;
@@ -341,41 +343,41 @@ Tree2 = class Tree {
           return tmp10 + ">"
         }
       } else if (tree1 instanceof Tree.Ident.class) {
-        param024 = tree1.name;
-        param117 = tree1.symbolic;
-        name1 = param024;
+        param025 = tree1.name;
+        param118 = tree1.symbolic;
+        name1 = param025;
         return name1
       } else {
         if (tree1 instanceof Tree.Underscore.class) {
           return "_"
         } else if (tree1 instanceof Tree.Modified.class) {
-          param023 = tree1.modifier;
-          param116 = tree1.subject;
-          modifier = param023;
-          subject = param116;
+          param024 = tree1.modifier;
+          param117 = tree1.subject;
+          modifier = param024;
+          subject = param117;
           tmp11 = go(modifier);
           tmp12 = tmp11 + " ";
           tmp13 = go(subject);
           return tmp12 + tmp13
         } else if (tree1 instanceof Tree.Tuple.class) {
-          param022 = tree1.trees;
-          trees2 = param022;
+          param023 = tree1.trees;
+          trees2 = param023;
           tmp14 = Iter.fromStack(trees2);
           tmp15 = Iter.mapping(tmp14, go);
           tmp16 = Iter.joined(tmp15, ", ");
           tmp17 = "(" + tmp16;
           return tmp17 + ")"
         } else if (tree1 instanceof Tree.Sequence.class) {
-          param021 = tree1.trees;
-          trees1 = param021;
+          param022 = tree1.trees;
+          trees1 = param022;
           tmp18 = Iter.fromStack(trees1);
           tmp19 = Iter.mapping(tmp18, go);
           return Iter.joined(tmp19, "; ")
         } else if (tree1 instanceof Tree.Literal.class) {
-          param020 = tree1.kind;
-          param115 = tree1.value;
-          if (param020 instanceof Token.LiteralKind.String.class) {
-            value1 = param115;
+          param021 = tree1.kind;
+          param116 = tree1.value;
+          if (param021 instanceof Token.LiteralKind.String.class) {
+            value1 = param116;
             scrut4 = value1.length > 5;
             if (scrut4 === true) {
               tmp20 = value1.slice(0, 5);
@@ -387,14 +389,14 @@ Tree2 = class Tree {
               return runtime.safeCall(globalThis.JSON.stringify(value1))
             }
           } else {
-            value = param115;
+            value = param116;
             return value
           }
         } else if (tree1 instanceof Tree.Match.class) {
-          param019 = tree1.scrutinee;
-          param114 = tree1.branches;
-          scrutinee = param019;
-          branches = param114;
+          param020 = tree1.scrutinee;
+          param115 = tree1.branches;
+          scrutinee = param020;
+          branches = param115;
           if (scrutinee instanceof Tree.Empty.class) {
             tmp24 = "function ";
           } else {
@@ -407,255 +409,154 @@ Tree2 = class Tree {
           tmp29 = Iter.joined(tmp28, " | ");
           return Predef.mkStr(tmp24, tmp29)
         } else if (tree1 instanceof Tree.App.class) {
-          param014 = tree1.callee;
-          param19 = tree1.argument;
-          if (param014 instanceof Tree.Ident.class) {
-            param015 = param014.name;
-            param110 = param014.symbolic;
-            if (param015 === ".") {
-              if (param19 instanceof Stack.Cons.class) {
-                param016 = param19.head;
-                param111 = param19.tail;
-                target = param016;
-                if (param111 instanceof Stack.Cons.class) {
-                  param017 = param111.head;
-                  param112 = param111.tail;
-                  if (param017 instanceof Tree.Ident.class) {
-                    param018 = param017.name;
-                    param113 = param017.symbolic;
-                    field = param018;
-                    if (param112 instanceof Stack.Nil.class) {
-                      scrut3 = Precedence.opPrec(".");
-                      if (globalThis.Array.isArray(scrut3) && scrut3.length === 2) {
-                        first01 = scrut3[0];
-                        first11 = scrut3[1];
-                        leftPrec1 = first01;
-                        tmp30 = Predef.fold((arg1, arg2) => {
-                          return arg1 + arg2
-                        });
-                        tmp31 = go(target);
-                        tmp32 = prec(target, false);
-                        tmp33 = tmp32 < leftPrec1;
-                        tmp34 = par(tmp31, tmp33);
-                        return runtime.safeCall(tmp30(tmp34, ".", field))
-                      } else {
-                        throw new globalThis.Error("match error");
-                      }
-                    } else {
-                      op1 = param015;
-                      if (param110 === true) {
-                        lhs2 = param016;
-                        rhs2 = param017;
-                        callee = param014;
-                        argument = param19;
-                        tmp35 = Predef.fold((arg1, arg2) => {
-                          return arg1 + arg2
-                        });
-                        tmp36 = go(callee);
-                        tmp37 = go(argument);
-                        return runtime.safeCall(tmp35(tmp36, " ", tmp37))
-                      } else {
-                        callee = param014;
-                        argument = param19;
-                        tmp38 = Predef.fold((arg1, arg2) => {
-                          return arg1 + arg2
-                        });
-                        tmp39 = go(callee);
-                        tmp40 = go(argument);
-                        return runtime.safeCall(tmp38(tmp39, " ", tmp40))
-                      }
-                    }
-                  } else {
-                    op1 = param015;
-                    if (param110 === true) {
-                      lhs2 = param016;
-                      rhs2 = param017;
-                      if (param112 instanceof Stack.Nil.class) {
-                        scrut2 = Precedence.opPrec(op1);
-                        if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                          first0 = scrut2[0];
-                          first1 = scrut2[1];
-                          leftPrec = first0;
-                          rightPrec = first1;
-                          tmp41 = Predef.fold((arg1, arg2) => {
-                            return arg1 + arg2
-                          });
-                          tmp42 = go(lhs2);
-                          tmp43 = prec(lhs2, false);
-                          tmp44 = tmp43 < leftPrec;
-                          tmp45 = par(tmp42, tmp44);
-                          tmp46 = go(rhs2);
-                          tmp47 = prec(rhs2, true);
-                          tmp48 = tmp47 < rightPrec;
-                          tmp49 = par(tmp46, tmp48);
-                          return runtime.safeCall(tmp41(tmp45, " ", op1, " ", tmp49))
-                        } else {
-                          throw new globalThis.Error("match error");
-                        }
-                      } else {
-                        callee = param014;
-                        argument = param19;
-                        tmp50 = Predef.fold((arg1, arg2) => {
-                          return arg1 + arg2
-                        });
-                        tmp51 = go(callee);
-                        tmp52 = go(argument);
-                        return runtime.safeCall(tmp50(tmp51, " ", tmp52))
-                      }
-                    } else {
-                      callee = param014;
-                      argument = param19;
-                      tmp53 = Predef.fold((arg1, arg2) => {
+          param016 = tree1.callee;
+          param111 = tree1.argument;
+          if (param016 instanceof Tree.Ident.class) {
+            param017 = param016.name;
+            param112 = param016.symbolic;
+            op2 = param017;
+            if (param112 === true) {
+              if (param111 instanceof Stack.Cons.class) {
+                param018 = param111.head;
+                param113 = param111.tail;
+                lhs2 = param018;
+                if (param113 instanceof Stack.Cons.class) {
+                  param019 = param113.head;
+                  param114 = param113.tail;
+                  rhs2 = param019;
+                  if (param114 instanceof Stack.Nil.class) {
+                    scrut3 = Precedence.opPrec(op2);
+                    if (globalThis.Array.isArray(scrut3) && scrut3.length === 2) {
+                      first01 = scrut3[0];
+                      first11 = scrut3[1];
+                      leftPrec1 = first01;
+                      rightPrec = first11;
+                      tmp30 = Predef.fold((arg1, arg2) => {
                         return arg1 + arg2
                       });
-                      tmp54 = go(callee);
-                      tmp55 = go(argument);
-                      return runtime.safeCall(tmp53(tmp54, " ", tmp55))
+                      tmp31 = go(lhs2);
+                      tmp32 = prec(lhs2, false);
+                      tmp33 = tmp32 < leftPrec1;
+                      tmp34 = par(tmp31, tmp33);
+                      tmp35 = go(rhs2);
+                      tmp36 = prec(rhs2, true);
+                      tmp37 = tmp36 < rightPrec;
+                      tmp38 = par(tmp35, tmp37);
+                      return runtime.safeCall(tmp30(tmp34, " ", op2, " ", tmp38))
+                    } else {
+                      throw new globalThis.Error("match error");
                     }
+                  } else {
+                    op1 = param017;
+                    arg = param111;
+                    tmp39 = go(arg);
+                    tmp40 = prec(arg, false);
+                    tmp41 = tmp40 <= Precedence.Keywords.prefixPrec;
+                    tmp42 = par(tmp39, tmp41);
+                    return Predef.mkStr(op1, tmp42)
                   }
                 } else {
-                  op1 = param015;
-                  if (param110 === true) {
-                    lhs2 = param016;
-                    callee = param014;
-                    argument = param19;
-                    tmp56 = Predef.fold((arg1, arg2) => {
-                      return arg1 + arg2
-                    });
-                    tmp57 = go(callee);
-                    tmp58 = go(argument);
-                    return runtime.safeCall(tmp56(tmp57, " ", tmp58))
-                  } else {
-                    callee = param014;
-                    argument = param19;
-                    tmp59 = Predef.fold((arg1, arg2) => {
-                      return arg1 + arg2
-                    });
-                    tmp60 = go(callee);
-                    tmp61 = go(argument);
-                    return runtime.safeCall(tmp59(tmp60, " ", tmp61))
-                  }
+                  op1 = param017;
+                  arg = param111;
+                  tmp43 = go(arg);
+                  tmp44 = prec(arg, false);
+                  tmp45 = tmp44 <= Precedence.Keywords.prefixPrec;
+                  tmp46 = par(tmp43, tmp45);
+                  return Predef.mkStr(op1, tmp46)
                 }
               } else {
-                op1 = param015;
-                if (param110 === true) {
-                  callee = param014;
-                  argument = param19;
-                  tmp62 = Predef.fold((arg1, arg2) => {
-                    return arg1 + arg2
-                  });
-                  tmp63 = go(callee);
-                  tmp64 = go(argument);
-                  return runtime.safeCall(tmp62(tmp63, " ", tmp64))
-                } else {
-                  callee = param014;
-                  argument = param19;
-                  tmp65 = Predef.fold((arg1, arg2) => {
-                    return arg1 + arg2
-                  });
-                  tmp66 = go(callee);
-                  tmp67 = go(argument);
-                  return runtime.safeCall(tmp65(tmp66, " ", tmp67))
-                }
+                op1 = param017;
+                arg = param111;
+                tmp47 = go(arg);
+                tmp48 = prec(arg, false);
+                tmp49 = tmp48 <= Precedence.Keywords.prefixPrec;
+                tmp50 = par(tmp47, tmp49);
+                return Predef.mkStr(op1, tmp50)
               }
             } else {
-              op1 = param015;
-              if (param110 === true) {
-                if (param19 instanceof Stack.Cons.class) {
-                  param016 = param19.head;
-                  param111 = param19.tail;
-                  lhs2 = param016;
-                  if (param111 instanceof Stack.Cons.class) {
-                    param017 = param111.head;
-                    param112 = param111.tail;
-                    rhs2 = param017;
-                    if (param112 instanceof Stack.Nil.class) {
-                      scrut2 = Precedence.opPrec(op1);
-                      if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
-                        first0 = scrut2[0];
-                        first1 = scrut2[1];
-                        leftPrec = first0;
-                        rightPrec = first1;
-                        tmp68 = Predef.fold((arg1, arg2) => {
-                          return arg1 + arg2
-                        });
-                        tmp69 = go(lhs2);
-                        tmp70 = prec(lhs2, false);
-                        tmp71 = tmp70 < leftPrec;
-                        tmp72 = par(tmp69, tmp71);
-                        tmp73 = go(rhs2);
-                        tmp74 = prec(rhs2, true);
-                        tmp75 = tmp74 < rightPrec;
-                        tmp76 = par(tmp73, tmp75);
-                        return runtime.safeCall(tmp68(tmp72, " ", op1, " ", tmp76))
-                      } else {
-                        throw new globalThis.Error("match error");
-                      }
-                    } else {
-                      callee = param014;
-                      argument = param19;
-                      tmp77 = Predef.fold((arg1, arg2) => {
-                        return arg1 + arg2
-                      });
-                      tmp78 = go(callee);
-                      tmp79 = go(argument);
-                      return runtime.safeCall(tmp77(tmp78, " ", tmp79))
-                    }
-                  } else {
-                    callee = param014;
-                    argument = param19;
-                    tmp80 = Predef.fold((arg1, arg2) => {
-                      return arg1 + arg2
-                    });
-                    tmp81 = go(callee);
-                    tmp82 = go(argument);
-                    return runtime.safeCall(tmp80(tmp81, " ", tmp82))
-                  }
-                } else {
-                  callee = param014;
-                  argument = param19;
-                  tmp83 = Predef.fold((arg1, arg2) => {
-                    return arg1 + arg2
-                  });
-                  tmp84 = go(callee);
-                  tmp85 = go(argument);
-                  return runtime.safeCall(tmp83(tmp84, " ", tmp85))
-                }
-              } else {
-                callee = param014;
-                argument = param19;
-                tmp86 = Predef.fold((arg1, arg2) => {
-                  return arg1 + arg2
-                });
-                tmp87 = go(callee);
-                tmp88 = go(argument);
-                return runtime.safeCall(tmp86(tmp87, " ", tmp88))
-              }
+              op1 = param017;
+              callee = param016;
+              argument = param111;
+              tmp51 = go(callee);
+              tmp52 = go(argument);
+              tmp53 = prec(argument, false);
+              tmp54 = tmp53 <= Precedence.Keywords.appPrec;
+              tmp55 = par(tmp52, tmp54);
+              return Predef.mkStr(tmp51, " ", tmp55)
             }
           } else {
-            callee = param014;
-            argument = param19;
-            tmp89 = Predef.fold((arg1, arg2) => {
-              return arg1 + arg2
-            });
-            tmp90 = go(callee);
-            tmp91 = go(argument);
-            return runtime.safeCall(tmp89(tmp90, " ", tmp91))
+            callee = param016;
+            argument = param111;
+            tmp56 = go(callee);
+            tmp57 = go(argument);
+            tmp58 = prec(argument, false);
+            tmp59 = tmp58 <= Precedence.Keywords.appPrec;
+            tmp60 = par(tmp57, tmp59);
+            return Predef.mkStr(tmp56, " ", tmp60)
           }
         } else if (tree1 instanceof Tree.Infix.class) {
           param013 = tree1.op;
           param18 = tree1.lhs;
           param23 = tree1.rhs;
-          op = param013;
-          lhs1 = param18;
-          rhs1 = param23;
-          tmp92 = Predef.fold((arg1, arg2) => {
-            return arg1 + arg2
-          });
-          tmp93 = go(lhs1);
-          tmp94 = go(op);
-          tmp95 = go(rhs1);
-          return runtime.safeCall(tmp92(tmp93, " ", tmp94, " ", tmp95))
+          if (param013 instanceof Keyword.Keyword.class) {
+            param014 = param013.name;
+            param19 = param013.leftPrec;
+            param24 = param013.rightPrec;
+            if (param014 === ".") {
+              target = param18;
+              if (param23 instanceof Tree.Ident.class) {
+                param015 = param23.name;
+                param110 = param23.symbolic;
+                field = param015;
+                scrut2 = Precedence.opPrec(".");
+                if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
+                  first0 = scrut2[0];
+                  first1 = scrut2[1];
+                  leftPrec = first0;
+                  tmp61 = go(target);
+                  tmp62 = prec(target, false);
+                  tmp63 = tmp62 < leftPrec;
+                  tmp64 = par(tmp61, tmp63);
+                  return Predef.mkStr(tmp64, ".", field)
+                } else {
+                  throw new globalThis.Error("match error");
+                }
+              } else {
+                op = param013;
+                lhs1 = param18;
+                rhs1 = param23;
+                tmp65 = Predef.fold((arg1, arg2) => {
+                  return arg1 + arg2
+                });
+                tmp66 = go(lhs1);
+                tmp67 = go(op);
+                tmp68 = go(rhs1);
+                return runtime.safeCall(tmp65(tmp66, " ", tmp67, " ", tmp68))
+              }
+            } else {
+              op = param013;
+              lhs1 = param18;
+              rhs1 = param23;
+              tmp69 = Predef.fold((arg1, arg2) => {
+                return arg1 + arg2
+              });
+              tmp70 = go(lhs1);
+              tmp71 = go(op);
+              tmp72 = go(rhs1);
+              return runtime.safeCall(tmp69(tmp70, " ", tmp71, " ", tmp72))
+            }
+          } else {
+            op = param013;
+            lhs1 = param18;
+            rhs1 = param23;
+            tmp73 = Predef.fold((arg1, arg2) => {
+              return arg1 + arg2
+            });
+            tmp74 = go(lhs1);
+            tmp75 = go(op);
+            tmp76 = go(rhs1);
+            return runtime.safeCall(tmp73(tmp74, " ", tmp75, " ", tmp76))
+          }
         } else if (tree1 instanceof Tree.Define.class) {
           param011 = tree1.kind;
           param17 = tree1.items;
@@ -664,22 +565,22 @@ Tree2 = class Tree {
           if (kind instanceof Tree.DefineKind.Let.class) {
             param012 = kind.recursive;
             if (param012 === true) {
-              tmp96 = "let rec ";
+              tmp77 = "let rec ";
             } else if (param012 === false) {
-              tmp96 = "let ";
+              tmp77 = "let ";
             } else {
               throw new globalThis.Error("match error");
             }
           } else if (kind instanceof Tree.DefineKind.Type.class) {
-            tmp96 = "type ";
+            tmp77 = "type ";
           } else if (kind instanceof Tree.DefineKind.Exception.class) {
-            tmp96 = "exception ";
+            tmp77 = "exception ";
           } else {
             throw new globalThis.Error("match error");
           }
-          tmp97 = Iter.fromStack(items);
-          tmp98 = (caseScrut) => {
-            let first12, first02, lhs3, rhs3, tree5, tmp132, tmp133, tmp134;
+          tmp78 = Iter.fromStack(items);
+          tmp79 = (caseScrut) => {
+            let first12, first02, lhs3, rhs3, tree5, tmp113, tmp114, tmp115;
             if (caseScrut instanceof Tree.Tree) {
               tree5 = caseScrut;
               return go(tree5)
@@ -688,48 +589,48 @@ Tree2 = class Tree {
               first12 = caseScrut[1];
               lhs3 = first02;
               rhs3 = first12;
-              tmp132 = go(lhs3);
-              tmp133 = tmp132 + " = ";
-              tmp134 = go(rhs3);
-              return tmp133 + tmp134
+              tmp113 = go(lhs3);
+              tmp114 = tmp113 + " = ";
+              tmp115 = go(rhs3);
+              return tmp114 + tmp115
             } else {
               throw new globalThis.Error("match error");
             }
           };
-          tmp99 = Iter.mapping(tmp97, tmp98);
-          tmp100 = Iter.joined(tmp99, " and ");
-          return Predef.mkStr(tmp96, tmp100)
+          tmp80 = Iter.mapping(tmp78, tmp79);
+          tmp81 = Iter.joined(tmp80, " and ");
+          return Predef.mkStr(tmp77, tmp81)
         } else if (tree1 instanceof Tree.LetIn.class) {
           param09 = tree1.bindings;
           param16 = tree1.body;
           bindings = param09;
           body5 = param16;
-          tmp101 = Iter.fromStack(bindings);
-          tmp102 = Iter.mapping(tmp101, go);
-          tmp103 = Iter.joined(tmp102, " and ");
+          tmp82 = Iter.fromStack(bindings);
+          tmp83 = Iter.mapping(tmp82, go);
+          tmp84 = Iter.joined(tmp83, " and ");
           if (body5 instanceof Option.Some.class) {
             param010 = body5.value;
             body6 = param010;
-            tmp104 = go(body6);
-            tmp105 = [
+            tmp85 = go(body6);
+            tmp86 = [
               " in ",
-              tmp104
+              tmp85
             ];
           } else if (body5 instanceof Option.None.class) {
-            tmp105 = [];
+            tmp86 = [];
           } else {
             throw new globalThis.Error("match error");
           }
-          return Predef.mkStr("let ", tmp103, ...tmp105)
+          return Predef.mkStr("let ", tmp84, ...tmp86)
         } else {
           if (tree1 instanceof Tree.While.class) {
             param08 = tree1.cond;
             param15 = tree1.body;
             cond = param08;
             body4 = param15;
-            tmp106 = go(cond);
-            tmp107 = go(body4);
-            return Predef.mkStr("while ", tmp106, " do ", tmp107, " done")
+            tmp87 = go(cond);
+            tmp88 = go(body4);
+            return Predef.mkStr("while ", tmp87, " do ", tmp88, " done")
           } else if (tree1 instanceof Tree.For.class) {
             param07 = tree1.head;
             param14 = tree1.start;
@@ -739,11 +640,11 @@ Tree2 = class Tree {
             start = param14;
             end = param22;
             body3 = param31;
-            tmp108 = go(head);
-            tmp109 = go(start);
-            tmp110 = go(end);
-            tmp111 = go(body3);
-            return Predef.mkStr("for ", tmp108, " = ", tmp109, " to ", tmp110, " do ", tmp111, " done")
+            tmp89 = go(head);
+            tmp90 = go(start);
+            tmp91 = go(end);
+            tmp92 = go(body3);
+            return Predef.mkStr("for ", tmp89, " = ", tmp90, " to ", tmp91, " do ", tmp92, " done")
           } else if (tree1 instanceof Tree.Ternary.class) {
             param04 = tree1.keyword;
             param13 = tree1.lhs;
@@ -753,58 +654,58 @@ Tree2 = class Tree {
             lhs = param13;
             rhs = param21;
             body1 = param3;
-            tmp112 = Predef.fold((arg1, arg2) => {
+            tmp93 = Predef.fold((arg1, arg2) => {
               return arg1 + arg2
             });
-            tmp113 = go(lhs);
+            tmp94 = go(lhs);
             scrut = keyword.name;
             if (scrut === "if") {
-              tmp114 = " then ";
+              tmp95 = " then ";
             } else if (scrut === "type") {
-              tmp114 = " = ";
+              tmp95 = " = ";
             } else if (scrut === "let") {
-              tmp114 = " = ";
+              tmp95 = " = ";
             } else {
               throw new globalThis.Error("match error");
             }
             if (rhs instanceof Option.Some.class) {
               param05 = rhs.value;
               rhs$_ = param05;
-              tmp115 = go(rhs$_);
+              tmp96 = go(rhs$_);
             } else {
-              tmp115 = go(rhs);
+              tmp96 = go(rhs);
             }
             scrut1 = keyword.name;
             if (scrut1 === "if") {
-              tmp116 = " then ";
+              tmp97 = " then ";
             } else if (scrut1 === "type") {
-              tmp116 = "";
+              tmp97 = "";
             } else if (scrut1 === "let") {
-              tmp116 = " in ";
+              tmp97 = " in ";
             } else {
               throw new globalThis.Error("match error");
             }
             if (body1 instanceof Option.Some.class) {
               param06 = body1.value;
               body2 = param06;
-              tmp117 = go(body2);
+              tmp98 = go(body2);
             } else {
-              tmp117 = go(body1);
+              tmp98 = go(body1);
             }
-            return runtime.safeCall(tmp112(keyword.name, " ", tmp113, tmp114, tmp115, tmp116, tmp117))
+            return runtime.safeCall(tmp93(keyword.name, " ", tmp94, tmp95, tmp96, tmp97, tmp98))
           } else if (tree1 instanceof Tree.Lambda.class) {
             param03 = tree1.params;
             param12 = tree1.body;
             params = param03;
             body = param12;
-            tmp118 = Predef.fold((arg1, arg2) => {
+            tmp99 = Predef.fold((arg1, arg2) => {
               return arg1 + arg2
             });
-            tmp119 = Iter.fromStack(params);
-            tmp120 = Iter.mapping(tmp119, go);
-            tmp121 = Iter.joined(tmp120, " ");
-            tmp122 = go(body);
-            return runtime.safeCall(tmp118("fun ", tmp121, " -> ", tmp122))
+            tmp100 = Iter.fromStack(params);
+            tmp101 = Iter.mapping(tmp100, go);
+            tmp102 = Iter.joined(tmp101, " ");
+            tmp103 = go(body);
+            return runtime.safeCall(tmp99("fun ", tmp102, " -> ", tmp103))
           } else if (tree1 instanceof Keyword.Keyword.class) {
             param02 = tree1.name;
             param11 = tree1.leftPrec;
@@ -814,32 +715,32 @@ Tree2 = class Tree {
           } else if (tree1 instanceof Option.Some.class) {
             param01 = tree1.value;
             tree2 = param01;
-            tmp123 = wrap(tree2);
-            tmp124 = "Some(" + tmp123;
-            return tmp124 + ")"
+            tmp104 = wrap(tree2);
+            tmp105 = "Some(" + tmp104;
+            return tmp105 + ")"
           } else if (tree1 instanceof Option.None.class) {
             return "None"
           } else if (tree1 instanceof Stack.Cons.class) {
             param0 = tree1.head;
             param1 = tree1.tail;
-            tmp125 = Iter.fromStack(tree1);
-            tmp126 = Iter.mapping(tmp125, wrap);
-            tmp127 = Iter.joined(tmp126, " :: ");
-            return tmp127 + " :: Nil"
+            tmp106 = Iter.fromStack(tree1);
+            tmp107 = Iter.mapping(tmp106, wrap);
+            tmp108 = Iter.joined(tmp107, " :: ");
+            return tmp108 + " :: Nil"
           } else if (tree1 instanceof Stack.Nil.class) {
             return "Nil"
           } else if (globalThis.Array.isArray(tree1) && tree1.length >= 0) {
             rest = runtime.safeCall(globalThis.Predef.tupleSlice(tree1, 0, 0));
             trees = rest;
-            tmp128 = runtime.safeCall(trees.map((tree5, _, _1) => {
+            tmp109 = runtime.safeCall(trees.map((tree5, _, _1) => {
               return wrap(tree5)
             }));
-            tmp129 = runtime.safeCall(tmp128.join(", "));
-            tmp130 = "[" + tmp129;
-            return tmp130 + "]"
+            tmp110 = runtime.safeCall(tmp109.join(", "));
+            tmp111 = "[" + tmp110;
+            return tmp111 + "]"
           } else {
-            tmp131 = "<unexpected:" + tree1;
-            return tmp131 + ">"
+            tmp112 = "<unexpected:" + tree1;
+            return tmp112 + ">"
           }
         }
       }

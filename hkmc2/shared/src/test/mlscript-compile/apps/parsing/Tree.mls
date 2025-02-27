@@ -78,6 +78,7 @@ module Tree with
         side then op.rightPrecOrMax
         else op.leftPrecOrMax
       Ternary then 3
+      Lambda then Keywords._fun.leftPrecOrMax
     // Wrap trees in guillemet so they are easier to spot.
     fun wrap(something) = if something is
       Tree then "«" + go(something) + "»"
@@ -104,18 +105,26 @@ module Tree with
         if scrutinee is Empty then "function " else
           "match " + go(scrutinee) + " with "
         branches Iter.fromStack() Iter.mapping(go) Iter.joined(" | ")
-      // Selection
-      App(Ident(".", _), target :: Ident(field) :: Nil) then
-        if opPrec(".") is [leftPrec, _] then fold(+) of
-          par of go(target), prec(target, false) < leftPrec
-          ".", field
+      // Function application for binary operators.
       App(Ident(op, true), lhs :: rhs :: Nil) then
         if opPrec(op) is [leftPrec, rightPrec] then fold(+) of
           par of go(lhs), prec(lhs, false) < leftPrec
           " ", op, " "
           par of go(rhs), prec(rhs, true) < rightPrec
-      App(callee, argument) then fold(+) of
-        go(callee), " ", go(argument)
+      // Unary expressions
+      App(Ident(op, true), arg) then mkStr of
+        op
+        par of go(arg), prec(arg, false) <= Keywords.prefixPrec
+      // Function application
+      App(callee, argument) then mkStr of
+        go(callee)
+        " "
+        par of go(argument), prec(argument, false) <= Keywords.appPrec
+      Infix(Keyword(".", _, _), target, Ident(field)) then
+        if opPrec(".") is [leftPrec, _] then mkStr of
+          par of go(target), prec(target, false) < leftPrec
+          "."
+          field
       Infix(op, lhs, rhs) then fold(+) of
         go(lhs), " ", go(op), " ", go(rhs)
       Define(kind, items) then mkStr of

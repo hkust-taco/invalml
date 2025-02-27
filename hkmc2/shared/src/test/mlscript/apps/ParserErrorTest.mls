@@ -79,7 +79,7 @@ example of """
 //│ >             Literal#Integer of "3"
 //│ >             Literal#Integer of "2"
 //│ >     Literal#Integer of "3"
-//│ > «(- 2) * 3 ~ 2 * 3»
+//│ > «(-2) * 3 ~ 2 * 3»
 
 example of """
 :tree
@@ -105,7 +105,7 @@ let foo = -2 * 3
 //│ >                 argument = Literal#Integer of "2"
 //│ >           Literal#Integer of "3"
 //│ >   body = None
-//│ > «let foo = (- 2) * 3 2 * 3»
+//│ > «let foo = (-2) * 3 2 * 3»
 
 
 
@@ -113,7 +113,7 @@ let foo = -2 * 3
 example of """
 => xx
 """
-//│ > «=> xx»
+//│ > «=>xx»
 
 example of """
 :tree
