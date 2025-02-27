@@ -197,12 +197,28 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
                 // Fail silently.
                 false -> Term.Error
           val l = new TempSymbol(S(t))
-            def rec(as: Ls[Bool -> st], asr: Ls[Arg]): Block = as match
-              case Nil => k(Call(fr, asr.reverse)(isMlsFun, true))
-              case (spd, a) :: as =>
-                subTerm_nonTail(a): ar =>
-                  rec(as, Arg(spd, ar) :: asr)
-            rec(as, Nil)
+          // * The straightforward way to lower arguments creates too much recursion depth
+          // * and makes Lowering stack overflow when lowering functions with lots of arguments.
+          /* 
+          def rec(as: Ls[Bool -> st], asr: Ls[Arg]): Block = as match
+            case Nil => k(Call(fr, asr.reverse)(isMlsFun, true))
+            case (spd, a) :: as =>
+              subTerm_nonTail(a): ar =>
+                rec(as, Arg(spd, ar) :: asr)
+          rec(as, Nil)
+          */
+          var asr: Ls[Arg] = Nil
+          def rec(as: Ls[Bool -> st]): Block = as match
+            case Nil => End()
+            case (spd, a) :: as =>
+              subTerm_nonTail(a): ar =>
+                asr ::= Arg(spd, ar)
+                rec(as)
+          val b = rec(as)
+          Begin(
+            b,
+            k(Call(fr, asr.reverse)(isMlsFun, true))
+          )
         case _ =>
           // Application arguments that are not tuples represent spreads, as in `f(...arg)`
           subTerm_nonTail(arg): ar =>
@@ -604,6 +620,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
     go(Nil, main)
   
   def setupSelection(prefix: Term, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
+  // inline def setupSelection(prefix: Term, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
     subTerm(prefix): p =>
       val selRes = TempSymbol(N, "selRes")
       k(Select(p, nme)(sym))
@@ -630,7 +647,7 @@ trait LoweringSelSanityChecks(using Config, TL, Raise, State)
     extends Lowering:
   
   private val instrument: Bool = config.sanityChecks.isDefined
-  
+  // /* 
   override def setupSelection(prefix: st, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
     if !instrument then return super.setupSelection(prefix, nme, sym)(k)
     subTerm(prefix): p =>
@@ -650,6 +667,7 @@ trait LoweringSelSanityChecks(using Config, TL, Raise, State)
             Value.Lit(syntax.Tree.StrLit(s"Access to required field '${nme.name}' yielded 'undefined'")) :: Nil))
         )
         .rest(k(selRes.asPath))
+  // */
 
 
 

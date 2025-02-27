@@ -1065,7 +1065,7 @@ Lexer1 = class Lexer {
       ]
     };
     number = function number(idx, head) {
-      let scrut, first1, first0, idx$_, integer, scrut1, param0, scrut2, first11, first01, idx$_$_, fraction, scrut3, param01, scrut4, first12, first02, idx$_1, integer1, scrut5, first13, first03, idx$_2, ds, scrut6, first14, first04, idx$_3, xs, scrut7, first15, first05, idx$_4, os, scrut8, first16, first06, idx$_5, bs, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66;
+      let scrut, first1, first0, idx$_, integer, scrut1, param0, scrut2, first11, first01, idx$_$_, fraction, scrut3, param01, scrut4, first12, first02, idx$_1, integer1, scrut5, first13, first03, idx$_2, ds, scrut6, first14, first04, idx$_3, xs, scrut7, first15, first05, idx$_4, os, scrut8, first16, first06, idx$_5, bs, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69;
       if (head === "0") {
         scrut3 = char1(idx);
         if (scrut3 instanceof Option.None.class) {
@@ -1077,8 +1077,7 @@ Lexer1 = class Lexer {
         } else if (scrut3 instanceof Option.Some.class) {
           param01 = scrut3.value;
           if (param01 === "b") {
-            tmp1 = idx + 1;
-            scrut8 = take((x) => {
+            tmp1 = (x) => {
               let matchResult;
               matchResult = runtime.safeCall(Char.BinDigit.unapply(x));
               if (matchResult instanceof globalThis.Predef.MatchResult.class) {
@@ -1086,17 +1085,19 @@ Lexer1 = class Lexer {
               } else {
                 return false
               }
-            }, tmp1, "");
+            };
+            tmp2 = idx + 1;
+            scrut8 = take(tmp1, tmp2, "");
             if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
               first06 = scrut8[0];
               first16 = scrut8[1];
               idx$_5 = first06;
               bs = first16;
-              tmp2 = Str.concat2("0b", bs);
-              tmp3 = Token.integer(tmp2);
+              tmp3 = Str.concat2("0b", bs);
+              tmp4 = Token.integer(tmp3);
               return [
                 idx$_5,
-                tmp3
+                tmp4
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1105,10 +1106,10 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp4 = Token.integer(integer1);
+                tmp5 = Token.integer(integer1);
                 return [
                   idx$_1,
-                  tmp4
+                  tmp5
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1121,39 +1122,39 @@ Lexer1 = class Lexer {
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp5 = idx$_ + 1;
-                      scrut2 = digits(tmp5, "");
+                      tmp6 = idx$_ + 1;
+                      scrut2 = digits(tmp6, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp6 = Str.concat2(integer, ".");
-                        tmp7 = Str.concat2(tmp6, fraction);
-                        tmp8 = Token.decimal(tmp7);
+                        tmp7 = Str.concat2(integer, ".");
+                        tmp8 = Str.concat2(tmp7, fraction);
+                        tmp9 = Token.decimal(tmp8);
                         return [
                           idx$_$_,
-                          tmp8
+                          tmp9
                         ]
                       } else {
-                        tmp9 = Token.integer(integer);
+                        tmp10 = Token.integer(integer);
                         return [
                           idx$_,
-                          tmp9
+                          tmp10
                         ]
                       }
                     } else {
-                      tmp10 = Token.integer(integer);
+                      tmp11 = Token.integer(integer);
                       return [
                         idx$_,
-                        tmp10
+                        tmp11
                       ]
                     }
                   } else {
-                    tmp11 = Token.integer(integer);
+                    tmp12 = Token.integer(integer);
                     return [
                       idx$_,
-                      tmp11
+                      tmp12
                     ]
                   }
                 } else {
@@ -1162,8 +1163,7 @@ Lexer1 = class Lexer {
               }
             }
           } else if (param01 === "o") {
-            tmp12 = idx + 1;
-            scrut7 = take((x) => {
+            tmp13 = (x) => {
               let matchResult;
               matchResult = runtime.safeCall(Char.OctDigit.unapply(x));
               if (matchResult instanceof globalThis.Predef.MatchResult.class) {
@@ -1171,17 +1171,19 @@ Lexer1 = class Lexer {
               } else {
                 return false
               }
-            }, tmp12, "");
+            };
+            tmp14 = idx + 1;
+            scrut7 = take(tmp13, tmp14, "");
             if (globalThis.Array.isArray(scrut7) && scrut7.length === 2) {
               first05 = scrut7[0];
               first15 = scrut7[1];
               idx$_4 = first05;
               os = first15;
-              tmp13 = Str.concat2("0o", os);
-              tmp14 = Token.integer(tmp13);
+              tmp15 = Str.concat2("0o", os);
+              tmp16 = Token.integer(tmp15);
               return [
                 idx$_4,
-                tmp14
+                tmp16
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1190,10 +1192,10 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp15 = Token.integer(integer1);
+                tmp17 = Token.integer(integer1);
                 return [
                   idx$_1,
-                  tmp15
+                  tmp17
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1206,39 +1208,39 @@ Lexer1 = class Lexer {
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp16 = idx$_ + 1;
-                      scrut2 = digits(tmp16, "");
+                      tmp18 = idx$_ + 1;
+                      scrut2 = digits(tmp18, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp17 = Str.concat2(integer, ".");
-                        tmp18 = Str.concat2(tmp17, fraction);
-                        tmp19 = Token.decimal(tmp18);
+                        tmp19 = Str.concat2(integer, ".");
+                        tmp20 = Str.concat2(tmp19, fraction);
+                        tmp21 = Token.decimal(tmp20);
                         return [
                           idx$_$_,
-                          tmp19
+                          tmp21
                         ]
                       } else {
-                        tmp20 = Token.integer(integer);
+                        tmp22 = Token.integer(integer);
                         return [
                           idx$_,
-                          tmp20
+                          tmp22
                         ]
                       }
                     } else {
-                      tmp21 = Token.integer(integer);
+                      tmp23 = Token.integer(integer);
                       return [
                         idx$_,
-                        tmp21
+                        tmp23
                       ]
                     }
                   } else {
-                    tmp22 = Token.integer(integer);
+                    tmp24 = Token.integer(integer);
                     return [
                       idx$_,
-                      tmp22
+                      tmp24
                     ]
                   }
                 } else {
@@ -1247,8 +1249,7 @@ Lexer1 = class Lexer {
               }
             }
           } else if (param01 === "x") {
-            tmp23 = idx + 1;
-            scrut6 = take((x) => {
+            tmp25 = (x) => {
               let matchResult;
               matchResult = runtime.safeCall(Char.HexDigit.unapply(x));
               if (matchResult instanceof globalThis.Predef.MatchResult.class) {
@@ -1256,17 +1257,19 @@ Lexer1 = class Lexer {
               } else {
                 return false
               }
-            }, tmp23, "");
+            };
+            tmp26 = idx + 1;
+            scrut6 = take(tmp25, tmp26, "");
             if (globalThis.Array.isArray(scrut6) && scrut6.length === 2) {
               first04 = scrut6[0];
               first14 = scrut6[1];
               idx$_3 = first04;
               xs = first14;
-              tmp24 = Str.concat2("0x", xs);
-              tmp25 = Token.integer(tmp24);
+              tmp27 = Str.concat2("0x", xs);
+              tmp28 = Token.integer(tmp27);
               return [
                 idx$_3,
-                tmp25
+                tmp28
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1275,10 +1278,10 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp26 = Token.integer(integer1);
+                tmp29 = Token.integer(integer1);
                 return [
                   idx$_1,
-                  tmp26
+                  tmp29
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1291,39 +1294,39 @@ Lexer1 = class Lexer {
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp27 = idx$_ + 1;
-                      scrut2 = digits(tmp27, "");
+                      tmp30 = idx$_ + 1;
+                      scrut2 = digits(tmp30, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp28 = Str.concat2(integer, ".");
-                        tmp29 = Str.concat2(tmp28, fraction);
-                        tmp30 = Token.decimal(tmp29);
+                        tmp31 = Str.concat2(integer, ".");
+                        tmp32 = Str.concat2(tmp31, fraction);
+                        tmp33 = Token.decimal(tmp32);
                         return [
                           idx$_$_,
-                          tmp30
+                          tmp33
                         ]
                       } else {
-                        tmp31 = Token.integer(integer);
+                        tmp34 = Token.integer(integer);
                         return [
                           idx$_,
-                          tmp31
+                          tmp34
                         ]
                       }
                     } else {
-                      tmp32 = Token.integer(integer);
+                      tmp35 = Token.integer(integer);
                       return [
                         idx$_,
-                        tmp32
+                        tmp35
                       ]
                     }
                   } else {
-                    tmp33 = Token.integer(integer);
+                    tmp36 = Token.integer(integer);
                     return [
                       idx$_,
-                      tmp33
+                      tmp36
                     ]
                   }
                 } else {
@@ -1332,18 +1335,18 @@ Lexer1 = class Lexer {
               }
             }
           } else if (param01 === ".") {
-            tmp34 = idx + 1;
-            scrut5 = digits(tmp34);
+            tmp37 = idx + 1;
+            scrut5 = digits(tmp37);
             if (globalThis.Array.isArray(scrut5) && scrut5.length === 2) {
               first03 = scrut5[0];
               first13 = scrut5[1];
               idx$_2 = first03;
               ds = first13;
-              tmp35 = Str.concat2("0.", ds);
-              tmp36 = Token.decimal(tmp35);
+              tmp38 = Str.concat2("0.", ds);
+              tmp39 = Token.decimal(tmp38);
               return [
                 idx$_2,
-                tmp36
+                tmp39
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1352,10 +1355,10 @@ Lexer1 = class Lexer {
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp37 = Token.integer(integer1);
+                tmp40 = Token.integer(integer1);
                 return [
                   idx$_1,
-                  tmp37
+                  tmp40
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1368,39 +1371,39 @@ Lexer1 = class Lexer {
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp38 = idx$_ + 1;
-                      scrut2 = digits(tmp38, "");
+                      tmp41 = idx$_ + 1;
+                      scrut2 = digits(tmp41, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp39 = Str.concat2(integer, ".");
-                        tmp40 = Str.concat2(tmp39, fraction);
-                        tmp41 = Token.decimal(tmp40);
+                        tmp42 = Str.concat2(integer, ".");
+                        tmp43 = Str.concat2(tmp42, fraction);
+                        tmp44 = Token.decimal(tmp43);
                         return [
                           idx$_$_,
-                          tmp41
+                          tmp44
                         ]
                       } else {
-                        tmp42 = Token.integer(integer);
+                        tmp45 = Token.integer(integer);
                         return [
                           idx$_,
-                          tmp42
+                          tmp45
                         ]
                       }
                     } else {
-                      tmp43 = Token.integer(integer);
+                      tmp46 = Token.integer(integer);
                       return [
                         idx$_,
-                        tmp43
+                        tmp46
                       ]
                     }
                   } else {
-                    tmp44 = Token.integer(integer);
+                    tmp47 = Token.integer(integer);
                     return [
                       idx$_,
-                      tmp44
+                      tmp47
                     ]
                   }
                 } else {
@@ -1415,10 +1418,10 @@ Lexer1 = class Lexer {
               first12 = scrut4[1];
               idx$_1 = first02;
               integer1 = first12;
-              tmp45 = Token.integer(integer1);
+              tmp48 = Token.integer(integer1);
               return [
                 idx$_1,
-                tmp45
+                tmp48
               ]
             } else {
               scrut = digits(idx, head);
@@ -1431,39 +1434,39 @@ Lexer1 = class Lexer {
                 if (scrut1 instanceof Option.Some.class) {
                   param0 = scrut1.value;
                   if (param0 === ".") {
-                    tmp46 = idx$_ + 1;
-                    scrut2 = digits(tmp46, "");
+                    tmp49 = idx$_ + 1;
+                    scrut2 = digits(tmp49, "");
                     if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                       first01 = scrut2[0];
                       first11 = scrut2[1];
                       idx$_$_ = first01;
                       fraction = first11;
-                      tmp47 = Str.concat2(integer, ".");
-                      tmp48 = Str.concat2(tmp47, fraction);
-                      tmp49 = Token.decimal(tmp48);
+                      tmp50 = Str.concat2(integer, ".");
+                      tmp51 = Str.concat2(tmp50, fraction);
+                      tmp52 = Token.decimal(tmp51);
                       return [
                         idx$_$_,
-                        tmp49
+                        tmp52
                       ]
                     } else {
-                      tmp50 = Token.integer(integer);
+                      tmp53 = Token.integer(integer);
                       return [
                         idx$_,
-                        tmp50
+                        tmp53
                       ]
                     }
                   } else {
-                    tmp51 = Token.integer(integer);
+                    tmp54 = Token.integer(integer);
                     return [
                       idx$_,
-                      tmp51
+                      tmp54
                     ]
                   }
                 } else {
-                  tmp52 = Token.integer(integer);
+                  tmp55 = Token.integer(integer);
                   return [
                     idx$_,
-                    tmp52
+                    tmp55
                   ]
                 }
               } else {
@@ -1482,39 +1485,39 @@ Lexer1 = class Lexer {
             if (scrut1 instanceof Option.Some.class) {
               param0 = scrut1.value;
               if (param0 === ".") {
-                tmp53 = idx$_ + 1;
-                scrut2 = digits(tmp53, "");
+                tmp56 = idx$_ + 1;
+                scrut2 = digits(tmp56, "");
                 if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                   first01 = scrut2[0];
                   first11 = scrut2[1];
                   idx$_$_ = first01;
                   fraction = first11;
-                  tmp54 = Str.concat2(integer, ".");
-                  tmp55 = Str.concat2(tmp54, fraction);
-                  tmp56 = Token.decimal(tmp55);
+                  tmp57 = Str.concat2(integer, ".");
+                  tmp58 = Str.concat2(tmp57, fraction);
+                  tmp59 = Token.decimal(tmp58);
                   return [
                     idx$_$_,
-                    tmp56
+                    tmp59
                   ]
                 } else {
-                  tmp57 = Token.integer(integer);
+                  tmp60 = Token.integer(integer);
                   return [
                     idx$_,
-                    tmp57
+                    tmp60
                   ]
                 }
               } else {
-                tmp58 = Token.integer(integer);
+                tmp61 = Token.integer(integer);
                 return [
                   idx$_,
-                  tmp58
+                  tmp61
                 ]
               }
             } else {
-              tmp59 = Token.integer(integer);
+              tmp62 = Token.integer(integer);
               return [
                 idx$_,
-                tmp59
+                tmp62
               ]
             }
           } else {
@@ -1532,39 +1535,39 @@ Lexer1 = class Lexer {
           if (scrut1 instanceof Option.Some.class) {
             param0 = scrut1.value;
             if (param0 === ".") {
-              tmp60 = idx$_ + 1;
-              scrut2 = digits(tmp60, "");
+              tmp63 = idx$_ + 1;
+              scrut2 = digits(tmp63, "");
               if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                 first01 = scrut2[0];
                 first11 = scrut2[1];
                 idx$_$_ = first01;
                 fraction = first11;
-                tmp61 = Str.concat2(integer, ".");
-                tmp62 = Str.concat2(tmp61, fraction);
-                tmp63 = Token.decimal(tmp62);
+                tmp64 = Str.concat2(integer, ".");
+                tmp65 = Str.concat2(tmp64, fraction);
+                tmp66 = Token.decimal(tmp65);
                 return [
                   idx$_$_,
-                  tmp63
+                  tmp66
                 ]
               } else {
-                tmp64 = Token.integer(integer);
+                tmp67 = Token.integer(integer);
                 return [
                   idx$_,
-                  tmp64
+                  tmp67
                 ]
               }
             } else {
-              tmp65 = Token.integer(integer);
+              tmp68 = Token.integer(integer);
               return [
                 idx$_,
-                tmp65
+                tmp68
               ]
             }
           } else {
-            tmp66 = Token.integer(integer);
+            tmp69 = Token.integer(integer);
             return [
               idx$_,
-              tmp66
+              tmp69
             ]
           }
         } else {

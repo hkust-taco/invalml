@@ -470,9 +470,8 @@ Precedence1 = class Precedence {
     return m
   } 
   static hasLetter(s) {
-    return runtime.safeCall([
-      ...s
-    ].some((ch, _, _1) => {
+    let tmp;
+    tmp = (ch, _, _1) => {
       let matchResult;
       matchResult = runtime.safeCall(Precedence.Letter.unapply(ch));
       if (matchResult instanceof globalThis.Predef.MatchResult.class) {
@@ -480,7 +479,10 @@ Precedence1 = class Precedence {
       } else {
         return false
       }
-    }))
+    };
+    return runtime.safeCall([
+      ...s
+    ].some(tmp))
   } 
   static opPrec(opStr) {
     let lastChar, rightPrec, matchResult, scrut, matchResult1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;

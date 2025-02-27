@@ -9,15 +9,16 @@ if true then 1 else 0
 :sjs
 let f = x => if x then print("ok") else print("ko")
 //│ JS (unsanitized):
-//│ let f;
-//│ f = (x) => {
+//│ let f, tmp;
+//│ tmp = (x) => {
 //│   if (x === true) {
 //│     return Predef.print("ok")
 //│   } else {
 //│     return Predef.print("ko")
 //│   }
 //│ };
-//│ f = [function f]
+//│ f = tmp;
+//│ f = [function tmp]
 
 f(true)
 //│ > ok
@@ -29,24 +30,7 @@ f(false)
 :sjs
 let f = x => print((if x then "ok" else "ko") + "!")
 //│ JS (unsanitized):
-//│ let f1, tmp;
-//│ tmp = (x) => {
-//│   let tmp1, tmp2;
-//│   if (x === true) {
-//│     tmp1 = "ok";
-//│   } else {
-//│     tmp1 = "ko";
-//│   }
-//│   tmp2 = tmp1 + "!";
-//│   return Predef.print(tmp2)
-//│ };
-//│ f1 = tmp;
-//│ f = [function tmp]
-
-:sjs
-let f = x => print((if x and x then "ok" else "ko") + "!")
-//│ JS (unsanitized):
-//│ let f2, tmp1;
+//│ let f1, tmp1;
 //│ tmp1 = (x) => {
 //│   let tmp2, tmp3;
 //│   if (x === true) {
@@ -57,8 +41,25 @@ let f = x => print((if x and x then "ok" else "ko") + "!")
 //│   tmp3 = tmp2 + "!";
 //│   return Predef.print(tmp3)
 //│ };
-//│ f2 = tmp1;
+//│ f1 = tmp1;
 //│ f = [function tmp1]
+
+:sjs
+let f = x => print((if x and x then "ok" else "ko") + "!")
+//│ JS (unsanitized):
+//│ let f2, tmp2;
+//│ tmp2 = (x) => {
+//│   let tmp3, tmp4;
+//│   if (x === true) {
+//│     tmp3 = "ok";
+//│   } else {
+//│     tmp3 = "ko";
+//│   }
+//│   tmp4 = tmp3 + "!";
+//│   return Predef.print(tmp4)
+//│ };
+//│ f2 = tmp2;
+//│ f = [function tmp2]
 // --- TODO: What we want ---
 // this.f = (x) => {
 //   let tmp, tmp1, flag;

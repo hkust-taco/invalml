@@ -143,17 +143,25 @@ str
 //│               this.pc = pc;
 //│             }
 //│             resume(value$) {
-//│               if (this.pc === 8) {
+//│               if (this.pc === 10) {
 //│                 tmp10 = value$;
 //│               }
 //│               contLoop: while (true) {
-//│                 if (this.pc === 8) {
+//│                 if (this.pc === 12) {
+//│                   tmp10 = runtime.safeCall(k(arg));
+//│                   if (tmp10 instanceof globalThis.Predef.__EffectSig.class) {
+//│                     this.pc = 10;
+//│                     return globalThis.Predef.__appendInCont(tmp10, this)
+//│                   }
+//│                   this.pc = 10;
+//│                   continue contLoop;
+//│                 } else if (this.pc === 10) {
 //│                   if (tmp10 instanceof globalThis.Predef.__Return.class) {
 //│                     return tmp10
 //│                   }
-//│                   this.pc = 9;
+//│                   this.pc = 11;
 //│                   continue contLoop;
-//│                 } else if (this.pc === 9) {
+//│                 } else if (this.pc === 11) {
 //│                   tmp11 = str + "A";
 //│                   str = tmp11;
 //│                   return runtime.Unit
@@ -167,7 +175,7 @@ str
 //│           str = tmp9;
 //│           tmp10 = runtime.safeCall(k(arg));
 //│           if (tmp10 instanceof globalThis.Predef.__EffectSig.class) {
-//│             tmp10.tail.next = new Cont$17.class(8);
+//│             tmp10.tail.next = new Cont$17.class(10);
 //│             tmp10.tail = tmp10.tail.next;
 //│             return tmp10
 //│           }
@@ -190,17 +198,17 @@ str
 //│         this.pc = pc;
 //│       }
 //│       resume(value$) {
-//│         if (this.pc === 6) {
+//│         if (this.pc === 8) {
 //│           tmp8 = value$;
 //│         }
 //│         contLoop: while (true) {
-//│           if (this.pc === 6) {
+//│           if (this.pc === 8) {
 //│             if (tmp8 instanceof globalThis.Predef.__Return.class) {
 //│               return tmp8
 //│             }
-//│             this.pc = 7;
+//│             this.pc = 9;
 //│             continue contLoop;
-//│           } else if (this.pc === 7) {
+//│           } else if (this.pc === 9) {
 //│             return tmp8
 //│           }
 //│           break;
@@ -226,17 +234,25 @@ str
 //│                 this.pc = pc;
 //│               }
 //│               resume(value$) {
-//│                 if (this.pc === 4) {
+//│                 if (this.pc === 5) {
 //│                   tmp12 = value$;
 //│                 }
 //│                 contLoop: while (true) {
-//│                   if (this.pc === 4) {
-//│                     if (tmp12 instanceof globalThis.Predef.__Return.class) {
-//│                       return tmp12
+//│                   if (this.pc === 7) {
+//│                     tmp12 = runtime.safeCall(k(arg));
+//│                     if (tmp12 instanceof globalThis.Predef.__EffectSig.class) {
+//│                       this.pc = 5;
+//│                       return globalThis.Predef.__appendInCont(tmp12, this)
 //│                     }
 //│                     this.pc = 5;
 //│                     continue contLoop;
 //│                   } else if (this.pc === 5) {
+//│                     if (tmp12 instanceof globalThis.Predef.__Return.class) {
+//│                       return tmp12
+//│                     }
+//│                     this.pc = 6;
+//│                     continue contLoop;
+//│                   } else if (this.pc === 6) {
 //│                     tmp13 = str + "B";
 //│                     tmp14 = str + tmp13;
 //│                     str = tmp14;
@@ -252,7 +268,7 @@ str
 //│             str = tmp11;
 //│             tmp12 = runtime.safeCall(k(arg));
 //│             if (tmp12 instanceof globalThis.Predef.__EffectSig.class) {
-//│               tmp12.tail.next = new Cont$18.class(4);
+//│               tmp12.tail.next = new Cont$18.class(5);
 //│               tmp12.tail = tmp12.tail.next;
 //│               return tmp12
 //│             }
@@ -282,7 +298,15 @@ str
 //│             res4 = value$;
 //│           }
 //│           contLoop: while (true) {
-//│             if (this.pc === 0) {
+//│             if (this.pc === 4) {
+//│               tmp9 = runtime.safeCall(h2.perform(runtime.Unit));
+//│               if (tmp9 instanceof globalThis.Predef.__EffectSig.class) {
+//│                 this.pc = 0;
+//│                 return globalThis.Predef.__appendInCont(tmp9, this)
+//│               }
+//│               this.pc = 0;
+//│               continue contLoop;
+//│             } else if (this.pc === 0) {
 //│               if (tmp9 instanceof globalThis.Predef.__Return.class) {
 //│                 return tmp9
 //│               }
@@ -330,7 +354,7 @@ str
 //│     };
 //│     tmp8 = handleBlock$5();
 //│     if (tmp8 instanceof globalThis.Predef.__EffectSig.class) {
-//│       tmp8.tail.next = new Cont$16(6);
+//│       tmp8.tail.next = new Cont$16(8);
 //│       return globalThis.Predef.__handleBlockImpl(tmp8, h1)
 //│     }
 //│     if (tmp8 instanceof globalThis.Predef.__Return.class) {

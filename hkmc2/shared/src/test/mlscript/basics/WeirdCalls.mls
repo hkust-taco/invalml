@@ -32,15 +32,19 @@ print of
 //│ ║        	        ^
 //│ ║  l.27: 	(
 //│ ╙──      	
+//│ > 
+//│ = "A"
 
 :pe
 print of
 ("A")
 //│ ╔══[PARSE ERROR] Expected an expression; found new line instead
-//│ ║  l.37: 	print of
+//│ ║  l.39: 	print of
 //│ ║        	        ^
-//│ ║  l.38: 	("A")
+//│ ║  l.40: 	("A")
 //│ ╙──      	
+//│ > 
+//│ = "A"
 
 print of
   (
@@ -54,15 +58,15 @@ print of
     "A"
 )
 //│ ╔══[PARSE ERROR] Mistmatched closing indentation
-//│ ║  l.54: 	    "A"
+//│ ║  l.58: 	    "A"
 //│ ║        	       ^
-//│ ║  l.55: 	)
+//│ ║  l.59: 	)
 //│ ║        	
 //│ ╟── does not correspond to opening parenthesis
-//│ ║  l.53: 	  (
+//│ ║  l.57: 	  (
 //│ ╙──      	  ^
 //│ ╔══[PARSE ERROR] Unexpected closing parenthesis
-//│ ║  l.55: 	)
+//│ ║  l.59: 	)
 //│ ╙──      	^
 //│ > A
 

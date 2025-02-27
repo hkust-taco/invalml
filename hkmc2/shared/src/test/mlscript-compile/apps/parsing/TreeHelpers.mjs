@@ -437,7 +437,7 @@ TreeHelpers1 = class TreeHelpers {
       }
     };
     go = function go(something) {
-      let scrut, first1, first0, intro, fields, dialogue, intro1, first01, field, scrut1, intro2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+      let scrut, first1, first0, intro, fields, dialogue, intro1, first01, field, scrut1, intro2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
       scrut = itemize(something);
       if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
         first0 = scrut[0];
@@ -457,34 +457,36 @@ TreeHelpers1 = class TreeHelpers {
           } else {
             intro = first0;
             fields = first1;
-            tmp2 = runtime.safeCall(fields.map((field1, _, _1) => {
-              let tmp10, tmp11, tmp12;
-              tmp10 = TreeHelpers.first(field1);
-              tmp11 = tmp10 + " = ";
-              tmp12 = TreeHelpers.second(field1);
-              return tmp11 + tmp12
-            }));
-            dialogue = tmp2;
-            tmp3 = intro + ":\n  ";
-            tmp4 = runtime.safeCall(dialogue.join("\n"));
-            tmp5 = TreeHelpers.indented(tmp4);
-            return tmp3 + tmp5
+            tmp2 = (field1, _, _1) => {
+              let tmp12, tmp13, tmp14;
+              tmp12 = TreeHelpers.first(field1);
+              tmp13 = tmp12 + " = ";
+              tmp14 = TreeHelpers.second(field1);
+              return tmp13 + tmp14
+            };
+            tmp3 = runtime.safeCall(fields.map(tmp2));
+            dialogue = tmp3;
+            tmp4 = intro + ":\n  ";
+            tmp5 = runtime.safeCall(dialogue.join("\n"));
+            tmp6 = TreeHelpers.indented(tmp5);
+            return tmp4 + tmp6
           }
         } else {
           intro = first0;
           fields = first1;
-          tmp6 = runtime.safeCall(fields.map((field1, _, _1) => {
-            let tmp10, tmp11, tmp12;
-            tmp10 = TreeHelpers.first(field1);
-            tmp11 = tmp10 + " = ";
-            tmp12 = TreeHelpers.second(field1);
-            return tmp11 + tmp12
-          }));
-          dialogue = tmp6;
-          tmp7 = intro + ":\n  ";
-          tmp8 = runtime.safeCall(dialogue.join("\n"));
-          tmp9 = TreeHelpers.indented(tmp8);
-          return tmp7 + tmp9
+          tmp7 = (field1, _, _1) => {
+            let tmp12, tmp13, tmp14;
+            tmp12 = TreeHelpers.first(field1);
+            tmp13 = tmp12 + " = ";
+            tmp14 = TreeHelpers.second(field1);
+            return tmp13 + tmp14
+          };
+          tmp8 = runtime.safeCall(fields.map(tmp7));
+          dialogue = tmp8;
+          tmp9 = intro + ":\n  ";
+          tmp10 = runtime.safeCall(dialogue.join("\n"));
+          tmp11 = TreeHelpers.indented(tmp10);
+          return tmp9 + tmp11
         }
       } else {
         throw new globalThis.Error("match error");

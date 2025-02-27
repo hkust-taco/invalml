@@ -91,6 +91,7 @@ pipeInto(1, _) @ inc
 :fixme
 1 pipeInto(_) @ inc
 //│ ═══[ERROR] Illegal position for '_' placeholder.
+//│ ═══[RUNTIME ERROR] TypeError: f1 is not a function
 
 
 // * Another argument for using `.` rather than juxtaposition
@@ -110,10 +111,10 @@ inc @ 1 . pipeInto @ inc
 :fixme
 1 . pipeInto of inc
 //│ ╔══[ERROR] Expected 2 arguments, got 1
-//│ ║  l.111: 	1 . pipeInto of inc
+//│ ║  l.112: 	1 . pipeInto of inc
 //│ ╙──       	    ^^^^^^^^
 //│ ╔══[ERROR] Expected 2 arguments, got 1
-//│ ║  l.111: 	1 . pipeInto of inc
+//│ ║  l.112: 	1 . pipeInto of inc
 //│ ╙──       	    ^^^^^^^^
 //│ ═══[RUNTIME ERROR] TypeError: f1 is not a function
 

@@ -65,13 +65,15 @@ Iter1 = class Iter {
     }
   } 
   static adaptIterable(iterable, makeNext) {
-    return Iterable1(() => {
-      let iterator, tmp, tmp1;
-      tmp = Iter.getIterator(iterable);
-      iterator = tmp;
-      tmp1 = runtime.safeCall(makeNext(iterator));
-      return Iterator1(tmp1)
-    })
+    let tmp;
+    tmp = () => {
+      let iterator, tmp1, tmp2;
+      tmp1 = Iter.getIterator(iterable);
+      iterator = tmp1;
+      tmp2 = runtime.safeCall(makeNext(iterator));
+      return Iterator1(tmp2)
+    };
+    return Iterable1(tmp)
   } 
   static mapping(xs, op) {
     return Iter.adaptIterable(xs, (iterator) => {
@@ -242,20 +244,21 @@ Iter1 = class Iter {
     return acc
   } 
   static appended(xs4, ys) {
-    return Iterable1(() => {
-      let xsIterator, currentIterator, tmp, tmp1;
-      tmp = Iter.getIterator(xs4);
-      xsIterator = tmp;
+    let tmp;
+    tmp = () => {
+      let xsIterator, currentIterator, tmp1, tmp2;
+      tmp1 = Iter.getIterator(xs4);
+      xsIterator = tmp1;
       currentIterator = xsIterator;
-      tmp1 = () => {
-        let next, scrut, scrut1, doTemp, next1, scrut2, tmp2;
+      tmp2 = () => {
+        let next, scrut, scrut1, doTemp, next1, scrut2, tmp3;
         next = runtime.safeCall(currentIterator.next());
         scrut = next.done;
         if (scrut === true) {
           scrut1 = currentIterator == xsIterator;
           if (scrut1 === true) {
-            tmp2 = Iter.getIterator(ys);
-            currentIterator = tmp2;
+            tmp3 = Iter.getIterator(ys);
+            currentIterator = tmp3;
             doTemp = runtime.Unit;
             next1 = runtime.safeCall(currentIterator.next());
             scrut2 = next1.done;
@@ -271,8 +274,9 @@ Iter1 = class Iter {
           return Result1.Next(next.value)
         }
       };
-      return Iterator1(tmp1)
-    })
+      return Iterator1(tmp2)
+    };
+    return Iterable1(tmp)
   } 
   static reduced(xs5, op3) {
     let iterator1, next, scrut, tmp, tmp1, tmp2;

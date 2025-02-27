@@ -48,8 +48,11 @@ print(1, 2, 3)
 //│ > 1
 
 :e
+:re
 1 . print(_)()
 //│ ═══[ERROR] Illegal position for '_' placeholder.
+//│ > 1
+//│ ═══[RUNTIME ERROR] TypeError: tmp6 is not a function
 
 // FIXME: should have the same semantics...
 1
