@@ -44,7 +44,7 @@ fun parse(tokens) =
     kind is "term" then term(prec, Keywords.all)
     // built-in kinds: plain identifiers
     kind is "ident" then if tokens is
-      Token.Identifier(name, false) :: _ then
+      Token.Identifier(name, false) :: _ and Keywords.all.get(name) is None then
         consume
         Tree.Ident(name, false)
       token :: _ then Tree.error("expect an identifier but found " + token)
@@ -83,12 +83,20 @@ fun parse(tokens) =
             None and
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
-              rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) then
+              rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
                 // TODO: use `outerPrec` and `innerPrec`
-                tracer.print of "found an expression choice", source.line
-                let acc = parseKind(kind, prec)
-                let tree = parseRule(prec, rest, allKeywords)
-                process(acc, tree)
+                do tracer.print of "found an reference to \"" + kind + "\"", source.line
+                parseKind(kind, prec) is
+                  Tree.Error then
+                    do tracer.print of "cannot parse more", source.line
+                    if rule.endChoice is Some(value) then
+                      tracer.print of "found end choice", source.line
+                      value
+                  acc then
+                    let tree = parseRule(prec, rest, allKeywords)
+                    tracer.print of "acc: " + acc Tree.summary(), source.line
+                    tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
+                    process(acc, tree)
               do tracer.print of "no exprChoice or the prec is less than " + prec, source.line
               rule.endChoice is Some(value) then
                 tracer.print of "found end choice", source.line
@@ -107,8 +115,7 @@ fun parse(tokens) =
             tracer.print of "the rest rule: " + rest.display, source.line
             let tree = parseRule(prec, rest, allKeywords)
             tracer.print of "acc: " + acc Tree.summary(), source.line
-            tracer.print of "tree: " + tree Tree.summary(), source.line
-            tracer.print of "tree AST is: " + tree, source.line
+            tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
             process(acc, tree)
           do tracer.print of "fallback to end choice", source.line
         do tracer.print of "no expression choice", source.line
@@ -236,7 +243,7 @@ fun parse(tokens) =
       do tracer.print of "check keyword " + TokenHelpers.preview(tokens), source.line
       Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is Some(keyword) and
         typeInfixRule.keywordChoices.get(name) is Some(rule) and
-          do tracer.print of "the keyword is found in infix rules" + name, source.line
+          do tracer.print of "keyword `" + name + "` is found in infix rules", source.line
           keyword.leftPrecOrMin > prec and rule.exprChoice is
             Some([kind, process, outerPrec, innerPrec, rest]) then
               // TODO: use `outerPrec` and `innerPrec`
@@ -290,7 +297,7 @@ fun parse(tokens) =
     Nil then acc reverse()
   
   fun modCont(acc: Stack[Tree]) = if tokens is
-    do tracer.print of ">>>>>> modCont <<<<<<", source.line
+    do tracer.print of ">>>>>> modCont <<<<<< " + TokenHelpers.preview(tokens), source.line
     Token.Identifier(";;", _) :: _ then
       consume
       acc mod()

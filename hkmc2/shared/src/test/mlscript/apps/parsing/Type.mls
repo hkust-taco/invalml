@@ -53,6 +53,13 @@ type b == p * q * (r * s)
 //│ > «type b == p * q * r * s»
 
 example of """
+type b == (p * q)
+type f == int
+"""
+//│ > «type b == p * q»
+//│ > «type f == int»
+
+example of """
 type a == b
 type b == p * q * (r * s)
 type f == int -> int
@@ -135,12 +142,10 @@ type 'a f == 'a * 'a
 //│ > «type f ('a) == 'a * 'a»
 
 example of """
-type foo == Bar | Qux
+type foo = Bar | Qux
 let double n = n * 2
 """
-//│ > «type foo == Bar»
-//│ > «⚠»
-//│ > «⚠»
+//│ > «type foo = Bar | Qux»
 //│ > «let double n = n * 2»
 
 example of """

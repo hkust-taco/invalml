@@ -109,8 +109,8 @@ print of Rules.termRule.display
 
 print of Rules.typeRule.display
 //│ > <rules for types> ::= 
-//│ >   | "(" <type> ")"
-//│ >   | <type> ("," <type> | "->" <type> | "*" <type> | <type>)
+//│ >   | "(" <type> (<type-arguments-tail> ")" <ident> | ")" [<ident>])
+//│ >   | <type> ("->" <type> | "*" <type> | <type>)
 
 print of Rules.declRule.display
 //│ > <prefix rules for module items> ::= 
@@ -130,6 +130,8 @@ Rules.syntaxKinds
 //│ >   | <term> <pattern-list>
 //│ > <multiple-matching> ::= 
 //│ >   | <pattern-list> "->" <term> ["|" <multiple-matching>]
+//│ > <type-arguments-tail> ::= 
+//│ >   | "," <type> [<type-arguments-tail>]
 //│ > <constr-decl> ::= 
 //│ >   | <ident> ["of" <type>]
 //│ > <variants> ::= 

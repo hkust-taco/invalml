@@ -326,12 +326,10 @@ val termRule = rule of
 
 val typeInfixRule = rule of
   "infix rules for types"
-  // Tuple (separated by commas)
-  makeInfixChoice of TypeKeywords._comma, "type", (lhs, rhs) => if rhs is
-    Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
-    else Tree.Tuple(lhs :: rhs :: Nil)
+  // <type> "->" <type>
   makeInfixChoice of TypeKeywords._arrow, "type", (lhs, rhs) =>
     Tree.Infix(TypeKeywords._arrow, lhs, rhs)
+  // <type> "*" <type>
   makeInfixChoice of TypeKeywords._asterisk, "type", (lhs, rhs) =>
     Tree.Infix(TypeKeywords._asterisk, lhs, rhs)
   // Application: <type> <type>
@@ -345,14 +343,55 @@ val typeInfixRule = rule of
 // Prefix rules and infix rules for types.
 val typeRule = rule of
   "rules for types"
-  // Choices for brackets
-  makeBracketRule of TypeKeywords._leftRound, TypeKeywords._rightRound, "type", id
+  // "(" <type> { "," <type> } ")" [ <ident> ]
+  Choice.keyword of
+    Keywords._leftRound
+    Choice.reference of                                                // : Tree
+      "type"
+      (headArg, tailArgsCtor) => if tailArgsCtor is
+        [tailArgs, ctor] then Tree.App(ctor, Tree.Tuple(headArg :: tailArgs))
+        Some(ctor) then Tree.App(ctor, headArg)
+        None then headArg
+      "the first type in the parentheses"
+      Choice.reference of                          // : [List[Tree], Tree.Ident]
+        "type-arguments-tail"
+        (args, ident) => [args, ident]
+        "the remaining type arguments"
+        Choice.keyword of                                        // : Tree.Ident
+          Keywords._rightRound  
+          Choice.reference of                                      // Tree.Ident
+            "ident"
+            (ident, _) => Some(ident)
+            "the type constructor's name"
+      Choice.keyword of                                  // : Option[Tree.Ident]
+        Keywords._rightRound
+        // either an identifier or nothing
+        Choice.end of None
+        Choice.reference of
+          "ident"
+          (ident, _) => Some(ident)
+          "the type constructor's name"
+  // Infix rules
   Choice.Ref of
     "type"
     (lhs, compose) => compose(lhs)
     None
     None
     typeInfixRule
+
+defineKind of
+  "type-arguments-tail"
+  Choice.keyword of
+    Keywords._comma
+    Choice.reference of ...
+    "type"
+    Cons
+    "the first type argument"
+    Choice.end of Nil                                                   // : Nil
+    Choice.reference of                                          // : List[Tree]
+      "type-arguments-tail"
+      (tail, _) => tail
+      "more type arguments"
   
 defineKind of
   "constr-decl"
@@ -395,7 +434,7 @@ defineKind of
   "typedef name"
   Choice.reference of ...
   "typedef-rhs"
-  (rhs, more) => [rhs, more]
+  tuple
   "typedef body"
   Choice.end of Nil
   Choice.keyword of ...
