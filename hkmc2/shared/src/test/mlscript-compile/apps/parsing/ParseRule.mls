@@ -124,9 +124,6 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
       Choice.Keyword(keyword, rest) and
         let prefix = "\"" + keyword.name + "\""
         tail(rest) is [name, line] then [prefix + line]
-      Choice.Ident(_, rest) and
-        let prefix = "<ident> "
-        tail(rest) is [name, line] then [prefix + line]
       Choice.Ref(kind, _, _, _, rest) and
         let prefix = "<" + kind + ">"
         tail(rest) is [name, line] then [prefix + line]
@@ -174,7 +171,6 @@ fun rule(name, ...choices) = ParseRule of
 
 module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
-  class Ident(process: Token.Identifier -> Tree, rest: ParseRule)
   class Ref(kind: Str, process: Tree -> Tree, outerPrec: Opt[Int], innerPrec: Opt[Int], rest: ParseRule)
   class End(value: Tree)
   class Siding(rule: ParseRule, optional: Bool, rest: ParseRule)
@@ -183,7 +179,6 @@ module Choice with
   fun rest(choice) = if choice is
     Lazy(get, _) then get() rest()
     Keyword(_, rest) then Some(rest)
-    Ident(_, rest) then Some(rest)
     Ref(_, _, _, _, rest) then Some(rest)
     Siding(_, rest) then Some(rest)
     End then None
@@ -213,8 +208,6 @@ module Choice with
   
   fun map(choice: Choice, op: Tree -> Tree) = if choice is
     Keyword(keyword, rest) then Keyword(keyword, rest.map(op))
-    Ident(process, rest) then
-      Ident((tok, tree) => op(process(tok, tree)), rest.map(op))
     Ref(kind, process, outerPrec, innerPrec, rest) then
       Ref(kind, (x, y) => op(process(x, y)), outerPrec, innerPrec, rest)
     Siding(rule, optional, rest) then Siding(rule.map(op), optional, rest.map(op))

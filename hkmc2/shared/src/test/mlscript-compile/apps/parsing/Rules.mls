@@ -353,18 +353,19 @@ val typeRule = rule of
   
 defineKind of
   "constr-decl"
-  Choice.typeExpr of
-    (ctor, argOpt) => if argOpt is
-      Some(arg) then Tree.Infix(TypeKeywords._of, ctor, arg)
-      None then ctor
-    "the variant constructor's name"
-    Choice.end of None
-    Choice.keyword of ...
-    Keywords._of
-    Choice.reference of ...
-    "type"
-    (argument, _) => Some(argument)
-    "the variant constructor's argument"
+  Choice.reference of ...
+  "ident"
+  (ctor, argOpt) => if argOpt is
+    Some(arg) then Tree.Infix(TypeKeywords._of, ctor, arg)
+    None then ctor
+  "the variant constructor's name"
+  Choice.end of None
+  Choice.keyword of ...
+  Keywords._of
+  Choice.reference of ...
+  "type"
+  (argument, _) => Some(argument)
+  "the variant constructor's argument"
 
 defineKind of
   "variants"
@@ -384,7 +385,8 @@ defineKind of
 
 defineKind of
   "typedefs"
-  Choice.typeExpr of ...
+  Choice.reference of ...
+  "typedef-lhs"
   (lhs, rhsMore) => if rhsMore is [rhs, more] then
     rhs(lhs) :: more
   "typedef name"
@@ -466,6 +468,54 @@ defineKind of
   "constr-decls"
   (tail, _) => tail
   "more constructor declarations"
+
+defineKind of
+  "typedef-lhs"
+  Choice.reference of ...
+  "type-params"
+  (params, ident) => if params is
+    Nil then ident
+    else Tree.App(ident, Tree.Tuple(params))
+  "the type parameters"
+  Choice.reference of ...
+  "ident"
+  (ident, _) => ident
+  "the type identifier"
+
+defineKind of
+  "type-params"
+  Choice.reference of
+    "typevar"
+    (head, _) => head :: Nil
+    "the only type parameter"
+  Choice.keyword of
+    Keywords._leftRound
+    Choice.reference of ...
+    "typevar"
+    Cons
+    "the first type parameter"
+    Choice.reference of ...
+    "type-params-tail"
+    (tail, _) => tail
+    "more type parameters"
+    Choice.keyword of ...
+    Keywords._rightRound
+  Choice.end of Nil
+
+defineKind of
+  "type-params-tail"
+  Choice.end of Nil
+  Choice.keyword of
+    Keywords._comma
+    Choice.reference of ...
+    "typevar"
+    Cons
+    "the first type parameter"
+    Choice.reference of ...
+    "type-params-tail"
+    (tail, _) => tail
+    "more type parameters"
+    Choice.end of ()
 
 val declRule = rule of
   "prefix rules for module items"

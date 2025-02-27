@@ -42,6 +42,20 @@ fun parse(tokens) =
   fun parseKind(kind: Str, prec: Int): Tree = if
     kind is "type" then typeExpr(prec, TypeKeywords.all)
     kind is "term" then term(prec, Keywords.all)
+    // built-in kinds: plain identifiers
+    kind is "ident" then if tokens is
+      Token.Identifier(name, false) :: _ then
+        consume
+        Tree.Ident(name, false)
+      token :: _ then Tree.error("expect an identifier but found " + token)
+      Nil then Tree.error("expect an identifier but found the end of input")
+    // built-in kinds: type variables
+    kind is "typevar" then if tokens is
+      Token.Identifier(name, false) :: _ and name.at(0) is "'" then
+        consume
+        Tree.Ident(name, false)
+      token :: _ then Tree.error("expect a type variable but found " + token)
+      Nil then Tree.error("expect a type variable but found the end of input")
     // * other kinds are rule-only and does not have operator-based parsing.
     syntaxKinds.get(kind) is Some(rule) then
       parseRule(prec, rule, Keywords.all)

@@ -54,7 +54,7 @@ val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "ut
 
 val tracer = new TreeTracer()
 
-let renderedKinds = new Set of tuple of "type", "term"
+let renderedKinds = new Set of tuple of "type", "term", "typevar", "ident"
 
 fun render(title: Str, rule: ParseRule) =
   let helperRules = []

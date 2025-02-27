@@ -2,6 +2,7 @@
 
 import "../../../mlscript-compile/apps/parsing/Precedence.mls"
 import "../../../mlscript-compile/apps/parsing/Rules.mls"
+import "../../../mlscript-compile/Iter.mls"
 import "../../../mlscript-compile/apps/parsing/Test.mls"
 
 open Precedence { Keywords, opPrec, opPrecOpt, TypeKeywords }
@@ -116,3 +117,38 @@ print of Rules.declRule.display
 //│ >   | "let" ["rec"] <let-bindings>
 //│ >   | "type" <typedefs>
 //│ >   | "exception" <constr-decls>
+
+Rules.syntaxKinds
+  Iter.mapping of case [name, rule] then rule.display
+  Iter.joined("\n")
+  print()
+//│ > <let-bindings> ::= 
+//│ >   | <term> "=" <term> ["and" <let-bindings>]
+//│ > <simple-matching> ::= 
+//│ >   | <term> "->" <term> ["|" <simple-matching>]
+//│ > <pattern-list> ::= 
+//│ >   | <term> <pattern-list>
+//│ > <multiple-matching> ::= 
+//│ >   | <pattern-list> "->" <term> ["|" <multiple-matching>]
+//│ > <constr-decl> ::= 
+//│ >   | <ident> ["of" <type>]
+//│ > <variants> ::= 
+//│ >   | <constr-decl> ["|" <variants>]
+//│ > <typedefs> ::= 
+//│ >   | <typedef-lhs> <typedef-rhs> ["and" <typedefs>]
+//│ > <typedef-rhs> ::= 
+//│ >   | "=" (<variants> | "{" <label-decls> "}")
+//│ >   | "==" <type>
+//│ > <label-decl> ::= 
+//│ >   | <type> ":" <type>
+//│ > <label-decls> ::= 
+//│ >   | <label-decl> [";" <label-decls>]
+//│ > <constr-decls> ::= 
+//│ >   | <constr-decl> ["|" <constr-decls>]
+//│ > <typedef-lhs> ::= 
+//│ >   | <type-params> <ident>
+//│ > <type-params> ::= 
+//│ >   | <typevar>
+//│ >   | "(" <typevar> <type-params-tail> ")"
+//│ > <type-params-tail> ::= 
+//│ >   | "," <typevar> <type-params-tail>

@@ -39,7 +39,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
     this.CSS_CONTENT = tmp3;
     tmp4 = new TreeTracer.TreeTracer();
     this.tracer = tmp4;
-    tmp5 = Predef.tuple("type", "term");
+    tmp5 = Predef.tuple("type", "term", "typevar", "ident");
     tmp6 = new globalThis.Set(tmp5);
     ParseRuleVisualizer.#renderedKinds = tmp6;
   }
