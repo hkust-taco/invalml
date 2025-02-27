@@ -669,29 +669,31 @@ ParseRule2 = class ParseRule {
           return choice1
         }
       } 
-      static keyword(keyword, name, ...choices) {
-        let tmp;
-        tmp = ParseRule.rule(name, ...choices);
-        return Choice.Keyword(keyword, tmp)
+      static keyword(keyword, ...choices) {
+        let tmp, tmp1, tmp2;
+        tmp = "`" + keyword.name;
+        tmp1 = tmp + "` keyword";
+        tmp2 = ParseRule.rule(tmp1, ...choices);
+        return Choice.Keyword(keyword, tmp2)
       } 
-      static reference(kind, process, name1, ...choices1) {
+      static reference(kind, process, name, ...choices1) {
         let tmp;
-        tmp = ParseRule.rule(name1, ...choices1);
+        tmp = ParseRule.rule(name, ...choices1);
         return Choice.Ref(kind, process, Option.None, Option.None, tmp)
       } 
-      static term(process1, name2, ...choices2) {
+      static term(process1, name1, ...choices2) {
         let tmp;
-        tmp = ParseRule.rule(name2, ...choices2);
+        tmp = ParseRule.rule(name1, ...choices2);
         return Choice.Ref("term", process1, Option.None, Option.None, tmp)
       } 
-      static termWithPrec(process2, name3, outerPrec, innerPrec, ...choices3) {
+      static termWithPrec(process2, name2, outerPrec, innerPrec, ...choices3) {
         let tmp;
-        tmp = ParseRule.rule(name3, ...choices3);
+        tmp = ParseRule.rule(name2, ...choices3);
         return Choice.Ref("term", process2, outerPrec, innerPrec, tmp)
       } 
-      static typeExpr(process3, name4, ...choices4) {
+      static typeExpr(process3, name3, ...choices4) {
         let tmp;
-        tmp = ParseRule.rule(name4, ...choices4);
+        tmp = ParseRule.rule(name3, ...choices4);
         return Choice.Ref("type", process3, Option.None, Option.None, tmp)
       } 
       static end(value) {
@@ -771,9 +773,15 @@ ParseRule2 = class ParseRule {
     };
   }
   static rule(name, ...choices) {
-    let tmp;
-    tmp = Iter.toStack(choices);
-    return ParseRule.ParseRule(name, tmp)
+    let scrut, tmp, tmp1;
+    scrut = choices.length == 0;
+    if (scrut === true) {
+      tmp = ParseRule.Choice.end(runtime.Unit);
+      tmp1 = Stack.Cons(tmp, Stack.Nil);
+    } else {
+      tmp1 = Iter.toStack(choices);
+    }
+    return ParseRule.ParseRule(name, tmp1)
   }
   static toString() { return "ParseRule"; }
 };

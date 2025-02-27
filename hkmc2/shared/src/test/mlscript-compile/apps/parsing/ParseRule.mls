@@ -158,7 +158,13 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         [head, ..tail] then head + "\n" + tail.join("\n")
 
 // Shorthands for constructing parse rules.
-fun rule(name, ...choices) = ParseRule(name, choices Iter.toStack())
+// Automatically adds an end choice to the rule if no choices are provided.
+fun rule(name, ...choices) = ParseRule of
+  name
+  if choices.length == 0 then
+    Choice.end(()) :: Nil
+  else
+    choices Iter.toStack()
 
 module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
@@ -178,7 +184,8 @@ module Choice with
   
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice
   // Shorthands for constructing rule choices.
-  fun keyword(keyword, name, ...choices) = Keyword(keyword, rule(name, ...choices))
+  fun keyword(keyword, ...choices) =
+    Keyword(keyword, rule("`" + keyword.name + "` keyword", ...choices))
   fun reference(kind, process, name, ...choices) =
     Ref(kind, process, None, None, rule(name, ...choices))
   fun term(process, name, ...choices) =
