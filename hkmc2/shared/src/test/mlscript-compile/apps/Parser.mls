@@ -29,41 +29,15 @@ module Parser with ...
 val tracer = new TreeTracer
 
 fun parse(tokens) =
-  let
-    current = tokens
-    counter = 0
+  let counter = 0
   
-  fun yeetSpaces =
-    while current is Token.Space :: tail do
-      tracer.print of "skipped a space at " + counter
-      set
-        current = tail
-        counter = counter + 1
-    current
-    
   fun consume =
-    if current is head :: tail then
-      tracer.print of "consumed `" + Token.summary(head) + "` at " + counter
-      set current = tail
+    if tokens is head :: tail then
+      tracer.print of "consume: `" + Token.summary(head) + "` at #" + counter
+      set tokens = tail
       set counter = counter + 1
     else
-      tracer.print of "consumed: EOF"
-  
-  // Useful when consuming matched brackets.
-  fun require(result: Tree, expected) = if yeetSpaces is
-    actual :: _ and
-      expected Token.same(actual) then
-        consume
-        result
-      else result Tree.Error of mkStr of
-        "Expected token "
-        expected Token.summary()
-        ", but found "
-        actual Token.summary() 
-    Nil then result Tree.Error of mkStr of
-      "Expected token "
-      expected Token.summary()
-      ", but found end of input"
+      tracer.print of "consume: the end of input"
   
   fun parseKind(kind: Str, prec: Int): Tree = if
     kind is "type" then typeExpr(prec, TypeKeywords.all)
@@ -78,7 +52,7 @@ fun parse(tokens) =
     "parsing rule \"" + rule.name + "\" with precedence " + prec
     result => "parsed rule \"" + rule.name + "\": " + result Tree.summary()
     () => ...
-    if yeetSpaces is
+    if tokens is
       Token.Identifier(name, _) :: _ and
         do tracer.print of "found an identifier \"" + name + "\"", source.line
         allKeywords.get(name) is Some(keyword) and
@@ -113,7 +87,7 @@ fun parse(tokens) =
         do tracer.print of "the current rule is " + rule.display
         rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
           // TODO: use `outerPrec` and `innerPrec`
-          do tracer.print of "parse \"" + kind + "\" kind from " + TokenHelpers.preview(current), source.line
+          do tracer.print of "parse \"" + kind + "\" kind from " + TokenHelpers.preview(tokens), source.line
           let acc = parseKind(kind, prec)
           acc Tree.nonEmptyError() then
             tracer.print of "the rest rule: " + rest.display, source.line
@@ -138,10 +112,10 @@ fun parse(tokens) =
           Tree.error("unexpected end of input")
   
   fun term(prec: Int) = tracer.trace of
-    "term <<< " + prec + " " + TokenHelpers.preview(current)
+    "term <<< " + prec + " " + TokenHelpers.preview(tokens)
     result => "term >>> " + result Tree.summary()
     () => ...
-    if yeetSpaces is
+    if tokens is
       Token.Identifier(name, symbolic) :: _ and Keywords.all.get(name) is
         Some(keyword) and termRule.keywordChoices.get(name) is
           Some(rule) and
@@ -164,7 +138,7 @@ fun parse(tokens) =
       token :: _ then Tree.error("unrecognized token: " + token)
       Nil then Tree.error("unexpected end of input")
   
-  fun termCont(acc: Tree, prec: Int) = if yeetSpaces is
+  fun termCont(acc: Tree, prec: Int) = if tokens is
     do tracer.print(">>> termCont " + prec + " " + acc Tree.summary() + " <<<", source.line)
     // Look up the infix rules.
     Token.Identifier(name, symbolic) :: _ and Keywords.all.get(name) is Some(keyword) and
@@ -216,10 +190,10 @@ fun parse(tokens) =
     Nil then acc
   
   fun typeExpr(prec: Int): Tree = tracer.trace of
-    "typeExpr <<< " + prec + " " + TokenHelpers.preview(current)
+    "typeExpr <<< " + prec + " " + TokenHelpers.preview(tokens)
     result => "typeExpr >>> " + result Tree.summary()
     () => ...
-    if yeetSpaces is
+    if tokens is
       Token.Identifier(name, symbolic) :: _ and TypeKeywords.all.get(name) is
         Some(keyword) and typeRule.keywordChoices.get(name) is
           Some(rule) and
@@ -244,8 +218,8 @@ fun parse(tokens) =
   
   fun typeExprCont(acc: Tree, prec: Int) =
     tracer.print of ">>> typeExprCont " + prec + " " + acc Tree.summary() + " <<<", source.line
-    if yeetSpaces is
-      do tracer.print of "check keyword " + TokenHelpers.preview(current), source.line
+    if tokens is
+      do tracer.print of "check keyword " + TokenHelpers.preview(tokens), source.line
       Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is Some(keyword) and
         typeInfixRule.keywordChoices.get(name) is Some(rule) and
           do tracer.print of "the keyword is found in infix rules" + name, source.line
@@ -280,7 +254,7 @@ fun parse(tokens) =
         None then acc
       Nil then acc
   
-  fun mod(acc: Stack[Tree]) = if yeetSpaces is
+  fun mod(acc: Stack[Tree]) = if tokens is
     do tracer.print of ">>>>>> mod <<<<<<", source.line
     Token.Identifier(";;", _) :: _ then
       consume
@@ -301,7 +275,7 @@ fun parse(tokens) =
     _ :: _ then modCont of term(0, None) :: acc
     Nil then acc reverse()
   
-  fun modCont(acc: Stack[Tree]) = if yeetSpaces is
+  fun modCont(acc: Stack[Tree]) = if tokens is
     do tracer.print of ">>>>>> modCont <<<<<<", source.line
     Token.Identifier(";;", _) :: _ then
       consume
@@ -314,7 +288,7 @@ fun parse(tokens) =
     result => "module >>> " + result Tree.summary()
     () => mod(Nil)
   
-  if yeetSpaces is
+  if tokens is
     token :: _ then
       let message = "expect EOF instead of " + token
       tracer.print of message, source.line

@@ -10,7 +10,7 @@ open RecursiveDescent { parse }
 open BasicExpr { Expr }
 
 fun example(input) =
-  let tokens = lex of input
+  let tokens = lex of input, false
   print of "Tokens: " + TokenHelpers.panorama(tokens)
   let expr = parse of tokens
   print of "Parsed: " + expr.toString()

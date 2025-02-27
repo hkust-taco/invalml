@@ -39,7 +39,7 @@ pattern Bracket = "(" | ")" | "[" | "]" | "{" | "}"
 
 pattern IdentifierQuote = "'" | "`"
 
-fun lex(str: Str) =
+fun lex(str: Str, noWhitespace: Bool) =
   fun char(idx: Int) = if idx < str.length
     then (Some of str.charAt of idx) else None
   
@@ -197,11 +197,18 @@ fun lex(str: Str) =
         [idx', Token.integer(integer)]
   
   fun scan(idx: Int, acc: Stack[Token]): Stack[Token] =
-    fun go(idx: Int, tok: Token) = scan(idx, tok :: acc)
+    fun go(idx: Int, tok: Token) = if
+      noWhitespace and tok is
+        Token.Comment then scan(idx, acc)
+        Token.Space then scan(idx, acc)
+      else scan(idx, Cons(tok, acc))
     
     if char(idx) is
       None then reverse of acc
-      Some(Char.Whitespace) then go(whitespace(idx + 1), Token.Space)
+      Some(Char.Whitespace) then while
+        char(idx) is Some(Char.Whitespace) then
+          set idx += 1
+        else go(whitespace(idx), Token.Space)
       Some("\"") then go(..string(idx + 1))
       Some(Bracket as b) then go(idx + 1, Token.Identifier(b, true))
       Some("/") then go(..comment(idx + 1))
