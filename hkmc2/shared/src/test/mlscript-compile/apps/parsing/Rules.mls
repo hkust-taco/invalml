@@ -574,3 +574,13 @@ val declRule = rule of
     "constr-decls"
     (decls, _) => Tree.Define(Tree.DefineKind.Exception, decls)
     "constructor declarations"
+  Choice.keyword of
+    Keywords._hash
+    Choice.reference of ...
+    "ident"
+    (ident, body) => Tree.Define(Tree.DefineKind.Directive, [ident, body] :: Nil)
+    "directive name"
+    Choice.reference of ...
+    "term"
+    (body, _) => body
+    "directive body"

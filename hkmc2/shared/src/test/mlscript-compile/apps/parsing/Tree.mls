@@ -2,6 +2,7 @@ import "../../Iter.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
 import "../../Option.mls"
+import "../../Str.mls"
 import "./Keyword.mls"
 import "./Precedence.mls"
 import "./Token.mls"
@@ -28,7 +29,9 @@ module Tree with
     class Let(recursive: Bool)
     object Type
     object Exception
-    type DefineKind = Let | Type | Exception
+    object Directive
+    
+    type DefineKind = Let | Type | Exception | Directive
   
   open DefineKind
   
@@ -127,6 +130,8 @@ module Tree with
           field
       Infix(op, lhs, rhs) then fold(+) of
         go(lhs), " ", go(op), " ", go(rhs)
+      Define(Directive, [name, value] :: Nil) then Str.concat of
+        "#", go(name), " ", go(value)
       Define(kind, items) then mkStr of
         if kind is
           Let(true) then "let rec "

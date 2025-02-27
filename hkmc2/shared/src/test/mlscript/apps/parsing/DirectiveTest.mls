@@ -1,0 +1,23 @@
+:js
+
+import "../../../mlscript-compile/apps/parsing/Test.mls"
+
+open Test { example }
+
+example of """
+#open "hello";;
+  
+let f x = x + 1;;
+  
+let g x = x * 2;;
+"""
+//│ > «#open "hello"»
+//│ > «let f x = x + 1»
+//│ > «let g x = x * 2»
+
+example of """
+#keyword ("try", None, None);;
+#extend "term" += "try" ~ (ref "term") ~ "with" ~ (ref "simple-matching");;
+"""
+//│ > «#keyword ("try", None, None)»
+//│ > «#extend "term" += "try" ~ ref "term" ~ "with" ~ ref "simpl…"»
