@@ -169,21 +169,17 @@ end
 //│ > «print_string "hello"; print_string "world"»
 
 example of "a == b"
-//│ > «a»
-//│ > «⚠»
-//│ > «⚠»
+//│ > «a == b»
 
 // TODO: comment on this syntax design smell in the paper
-:todo
 example of """
 if a == b then
   a
 else
   b
 """
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > «if a == b then a then b»
 
-:todo
 example of """
 let f a b =
   if a == b then
@@ -196,7 +192,7 @@ let f a b =
     print_newline ()
   end
 """
-//│ ═══[RUNTIME ERROR] Error: match error
+//│ > «let f a b = if a == b then print_endline "Equal" then print_string "Not E…"; print_int a; print_string " and "; print_int b; print_newline ()»
 
 example of """
 let foo = y; x

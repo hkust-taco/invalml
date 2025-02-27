@@ -24,7 +24,7 @@ type 'a foo == 'a * 'a list * 'a list
 //│ >   kind = Type
 //│ >   items = Stack of 
 //│ >     Infix:
-//│ >       op = Keyword(`==`, N/A, N/A)
+//│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = App:
 //│ >         callee = Ident of "foo"
 //│ >         argument = Tuple of Stack of 
@@ -70,7 +70,7 @@ type g == (a -> b) -> c
 //│ >   kind = Type
 //│ >   items = Stack of 
 //│ >     Infix:
-//│ >       op = Keyword(`==`, N/A, N/A)
+//│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "f"
 //│ >       rhs = Infix:
 //│ >         op = Keyword(`->`, 4, 3)
@@ -83,7 +83,7 @@ type g == (a -> b) -> c
 //│ >   kind = Type
 //│ >   items = Stack of 
 //│ >     Infix:
-//│ >       op = Keyword(`==`, N/A, N/A)
+//│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "g"
 //│ >       rhs = Infix:
 //│ >         op = Keyword(`->`, 4, 3)
@@ -104,7 +104,7 @@ type g == int * (string -> float)
 //│ >   kind = Type
 //│ >   items = Stack of 
 //│ >     Infix:
-//│ >       op = Keyword(`==`, N/A, N/A)
+//│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "f"
 //│ >       rhs = Infix:
 //│ >         op = Keyword(`->`, 4, 3)
@@ -117,7 +117,7 @@ type g == int * (string -> float)
 //│ >   kind = Type
 //│ >   items = Stack of 
 //│ >     Infix:
-//│ >       op = Keyword(`==`, N/A, N/A)
+//│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "g"
 //│ >       rhs = Infix:
 //│ >         op = Keyword(`*`, 5, 5)

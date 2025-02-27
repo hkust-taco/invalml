@@ -80,7 +80,6 @@ module Keywords with
   val _type = keyword("type", currPrec, None)
   val _exception = keyword("exception", currPrec, None)
   val _rec = keyword("rec", currPrec, eqPrec)
-  val _equalequal = keyword("==", None, None)
   val maxKeywordPrec = prec
 
   let precMap = makePrecMap of
@@ -115,6 +114,8 @@ module Keywords with
   fun charPrec(op) = precMap.get(op) Option.unsafe.get()
   
   fun charPrecOpt(op) = precMap.get(op)
+  
+  val _equalequal = keyword of "==", charPrecOpt("="), charPrecOpt("=")
   
   let bracketPrec = Some(maxOperatorPrec + 1)
   

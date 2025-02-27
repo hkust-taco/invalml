@@ -17,18 +17,18 @@ Rules1 = class Rules {
   static #letExpression;
   static #funTerm;
   static {
-    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, tmp130, tmp131, tmp132, tmp133, tmp134, tmp135, tmp136, tmp137, tmp138, tmp139, tmp140, tmp141, tmp142, tmp143, tmp144, tmp145, tmp146, tmp147, tmp148, tmp149, tmp150, tmp151, tmp152, tmp153, tmp154, tmp155, tmp156, tmp157, tmp158, tmp159, tmp160, tmp161, tmp162, tmp163, tmp164, tmp165, tmp166, tmp167, tmp168, tmp169, tmp170, tmp171, tmp172, tmp173, tmp174;
+    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, tmp130, tmp131, tmp132, tmp133, tmp134, tmp135, tmp136, tmp137, tmp138, tmp139, tmp140, tmp141, tmp142, tmp143, tmp144, tmp145, tmp146, tmp147, tmp148, tmp149, tmp150, tmp151, tmp152, tmp153, tmp154, tmp155, tmp156, tmp157, tmp158, tmp159, tmp160, tmp161, tmp162, tmp163, tmp164, tmp165, tmp166, tmp167, tmp168, tmp169, tmp170, tmp171, tmp172, tmp173, tmp174, tmp175;
     tmp = new BetterMap.Map();
     this.syntaxKinds = tmp;
     tmp1 = (lhs, rhsBindings) => {
-      let first1, first0, rhs, bindings, tmp175;
+      let first1, first0, rhs, bindings, tmp176;
       if (globalThis.Array.isArray(rhsBindings) && rhsBindings.length === 2) {
         first0 = rhsBindings[0];
         first1 = rhsBindings[1];
         rhs = first0;
         bindings = first1;
-        tmp175 = Tree.Infix(Precedence.Keywords._equal, lhs, rhs);
-        return Stack.Cons(tmp175, bindings)
+        tmp176 = Tree.Infix(Precedence.Keywords._equal, lhs, rhs);
+        return Stack.Cons(tmp176, bindings)
       } else {
         throw new globalThis.Error("match error");
       }
@@ -55,21 +55,21 @@ Rules1 = class Rules {
     }, "function body", tmp10);
     tmp12 = ParseRule.Choice.keyword(Precedence.Keywords._thinArrow, tmp11);
     tmp13 = ParseRule.Choice.term((params, body) => {
-      let tmp175;
-      tmp175 = Stack.Cons(params, Stack.Nil);
-      return Tree.Lambda(tmp175, body)
+      let tmp176;
+      tmp176 = Stack.Cons(params, Stack.Nil);
+      return Tree.Lambda(tmp176, body)
     }, "function parameters", tmp12);
     tmp14 = ParseRule.Choice.keyword(Precedence.Keywords._fun, tmp13);
     Rules.#funTerm = tmp14;
     tmp15 = (lhs, rhsTail) => {
-      let first1, first0, rhs, tail, tmp175;
+      let first1, first0, rhs, tail, tmp176;
       if (globalThis.Array.isArray(rhsTail) && rhsTail.length === 2) {
         first0 = rhsTail[0];
         first1 = rhsTail[1];
         rhs = first0;
         tail = first1;
-        tmp175 = Tree.Infix(Precedence.Keywords._thinArrow, lhs, rhs);
-        return Stack.Cons(tmp175, tail)
+        tmp176 = Tree.Infix(Precedence.Keywords._thinArrow, lhs, rhs);
+        return Stack.Cons(tmp176, tail)
       } else {
         throw new globalThis.Error("match error");
       }
@@ -108,81 +108,84 @@ Rules1 = class Rules {
     tmp32 = ParseRule.Choice.reference("pattern-list", tmp26, "the list of patterns", tmp31);
     tmp33 = Rules.defineKind("multiple-matching", tmp32);
     tmp34 = (lhs, rhs) => {
-      let param0, tail, tmp175, tmp176, tmp177;
+      let param0, tail, tmp176, tmp177, tmp178;
       if (rhs instanceof Tree.Tuple.class) {
         param0 = rhs.trees;
         tail = param0;
-        tmp175 = Stack.Cons(lhs, tail);
-        return Tree.Tuple(tmp175)
+        tmp176 = Stack.Cons(lhs, tail);
+        return Tree.Tuple(tmp176)
       } else {
-        tmp176 = Stack.Cons(rhs, Stack.Nil);
-        tmp177 = Stack.Cons(lhs, tmp176);
-        return Tree.Tuple(tmp177)
+        tmp177 = Stack.Cons(rhs, Stack.Nil);
+        tmp178 = Stack.Cons(lhs, tmp177);
+        return Tree.Tuple(tmp178)
       }
     };
     tmp35 = Rules.makeInfixChoice(Precedence.Keywords._comma, "term", tmp34);
     tmp36 = (lhs, rhs) => {
-      let param0, tail, tmp175, tmp176, tmp177;
+      let param0, tail, tmp176, tmp177, tmp178;
       if (rhs instanceof Tree.Sequence.class) {
         param0 = rhs.trees;
         tail = param0;
-        tmp175 = Stack.Cons(lhs, tail);
-        return Tree.Sequence(tmp175)
+        tmp176 = Stack.Cons(lhs, tail);
+        return Tree.Sequence(tmp176)
       } else {
-        tmp176 = Stack.Cons(rhs, Stack.Nil);
-        tmp177 = Stack.Cons(lhs, tmp176);
-        return Tree.Sequence(tmp177)
+        tmp177 = Stack.Cons(rhs, Stack.Nil);
+        tmp178 = Stack.Cons(lhs, tmp177);
+        return Tree.Sequence(tmp178)
       }
     };
     tmp37 = Rules.makeInfixChoice(Precedence.Keywords._semicolon, "term", tmp36);
     tmp38 = Rules.makeInfixChoice(Precedence.Keywords._leftArrow, "term", (lhs, rhs) => {
       return Tree.Infix(Precedence.Keywords._leftArrow, lhs, rhs)
     });
-    tmp39 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
-    tmp40 = ParseRule.Choice.term((argument, _) => {
+    tmp39 = Rules.makeInfixChoice(Precedence.Keywords._equalequal, "term", (lhs, rhs) => {
+      return Tree.Infix(Precedence.Keywords._equalequal, lhs, rhs)
+    });
+    tmp40 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
+    tmp41 = ParseRule.Choice.term((argument, _) => {
       return (lhs) => {
-        let tmp175;
-        tmp175 = Tree.Bracketed(Token.Round, argument);
-        return Tree.Infix(Precedence.Keywords._period, lhs, tmp175)
+        let tmp176;
+        tmp176 = Tree.Bracketed(Token.Round, argument);
+        return Tree.Infix(Precedence.Keywords._period, lhs, tmp176)
       }
-    }, "application argument", tmp39);
-    tmp41 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound, tmp40);
-    tmp42 = ParseRule.Choice.reference("term", (rhs, _) => {
+    }, "application argument", tmp40);
+    tmp42 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound, tmp41);
+    tmp43 = ParseRule.Choice.reference("term", (rhs, _) => {
       return (lhs) => {
         return Tree.Infix(Precedence.Keywords._period, lhs, rhs)
       }
     }, "operator `.` right-hand side");
-    tmp43 = ParseRule.Choice.keyword(Precedence.Keywords._period, tmp41, tmp42);
-    tmp44 = ParseRule.Choice.typeExpr((rhs, _) => {
+    tmp44 = ParseRule.Choice.keyword(Precedence.Keywords._period, tmp42, tmp43);
+    tmp45 = ParseRule.Choice.typeExpr((rhs, _) => {
       return (lhs) => {
         return Tree.Infix(Precedence.Keywords._colon, lhs, rhs)
       }
     }, "right-hand side type");
-    tmp45 = ParseRule.Choice.keyword(Precedence.Keywords._colon, tmp44);
-    tmp46 = Option.Some(Precedence.Keywords.appPrec);
-    tmp47 = ParseRule.Choice.termWithPrec((argument, _) => {
+    tmp46 = ParseRule.Choice.keyword(Precedence.Keywords._colon, tmp45);
+    tmp47 = Option.Some(Precedence.Keywords.appPrec);
+    tmp48 = ParseRule.Choice.termWithPrec((argument, _) => {
       return (callee) => {
         return Tree.App(callee, argument)
       }
-    }, "application argument", tmp46, Option.None);
-    tmp48 = ParseRule.rule("infix rules for expressions", tmp35, tmp37, tmp38, tmp43, tmp45, tmp47);
-    this.termInfixRule = tmp48;
-    tmp49 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
-    tmp50 = ParseRule.rule("pattern matching case body", tmp49);
-    tmp51 = Rules.getRuleByKind("simple-matching");
-    tmp52 = ParseRule.Choice.optional(tmp50, tmp51);
-    tmp53 = ParseRule.Choice.keyword(Precedence.Keywords._with, tmp52);
-    tmp54 = ParseRule.Choice.term(Tree.Match, "pattern matching scrutinee", tmp53);
-    tmp55 = ParseRule.Choice.keyword(Precedence.Keywords._match, tmp54);
-    tmp56 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
-    tmp57 = ParseRule.rule("function body", tmp56);
-    tmp58 = Rules.getRuleByKind("simple-matching");
-    tmp59 = ParseRule.Choice.optional(tmp57, tmp58);
-    tmp60 = ParseRule.Choice.map(tmp59, (branches) => {
+    }, "application argument", tmp47, Option.None);
+    tmp49 = ParseRule.rule("infix rules for expressions", tmp35, tmp37, tmp38, tmp39, tmp44, tmp46, tmp48);
+    this.termInfixRule = tmp49;
+    tmp50 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
+    tmp51 = ParseRule.rule("pattern matching case body", tmp50);
+    tmp52 = Rules.getRuleByKind("simple-matching");
+    tmp53 = ParseRule.Choice.optional(tmp51, tmp52);
+    tmp54 = ParseRule.Choice.keyword(Precedence.Keywords._with, tmp53);
+    tmp55 = ParseRule.Choice.term(Tree.Match, "pattern matching scrutinee", tmp54);
+    tmp56 = ParseRule.Choice.keyword(Precedence.Keywords._match, tmp55);
+    tmp57 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
+    tmp58 = ParseRule.rule("function body", tmp57);
+    tmp59 = Rules.getRuleByKind("simple-matching");
+    tmp60 = ParseRule.Choice.optional(tmp58, tmp59);
+    tmp61 = ParseRule.Choice.map(tmp60, (branches) => {
       return Tree.Match(Tree.empty, branches)
     });
-    tmp61 = ParseRule.Choice.keyword(Precedence.Keywords._function, tmp60);
-    tmp62 = (tst, conAlt) => {
+    tmp62 = ParseRule.Choice.keyword(Precedence.Keywords._function, tmp61);
+    tmp63 = (tst, conAlt) => {
       let first1, first0, con, alt;
       if (globalThis.Array.isArray(conAlt) && conAlt.length === 2) {
         first0 = conAlt[0];
@@ -194,121 +197,121 @@ Rules1 = class Rules {
         throw new globalThis.Error("match error");
       }
     };
-    tmp63 = ParseRule.Choice.end(Option.None);
     tmp64 = ParseRule.Choice.end(Option.None);
-    tmp65 = ParseRule.Choice.term((alt, _) => {
+    tmp65 = ParseRule.Choice.end(Option.None);
+    tmp66 = ParseRule.Choice.term((alt, _) => {
       return Option.Some(alt)
-    }, "if-then-else alternative", tmp64);
-    tmp66 = ParseRule.Choice.keyword(Precedence.Keywords._else, tmp65);
-    tmp67 = ParseRule.Choice.term((con, optAlt) => {
+    }, "if-then-else alternative", tmp65);
+    tmp67 = ParseRule.Choice.keyword(Precedence.Keywords._else, tmp66);
+    tmp68 = ParseRule.Choice.term((con, optAlt) => {
       return [
         con,
         optAlt
       ]
-    }, "if-then-else consequent", tmp63, tmp66);
-    tmp68 = ParseRule.Choice.keyword(Precedence.Keywords._then, tmp67);
-    tmp69 = ParseRule.Choice.term(tmp62, "if-then-else condition", tmp68);
-    tmp70 = ParseRule.Choice.keyword(Precedence.Keywords._if, tmp69);
-    tmp71 = ParseRule.Choice.keyword(Precedence.Keywords._done);
-    tmp72 = ParseRule.Choice.term((body, _) => {
+    }, "if-then-else consequent", tmp64, tmp67);
+    tmp69 = ParseRule.Choice.keyword(Precedence.Keywords._then, tmp68);
+    tmp70 = ParseRule.Choice.term(tmp63, "if-then-else condition", tmp69);
+    tmp71 = ParseRule.Choice.keyword(Precedence.Keywords._if, tmp70);
+    tmp72 = ParseRule.Choice.keyword(Precedence.Keywords._done);
+    tmp73 = ParseRule.Choice.term((body, _) => {
       return body
-    }, "while end", tmp71);
-    tmp73 = ParseRule.Choice.keyword(Precedence.Keywords._do, tmp72);
-    tmp74 = ParseRule.Choice.term(Tree.While, "while body", tmp73);
-    tmp75 = ParseRule.Choice.keyword(Precedence.Keywords._while, tmp74);
-    tmp76 = ParseRule.Choice.keyword(Precedence.Keywords._to);
-    tmp77 = ParseRule.Choice.keyword(Precedence.Keywords._downto);
-    tmp78 = ParseRule.rule("iteration keyword", tmp76, tmp77);
-    tmp79 = ParseRule.Choice.keyword(Precedence.Keywords._done);
-    tmp80 = ParseRule.Choice.term((body, _) => {
+    }, "while end", tmp72);
+    tmp74 = ParseRule.Choice.keyword(Precedence.Keywords._do, tmp73);
+    tmp75 = ParseRule.Choice.term(Tree.While, "while body", tmp74);
+    tmp76 = ParseRule.Choice.keyword(Precedence.Keywords._while, tmp75);
+    tmp77 = ParseRule.Choice.keyword(Precedence.Keywords._to);
+    tmp78 = ParseRule.Choice.keyword(Precedence.Keywords._downto);
+    tmp79 = ParseRule.rule("iteration keyword", tmp77, tmp78);
+    tmp80 = ParseRule.Choice.keyword(Precedence.Keywords._done);
+    tmp81 = ParseRule.Choice.term((body, _) => {
       return body
-    }, "`for` `done` keyword", tmp79);
-    tmp81 = ParseRule.Choice.keyword(Precedence.Keywords._do, tmp80);
-    tmp82 = ParseRule.Choice.term((end, body) => {
+    }, "`for` `done` keyword", tmp80);
+    tmp82 = ParseRule.Choice.keyword(Precedence.Keywords._do, tmp81);
+    tmp83 = ParseRule.Choice.term((end, body) => {
       return [
         end,
         body
       ]
-    }, "`for` `do` keyword", tmp81);
-    tmp83 = ParseRule.rule("the iteration keyword", tmp82);
-    tmp84 = ParseRule.Choice.siding(tmp78, tmp83);
-    tmp85 = ParseRule.Choice.term((start, endBody) => {
+    }, "`for` `do` keyword", tmp82);
+    tmp84 = ParseRule.rule("the iteration keyword", tmp83);
+    tmp85 = ParseRule.Choice.siding(tmp79, tmp84);
+    tmp86 = ParseRule.Choice.term((start, endBody) => {
       return [
         start,
         ...endBody
       ]
-    }, "`for` `to` or `downto` keyword", tmp84);
-    tmp86 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp85);
-    tmp87 = ParseRule.Choice.term((head, startEndBody) => {
+    }, "`for` `to` or `downto` keyword", tmp85);
+    tmp87 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp86);
+    tmp88 = ParseRule.Choice.term((head, startEndBody) => {
       return Tree.For(head, ...startEndBody)
-    }, "`for` head", tmp86);
-    tmp88 = ParseRule.Choice.keyword(Precedence.Keywords._for, tmp87);
-    tmp89 = Rules.makeBracketRule(Precedence.Keywords._leftRound, Precedence.Keywords._rightRound, "term", (tree) => {
+    }, "`for` head", tmp87);
+    tmp89 = ParseRule.Choice.keyword(Precedence.Keywords._for, tmp88);
+    tmp90 = Rules.makeBracketRule(Precedence.Keywords._leftRound, Precedence.Keywords._rightRound, "term", (tree) => {
       if (tree instanceof Tree.Empty.class) {
         return Tree.Tuple(Stack.Nil)
       } else {
         return tree
       }
     });
-    tmp90 = (tree) => {
-      let tmp175;
+    tmp91 = (tree) => {
+      let tmp176;
       if (tree instanceof Tree.Empty.class) {
-        tmp175 = Tree.Sequence(Stack.Nil);
+        tmp176 = Tree.Sequence(Stack.Nil);
       } else {
-        tmp175 = tree;
+        tmp176 = tree;
       }
-      return Tree.Bracketed(Token.Square, tmp175)
+      return Tree.Bracketed(Token.Square, tmp176)
     };
-    tmp91 = Rules.makeBracketRule(Precedence.Keywords._leftSquare, Precedence.Keywords._rightSquare, "term", tmp90);
-    tmp92 = Rules.makeBracketRule(Precedence.Keywords._leftCurly, Precedence.Keywords._rightCurly, "term", Predef.id);
-    tmp93 = Rules.makeBracketRule(Precedence.Keywords._begin, Precedence.Keywords._end, "term", (tree) => {
+    tmp92 = Rules.makeBracketRule(Precedence.Keywords._leftSquare, Precedence.Keywords._rightSquare, "term", tmp91);
+    tmp93 = Rules.makeBracketRule(Precedence.Keywords._leftCurly, Precedence.Keywords._rightCurly, "term", Predef.id);
+    tmp94 = Rules.makeBracketRule(Precedence.Keywords._begin, Precedence.Keywords._end, "term", (tree) => {
       if (tree instanceof Tree.Empty.class) {
         return Tree.Sequence(Stack.Nil)
       } else {
         return tree
       }
     });
-    tmp94 = ParseRule.Choice.Ref("term", (lhs, compose) => {
+    tmp95 = ParseRule.Choice.Ref("term", (lhs, compose) => {
       return runtime.safeCall(compose(lhs))
     }, Option.None, Option.None, Rules.termInfixRule);
-    tmp95 = ParseRule.rule("prefix rules for expressions", Rules.#letExpression, Rules.#funTerm, tmp55, tmp61, tmp70, tmp75, tmp88, tmp89, tmp91, tmp92, tmp93, tmp94);
-    this.termRule = tmp95;
-    tmp96 = (lhs, rhs) => {
-      let param0, tail, tmp175, tmp176, tmp177;
+    tmp96 = ParseRule.rule("prefix rules for expressions", Rules.#letExpression, Rules.#funTerm, tmp56, tmp62, tmp71, tmp76, tmp89, tmp90, tmp92, tmp93, tmp94, tmp95);
+    this.termRule = tmp96;
+    tmp97 = (lhs, rhs) => {
+      let param0, tail, tmp176, tmp177, tmp178;
       if (rhs instanceof Tree.Tuple.class) {
         param0 = rhs.trees;
         tail = param0;
-        tmp175 = Stack.Cons(lhs, tail);
-        return Tree.Tuple(tmp175)
+        tmp176 = Stack.Cons(lhs, tail);
+        return Tree.Tuple(tmp176)
       } else {
-        tmp176 = Stack.Cons(rhs, Stack.Nil);
-        tmp177 = Stack.Cons(lhs, tmp176);
-        return Tree.Tuple(tmp177)
+        tmp177 = Stack.Cons(rhs, Stack.Nil);
+        tmp178 = Stack.Cons(lhs, tmp177);
+        return Tree.Tuple(tmp178)
       }
     };
-    tmp97 = Rules.makeInfixChoice(Precedence.TypeKeywords._comma, "type", tmp96);
-    tmp98 = Rules.makeInfixChoice(Precedence.TypeKeywords._arrow, "type", (lhs, rhs) => {
+    tmp98 = Rules.makeInfixChoice(Precedence.TypeKeywords._comma, "type", tmp97);
+    tmp99 = Rules.makeInfixChoice(Precedence.TypeKeywords._arrow, "type", (lhs, rhs) => {
       return Tree.Infix(Precedence.TypeKeywords._arrow, lhs, rhs)
     });
-    tmp99 = Rules.makeInfixChoice(Precedence.TypeKeywords._asterisk, "type", (lhs, rhs) => {
+    tmp100 = Rules.makeInfixChoice(Precedence.TypeKeywords._asterisk, "type", (lhs, rhs) => {
       return Tree.Infix(Precedence.TypeKeywords._asterisk, lhs, rhs)
     });
-    tmp100 = Option.Some(Precedence.TypeKeywords.appPrec);
-    tmp101 = ParseRule.rule("end of type infix rules");
-    tmp102 = ParseRule.Choice.Ref("type", (callee, _) => {
+    tmp101 = Option.Some(Precedence.TypeKeywords.appPrec);
+    tmp102 = ParseRule.rule("end of type infix rules");
+    tmp103 = ParseRule.Choice.Ref("type", (callee, _) => {
       return (argument) => {
         return Tree.App(callee, argument)
       }
-    }, tmp100, Option.None, tmp101);
-    tmp103 = ParseRule.rule("infix rules for types", tmp97, tmp98, tmp99, tmp102);
-    this.typeInfixRule = tmp103;
-    tmp104 = Rules.makeBracketRule(Precedence.TypeKeywords._leftRound, Precedence.TypeKeywords._rightRound, "type", Predef.id);
-    tmp105 = ParseRule.Choice.Ref("type", (lhs, compose) => {
+    }, tmp101, Option.None, tmp102);
+    tmp104 = ParseRule.rule("infix rules for types", tmp98, tmp99, tmp100, tmp103);
+    this.typeInfixRule = tmp104;
+    tmp105 = Rules.makeBracketRule(Precedence.TypeKeywords._leftRound, Precedence.TypeKeywords._rightRound, "type", Predef.id);
+    tmp106 = ParseRule.Choice.Ref("type", (lhs, compose) => {
       return runtime.safeCall(compose(lhs))
     }, Option.None, Option.None, Rules.typeInfixRule);
-    tmp106 = ParseRule.rule("rules for types", tmp104, tmp105);
-    this.typeRule = tmp106;
-    tmp107 = (ctor, argOpt) => {
+    tmp107 = ParseRule.rule("rules for types", tmp105, tmp106);
+    this.typeRule = tmp107;
+    tmp108 = (ctor, argOpt) => {
       let param0, arg;
       if (argOpt instanceof Option.Some.class) {
         param0 = argOpt.value;
@@ -320,14 +323,14 @@ Rules1 = class Rules {
         throw new globalThis.Error("match error");
       }
     };
-    tmp108 = ParseRule.Choice.end(Option.None);
-    tmp109 = ParseRule.Choice.reference("type", (argument, _) => {
+    tmp109 = ParseRule.Choice.end(Option.None);
+    tmp110 = ParseRule.Choice.reference("type", (argument, _) => {
       return Option.Some(argument)
     }, "the variant constructor's argument");
-    tmp110 = ParseRule.Choice.keyword(Precedence.Keywords._of, tmp109);
-    tmp111 = ParseRule.Choice.reference("ident", tmp107, "the variant constructor's name", tmp108, tmp110);
-    tmp112 = Rules.defineKind("constr-decl", tmp111);
-    tmp113 = (lhs, rhsOpt) => {
+    tmp111 = ParseRule.Choice.keyword(Precedence.Keywords._of, tmp110);
+    tmp112 = ParseRule.Choice.reference("ident", tmp108, "the variant constructor's name", tmp109, tmp111);
+    tmp113 = Rules.defineKind("constr-decl", tmp112);
+    tmp114 = (lhs, rhsOpt) => {
       let param0, rhs;
       if (rhsOpt instanceof Option.Some.class) {
         param0 = rhsOpt.value;
@@ -337,136 +340,136 @@ Rules1 = class Rules {
         return lhs
       }
     };
-    tmp114 = ParseRule.Choice.end(Option.None);
-    tmp115 = ParseRule.Choice.reference("variants", (more, _) => {
+    tmp115 = ParseRule.Choice.end(Option.None);
+    tmp116 = ParseRule.Choice.reference("variants", (more, _) => {
       return Option.Some(more)
     }, "variants end");
-    tmp116 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp115);
-    tmp117 = ParseRule.Choice.reference("constr-decl", tmp113, "variants item", tmp114, tmp116);
-    tmp118 = Rules.defineKind("variants", tmp117);
-    tmp119 = (lhs, rhsMore) => {
-      let first1, first0, rhs, more, tmp175;
+    tmp117 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp116);
+    tmp118 = ParseRule.Choice.reference("constr-decl", tmp114, "variants item", tmp115, tmp117);
+    tmp119 = Rules.defineKind("variants", tmp118);
+    tmp120 = (lhs, rhsMore) => {
+      let first1, first0, rhs, more, tmp176;
       if (globalThis.Array.isArray(rhsMore) && rhsMore.length === 2) {
         first0 = rhsMore[0];
         first1 = rhsMore[1];
         rhs = first0;
         more = first1;
-        tmp175 = runtime.safeCall(rhs(lhs));
-        return Stack.Cons(tmp175, more)
+        tmp176 = runtime.safeCall(rhs(lhs));
+        return Stack.Cons(tmp176, more)
       } else {
         throw new globalThis.Error("match error");
       }
     };
-    tmp120 = ParseRule.Choice.end(Stack.Nil);
-    tmp121 = ParseRule.Choice.reference("typedefs", (more, _) => {
+    tmp121 = ParseRule.Choice.end(Stack.Nil);
+    tmp122 = ParseRule.Choice.reference("typedefs", (more, _) => {
       return more
     }, "typedef end");
-    tmp122 = ParseRule.Choice.keyword(Precedence.Keywords._and, tmp121);
-    tmp123 = ParseRule.Choice.reference("typedef-rhs", (rhs, more) => {
+    tmp123 = ParseRule.Choice.keyword(Precedence.Keywords._and, tmp122);
+    tmp124 = ParseRule.Choice.reference("typedef-rhs", (rhs, more) => {
       return [
         rhs,
         more
       ]
-    }, "typedef body", tmp120, tmp122);
-    tmp124 = ParseRule.Choice.reference("typedef-lhs", tmp119, "typedef name", tmp123);
-    tmp125 = Rules.defineKind("typedefs", tmp124);
-    tmp126 = ParseRule.Choice.reference("variants", (rhs, _) => {
+    }, "typedef body", tmp121, tmp123);
+    tmp125 = ParseRule.Choice.reference("typedef-lhs", tmp120, "typedef name", tmp124);
+    tmp126 = Rules.defineKind("typedefs", tmp125);
+    tmp127 = ParseRule.Choice.reference("variants", (rhs, _) => {
       return (lhs) => {
         return Tree.Infix(Precedence.Keywords._equal, lhs, rhs)
       }
     }, "typedef-rhs: variants");
-    tmp127 = (content, _) => {
-      let tmp175, tmp176;
+    tmp128 = (content, _) => {
+      let tmp176, tmp177;
       if (content instanceof Stack.Nil.class) {
-        tmp175 = Tree.Sequence(Stack.Nil);
-        return Tree.Bracketed(Token.Curly, tmp175)
-      } else {
-        tmp176 = Tree.Sequence(content);
+        tmp176 = Tree.Sequence(Stack.Nil);
         return Tree.Bracketed(Token.Curly, tmp176)
+      } else {
+        tmp177 = Tree.Sequence(content);
+        return Tree.Bracketed(Token.Curly, tmp177)
       }
     };
-    tmp128 = ParseRule.Choice.end(Tree.empty);
-    tmp129 = ParseRule.Choice.keyword(Precedence.Keywords._rightCurly, tmp128);
-    tmp130 = ParseRule.Choice.reference("label-decls", tmp127, "label-decl", tmp129);
-    tmp131 = ParseRule.Choice.keyword(Precedence.Keywords._leftCurly, tmp130);
-    tmp132 = ParseRule.Choice.map(tmp131, (rhs) => {
+    tmp129 = ParseRule.Choice.end(Tree.empty);
+    tmp130 = ParseRule.Choice.keyword(Precedence.Keywords._rightCurly, tmp129);
+    tmp131 = ParseRule.Choice.reference("label-decls", tmp128, "label-decl", tmp130);
+    tmp132 = ParseRule.Choice.keyword(Precedence.Keywords._leftCurly, tmp131);
+    tmp133 = ParseRule.Choice.map(tmp132, (rhs) => {
       return (lhs) => {
         return Tree.Infix(Precedence.Keywords._equal, lhs, rhs)
       }
     });
-    tmp133 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp126, tmp132);
-    tmp134 = ParseRule.Choice.reference("type", (rhs, _) => {
+    tmp134 = ParseRule.Choice.keyword(Precedence.Keywords._equal, tmp127, tmp133);
+    tmp135 = ParseRule.Choice.reference("type", (rhs, _) => {
       return (lhs) => {
         return Tree.Infix(Precedence.Keywords._equalequal, lhs, rhs)
       }
     }, "type alias body");
-    tmp135 = ParseRule.Choice.keyword(Precedence.Keywords._equalequal, tmp134);
-    tmp136 = Rules.defineKind("typedef-rhs", tmp133, tmp135);
-    tmp137 = Tree.infix(Precedence.TypeKeywords._colon);
-    tmp138 = ParseRule.Choice.typeExpr((rhs, _) => {
+    tmp136 = ParseRule.Choice.keyword(Precedence.Keywords._equalequal, tmp135);
+    tmp137 = Rules.defineKind("typedef-rhs", tmp134, tmp136);
+    tmp138 = Tree.infix(Precedence.TypeKeywords._colon);
+    tmp139 = ParseRule.Choice.typeExpr((rhs, _) => {
       return rhs
     }, "label-decl body");
-    tmp139 = ParseRule.Choice.keyword(Precedence.TypeKeywords._colon, tmp138);
-    tmp140 = ParseRule.Choice.typeExpr(tmp137, "label-decl name", tmp139);
-    tmp141 = Rules.defineKind("label-decl", tmp140);
-    tmp142 = ParseRule.Choice.end(Stack.Nil);
-    tmp143 = ParseRule.Choice.reference("label-decls", (more, _) => {
+    tmp140 = ParseRule.Choice.keyword(Precedence.TypeKeywords._colon, tmp139);
+    tmp141 = ParseRule.Choice.typeExpr(tmp138, "label-decl name", tmp140);
+    tmp142 = Rules.defineKind("label-decl", tmp141);
+    tmp143 = ParseRule.Choice.end(Stack.Nil);
+    tmp144 = ParseRule.Choice.reference("label-decls", (more, _) => {
       return more
     }, "more label-decls");
-    tmp144 = ParseRule.Choice.keyword(Precedence.Keywords._semicolon, tmp143);
-    tmp145 = ParseRule.Choice.reference("label-decl", Stack.Cons, "the first label-decl", tmp142, tmp144);
-    tmp146 = Rules.defineKind("label-decls", tmp145);
-    tmp147 = ParseRule.Choice.end(Stack.Nil);
-    tmp148 = ParseRule.Choice.reference("constr-decls", (tail, _) => {
+    tmp145 = ParseRule.Choice.keyword(Precedence.Keywords._semicolon, tmp144);
+    tmp146 = ParseRule.Choice.reference("label-decl", Stack.Cons, "the first label-decl", tmp143, tmp145);
+    tmp147 = Rules.defineKind("label-decls", tmp146);
+    tmp148 = ParseRule.Choice.end(Stack.Nil);
+    tmp149 = ParseRule.Choice.reference("constr-decls", (tail, _) => {
       return tail
     }, "more constructor declarations");
-    tmp149 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp148);
-    tmp150 = ParseRule.Choice.reference("constr-decl", Stack.Cons, "the first constructor declaration", tmp147, tmp149);
-    tmp151 = Rules.defineKind("constr-decls", tmp150);
-    tmp152 = (params, ident) => {
-      let tmp175;
+    tmp150 = ParseRule.Choice.keyword(Precedence.Keywords._bar, tmp149);
+    tmp151 = ParseRule.Choice.reference("constr-decl", Stack.Cons, "the first constructor declaration", tmp148, tmp150);
+    tmp152 = Rules.defineKind("constr-decls", tmp151);
+    tmp153 = (params, ident) => {
+      let tmp176;
       if (params instanceof Stack.Nil.class) {
         return ident
       } else {
-        tmp175 = Tree.Tuple(params);
-        return Tree.App(ident, tmp175)
+        tmp176 = Tree.Tuple(params);
+        return Tree.App(ident, tmp176)
       }
     };
-    tmp153 = ParseRule.Choice.reference("ident", (ident, _) => {
+    tmp154 = ParseRule.Choice.reference("ident", (ident, _) => {
       return ident
     }, "the type identifier");
-    tmp154 = ParseRule.Choice.reference("type-params", tmp152, "the type parameters", tmp153);
-    tmp155 = Rules.defineKind("typedef-lhs", tmp154);
-    tmp156 = ParseRule.Choice.reference("typevar", (head, _) => {
+    tmp155 = ParseRule.Choice.reference("type-params", tmp153, "the type parameters", tmp154);
+    tmp156 = Rules.defineKind("typedef-lhs", tmp155);
+    tmp157 = ParseRule.Choice.reference("typevar", (head, _) => {
       return Stack.Cons(head, Stack.Nil)
     }, "the only type parameter");
-    tmp157 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
-    tmp158 = ParseRule.Choice.reference("type-params-tail", (tail, _) => {
+    tmp158 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
+    tmp159 = ParseRule.Choice.reference("type-params-tail", (tail, _) => {
       return tail
-    }, "more type parameters", tmp157);
-    tmp159 = ParseRule.Choice.reference("typevar", Stack.Cons, "the first type parameter", tmp158);
-    tmp160 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound, tmp159);
-    tmp161 = ParseRule.Choice.end(Stack.Nil);
-    tmp162 = Rules.defineKind("type-params", tmp156, tmp160, tmp161);
-    tmp163 = ParseRule.Choice.end(Stack.Nil);
-    tmp164 = ParseRule.Choice.end(runtime.Unit);
-    tmp165 = ParseRule.Choice.reference("type-params-tail", (tail, _) => {
+    }, "more type parameters", tmp158);
+    tmp160 = ParseRule.Choice.reference("typevar", Stack.Cons, "the first type parameter", tmp159);
+    tmp161 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound, tmp160);
+    tmp162 = ParseRule.Choice.end(Stack.Nil);
+    tmp163 = Rules.defineKind("type-params", tmp157, tmp161, tmp162);
+    tmp164 = ParseRule.Choice.end(Stack.Nil);
+    tmp165 = ParseRule.Choice.end(runtime.Unit);
+    tmp166 = ParseRule.Choice.reference("type-params-tail", (tail, _) => {
       return tail
-    }, "more type parameters", tmp164);
-    tmp166 = ParseRule.Choice.reference("typevar", Stack.Cons, "the first type parameter", tmp165);
-    tmp167 = ParseRule.Choice.keyword(Precedence.Keywords._comma, tmp166);
-    tmp168 = Rules.defineKind("type-params-tail", tmp163, tmp167);
-    tmp169 = Rules.makeLetBindings(false);
-    tmp170 = ParseRule.Choice.reference("typedefs", (typedefs, _) => {
+    }, "more type parameters", tmp165);
+    tmp167 = ParseRule.Choice.reference("typevar", Stack.Cons, "the first type parameter", tmp166);
+    tmp168 = ParseRule.Choice.keyword(Precedence.Keywords._comma, tmp167);
+    tmp169 = Rules.defineKind("type-params-tail", tmp164, tmp168);
+    tmp170 = Rules.makeLetBindings(false);
+    tmp171 = ParseRule.Choice.reference("typedefs", (typedefs, _) => {
       return Tree.Define(Tree.DefineKind.Type, typedefs)
     }, "more typedefs");
-    tmp171 = ParseRule.Choice.keyword(Precedence.Keywords._type, tmp170);
-    tmp172 = ParseRule.Choice.reference("constr-decls", (decls, _) => {
+    tmp172 = ParseRule.Choice.keyword(Precedence.Keywords._type, tmp171);
+    tmp173 = ParseRule.Choice.reference("constr-decls", (decls, _) => {
       return Tree.Define(Tree.DefineKind.Exception, decls)
     }, "constructor declarations");
-    tmp173 = ParseRule.Choice.keyword(Precedence.Keywords._exception, tmp172);
-    tmp174 = ParseRule.rule("prefix rules for module items", tmp169, tmp171, tmp173);
-    this.declRule = tmp174;
+    tmp174 = ParseRule.Choice.keyword(Precedence.Keywords._exception, tmp173);
+    tmp175 = ParseRule.rule("prefix rules for module items", tmp170, tmp172, tmp174);
+    this.declRule = tmp175;
   }
   static getRuleByKind(kind) {
     let tmp;

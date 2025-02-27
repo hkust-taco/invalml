@@ -159,6 +159,9 @@ val termInfixRule = rule of
   // Assignment: <expr> <- <expr>
   makeInfixChoice of Keywords._leftArrow, "term", (lhs, rhs) =>
     Tree.Infix(Keywords._leftArrow, lhs, rhs)
+  // Comparison: <expr> == <expr>
+  makeInfixChoice of Keywords._equalequal, "term", (lhs, rhs) =>
+    Tree.Infix(Keywords._equalequal, lhs, rhs)
   // Selection: <expr> "." <identifier>
   // Access: <expr> "." "(" <expr> ")"
   Choice.keyword of

@@ -62,8 +62,8 @@ print of Keywords.all.values.join("\n")
 //│ > Keyword(`type`, 11, N/A)
 //│ > Keyword(`exception`, 11, N/A)
 //│ > Keyword(`rec`, 11, 3)
-//│ > Keyword(`==`, N/A, N/A)
 //│ > Keyword(`.`, 26, 26)
+//│ > Keyword(`==`, 16, 16)
 //│ > Keyword(`(`, 27, 0)
 //│ > Keyword(`)`, 0, N/A)
 //│ > Keyword(`[`, 27, 0)
@@ -105,7 +105,7 @@ print of Rules.termRule.display
 //│ >   | "[" <term> "]"
 //│ >   | "{" <term> "}"
 //│ >   | "begin" <term> "end"
-//│ >   | <term> ("," <term> | ";" <term> | "<-" <term> | "." ("(" <term> ")" | <term>) | ":" <type> | <term>)
+//│ >   | <term> ("," <term> | ";" <term> | "<-" <term> | "==" <term> | "." ("(" <term> ")" | <term>) | ":" <type> | <term>)
 
 print of Rules.typeRule.display
 //│ > <rules for types> ::= 
