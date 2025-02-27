@@ -92,51 +92,27 @@ print of TypeKeywords.all.values.join("\n")
 //│ > Keyword(`}`, 0, N/A)
 
 print of Rules.termRule.display
-//│ > <prefix rules for expressions> ::= `let` [`rec` ] 
-//│ >   <let-bindings>
-//│ >     `in` <term>
-//│ >     
-//│ > `fun` <term>`->` <term>
-//│ > `match` <term>
-//│ >   `with` [`|` ] 
-//│ >     <term>
-//│ >       `->` <term>
-//│ >         
-//│ >         `|` <simple-matching>
-//│ > `function` [`|` ] 
-//│ >   <term>
-//│ >     `->` <term>
-//│ >       
-//│ >       `|` <simple-matching>
-//│ > `if` <term>
-//│ >   `then` <term>
-//│ >     
-//│ >     `else` <term>
-//│ > `while` <term>`do` <term>`done` 
-//│ > `for` <term>
-//│ >   `=` <term>
-//│ >     `to` <term>`do` <term>`done` 
-//│ >     `downto` <term>`do` <term>`done` 
-//│ > `(` <term>`)` 
-//│ > `[` <term>`]` 
-//│ > `{` <term>`}` 
-//│ > `begin` <term>`end` 
-//│ > <term>
-//│ >   `,` <term>
-//│ >   `;` <term>
-//│ >   `<-` <term>
-//│ >   `:` <type>
-//│ >   <term>
+//│ > <prefix rules for expressions> ::= 
+//│ >   | "let" ["rec"] <let-bindings> ["in" <term>]
+//│ >   | "fun" <term> "->" <term>
+//│ >   | "match" <term> "with" ["|"] <term> "->" <term> ["|" <simple-matching>]
+//│ >   | "function" ["|"] <term> "->" <term> ["|" <simple-matching>]
+//│ >   | "if" <term> "then" <term> ["else" <term>]
+//│ >   | "while" <term> "do" <term> "done"
+//│ >   | "for" <term> "=" <term> ("to" | "downto") <term> "do" <term> "done"
+//│ >   | "(" <term> ")"
+//│ >   | "[" <term> "]"
+//│ >   | "{" <term> "}"
+//│ >   | "begin" <term> "end"
+//│ >   | <term> ("," <term> | ";" <term> | "<-" <term> | ":" <type> | <term>)
 
 print of Rules.typeRule.display
-//│ > <rules for types> ::= `(` <type>`)` 
-//│ > <type>
-//│ >   `,` <type>
-//│ >   `->` <type>
-//│ >   `*` <type>
-//│ >   <type>
+//│ > <rules for types> ::= 
+//│ >   | "(" <type> ")"
+//│ >   | <type> ("," <type> | "->" <type> | "*" <type> | <type>)
 
 print of Rules.declRule.display
-//│ > <prefix rules for module items> ::= `let` [`rec` ] <let-bindings>
-//│ > `type` <typedefs>
-//│ > `exception` <constr-decls>
+//│ > <prefix rules for module items> ::= 
+//│ >   | "let" ["rec"] <let-bindings>
+//│ >   | "type" <typedefs>
+//│ >   | "exception" <constr-decls>

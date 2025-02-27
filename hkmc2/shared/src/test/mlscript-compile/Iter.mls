@@ -164,6 +164,18 @@ fun firstDefined(xs, op) =
       next = iterator.next()
   result
 
+// `exists` is a keyword
+fun some(xs, op) =
+  let iterator = getIterator of xs
+  let next = iterator.next()
+  let result = None
+  while result is None do
+    if ...
+    next.done then set result = Some(false)
+    op(next.value) then set result = Some(true)
+    else set next = iterator.next()
+  result Option.getOrElse(false)
+
 fun toArray(view) = Array.from(view)
 
 fun fromStack(stack) = Iterable of () =>

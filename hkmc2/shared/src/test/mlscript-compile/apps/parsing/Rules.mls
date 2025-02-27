@@ -54,7 +54,7 @@ fun makeLetBindings(hasInClause: Bool) =
   let intro = "let binding: "
   Choice.keyword of
     Keywords._let
-    Choice.Optional of
+    Choice.optional of
       rule of
         intro + "keyword"
         Choice.keyword of
@@ -76,26 +76,6 @@ fun makeLetBindings(hasInClause: Bool) =
             tuple of Choice.end of None
 
 let letExpression = makeLetBindings(true)
-
-let ifThenElse =
-  Choice.keyword of ...
-  Keywords._if
-  Choice.term of ...
-  (tst, conAlt) => if conAlt is [con, alt] then
-    Tree.Ternary(Keywords._if, tst, con, alt)
-  "if-then-else condition"
-  Choice.keyword of ...
-  Keywords._then
-  Choice.term of ...
-  (con, optAlt) => [con, optAlt]
-  "if-then-else consequent"
-  Choice.end of None
-  Choice.keyword of ...
-  Keywords._else
-  Choice.term of ...
-  (alt, _) => Some(alt)
-  "if-then-else alternative"
-  Choice.end of None
 
 let funTerm =
   Choice.keyword of ...
@@ -158,78 +138,6 @@ defineKind of
   (tail, _) => tail
   "multiple-matching tail"
 
-let matchTerm =
-  Choice.keyword of ...
-  Keywords._match
-  Choice.term of ...
-  (scrutinee, branches) => Tree.Match(scrutinee, branches)
-  "pattern matching scrutinee"
-  Choice.keyword of ...
-  Keywords._with
-  Choice.Optional of
-    rule of
-      "pattern matching case body"
-      Choice.keyword of
-        Keywords._bar
-    getRuleByKind("simple-matching")
-
-let functionTerm =
-  Choice.keyword of ...
-  Keywords._function
-  Choice.map of
-    Choice.Optional of
-      rule of
-        "function body"
-        Choice.keyword of
-          Keywords._bar
-      getRuleByKind("simple-matching")
-    branches => Tree.Match(Tree.empty, branches)
-
-let whileTerm = Choice.keyword of
-  Keywords._while
-  Choice.term of ...
-  Tree.While
-  "while body"
-  Choice.keyword of ...
-  Keywords._do
-  Choice.term of ...
-  (body, _) => body
-  "while end"
-  Choice.keyword of ...
-  Keywords._done
-
-fun forTerm =
-  let intro = "for: "
-  let innerPart = Choice.term of
-    (end, body) => [end, body]
-    intro + "`do` keyword"
-    Choice.keyword of
-      Keywords._do
-      Choice.term of
-        (body, _) => body
-        intro + "`done` keyword"
-        Choice.keyword of
-          Keywords._done
-  Choice.keyword of
-    Keywords._for
-    Choice.term of
-      (head, startEndBody) => if startEndBody is
-        [start, end, body] then
-          Tree.For(head, start, end, body)
-      intro + "head"
-      Choice.keyword of
-        Keywords._equal
-        Choice.term of
-          (start, endBody) => if endBody is [end, body] then
-            [start, end, body]
-          intro + "`to` or `downto` keyword"
-          Choice.keyword of
-            Keywords._to
-            innerPart
-          Choice.keyword of
-            Keywords._downto
-            innerPart
-
 fun makeInfixChoice(keyword: Keyword, rhsKind: Str, compose: (Tree, Tree) -> Tree) =
   Choice.keyword of ...
   keyword
@@ -273,7 +181,7 @@ fun makeBracketRule(opening, closing, contentKind, wrapContent) =
   (tree: Tree, end: Tree) => if end is
     Tree.Error(Tree.Empty, msg) then wrapContent(tree) Tree.Error(msg)
     Tree.Empty                  then wrapContent(tree)
-  contentKind + ": close bracket"
+  contentKind + " in bracket"
   Choice.keyword of ...
   closing
   Choice.end of Tree.empty
@@ -283,11 +191,91 @@ val termRule = rule of
   "prefix rules for expressions"
   letExpression
   funTerm
-  matchTerm
-  functionTerm
-  ifThenElse
-  whileTerm
-  forTerm
+  // `match`-`with` term
+  Choice.keyword of
+    Keywords._match
+    Choice.term of ...
+    Tree.Match
+    "pattern matching scrutinee"
+    Choice.keyword of ...
+    Keywords._with
+    Choice.optional of
+      rule of
+        "pattern matching case body"
+        Choice.keyword of
+          Keywords._bar
+      getRuleByKind("simple-matching")
+  // `function` term
+  Choice.keyword of
+    Keywords._function
+    Choice.map of ...
+    Choice.optional of
+      rule of
+        "function body"
+        Choice.keyword of ...
+        Keywords._bar
+      getRuleByKind("simple-matching")
+    branches => Tree.Match(Tree.empty, branches)
+  // `if`-`then`-`else` term
+  Choice.keyword of
+    Keywords._if
+    Choice.term of ...
+    (tst, conAlt) => if conAlt is [con, alt] then
+      Tree.Ternary(Keywords._if, tst, con, alt)
+    "if-then-else condition"
+    Choice.keyword of ...
+    Keywords._then
+    Choice.term of ...
+    (con, optAlt) => [con, optAlt]
+    "if-then-else consequent"
+    Choice.end of None
+    Choice.keyword of ...
+    Keywords._else
+    Choice.term of ...
+    (alt, _) => Some(alt)
+    "if-then-else alternative"
+    Choice.end of None
+  // `while` term
+  Choice.keyword of
+    Keywords._while
+    Choice.term of ...
+    Tree.While
+    "while body"
+    Choice.keyword of ...
+    Keywords._do
+    Choice.term of ...
+    (body, _) => body
+    "while end"
+    Choice.keyword of ...
+    Keywords._done
+  // `for` term
+  Choice.keyword of
+    Keywords._for
+    Choice.term of ...
+    (head, startEndBody) => Tree.For(head, ...startEndBody)
+    "`for` head"
+    Choice.keyword of ...
+    Keywords._equal
+    Choice.term of ...
+    (start, endBody) => [start, ...endBody]
+    "`for` `to` or `downto` keyword"
+    Choice.siding of ...
+    rule of
+      "iteration keyword"
+      Choice.keyword of Keywords._to
+      Choice.keyword of Keywords._downto
+    rule of
+      "the iteration keyword"
+      Choice.term of ...
+      (end, body) => [end, body]
+      "`for` `do` keyword"
+      Choice.keyword of ...
+      Keywords._do
+      Choice.term of ...
+      (body, _) => body
+      "`for` `done` keyword"
+      Choice.keyword of ...
+      Keywords._done
   // Choices for brackets
   makeBracketRule of
     Keywords._leftRound

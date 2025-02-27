@@ -2,12 +2,14 @@ import "../../BetterMap.mls"
 import "../../Iter.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
+import "../../Predef.mls"
 import "./Token.mls"
 import "./Keyword.mls"
 import "./Tree.mls"
 
 open BetterMap { Map, toMap }
 open Option { Some, None }
+open Predef { tuple }
 open Stack
 
 type Opt[A] = Some[A] | None
@@ -42,7 +44,8 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         Choice.Ref(isType, process, outerPrec, innerPrec, rest') then
           [Choice.Ref(isType, process, outerPrec, innerPrec, rest'.andThen(rest))]
         Choice.End then rest.choices Iter.fromStack()
-        Choice.Optional(rule, rest') then [Choice.Optional(process, rule, rest'.andThen(rest))]
+        Choice.Siding(rule, optional, rest') then
+          [Choice.Siding(rule, optional, rest'.andThen(rest))]
         Choice.Lazy(get, make) then
           let get' = () => get() andThen(rest)
           let make' = getChoice => make(() => getChoice andThen(rest))
@@ -57,7 +60,7 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
     Iter.firstDefined of choice =>
       if choice Choice.forced() is
         Choice.End(value) then Some(value)
-        Choice.Optional(_, rest) then rest.endChoice
+        Choice.Siding(_, _, rest) then rest.endChoice // TODO: is this correct?
         else None
   
   // Collect the first end choice in this rule.
@@ -71,19 +74,19 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
   // Manual memoization for keyword choices.
   let _keywordChoices = None
   
-  let _computeKeywordsChoices = () =>
-    toMap of choices
-      Iter.fromStack()
-      Iter.mapping of choice => if choice Choice.forced() is
-        Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
-        Choice.Optional(rule, rest) then rule.keywordChoices
-          Iter.mapping of case [keyword, rule] then
-            [keyword, rule.andThen(rest)]
-          Iter.appended of rest.keywordChoices
-          Iter.toArray()
-        else []
-      Iter.flattening()
-      Iter.toArray()
+  let _computeKeywordsChoices = () => choices
+    Iter.fromStack()
+    Iter.mapping of choice => if choice Choice.forced() is
+      Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
+      Choice.Siding(rule, optional, rest) then rule.keywordChoices
+        Iter.mapping of case [keyword, rule] then
+          [keyword, rule.andThen(rest)]
+        Iter.appended of if optional then [] else rest.keywordChoices
+        Iter.toArray()
+      else []
+    Iter.flattening()
+    Iter.toArray()
+    toMap()
   
   // Collect all keyword choices in this rule.
   fun keywordChoices = if _keywordChoices is
@@ -100,10 +103,11 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
     Iter.firstDefined of choice => if choice Choice.forced() is
       Choice.Ref(isType, process, outerPrec, innerPrec, rest) then
         Some([isType, process, outerPrec, innerPrec, rest])
-      Choice.Optional(rule, rest) and
+      Choice.Siding(rule, optional, rest) and
         rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest']) then
           Some([kind, process, outerPrec, innerPrec rest'.andThen(rest)])
-        else rest.exprChoice
+        optional then rest.exprChoice
+        else None
       else None
   
   fun exprChoice = if _exprChoice is
@@ -118,44 +122,46 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
     object Knot
     fun displayChoice(choice) = if choice is
       Choice.Keyword(keyword, rest) and
-        let prefix = "`" + keyword.name + "` "
-        go(rest) is
-          [name, [line]] then [prefix + line]
-          [name, [head, ..tail']] then [prefix + head, ..tail']
+        let prefix = "\"" + keyword.name + "\""
+        tail(rest) is [name, line] then [prefix + line]
       Choice.Ident(_, rest) and
         let prefix = "<ident> "
-        go(rest) is
-          [name, [line]] then [prefix + line]
-          [name, [head, ..tail']] then [prefix + head, ..tail']
+        tail(rest) is [name, line] then [prefix + line]
       Choice.Ref(kind, _, _, _, rest) and
         let prefix = "<" + kind + ">"
-        go(rest) is
-          [name, [line]] then [prefix + line]
-          [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
-      Choice.Optional(rule, rest) then
-        let prefix = "[" + (if go(rule) is
-          [name, [line]] then line
-          [name, lines] then lines.map((line, _, _) => "  " + line)) + "] "
-        if go(rest) is
-          [name, [line]] then [prefix + line]
-          [name, lines] then [prefix, ..lines.map((line, _, _) => "  " + line)]
+        tail(rest) is [name, line] then [prefix + line]
+      Choice.Siding(rule, optional, rest) then
+        let ruleContent = if go(rule, false) is [name, line] then line
+        let prefix = if optional then "[" + ruleContent + "]" else "(" + ruleContent + ")"
+        if tail(rest) is [name, line] then [prefix + line]
       Choice.End then [""]
       Choice.Lazy(get, make) and
         get() is Knot then ["<rec>"]
         else displayChoice(make(() => Knot))
       other then ["<unknown>" + JSON.stringify(other)]
-    fun go(rule) =
-      let
-        choices = rule.choices
-        lines = []
-      while choices is head :: tail do
-        lines.push of displayChoice(head)
-        set choices = tail
-      [rule.name, lines.flat()]
-    if go(this) is [name, lines] then
-      "<" + name + "> ::= " + if lines is
-        [line] then line
-        [head, ..tail] then head + "\n" + tail.join("\n")
+    fun tail(rest) = if rest is ParseRule(_, choices) and
+      choices is Choice.End :: Nil then ["", ""]
+      go(rest, false) is [name, line] and
+        choices is _ :: _ :: _ and
+          choices Iter.fromStack() Iter.some(c => c is Choice.End) then
+            [name, " [" + line + "]"]
+          else [name, " (" + line + ")"]
+        else [name, " " + line]
+    fun go(rule, top) =
+      let content = rule.choices
+        Iter.fromStack()
+        Iter.filtering of case
+          Choice.End then false
+          else true
+        Iter.mapping of displayChoice
+        Iter.joined of if top then "\n  | " else " | "
+      tuple of
+        rule.name
+        if
+          top then "\n  | " + content
+          rule.choices.length > 1 then "(" + content + ")"
+          else content
+    if go(this, true) is [name, line] then "<" + name + "> ::= " + line
 
 // Shorthands for constructing parse rules.
 // Automatically adds an end choice to the rule if no choices are provided.
@@ -171,7 +177,7 @@ module Choice with
   class Ident(process: Token.Identifier -> Tree, rest: ParseRule)
   class Ref(kind: Str, process: Tree -> Tree, outerPrec: Opt[Int], innerPrec: Opt[Int], rest: ParseRule)
   class End(value: Tree)
-  class Optional(rule: ParseRule, rest: ParseRule)
+  class Siding(rule: ParseRule, optional: Bool, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
   
   fun rest(choice) = if choice is
@@ -179,7 +185,7 @@ module Choice with
     Keyword(_, rest) then Some(rest)
     Ident(_, rest) then Some(rest)
     Ref(_, _, _, _, rest) then Some(rest)
-    Optional(_, rest) then Some(rest)
+    Siding(_, rest) then Some(rest)
     End then None
   
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice
@@ -194,6 +200,8 @@ module Choice with
     Ref("term", process, outerPrec, innerPrec, rule(name, ...choices))
   fun typeExpr(process, name, ...choices) =
     Ref("type", process, None, None, rule(name, ...choices))
+  fun optional(rule, rest) = Siding(rule, true, rest)
+  fun siding(rule, rest) = Siding(rule, false, rest)
   fun end(value) = End(value)
   fun lazy(makeChoice) =
     let cache = None
@@ -209,5 +217,5 @@ module Choice with
       Ident((tok, tree) => op(process(tok, tree)), rest.map(op))
     Ref(kind, process, outerPrec, innerPrec, rest) then
       Ref(kind, (x, y) => op(process(x, y)), outerPrec, innerPrec, rest)
-    Optional(rule, rest) then Optional(rule.map(op), rest.map(op))
+    Siding(rule, optional, rest) then Siding(rule.map(op), optional, rest.map(op))
     End(value) then End(op(value))

@@ -114,7 +114,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return runtime.safeCall(ParseRuleVisualizer.rr.Diagram(tmp10))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
-      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, rule2, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53;
+      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, param21, rule2, optional, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp10 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.End"));
         return Option.None
@@ -128,19 +128,25 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         tmp13 = renderRule(rest2, currentRule);
         tmp14 = sequence(tmp12, tmp13);
         return Option.Some(tmp14)
-      } else if (choice instanceof ParseRule.Choice.Optional.class) {
+      } else if (choice instanceof ParseRule.Choice.Siding.class) {
         param03 = choice.rule;
-        param12 = choice.rest;
+        param12 = choice.optional;
+        param21 = choice.rest;
         rule2 = param03;
-        rest1 = param12;
-        tmp15 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Optional"));
+        optional = param12;
+        rest1 = param21;
+        tmp15 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Siding"));
         scrut3 = renderRule(rule2, currentRule);
         latterPart = renderRule(rest1, currentRule);
         if (scrut3 instanceof Option.Some.class) {
           param04 = scrut3.value;
           optionalPart = param04;
-          tmp16 = runtime.safeCall(ParseRuleVisualizer.rr.Optional(optionalPart));
-          tmp17 = sequence(tmp16, latterPart);
+          if (optional === true) {
+            tmp16 = runtime.safeCall(ParseRuleVisualizer.rr.Optional(optionalPart));
+            tmp17 = sequence(tmp16, latterPart);
+          } else {
+            tmp17 = sequence(optionalPart, latterPart);
+          }
         } else if (scrut3 instanceof Option.None.class) {
           tmp17 = latterPart;
         } else {

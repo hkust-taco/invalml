@@ -363,6 +363,41 @@ Iter1 = class Iter {
     }
     return result
   } 
+  static some(xs10, op7) {
+    let iterator1, next, result, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    tmp = Iter.getIterator(xs10);
+    iterator1 = tmp;
+    tmp1 = runtime.safeCall(iterator1.next());
+    next = tmp1;
+    result = Option.None;
+    tmp7: while (true) {
+      if (result instanceof Option.None.class) {
+        scrut1 = next.done;
+        if (scrut1 === true) {
+          tmp2 = Option.Some(false);
+          result = tmp2;
+          tmp3 = runtime.Unit;
+        } else {
+          scrut = runtime.safeCall(op7(next.value));
+          if (scrut === true) {
+            tmp4 = Option.Some(true);
+            result = tmp4;
+            tmp3 = runtime.Unit;
+          } else {
+            tmp5 = runtime.safeCall(iterator1.next());
+            next = tmp5;
+            tmp3 = runtime.Unit;
+          }
+        }
+        tmp6 = tmp3;
+        continue tmp7;
+      } else {
+        tmp6 = runtime.Unit;
+      }
+      break;
+    }
+    return Option.getOrElse(result, false)
+  } 
   static toArray(view) {
     return runtime.safeCall(globalThis.Array.from(view))
   } 
@@ -388,8 +423,8 @@ Iter1 = class Iter {
       return Iterator1(tmp)
     })
   } 
-  static toStack(xs10) {
-    return Iter.rightFolded(xs10, Stack.Nil, Stack.Cons)
+  static toStack(xs11) {
+    return Iter.rightFolded(xs11, Stack.Nil, Stack.Cons)
   }
   static toString() { return "Iter"; }
 };
