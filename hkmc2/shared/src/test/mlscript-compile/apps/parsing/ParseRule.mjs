@@ -293,36 +293,36 @@ ParseRule2 = class ParseRule {
       get display() {
         let go, Knot1, displayChoice, scrut, first1, first0, name1, lines, rest1, first01, head, tail, line, tmp, tmp1, tmp2, tmp3, tmp4;
         displayChoice = function displayChoice(choice) {
-          let other, param0, param1, get, make, scrut1, param01, param11, rule, rest2, prefix, scrut2, first11, first02, name2, lines1, name3, first03, line1, scrut3, first12, first04, name4, lines2, name5, first05, line2, param02, param12, param2, param3, param4, kind, rest3, prefix1, scrut4, first13, first06, name6, lines3, name7, first07, line3, param03, param13, keyword, rest4, prefix2, scrut5, first14, first08, name8, rest5, first09, head1, tail$_, name9, line4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24;
+          let other, param0, param1, get, make, scrut1, param01, param11, rule, rest2, prefix, scrut2, first11, first02, name2, lines1, name3, first03, line1, scrut3, first12, first04, name4, lines2, name5, first05, line2, param02, param12, param2, param3, param4, kind, rest3, prefix1, scrut4, first13, first06, name6, lines3, name7, first07, line3, param03, param13, rest4, prefix2, scrut5, first14, first08, name8, rest5, first09, head1, tail$_, name9, line4, param04, param14, keyword, rest6, prefix3, scrut6, first15, first010, name10, rest7, first011, head2, tail$_1, name11, line5, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30;
           if (choice instanceof ParseRule.Choice.Keyword.class) {
-            param03 = choice.keyword;
-            param13 = choice.rest;
-            keyword = param03;
-            rest4 = param13;
+            param04 = choice.keyword;
+            param14 = choice.rest;
+            keyword = param04;
+            rest6 = param14;
             tmp5 = "`" + keyword.name;
-            prefix2 = tmp5 + "` ";
-            scrut5 = go(rest4);
-            if (globalThis.Array.isArray(scrut5) && scrut5.length === 2) {
-              first08 = scrut5[0];
-              first14 = scrut5[1];
-              name9 = first08;
-              name8 = first08;
-              if (globalThis.Array.isArray(first14) && first14.length === 1) {
-                first09 = first14[0];
-                line4 = first09;
-                tmp6 = prefix2 + line4;
+            prefix3 = tmp5 + "` ";
+            scrut6 = go(rest6);
+            if (globalThis.Array.isArray(scrut6) && scrut6.length === 2) {
+              first010 = scrut6[0];
+              first15 = scrut6[1];
+              name11 = first010;
+              name10 = first010;
+              if (globalThis.Array.isArray(first15) && first15.length === 1) {
+                first011 = first15[0];
+                line5 = first011;
+                tmp6 = prefix3 + line5;
                 return [
                   tmp6
                 ]
-              } else if (globalThis.Array.isArray(first14) && first14.length >= 1) {
-                first09 = first14[0];
-                rest5 = runtime.safeCall(globalThis.Predef.tupleSlice(first14, 1, 0));
-                head1 = first09;
-                tail$_ = rest5;
-                tmp7 = prefix2 + head1;
+              } else if (globalThis.Array.isArray(first15) && first15.length >= 1) {
+                first011 = first15[0];
+                rest7 = runtime.safeCall(globalThis.Predef.tupleSlice(first15, 1, 0));
+                head2 = first011;
+                tail$_1 = rest7;
+                tmp7 = prefix3 + head2;
                 return [
                   tmp7,
-                  ...tail$_
+                  ...tail$_1
                 ]
               } else {
                 other = choice;
@@ -340,6 +340,50 @@ ParseRule2 = class ParseRule {
                 tmp11
               ]
             }
+          } else if (choice instanceof ParseRule.Choice.Ident.class) {
+            param03 = choice.process;
+            param13 = choice.rest;
+            rest4 = param13;
+            prefix2 = "<ident> ";
+            scrut5 = go(rest4);
+            if (globalThis.Array.isArray(scrut5) && scrut5.length === 2) {
+              first08 = scrut5[0];
+              first14 = scrut5[1];
+              name9 = first08;
+              name8 = first08;
+              if (globalThis.Array.isArray(first14) && first14.length === 1) {
+                first09 = first14[0];
+                line4 = first09;
+                tmp12 = prefix2 + line4;
+                return [
+                  tmp12
+                ]
+              } else if (globalThis.Array.isArray(first14) && first14.length >= 1) {
+                first09 = first14[0];
+                rest5 = runtime.safeCall(globalThis.Predef.tupleSlice(first14, 1, 0));
+                head1 = first09;
+                tail$_ = rest5;
+                tmp13 = prefix2 + head1;
+                return [
+                  tmp13,
+                  ...tail$_
+                ]
+              } else {
+                other = choice;
+                tmp14 = runtime.safeCall(globalThis.JSON.stringify(other));
+                tmp15 = "<unknown>" + tmp14;
+                return [
+                  tmp15
+                ]
+              }
+            } else {
+              other = choice;
+              tmp16 = runtime.safeCall(globalThis.JSON.stringify(other));
+              tmp17 = "<unknown>" + tmp16;
+              return [
+                tmp17
+              ]
+            }
           } else if (choice instanceof ParseRule.Choice.Ref.class) {
             param02 = choice.kind;
             param12 = choice.process;
@@ -348,8 +392,8 @@ ParseRule2 = class ParseRule {
             param4 = choice.rest;
             kind = param02;
             rest3 = param4;
-            tmp12 = "<" + kind;
-            prefix1 = tmp12 + ">";
+            tmp18 = "<" + kind;
+            prefix1 = tmp18 + ">";
             scrut4 = go(rest3);
             if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
               first06 = scrut4[0];
@@ -358,27 +402,27 @@ ParseRule2 = class ParseRule {
               if (globalThis.Array.isArray(first13) && first13.length === 1) {
                 first07 = first13[0];
                 line3 = first07;
-                tmp13 = prefix1 + line3;
+                tmp19 = prefix1 + line3;
                 return [
-                  tmp13
+                  tmp19
                 ]
               } else {
                 name6 = first06;
                 lines3 = first13;
-                tmp14 = runtime.safeCall(lines3.map((line5, _, _1) => {
-                  return "  " + line5
+                tmp20 = runtime.safeCall(lines3.map((line6, _, _1) => {
+                  return "  " + line6
                 }));
                 return [
                   prefix1,
-                  ...tmp14
+                  ...tmp20
                 ]
               }
             } else {
               other = choice;
-              tmp15 = runtime.safeCall(globalThis.JSON.stringify(other));
-              tmp16 = "<unknown>" + tmp15;
+              tmp21 = runtime.safeCall(globalThis.JSON.stringify(other));
+              tmp22 = "<unknown>" + tmp21;
               return [
-                tmp16
+                tmp22
               ]
             }
           } else if (choice instanceof ParseRule.Choice.Optional.class) {
@@ -394,20 +438,20 @@ ParseRule2 = class ParseRule {
               if (globalThis.Array.isArray(first11) && first11.length === 1) {
                 first03 = first11[0];
                 line1 = first03;
-                tmp17 = line1;
+                tmp23 = line1;
               } else {
                 name2 = first02;
                 lines1 = first11;
-                tmp17 = runtime.safeCall(lines1.map((line5, _, _1) => {
-                  return "  " + line5
+                tmp23 = runtime.safeCall(lines1.map((line6, _, _1) => {
+                  return "  " + line6
                 }));
               }
             } else {
               throw new globalThis.Error("match error");
             }
-            tmp18 = "[" + tmp17;
-            tmp19 = tmp18 + "] ";
-            prefix = tmp19;
+            tmp24 = "[" + tmp23;
+            tmp25 = tmp24 + "] ";
+            prefix = tmp25;
             scrut3 = go(rest2);
             if (globalThis.Array.isArray(scrut3) && scrut3.length === 2) {
               first04 = scrut3[0];
@@ -416,19 +460,19 @@ ParseRule2 = class ParseRule {
               if (globalThis.Array.isArray(first12) && first12.length === 1) {
                 first05 = first12[0];
                 line2 = first05;
-                tmp20 = prefix + line2;
+                tmp26 = prefix + line2;
                 return [
-                  tmp20
+                  tmp26
                 ]
               } else {
                 name4 = first04;
                 lines2 = first12;
-                tmp21 = runtime.safeCall(lines2.map((line5, _, _1) => {
-                  return "  " + line5
+                tmp27 = runtime.safeCall(lines2.map((line6, _, _1) => {
+                  return "  " + line6
                 }));
                 return [
                   prefix,
-                  ...tmp21
+                  ...tmp27
                 ]
               }
             } else {
@@ -449,17 +493,17 @@ ParseRule2 = class ParseRule {
                 "<rec>"
               ]
             } else {
-              tmp22 = runtime.safeCall(make(() => {
+              tmp28 = runtime.safeCall(make(() => {
                 return Knot1
               }));
-              return displayChoice(tmp22)
+              return displayChoice(tmp28)
             }
           } else {
             other = choice;
-            tmp23 = runtime.safeCall(globalThis.JSON.stringify(other));
-            tmp24 = "<unknown>" + tmp23;
+            tmp29 = runtime.safeCall(globalThis.JSON.stringify(other));
+            tmp30 = "<unknown>" + tmp29;
             return [
-              tmp24
+              tmp30
             ]
           }
         };
@@ -534,6 +578,14 @@ ParseRule2 = class ParseRule {
           }
           toString() { return "Keyword(" + globalThis.Predef.render(this.keyword) + ", " + globalThis.Predef.render(this.rest) + ")"; }
         };
+        this.Ident = function Ident(process1, rest1) { return new Ident.class(process1, rest1); };
+        this.Ident.class = class Ident {
+          constructor(process, rest) {
+            this.process = process;
+            this.rest = rest;
+          }
+          toString() { return "Ident(" + globalThis.Predef.render(this.process) + ", " + globalThis.Predef.render(this.rest) + ")"; }
+        };
         this.Ref = function Ref(kind1, process1, outerPrec1, innerPrec1, rest1) { return new Ref.class(kind1, process1, outerPrec1, innerPrec1, rest1); };
         this.Ref.class = class Ref {
           constructor(kind, process, outerPrec, innerPrec, rest) {
@@ -570,15 +622,20 @@ ParseRule2 = class ParseRule {
         };
       }
       static rest(choice) {
-        let param0, param1, rest, param01, param11, param2, param3, param4, rest1, param02, param12, rest2, param03, param13, get, tmp;
+        let param0, param1, rest, param01, param11, param2, param3, param4, rest1, param02, param12, rest2, param03, param13, rest3, param04, param14, get, tmp;
         if (choice instanceof Choice.Lazy.class) {
-          param03 = choice.get;
-          param13 = choice.make;
-          get = param03;
+          param04 = choice.get;
+          param14 = choice.make;
+          get = param04;
           tmp = runtime.safeCall(get());
           return Choice.rest(tmp)
         } else if (choice instanceof Choice.Keyword.class) {
-          param02 = choice.keyword;
+          param03 = choice.keyword;
+          param13 = choice.rest;
+          rest3 = param13;
+          return Option.Some(rest3)
+        } else if (choice instanceof Choice.Ident.class) {
+          param02 = choice.process;
           param12 = choice.rest;
           rest2 = param12;
           return Option.Some(rest2)
@@ -658,14 +715,25 @@ ParseRule2 = class ParseRule {
         return Choice.Lazy(getChoice, makeChoice)
       } 
       static map(choice2, op) {
-        let param0, value1, param01, param1, rule, rest, param02, param11, param2, param3, param4, kind1, process4, outerPrec1, innerPrec1, rest1, param03, param12, keyword1, rest2, tmp, tmp1, tmp2, tmp3;
+        let param0, value1, param01, param1, rule, rest, param02, param11, param2, param3, param4, kind1, process4, outerPrec1, innerPrec1, rest1, param03, param12, process5, rest2, param04, param13, keyword1, rest3, tmp, tmp1, tmp2, tmp3, tmp4;
         if (choice2 instanceof Choice.Keyword.class) {
-          param03 = choice2.keyword;
-          param12 = choice2.rest;
-          keyword1 = param03;
-          rest2 = param12;
-          tmp = runtime.safeCall(rest2.map(op));
+          param04 = choice2.keyword;
+          param13 = choice2.rest;
+          keyword1 = param04;
+          rest3 = param13;
+          tmp = runtime.safeCall(rest3.map(op));
           return Choice.Keyword(keyword1, tmp)
+        } else if (choice2 instanceof Choice.Ident.class) {
+          param03 = choice2.process;
+          param12 = choice2.rest;
+          process5 = param03;
+          rest2 = param12;
+          tmp1 = runtime.safeCall(rest2.map(op));
+          return Choice.Ident((tok, tree) => {
+            let tmp5;
+            tmp5 = runtime.safeCall(process5(tok, tree));
+            return runtime.safeCall(op(tmp5))
+          }, tmp1)
         } else if (choice2 instanceof Choice.Ref.class) {
           param02 = choice2.kind;
           param11 = choice2.process;
@@ -678,23 +746,23 @@ ParseRule2 = class ParseRule {
           innerPrec1 = param3;
           rest1 = param4;
           return Choice.Ref(kind1, (x, y) => {
-            let tmp4;
-            tmp4 = runtime.safeCall(process4(x, y));
-            return runtime.safeCall(op(tmp4))
+            let tmp5;
+            tmp5 = runtime.safeCall(process4(x, y));
+            return runtime.safeCall(op(tmp5))
           }, outerPrec1, innerPrec1, rest1)
         } else if (choice2 instanceof Choice.Optional.class) {
           param01 = choice2.rule;
           param1 = choice2.rest;
           rule = param01;
           rest = param1;
-          tmp1 = runtime.safeCall(rule.map(op));
-          tmp2 = runtime.safeCall(rest.map(op));
-          return Choice.Optional(tmp1, tmp2)
+          tmp2 = runtime.safeCall(rule.map(op));
+          tmp3 = runtime.safeCall(rest.map(op));
+          return Choice.Optional(tmp2, tmp3)
         } else if (choice2 instanceof Choice.End.class) {
           param0 = choice2.value;
           value1 = param0;
-          tmp3 = runtime.safeCall(op(value1));
-          return Choice.End(tmp3)
+          tmp4 = runtime.safeCall(op(value1));
+          return Choice.End(tmp4)
         } else {
           throw new globalThis.Error("match error");
         }

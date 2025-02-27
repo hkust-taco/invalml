@@ -122,6 +122,11 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         go(rest) is
           [name, [line]] then [prefix + line]
           [name, [head, ..tail']] then [prefix + head, ..tail']
+      Choice.Ident(_, rest) and
+        let prefix = "<ident> "
+        go(rest) is
+          [name, [line]] then [prefix + line]
+          [name, [head, ..tail']] then [prefix + head, ..tail']
       Choice.Ref(kind, _, _, _, rest) and
         let prefix = "<" + kind + ">"
         go(rest) is
@@ -157,6 +162,7 @@ fun rule(name, ...choices) = ParseRule(name, choices Iter.toStack())
 
 module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
+  class Ident(process: Token.Identifier -> Tree, rest: ParseRule)
   class Ref(kind: Str, process: Tree -> Tree, outerPrec: Opt[Int], innerPrec: Opt[Int], rest: ParseRule)
   class End(value: Tree)
   class Optional(rule: ParseRule, rest: ParseRule)
@@ -165,6 +171,7 @@ module Choice with
   fun rest(choice) = if choice is
     Lazy(get, _) then get() rest()
     Keyword(_, rest) then Some(rest)
+    Ident(_, rest) then Some(rest)
     Ref(_, _, _, _, rest) then Some(rest)
     Optional(_, rest) then Some(rest)
     End then None
@@ -191,6 +198,8 @@ module Choice with
   
   fun map(choice: Choice, op: Tree -> Tree) = if choice is
     Keyword(keyword, rest) then Keyword(keyword, rest.map(op))
+    Ident(process, rest) then
+      Ident((tok, tree) => op(process(tok, tree)), rest.map(op))
     Ref(kind, process, outerPrec, innerPrec, rest) then
       Ref(kind, (x, y) => op(process(x, y)), outerPrec, innerPrec, rest)
     Optional(rule, rest) then Optional(rule.map(op), rest.map(op))

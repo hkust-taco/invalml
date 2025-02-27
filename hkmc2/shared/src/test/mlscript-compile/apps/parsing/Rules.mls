@@ -86,44 +86,42 @@ fun letBinding(hasInClause: Bool) =
 let letExpression = letBinding(true)
 let letDefinition = letBinding(false)
 
-fun ifThenElse() =
-  let intro = "if-then-else: "
+let ifThenElse =
   Choice.keyword of ...
   Keywords._if
-  intro + "`if` keyword"
+  "`if` keyword"
   Choice.term of ...
   (tst, conAlt) => if conAlt is [con, alt] then
     Tree.Ternary(Keywords._if, tst, con, alt)
-  intro + "condition"
+  "if-then-else condition"
   Choice.keyword of ...
   Keywords._then
-  intro + "`then` keyword"
+  "`then` keyword"
   Choice.term of ...
   (con, optAlt) => [con, optAlt]
-  intro + "consequent"
+  "if-then-else consequent"
   Choice.end of None
   Choice.keyword of ...
   Keywords._else
-  intro + "`else` keyword"
+  "`else` keyword"
   Choice.term of ...
   (alt, _) => Some(alt)
-  intro + "alternative"
+  "if-then-else alternative"
   Choice.end of None
 
-fun funTerm() =
-  let intro = "function expression: "
+let funTerm =
   Choice.keyword of ...
   Keywords._fun
-  intro + "keyword"
+  "`function` keyword"
   Choice.term of ...
   (params, body) => Tree.Lambda(params :: Nil, body)
-  intro + "parameters"
+  "function parameters"
   Choice.keyword of ...
   Keywords._thinArrow
-  intro + "arrow"
+  "`->` operator"
   Choice.term of ...
   (body, _) => body
-  intro + "body"
+  "function body"
   Choice.end of None
 
 defineKind of
@@ -181,40 +179,39 @@ defineKind of
   "multiple-matching tail"
   Choice.end of ()
 
-fun matchTerm() =
-  let intro = "`match` expression: "
+let matchTerm =
   Choice.keyword of ...
   Keywords._match
-  intro + "keyword"
+  "`match` keyword"
   Choice.term of ...
   (scrutinee, branches) => Tree.Match(scrutinee, branches)
-  intro + "scrutinee"
+  "pattern matching scrutinee"
   Choice.keyword of ...
   Keywords._with
-  intro + "with"
+  "`with` keyword"
   Choice.Optional of
     rule of
-      intro + "body"
+      "pattern matching case body"
       Choice.keyword of
         Keywords._bar
-        intro + "leading bar"
+        "`|` separator"
         Choice.end of ()
     getRuleByKind("simple-matching")
 
-fun functionTerm() =
-  let intro = "`function` definition: "
-  let body = Choice.Optional of
-    rule of
-      intro + "body"
-      Choice.keyword of
-        Keywords._bar
-        intro + "leading bar"
-        Choice.end of ()
-    getRuleByKind("simple-matching")
+let functionTerm =
   Choice.keyword of ...
   Keywords._function
-  intro + "`function` keyword"
-  body Choice.map(branches => Tree.Match(Tree.empty, branches))
+  "`function` keyword"
+  Choice.map of
+    Choice.Optional of
+      rule of
+        "function body"
+        Choice.keyword of
+          Keywords._bar
+          "`|` separator"
+          Choice.end of ()
+      getRuleByKind("simple-matching")
+    branches => Tree.Match(Tree.empty, branches)
 
 let whileTerm = Choice.keyword of
   Keywords._while
@@ -331,10 +328,10 @@ fun makeBracketRule(opening, closing, contentKind, wrapContent) =
 val termRule = rule of
   "prefix rules for expressions"
   letExpression
-  funTerm()
-  matchTerm()
-  functionTerm()
-  ifThenElse()
+  funTerm
+  matchTerm
+  functionTerm
+  ifThenElse
   whileTerm
   forTerm
   // Choices for brackets
@@ -368,20 +365,19 @@ val termRule = rule of
     None
     termInfixRule
 
-fun recordTypeChoice =
-  let intro = "record type: "
+let recordTypeChoice =
   Choice.keyword of ...
   Keywords._leftCurly
-  intro + "left brace"
+  "left brace"
   Choice.reference of ...
   "label-decls"
   (content, _) => if content is
     Nil then Tree.Bracketed(Token.Curly, Tree.Sequence(Nil))
     else Tree.Bracketed(Token.Curly, Tree.Sequence(content))
-  intro + "label-decl"
+  "label-decl"
   Choice.keyword of ...
   Keywords._rightCurly
-  intro + "right brace"
+  "right brace"
   Choice.end of Tree.empty
 
 val typeInfixRule = rule of
@@ -414,15 +410,14 @@ val typeRule = rule of
     None
     typeInfixRule
 
-fun typeDefinition() =
-  let intro = "type definition"
+let typeDefinition =
   Choice.keyword of ...
   Keywords._type
-  intro + "type defs"
+  "`type` keyword"
   Choice.reference of ...
   "typedefs"
   (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
-  intro + "end"
+  "more typedefs"
   Choice.end of ()
   
 defineKind of
@@ -442,47 +437,43 @@ defineKind of
     "the variant constructor's argument"
     Choice.end of ()
 
-fun variantsRule =
-  let intro = "variant "
+defineKind of
+  "variants"
   Choice.reference of ...
   "constr-decl"
   (lhs, rhsOpt) => if rhsOpt is
     Some(rhs) then Tree.Infix(Keywords._bar, lhs, rhs)
     else lhs
-  intro + "item"
+  "variants item"
   Choice.end of None
   Choice.keyword of ...
   Keywords._bar
-  intro + "bar"
+  "variants bar"
   Choice.reference of ...
   "variants"
   (more, _) => Some(more)
-  intro + "end"
+  "variants end"
   Choice.end of ()
 
-defineKind of "variants", variantsRule
-
-fun typedefRule =
-  let intro = "typedef "
+defineKind of
+  "typedefs"
   Choice.typeExpr of ...
   (lhs, rhsMore) => if rhsMore is [rhs, more] then
     rhs(lhs) :: more
-  intro + "name"
+  "typedef name"
   Choice.reference of ...
   "typedef-rhs"
   (rhs, more) => [rhs, more]
-  intro + "body"
+  "typedef body"
   Choice.end of Nil
   Choice.keyword of ...
   Keywords._and
-  intro + "and"
+  "typedef `and` separator"
   Choice.reference of ...
   "typedefs"
   (more, _) => more
-  intro + "end"
+  "typedef end"
   Choice.end of ()
-
-defineKind of "typedefs", typedefRule
   
 defineKind of
   "typedef-rhs"
@@ -505,20 +496,18 @@ defineKind of
     "type alias body"
     Choice.end of ()
 
-fun labelDecl =
-  let intro = "label-decl: "
+defineKind of
+  "label-decl"
   Choice.typeExpr of ...
   Tree.infix of TypeKeywords._colon
-  intro + "name"
+  "label-decl name"
   Choice.keyword of ...
   TypeKeywords._colon
-  intro + "colon"
+  "label-decl colon"
   Choice.typeExpr of ...
   (rhs, _) => rhs
-  intro + "body"
+  "label-decl body"
   Choice.end of ()
-
-defineKind of "label-decl", labelDecl
 
 fun labelDecls =
   let intro = "label-decls: "
@@ -554,11 +543,10 @@ defineKind of
   "more constructor declarations"
   Choice.end of ()
 
-fun exceptionDefinition() =
-  let intro = "exception definition: "
+let exceptionDefinition =
   Choice.keyword of ...
   Keywords._exception
-  intro + "keyword"
+  "`exception` keyword"
   Choice.reference of ...
   "constr-decls"
   (decls, _) => Tree.Define(Tree.DefineKind.Exception, decls)
@@ -568,5 +556,5 @@ fun exceptionDefinition() =
 val declRule = rule of
   "prefix rules for module items"
   letDefinition
-  typeDefinition()
-  exceptionDefinition()
+  typeDefinition
+  exceptionDefinition
