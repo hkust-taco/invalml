@@ -2,11 +2,12 @@
 
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
+import "../../mlscript-compile/apps/parsing/Rules.mls"
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
 
 open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
-open Parser { termRule, declRule, typeRule }
+open Rules { termRule, declRule, typeRule }
 open XML { html, tag, elem, style }
 
 fun toHTML(...elements) = html(["lang", "en"]) of

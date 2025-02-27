@@ -1,4 +1,5 @@
 import "./ParseRule.mls"
+import "./Rules.mls"
 import "../Parser.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
@@ -13,7 +14,7 @@ open Predef
 open Stack
 open Option
 open ParseRule { ParseRule, Choice }
-open Parser { syntaxKinds }
+open Rules { syntaxKinds }
 open TreeTracer
 open XML { html, tag, elem, style }
 

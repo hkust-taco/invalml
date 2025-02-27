@@ -88,20 +88,6 @@ Token1 = class Token {
       }
       toString() { return "Identifier(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.symbolic) + ")"; }
     };
-    this.TypeVariable = function TypeVariable(name1) { return new TypeVariable.class(name1); };
-    this.TypeVariable.class = class TypeVariable {
-      constructor(name) {
-        this.name = name;
-      }
-      toString() { return "TypeVariable(" + globalThis.Predef.render(this.name) + ")"; }
-    };
-    this.TagName = function TagName(name1) { return new TagName.class(name1); };
-    this.TagName.class = class TagName {
-      constructor(name) {
-        this.name = name;
-      }
-      toString() { return "TagName(" + globalThis.Predef.render(this.name) + ")"; }
-    };
     this.Literal = function Literal(kind1, literal1) { return new Literal.class(kind1, literal1); };
     this.Literal.class = class Literal {
       constructor(kind, literal) {
@@ -112,7 +98,7 @@ Token1 = class Token {
     };
   }
   static same(a, b) {
-    let param0, param1, k, l, param01, param11, k$_, l$_, scrut, scrut1, param02, n, param03, n$_, param04, param12, n1, s, param05, param13, n$_1, s$_, scrut2, scrut3, param06, c, param07, c$_;
+    let param0, param1, k, l, param01, param11, k$_, l$_, scrut, scrut1, param02, param12, n, s, param03, param13, n$_, s$_, scrut2, scrut3, param04, c, param05, c$_;
     if (a instanceof Token.Space.class) {
       if (b instanceof Token.Space.class) {
         return true
@@ -120,26 +106,26 @@ Token1 = class Token {
         return false
       }
     } else if (a instanceof Token.Comment.class) {
-      param06 = a.content;
-      c = param06;
+      param04 = a.content;
+      c = param04;
       if (b instanceof Token.Comment.class) {
-        param07 = b.content;
-        c$_ = param07;
+        param05 = b.content;
+        c$_ = param05;
         return c == c$_
       } else {
         return false
       }
     } else if (a instanceof Token.Identifier.class) {
-      param04 = a.name;
+      param02 = a.name;
       param12 = a.symbolic;
-      n1 = param04;
+      n = param02;
       s = param12;
       if (b instanceof Token.Identifier.class) {
-        param05 = b.name;
+        param03 = b.name;
         param13 = b.symbolic;
-        n$_1 = param05;
+        n$_ = param03;
         s$_ = param13;
-        scrut2 = n1 == n$_1;
+        scrut2 = n == n$_;
         if (scrut2 === true) {
           scrut3 = s == s$_;
           if (scrut3 === true) {
@@ -150,16 +136,6 @@ Token1 = class Token {
         } else {
           return false
         }
-      } else {
-        return false
-      }
-    } else if (a instanceof Token.TypeVariable.class) {
-      param02 = a.name;
-      n = param02;
-      if (b instanceof Token.TypeVariable.class) {
-        param03 = b.name;
-        n$_ = param03;
-        return n == n$_
       } else {
         return false
       }
@@ -204,27 +180,19 @@ Token1 = class Token {
     return Token.Literal(Token.LiteralKind.Boolean, literal3)
   } 
   static summary(token) {
-    let param0, param1, literal4, param01, name, param02, name1, param03, param11, name2, param04;
+    let param0, param1, literal4, param01, param11, name, param02;
     if (token instanceof Token.Space.class) {
       return "\u2420"
     } else if (token instanceof Token.Error.class) {
       return "\u26A0"
     } else if (token instanceof Token.Comment.class) {
-      param04 = token.content;
+      param02 = token.content;
       return "\uD83D\uDCAC"
     } else if (token instanceof Token.Identifier.class) {
-      param03 = token.name;
-      param11 = token.symbolic;
-      name2 = param03;
-      return name2
-    } else if (token instanceof Token.TypeVariable.class) {
-      param02 = token.name;
-      name1 = param02;
-      return "'" + name1
-    } else if (token instanceof Token.TagName.class) {
       param01 = token.name;
+      param11 = token.symbolic;
       name = param01;
-      return "`" + name
+      return name
     } else if (token instanceof Token.Literal.class) {
       param0 = token.kind;
       param1 = token.literal;

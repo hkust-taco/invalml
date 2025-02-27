@@ -1,127 +1,8 @@
 :js
 
-import "../../mlscript-compile/apps/parsing/Precedence.mls"
-import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/apps/parsing/Test.mls"
 
-open Precedence { Keywords, opPrec, TypeKeywords }
 open Test { example }
-
-Keywords.maxKeywordPrec
-//│ = 11
-
-Keywords.maxOperatorPrec
-//│ = 26
-
-opPrec("|>")
-//│ = [14, 20]
-
-opPrec("<:")
-//│ = [20, 12]
-
-opPrec("::")
-//│ = [13, 12]
-
-opPrec of "+"
-//│ = [21, 21]
-
-print of Keywords.all.values.join("\n")
-//│ > Keyword(`;;`, 0, 0)
-//│ > Keyword(`class`, N/A, 0)
-//│ > Keyword(`;`, 1, 0)
-//│ > Keyword(`,`, 2, 1)
-//│ > Keyword(`=`, 3, 3)
-//│ > Keyword(`and`, N/A, 4)
-//│ > Keyword(`|`, N/A, 4)
-//│ > Keyword(`->`, 5, 3)
-//│ > Keyword(`:`, 4, 3)
-//│ > Keyword(`match`, 6, 6)
-//│ > Keyword(`while`, 7, 7)
-//│ > Keyword(`for`, 8, 8)
-//│ > Keyword(`to`, N/A, N/A)
-//│ > Keyword(`downto`, N/A, N/A)
-//│ > Keyword(`do`, N/A, N/A)
-//│ > Keyword(`done`, N/A, N/A)
-//│ > Keyword(`of`, N/A, N/A)
-//│ > Keyword(`with`, N/A, 8)
-//│ > Keyword(`case`, N/A, 8)
-//│ > Keyword(`if`, 10, 9)
-//│ > Keyword(`then`, 9, 9)
-//│ > Keyword(`else`, 9, 9)
-//│ > Keyword(`let`, 3, 1)
-//│ > Keyword(`in`, 9, 9)
-//│ > Keyword(`true`, N/A, N/A)
-//│ > Keyword(`false`, N/A, N/A)
-//│ > Keyword(`as`, 11, 11)
-//│ > Keyword(`fun`, 11, 5)
-//│ > Keyword(`function`, 11, 3)
-//│ > Keyword(`type`, 11, N/A)
-//│ > Keyword(`exception`, 11, N/A)
-//│ > Keyword(`rec`, 11, 3)
-//│ > Keyword(`==`, N/A, N/A)
-//│ > Keyword(`(`, 27, 0)
-//│ > Keyword(`)`, 0, N/A)
-//│ > Keyword(`[`, 27, 0)
-//│ > Keyword(`]`, 0, N/A)
-//│ > Keyword(`{`, 27, 0)
-//│ > Keyword(`}`, 0, N/A)
-//│ > Keyword(`begin`, 27, 0)
-//│ > Keyword(`end`, 0, N/A)
-
-print of TypeKeywords.all.values.join("\n")
-//│ > Keyword(`type`, N/A, N/A)
-//│ > Keyword(`exception`, N/A, N/A)
-//│ > Keyword(`let`, N/A, N/A)
-//│ > Keyword(`and`, N/A, N/A)
-//│ > Keyword(`;`, 1, 0)
-//│ > Keyword(`,`, 2, 2)
-//│ > Keyword(`|`, 3, 3)
-//│ > Keyword(``, 4, 4)
-//│ > Keyword(`->`, 5, 4)
-//│ > Keyword(`*`, 6, 6)
-//│ > Keyword(`:`, 7, 7)
-//│ > Keyword(`of`, 9, 9)
-//│ > Keyword(`.`, 10, 10)
-//│ > Keyword(`(`, 11, 0)
-//│ > Keyword(`)`, 0, N/A)
-//│ > Keyword(`{`, 11, 0)
-//│ > Keyword(`}`, 0, N/A)
-
-print of Parser.termRule.display
-//│ > <prefix rules for expressions> ::= `let` [`rec` ] 
-//│ >   <let-bindings>
-//│ >     `in` <term>
-//│ >     
-//│ > `fun` <term>`->` <term>
-//│ > `match` <term>
-//│ >   `with` [`|` ] 
-//│ >     <term>
-//│ >       `->` <term>
-//│ >         
-//│ >         `|` <simple-matching>
-//│ > `function` [`|` ] 
-//│ >   <term>
-//│ >     `->` <term>
-//│ >       
-//│ >       `|` <simple-matching>
-//│ > `if` <term>
-//│ >   `then` <term>
-//│ >     
-//│ >     `else` <term>
-//│ > `while` <term>`do` <term>`done` 
-//│ > `for` <term>
-//│ >   `=` <term>
-//│ >     `to` <term>`do` <term>`done` 
-//│ >     `downto` <term>`do` <term>`done` 
-//│ > `(` <term>`)` 
-//│ > `[` <term>`]` 
-//│ > `{` <term>`}` 
-//│ > `begin` <term>`end` 
-//│ > <term>
-//│ >   `,` <term>
-//│ >   `;` <term>
-//│ >   `:` <type>
-//│ >   <term>
 
 example of "(x) => x"
 //│ > «x => x»
@@ -279,46 +160,7 @@ end
 """
 //│ > «print_string "hello"; print_string "world"»
 
-example of ":trace a == b"
-//│ > ┍ module <<< 
-//│ > ├ skipped a space at 0
-//│ > ├ >>>>>> mod <<<<<< [Ln 829]
-//│ > ├─┮ term <<< 0 ┃a│␠│==│␠│b┃
-//│ > │ ├ consumed `a` at 1
-//│ > │ ├ skipped a space at 2
-//│ > │ ├ >>> termCont 0 «a» <<< [Ln 712]
-//│ > │ ├ found a keyword: == [Ln 715]
-//│ > │ ├ keyword `==` does not have infix rules [Ln 728]
-//│ > │ ├ found an exprChoice with outerPrec = Some(25) [Ln 742]
-//│ > │ ├─┮ term <<< 25 ┃==│␠│b┃
-//│ > │ │ ├ no rule starting with == [Ln 700]
-//│ > │ │ ┕ term >>> «{}»
-//│ > │ ├ nothing was parsed [Ln 747]
-//│ > │ ┕ term >>> «a»
-//│ > ├ >>>>>> modCont <<<<<< [Ln 850]
-//│ > ├─┮ parsing rule "prefix rules for module items" with precedence 0
-//│ > │ ├ found an identifier "==" [Ln 627]
-//│ > │ ├ Keyword(`==`, N/A, N/A) [Ln 629]
-//│ > │ ├ keyword choices: `let`, `type`, `exception`
-//│ > │ ├ no rule starting with `==` was found [Ln 640]
-//│ > │ ├ the left prec of `==` is None [Ln 641]
-//│ > │ ├ no exprChoice or the prec is less than 0 [Ln 648]
-//│ > │ ├ consumed `==` at 3
-//│ > │ ┕ parsed rule "prefix rules for module items": «⚠»
-//│ > ├ skipped a space at 4
-//│ > ├ >>>>>> modCont <<<<<< [Ln 850]
-//│ > ├─┮ parsing rule "prefix rules for module items" with precedence 0
-//│ > │ ├ found an identifier "b" [Ln 627]
-//│ > │ ├ "b" is not a keyword [Ln 655]
-//│ > │ ├ the current rule is <prefix rules for module items> ::= `let` [`rec` ] <let-bindings> ↵
-//│ > │ │ `type` <typedefs> ↵
-//│ > │ │ `exception` <constr-decls>
-//│ > │ ├ no expression choice [Ln 670]
-//│ > │ ├ no end choice [Ln 674]
-//│ > │ ├ consumed `b` at 5
-//│ > │ ┕ parsed rule "prefix rules for module items": «⚠»
-//│ > ├ >>>>>> modCont <<<<<< [Ln 850]
-//│ > ┕ module >>> «a» :: «⚠» :: «⚠» :: Nil
+example of "a == b"
 //│ > «a»
 //│ > «⚠»
 //│ > «⚠»
@@ -357,7 +199,25 @@ example of """
 let translate p dx dy =
     p.x <- p.x +. dx; p.y <- p.y +. dy
 """
-//│ > «let translate p dx dy = (p.x <- p.x) +. dx; (p.y <- p.y) +. dy»
+//│ > «let translate p dx dy = p»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
 
 example of "()"
 //│ > «()»
@@ -468,6 +328,61 @@ let f x = x
 """
 //│ > «let f x = x»
 //│ > «1 + 2 * 3»
+
+example of """
+:tree
+x.y <- 0
+"""
+//│ > Ident of "x"
+//│ > Error of "unexpected keyword ."
+//│ > Error of "unexpected token Identifier(\"y\", false)"
+//│ > Error of "unexpected keyword <-"
+//│ > Error of "unexpected token Literal(Integer, \"0\")"
+//│ > «x»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+
+example of """
+:tree
+f expr .( expr ) <- expr
+"""
+//│ > App:
+//│ >   callee = Ident of "f"
+//│ >   argument = Ident of "expr"
+//│ > Error of "unexpected keyword ."
+//│ > Error of "unexpected keyword ("
+//│ > Error of "unexpected token Identifier(\"expr\", false)"
+//│ > Error of "unexpected keyword )"
+//│ > Error of "unexpected keyword <-"
+//│ > Error of "unexpected token Identifier(\"expr\", false)"
+//│ > «f expr»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+
+example of """
+:tree
+f (expr .( expr ) <- expr)
+"""
+//│ > Ident of "f"
+//│ > Error of "unexpected keyword ("
+//│ > Error of "unexpected token Identifier(\"expr\", false)"
+//│ > Error of "unexpected keyword )"
+//│ > Error of "unexpected keyword <-"
+//│ > Error of "unexpected token Identifier(\"expr\", false)"
+//│ > Error of "unexpected keyword )"
+//│ > «f»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
+//│ > «⚠»
 
 // TODO add tests for
 // f expr .( expr ) <- expr

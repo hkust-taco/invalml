@@ -37,6 +37,8 @@ pattern Operator =
 
 pattern Bracket = "(" | ")" | "[" | "]" | "{" | "}"
 
+pattern IdentifierQuote = "'" | "`"
+
 fun lex(str: Str) =
   fun char(idx: Int) = if idx < str.length
     then (Some of str.charAt of idx) else None
@@ -206,17 +208,11 @@ fun lex(str: Str) =
       Some(Operator as ch) then go(..operator(idx + 1, ch))
       Some(Char.Digit as ch) then go(..number(idx + 1, ch))
       Some(IdentifierStart as ch) then go(..identifier(idx + 1, ch))
-      Some("'")
+      Some(IdentifierQuote as quote)
         and char(idx + 1) is Some(IdentifierStart as ch)
-        and identifier(idx + 2, ch) is [idx', token] and
+        and identifier(idx + 2, quote + ch) is [idx', token] and
           token is Token.Identifier(name, _) then
-            go(idx', Token.TypeVariable(name))
-          else go(idx + 1, Token.Error)
-      Some("`")
-        and char(idx + 1) is Some(IdentifierStart as ch)
-        and identifier(idx + 2, ch) is [idx', token] and
-          token is Token.Identifier(name, _) then
-            go(idx', Token.TagName(name))
+            go(idx', Token.Identifier(name, false))
           else go(idx + 1, Token.Error)
       Some(other) then
         print("Unrecognized character: '" ~ other ~ "'")

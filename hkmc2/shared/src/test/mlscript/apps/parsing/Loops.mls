@@ -32,16 +32,15 @@ done
 //│ >       App:
 //│ >         callee = Ident of "print_newline"
 //│ >         argument = Tuple of Nil
-//│ >       App:
-//│ >         callee = Ident of "+"
-//│ >         argument = Stack of 
-//│ >           App:
-//│ >             callee = Ident of "<-"
-//│ >             argument = Stack of 
-//│ >               Ident of "x"
-//│ >               Ident of "x"
-//│ >           Literal#Integer of "1"
-//│ > «let x = 0 in while x < 10 do print_int x; print_newline (); (x <- x) + 1 done»
+//│ >       Infix:
+//│ >         op = Keyword(`<-`, 9, 9)
+//│ >         lhs = Ident of "x"
+//│ >         rhs = App:
+//│ >           callee = Ident of "+"
+//│ >           argument = Stack of 
+//│ >             Ident of "x"
+//│ >             Literal#Integer of "1"
+//│ > «let x = 0 in while x < 10 do print_int x; print_newline (); x <- x + 1 done»
 
 example of """
 :tree

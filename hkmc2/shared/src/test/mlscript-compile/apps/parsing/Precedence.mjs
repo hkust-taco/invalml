@@ -17,7 +17,7 @@ Precedence1 = class Precedence {
       static #precMap;
       static #bracketPrec;
       static {
-        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48;
+        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52;
         tmp = new BetterMap.Map();
         this.all = tmp;
         Keywords.#prec = 0;
@@ -67,61 +67,68 @@ Precedence1 = class Precedence {
         Keywords.#thenPrec = Keywords.nextPrec;
         tmp20 = Keywords.keyword("if", Keywords.nextPrec, Keywords.#thenPrec);
         this._if = tmp20;
-        tmp21 = Keywords.keyword("then", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._then = tmp21;
-        tmp22 = Keywords.keyword("else", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._else = tmp22;
-        tmp23 = Keywords.keyword("let", Keywords.#eqPrec, Keywords.#semiPrec);
-        this._let = tmp23;
-        tmp24 = Keywords.keyword("in", Keywords.#thenPrec, Keywords.#thenPrec);
-        this._in = tmp24;
-        tmp25 = Keywords.keyword("true", Option.None, Option.None);
-        this._true = tmp25;
-        tmp26 = Keywords.keyword("false", Option.None, Option.None);
-        this._false = tmp26;
-        tmp27 = Keywords.keyword("as", Keywords.nextPrec, Keywords.currPrec);
-        this._as = tmp27;
-        tmp28 = Keywords.keyword("fun", Keywords.currPrec, Keywords._thinArrow.leftPrec);
-        this._fun = tmp28;
-        tmp29 = Keywords.keyword("function", Keywords.currPrec, Keywords.#eqPrec);
-        this._function = tmp29;
-        tmp30 = Keywords.keyword("type", Keywords.currPrec, Option.None);
-        this._type = tmp30;
-        tmp31 = Keywords.keyword("exception", Keywords.currPrec, Option.None);
-        this._exception = tmp31;
-        tmp32 = Keywords.keyword("rec", Keywords.currPrec, Keywords.#eqPrec);
-        this._rec = tmp32;
-        tmp33 = Keywords.keyword("==", Option.None, Option.None);
-        this._equalequal = tmp33;
+        tmp21 = Keywords.keyword("<-", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._leftArrow = tmp21;
+        tmp22 = Keywords.keyword("then", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._then = tmp22;
+        tmp23 = Keywords.keyword("else", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._else = tmp23;
+        tmp24 = Keywords.keyword("let", Keywords.#eqPrec, Keywords.#semiPrec);
+        this._let = tmp24;
+        tmp25 = Keywords.keyword("in", Keywords.#thenPrec, Keywords.#thenPrec);
+        this._in = tmp25;
+        tmp26 = Keywords.keyword("true", Option.None, Option.None);
+        this._true = tmp26;
+        tmp27 = Keywords.keyword("false", Option.None, Option.None);
+        this._false = tmp27;
+        tmp28 = Keywords.keyword("as", Keywords.nextPrec, Keywords.currPrec);
+        this._as = tmp28;
+        tmp29 = Keywords.keyword("fun", Keywords.currPrec, Keywords._thinArrow.leftPrec);
+        this._fun = tmp29;
+        tmp30 = Keywords.keyword("function", Keywords.currPrec, Keywords.#eqPrec);
+        this._function = tmp30;
+        tmp31 = Keywords.keyword("type", Keywords.currPrec, Option.None);
+        this._type = tmp31;
+        tmp32 = Keywords.keyword("exception", Keywords.currPrec, Option.None);
+        this._exception = tmp32;
+        tmp33 = Keywords.keyword("rec", Keywords.currPrec, Keywords.#eqPrec);
+        this._rec = tmp33;
+        tmp34 = Keywords.keyword("==", Option.None, Option.None);
+        this._equalequal = tmp34;
         this.maxKeywordPrec = Keywords.#prec;
-        tmp34 = Precedence.makePrecMap(Keywords.maxKeywordPrec, ",", "@", ":", "|", "&", "=", "/ \\", "^", "!", "< >", "+ -", "* %", "~", "", "", ".");
-        Keywords.#precMap = tmp34;
-        tmp35 = runtime.safeCall(Keywords.#precMap.get("."));
-        tmp36 = Option.unsafe.get(tmp35);
-        this.maxOperatorPrec = tmp36;
-        tmp37 = Keywords.maxOperatorPrec - 1;
-        this.appPrec = tmp37;
-        tmp38 = Keywords.appPrec - 1;
-        this.prefixPrec = tmp38;
-        tmp39 = Keywords.maxOperatorPrec + 1;
-        tmp40 = Option.Some(tmp39);
-        Keywords.#bracketPrec = tmp40;
-        tmp41 = Keywords.keyword("(", Keywords.#bracketPrec, Keywords.#basePrec);
-        this._leftRound = tmp41;
-        tmp42 = Keywords.keyword(")", Keywords.#basePrec, Option.None);
-        this._rightRound = tmp42;
-        tmp43 = Keywords.keyword("[", Keywords.#bracketPrec, Keywords.#basePrec);
-        this._leftSquare = tmp43;
-        tmp44 = Keywords.keyword("]", Keywords.#basePrec, Option.None);
-        this._rightSquare = tmp44;
-        tmp45 = Keywords.keyword("{", Keywords.#bracketPrec, Keywords.#basePrec);
-        this._leftCurly = tmp45;
-        tmp46 = Keywords.keyword("}", Keywords.#basePrec, Option.None);
-        this._rightCurly = tmp46;
-        tmp47 = Keywords.keyword("begin", Keywords.#bracketPrec, Keywords.#basePrec);
-        this._begin = tmp47;
-        tmp48 = Keywords.keyword("end", Keywords.#basePrec, Option.None);
-        this._end = tmp48;
+        tmp35 = Precedence.makePrecMap(Keywords.maxKeywordPrec, ",", "@", ":", "|", "&", "=", "/ \\", "^", "!", "< >", "+ -", "* %", "~", "", "", ".");
+        Keywords.#precMap = tmp35;
+        tmp36 = runtime.safeCall(Keywords.#precMap.get("."));
+        tmp37 = Option.unsafe.get(tmp36);
+        this.periodPrec = tmp37;
+        tmp38 = Option.Some(Keywords.periodPrec);
+        tmp39 = Option.Some(Keywords.periodPrec);
+        tmp40 = Keywords.keyword(".", tmp38, tmp39);
+        this._period = tmp40;
+        this.maxOperatorPrec = Keywords.periodPrec;
+        tmp41 = Keywords.maxOperatorPrec - 1;
+        this.appPrec = tmp41;
+        tmp42 = Keywords.appPrec - 1;
+        this.prefixPrec = tmp42;
+        tmp43 = Keywords.maxOperatorPrec + 1;
+        tmp44 = Option.Some(tmp43);
+        Keywords.#bracketPrec = tmp44;
+        tmp45 = Keywords.keyword("(", Keywords.#bracketPrec, Keywords.#basePrec);
+        this._leftRound = tmp45;
+        tmp46 = Keywords.keyword(")", Keywords.#basePrec, Option.None);
+        this._rightRound = tmp46;
+        tmp47 = Keywords.keyword("[", Keywords.#bracketPrec, Keywords.#basePrec);
+        this._leftSquare = tmp47;
+        tmp48 = Keywords.keyword("]", Keywords.#basePrec, Option.None);
+        this._rightSquare = tmp48;
+        tmp49 = Keywords.keyword("{", Keywords.#bracketPrec, Keywords.#basePrec);
+        this._leftCurly = tmp49;
+        tmp50 = Keywords.keyword("}", Keywords.#basePrec, Option.None);
+        this._rightCurly = tmp50;
+        tmp51 = Keywords.keyword("begin", Keywords.#bracketPrec, Keywords.#basePrec);
+        this._begin = tmp51;
+        tmp52 = Keywords.keyword("end", Keywords.#basePrec, Option.None);
+        this._end = tmp52;
       }
       static keyword(name, leftPrec, rightPrec) {
         let result, tmp, tmp1;
@@ -143,6 +150,9 @@ Precedence1 = class Precedence {
         let tmp;
         tmp = runtime.safeCall(Keywords.#precMap.get(op));
         return Option.unsafe.get(tmp)
+      } 
+      static charPrecOpt(op1) {
+        return runtime.safeCall(Keywords.#precMap.get(op1))
       }
       static toString() { return "Keywords"; }
     };
@@ -500,6 +510,55 @@ Precedence1 = class Precedence {
         }
         tmp9 = tmp7 + tmp8;
         return Predef.tuple(tmp6, tmp9)
+      }
+    }
+  } 
+  static opPrecOpt(opStr1) {
+    let lastChar, scrut, param0, rightPrec, scrut1, param01, leftPrec, matchResult, scrut2, matchResult1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10;
+    if (opStr1 === "") {
+      return Option.None
+    } else {
+      matchResult1 = runtime.safeCall(Precedence.FloatOperator.unapply(opStr1));
+      if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+        tmp = runtime.safeCall(opStr1.at(0));
+        tmp1 = Precedence.Keywords.charPrec(tmp);
+        tmp2 = runtime.safeCall(opStr1.at(0));
+        tmp3 = Precedence.Keywords.charPrec(tmp2);
+        tmp4 = Predef.tuple(tmp1, tmp3);
+        return Option.Some(tmp4)
+      } else {
+        scrut2 = Precedence.hasLetter(opStr1);
+        if (scrut2 === true) {
+          tmp5 = Predef.tuple(Precedence.Keywords.maxKeywordPrec, Precedence.Keywords.maxKeywordPrec);
+          return Option.Some(tmp5)
+        } else {
+          tmp6 = - 1;
+          lastChar = runtime.safeCall(opStr1.at(tmp6));
+          scrut = Precedence.Keywords.charPrecOpt(lastChar);
+          if (scrut instanceof Option.Some.class) {
+            param0 = scrut.value;
+            rightPrec = param0;
+            tmp7 = runtime.safeCall(opStr1.at(0));
+            scrut1 = Precedence.Keywords.charPrecOpt(tmp7);
+            if (scrut1 instanceof Option.Some.class) {
+              param01 = scrut1.value;
+              leftPrec = param01;
+              matchResult = runtime.safeCall(Precedence.RightAssociative.unapply(lastChar));
+              if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+                tmp8 = - 1;
+              } else {
+                tmp8 = 0;
+              }
+              tmp9 = rightPrec + tmp8;
+              tmp10 = Predef.tuple(leftPrec, tmp9);
+              return Option.Some(tmp10)
+            } else {
+              return Option.None
+            }
+          } else {
+            return Option.None
+          }
+        }
       }
     }
   }

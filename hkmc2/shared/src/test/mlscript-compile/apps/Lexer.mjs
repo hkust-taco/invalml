@@ -440,6 +440,41 @@ Lexer1 = class Lexer {
     };
     this.Bracket = new Bracket$class;
     this.Bracket.class = Bracket$class;
+    const IdentifierQuote$class = class IdentifierQuote {
+      constructor() {}
+      unapply(scrut) {
+        if (scrut === "'") {
+          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+        } else if (scrut === "`") {
+          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+        } else {
+          return runtime.safeCall(globalThis.Predef.MatchFailure())
+        }
+      } 
+      unapplyStringPrefix(topic) {
+        let cond, sliced, cond1, sliced1;
+        cond = globalThis.Predef.stringStartsWith(topic, "'");
+        if (cond === true) {
+          sliced = globalThis.Predef.stringDrop(topic, 1);
+          return runtime.safeCall(globalThis.Predef.MatchResult([
+            sliced
+          ]))
+        } else {
+          cond1 = globalThis.Predef.stringStartsWith(topic, "`");
+          if (cond1 === true) {
+            sliced1 = globalThis.Predef.stringDrop(topic, 1);
+            return runtime.safeCall(globalThis.Predef.MatchResult([
+              sliced1
+            ]))
+          } else {
+            return runtime.safeCall(globalThis.Predef.MatchFailure())
+          }
+        }
+      }
+      toString() { return "IdentifierQuote"; }
+    };
+    this.IdentifierQuote = new IdentifierQuote$class;
+    this.IdentifierQuote.class = IdentifierQuote$class;
   }
   static lex(str) {
     let number, hex, identifier, digits, char1, scanHexDigits, whitespace, scan, string, escape, take, operator, comment;
@@ -1538,11 +1573,11 @@ Lexer1 = class Lexer {
       }
     };
     scan = function scan(idx, acc) {
-      let go, scrut, param0, other, scrut1, param01, ch, matchResult, scrut2, first1, first0, idx$_, token, param02, param1, name, scrut3, param03, ch1, matchResult1, scrut4, first11, first01, idx$_1, token1, param04, param11, name1, ch2, matchResult2, ch3, matchResult3, ch4, matchResult4, b, matchResult5, matchResult6, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49;
+      let go, scrut, param0, other, quote, matchResult, scrut1, param01, ch, matchResult1, scrut2, first1, first0, idx$_, token, param02, param1, name, ch1, matchResult2, ch2, matchResult3, ch3, matchResult4, b, matchResult5, matchResult6, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34;
       go = function go(idx1, tok) {
-        let tmp50;
-        tmp50 = Stack.Cons(tok, acc);
-        return scan(idx1, tmp50)
+        let tmp35;
+        tmp35 = Stack.Cons(tok, acc);
+        return scan(idx1, tmp35)
       };
       scrut = char1(idx);
       if (scrut instanceof Option.None.class) {
@@ -1574,84 +1609,38 @@ Lexer1 = class Lexer {
               } else {
                 matchResult4 = runtime.safeCall(Lexer.Operator.unapply(param0));
                 if (matchResult4 instanceof globalThis.Predef.MatchResult.class) {
-                  ch4 = param0;
+                  ch3 = param0;
                   tmp8 = idx + 1;
-                  tmp9 = operator(tmp8, ch4);
+                  tmp9 = operator(tmp8, ch3);
                   return go(...tmp9)
                 } else {
                   matchResult3 = runtime.safeCall(Char.Digit.unapply(param0));
                   if (matchResult3 instanceof globalThis.Predef.MatchResult.class) {
-                    ch3 = param0;
+                    ch2 = param0;
                     tmp10 = idx + 1;
-                    tmp11 = number(tmp10, ch3);
+                    tmp11 = number(tmp10, ch2);
                     return go(...tmp11)
                   } else {
                     matchResult2 = runtime.safeCall(Lexer.IdentifierStart.unapply(param0));
                     if (matchResult2 instanceof globalThis.Predef.MatchResult.class) {
-                      ch2 = param0;
+                      ch1 = param0;
                       tmp12 = idx + 1;
-                      tmp13 = identifier(tmp12, ch2);
+                      tmp13 = identifier(tmp12, ch1);
                       return go(...tmp13)
                     } else {
-                      if (param0 === "'") {
+                      matchResult = runtime.safeCall(Lexer.IdentifierQuote.unapply(param0));
+                      if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+                        quote = param0;
                         tmp14 = idx + 1;
-                        scrut3 = char1(tmp14);
-                        if (scrut3 instanceof Option.Some.class) {
-                          param03 = scrut3.value;
-                          matchResult1 = runtime.safeCall(Lexer.IdentifierStart.unapply(param03));
-                          if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
-                            ch1 = param03;
-                            tmp15 = idx + 2;
-                            scrut4 = identifier(tmp15, ch1);
-                            if (globalThis.Array.isArray(scrut4) && scrut4.length === 2) {
-                              first01 = scrut4[0];
-                              first11 = scrut4[1];
-                              idx$_1 = first01;
-                              token1 = first11;
-                              if (token1 instanceof Token.Identifier.class) {
-                                param04 = token1.name;
-                                param11 = token1.symbolic;
-                                name1 = param04;
-                                tmp16 = Token.TypeVariable(name1);
-                                return go(idx$_1, tmp16)
-                              } else {
-                                tmp17 = idx + 1;
-                                return go(tmp17, Token.Error)
-                              }
-                            } else {
-                              other = param0;
-                              tmp18 = Str.concat2("Unrecognized character: '", other);
-                              tmp19 = Str.concat2(tmp18, "'");
-                              tmp20 = Predef.print(tmp19);
-                              tmp21 = idx + 1;
-                              return go(tmp21, Token.Error)
-                            }
-                          } else {
-                            other = param0;
-                            tmp22 = Str.concat2("Unrecognized character: '", other);
-                            tmp23 = Str.concat2(tmp22, "'");
-                            tmp24 = Predef.print(tmp23);
-                            tmp25 = idx + 1;
-                            return go(tmp25, Token.Error)
-                          }
-                        } else {
-                          other = param0;
-                          tmp26 = Str.concat2("Unrecognized character: '", other);
-                          tmp27 = Str.concat2(tmp26, "'");
-                          tmp28 = Predef.print(tmp27);
-                          tmp29 = idx + 1;
-                          return go(tmp29, Token.Error)
-                        }
-                      } else if (param0 === "`") {
-                        tmp30 = idx + 1;
-                        scrut1 = char1(tmp30);
+                        scrut1 = char1(tmp14);
                         if (scrut1 instanceof Option.Some.class) {
                           param01 = scrut1.value;
-                          matchResult = runtime.safeCall(Lexer.IdentifierStart.unapply(param01));
-                          if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+                          matchResult1 = runtime.safeCall(Lexer.IdentifierStart.unapply(param01));
+                          if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
                             ch = param01;
-                            tmp31 = idx + 2;
-                            scrut2 = identifier(tmp31, ch);
+                            tmp15 = idx + 2;
+                            tmp16 = quote + ch;
+                            scrut2 = identifier(tmp15, tmp16);
                             if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                               first0 = scrut2[0];
                               first1 = scrut2[1];
@@ -1661,43 +1650,43 @@ Lexer1 = class Lexer {
                                 param02 = token.name;
                                 param1 = token.symbolic;
                                 name = param02;
-                                tmp32 = Token.TagName(name);
-                                return go(idx$_, tmp32)
+                                tmp17 = Token.Identifier(name, false);
+                                return go(idx$_, tmp17)
                               } else {
-                                tmp33 = idx + 1;
-                                return go(tmp33, Token.Error)
+                                tmp18 = idx + 1;
+                                return go(tmp18, Token.Error)
                               }
                             } else {
                               other = param0;
-                              tmp34 = Str.concat2("Unrecognized character: '", other);
-                              tmp35 = Str.concat2(tmp34, "'");
-                              tmp36 = Predef.print(tmp35);
-                              tmp37 = idx + 1;
-                              return go(tmp37, Token.Error)
+                              tmp19 = Str.concat2("Unrecognized character: '", other);
+                              tmp20 = Str.concat2(tmp19, "'");
+                              tmp21 = Predef.print(tmp20);
+                              tmp22 = idx + 1;
+                              return go(tmp22, Token.Error)
                             }
                           } else {
                             other = param0;
-                            tmp38 = Str.concat2("Unrecognized character: '", other);
-                            tmp39 = Str.concat2(tmp38, "'");
-                            tmp40 = Predef.print(tmp39);
-                            tmp41 = idx + 1;
-                            return go(tmp41, Token.Error)
+                            tmp23 = Str.concat2("Unrecognized character: '", other);
+                            tmp24 = Str.concat2(tmp23, "'");
+                            tmp25 = Predef.print(tmp24);
+                            tmp26 = idx + 1;
+                            return go(tmp26, Token.Error)
                           }
                         } else {
                           other = param0;
-                          tmp42 = Str.concat2("Unrecognized character: '", other);
-                          tmp43 = Str.concat2(tmp42, "'");
-                          tmp44 = Predef.print(tmp43);
-                          tmp45 = idx + 1;
-                          return go(tmp45, Token.Error)
+                          tmp27 = Str.concat2("Unrecognized character: '", other);
+                          tmp28 = Str.concat2(tmp27, "'");
+                          tmp29 = Predef.print(tmp28);
+                          tmp30 = idx + 1;
+                          return go(tmp30, Token.Error)
                         }
                       } else {
                         other = param0;
-                        tmp46 = Str.concat2("Unrecognized character: '", other);
-                        tmp47 = Str.concat2(tmp46, "'");
-                        tmp48 = Predef.print(tmp47);
-                        tmp49 = idx + 1;
-                        return go(tmp49, Token.Error)
+                        tmp31 = Str.concat2("Unrecognized character: '", other);
+                        tmp32 = Str.concat2(tmp31, "'");
+                        tmp33 = Predef.print(tmp32);
+                        tmp34 = idx + 1;
+                        return go(tmp34, Token.Error)
                       }
                     }
                   }

@@ -1,5 +1,6 @@
 import runtime from "./../../Runtime.mjs";
 import ParseRule from "./ParseRule.mjs";
+import Rules from "./Rules.mjs";
 import Parser from "./../Parser.mjs";
 import Predef from "./../../Predef.mjs";
 import Stack from "./../../Stack.mjs";
@@ -313,7 +314,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         referencedKinds = tmp5;
         tmp6 = (kind) => {
           let theRule, tmp11, tmp12, tmp13, tmp14;
-          tmp11 = runtime.safeCall(Parser.syntaxKinds.get(kind));
+          tmp11 = runtime.safeCall(Rules.syntaxKinds.get(kind));
           tmp12 = Option.unsafe.get(tmp11);
           theRule = tmp12;
           tmp13 = renderRule(theRule);
