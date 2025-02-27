@@ -173,6 +173,16 @@ module Choice with
   class Keyword(keyword: Keyword, rest: ParseRule)
   class Ref(kind: Str, process: Tree -> Tree, outerPrec: Opt[Int], innerPrec: Opt[Int], rest: ParseRule)
   class End(value: Tree)
+  // * An alternative route that branches off from the main railroad and
+  // * eventually connects back to the main railroad. For example, `foo`, `bar`,
+  // * and `baz` are choices represented by `rule`. If `optional` is set to
+  // * `true`, an additional empty choice is added to `rule`, making it possible
+  // * to skip the entire `rule`.
+  // *                     _______ foo ______
+  // *                    /                  \
+  // *                   /-------- bar -------\
+  // *                  /                      \
+  // * ----- start ----+---------- baz ---------+--- end ---------
   class Siding(rule: ParseRule, optional: Bool, rest: ParseRule)
   class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
   
