@@ -17,8 +17,7 @@ open Option
 open Stack
 open BetterMap
 open TreeTracer { TreeTracer }
-open Token { LiteralKind, BracketKind }
-open Precedence { Keywords, opPrec, opPrecOpt }
+open Precedence { Keywords, opPrec }
 open ParseRule { ParseRule }
 open Rules { termRule, termInfixRule, typeRule, typeInfixRule, declRule, syntaxKinds }
 
