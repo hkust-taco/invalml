@@ -110,7 +110,6 @@ fun parse(tokens) =
       other :: _ and
         do tracer.print of "the current rule is " + rule.display
         rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
-          // TODO: use `outerPrec` and `innerPrec`
           do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
           let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
           let innerPrec' = innerPrec Option.getOrElse(prec)
@@ -178,12 +177,14 @@ fun parse(tokens) =
       termInfixRule.keywordChoices.get(name) is Some(rule) and
         do tracer.print of "the keyword is found in infix rules" + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
-          Some([kind, process, outerPrec, innerPrec, rest]) then
-            // TODO: use `outerPrec` and `innerPrec`
-            consume
-            let rhs = parseKind(kind, keyword.rightPrecOrMin)
-            let acc' = process(rhs, ())(acc)
-            termCont(acc', prec)
+          Some([kind, process, outerPrec, innerPrec, rest]) and
+            do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+            let outerPrec' = outerPrec Option.getOrElse(Keywords.maxOperatorPrec)
+            let innerPrec' = innerPrec Option.getOrElse(keyword.rightPrecOrMin)
+            outerPrec' > prec then
+              consume
+              let rhs = parseKind(kind, keyword.rightPrecOrMin)
+              process(rhs, ())(acc) termCont(prec)
           None then acc
       do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
     Token.Identifier(name, true) :: _ and Keywords.all.get(name) is None and
