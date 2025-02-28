@@ -41,20 +41,20 @@ and test' = Bar' | Test' | Foo'
 //│ >       op = Keyword(`=`, 3, 3)
 //│ >       lhs = Ident of "test"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         op = Keyword(`|`, N/A, N/A)
 //│ >         lhs = Ident of "Bar"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`|`, N/A, 4)
+//│ >           op = Keyword(`|`, N/A, N/A)
 //│ >           lhs = Ident of "Test"
 //│ >           rhs = Ident of "Foo"
 //│ >     Infix:
 //│ >       op = Keyword(`=`, 3, 3)
 //│ >       lhs = Ident of "test'"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         op = Keyword(`|`, N/A, N/A)
 //│ >         lhs = Ident of "Bar'"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`|`, N/A, 4)
+//│ >           op = Keyword(`|`, N/A, N/A)
 //│ >           lhs = Ident of "Test'"
 //│ >           rhs = Ident of "Foo'"
 //│ > «type test = Bar | Test | Foo and test' = Bar' | Test' | Foo'»

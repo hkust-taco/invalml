@@ -18,7 +18,7 @@ open Stack
 open BetterMap
 open TreeTracer { TreeTracer }
 open Token { LiteralKind, BracketKind }
-open Precedence { Keywords, TypeKeywords, opPrec, opPrecOpt }
+open Precedence { Keywords, opPrec, opPrecOpt }
 open ParseRule { ParseRule }
 open Rules { termRule, termInfixRule, typeRule, typeInfixRule, declRule, syntaxKinds }
 
@@ -40,7 +40,7 @@ fun parse(tokens) =
       tracer.print of "consume: the end of input"
   
   fun parseKind(kind: Str, prec: Int): Tree = if
-    kind is "type" then typeExpr(prec, TypeKeywords.all)
+    kind is "type" then typeExpr(prec, Keywords.all)
     kind is "term" then term(prec, Keywords.all)
     // built-in kinds: plain identifiers
     kind is "ident" then if tokens is
@@ -215,12 +215,12 @@ fun parse(tokens) =
     result => "typeExpr >>> " + result Tree.summary()
     () => ...
     if tokens is
-      Token.Identifier(name, symbolic) :: _ and TypeKeywords.all.get(name) is
+      Token.Identifier(name, symbolic) :: _ and Keywords.all.get(name) is
         Some(keyword) and typeRule.keywordChoices.get(name) is
           Some(rule) and
             keyword.leftPrecOrMin > prec then
               consume
-              let acc = parseRule(keyword.rightPrecOrMax, rule, TypeKeywords.all)
+              let acc = parseRule(keyword.rightPrecOrMax, rule, Keywords.all)
               typeExprCont(acc, prec)
             else
               tracer.print of "the left precedence is less" + name, source.line
@@ -241,7 +241,7 @@ fun parse(tokens) =
     tracer.print of ">>> typeExprCont " + prec + " " + acc Tree.summary() + " <<<", source.line
     if tokens is
       do tracer.print of "check keyword " + TokenHelpers.preview(tokens), source.line
-      Token.Identifier(name, _) :: _ and TypeKeywords.all.get(name) is Some(keyword) and
+      Token.Identifier(name, _) :: _ and Keywords.all.get(name) is Some(keyword) and
         typeInfixRule.keywordChoices.get(name) is Some(rule) and
           do tracer.print of "keyword `" + name + "` is found in infix rules", source.line
           keyword.leftPrecOrMin > prec and rule.exprChoice is

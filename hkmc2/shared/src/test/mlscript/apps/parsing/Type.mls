@@ -30,9 +30,9 @@ type 'a foo == 'a * 'a list * 'a list
 //│ >         argument = Tuple of Stack of 
 //│ >           Ident of "'a"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`*`, 5, 5)
+//│ >         op = Keyword(`*`, 22, 22)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`*`, 5, 5)
+//│ >           op = Keyword(`*`, 22, 22)
 //│ >           lhs = Ident of "'a"
 //│ >           rhs = App:
 //│ >             callee = Ident of "list"
@@ -80,10 +80,10 @@ type g == (a -> b) -> c
 //│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "f"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`->`, 4, 3)
+//│ >         op = Keyword(`->`, 5, 3)
 //│ >         lhs = Ident of "a"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`->`, 4, 3)
+//│ >           op = Keyword(`->`, 5, 3)
 //│ >           lhs = Ident of "b"
 //│ >           rhs = Ident of "c"
 //│ > Define:
@@ -93,9 +93,9 @@ type g == (a -> b) -> c
 //│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "g"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`->`, 4, 3)
+//│ >         op = Keyword(`->`, 5, 3)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`->`, 4, 3)
+//│ >           op = Keyword(`->`, 5, 3)
 //│ >           lhs = Ident of "a"
 //│ >           rhs = Ident of "b"
 //│ >         rhs = Ident of "c"
@@ -114,9 +114,9 @@ type g == int * (string -> float)
 //│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "f"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`->`, 4, 3)
+//│ >         op = Keyword(`->`, 5, 3)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`*`, 5, 5)
+//│ >           op = Keyword(`*`, 22, 22)
 //│ >           lhs = Ident of "int"
 //│ >           rhs = Ident of "string"
 //│ >         rhs = Ident of "float"
@@ -127,10 +127,10 @@ type g == int * (string -> float)
 //│ >       op = Keyword(`==`, 16, 16)
 //│ >       lhs = Ident of "g"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`*`, 5, 5)
+//│ >         op = Keyword(`*`, 22, 22)
 //│ >         lhs = Ident of "int"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`->`, 4, 3)
+//│ >           op = Keyword(`->`, 5, 3)
 //│ >           lhs = Ident of "string"
 //│ >           rhs = Ident of "float"
 //│ > «type f == int * string -> float»
@@ -167,9 +167,9 @@ type 'a option = Some of 'a | None
 //│ >         argument = Tuple of Stack of 
 //│ >           Ident of "'a"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         op = Keyword(`|`, N/A, N/A)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`of`, 8, 8)
+//│ >           op = Keyword(`of`, N/A, N/A)
 //│ >           lhs = Ident of "Some"
 //│ >           rhs = Ident of "'a"
 //│ >         rhs = Ident of "None"
@@ -189,15 +189,15 @@ type 'a tree = Leaf | Node of 'a tree * 'a * 'a tree
 //│ >         argument = Tuple of Stack of 
 //│ >           Ident of "'a"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         op = Keyword(`|`, N/A, N/A)
 //│ >         lhs = Ident of "Leaf"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`of`, 8, 8)
+//│ >           op = Keyword(`of`, N/A, N/A)
 //│ >           lhs = Ident of "Node"
 //│ >           rhs = Infix:
-//│ >             op = Keyword(`*`, 5, 5)
+//│ >             op = Keyword(`*`, 22, 22)
 //│ >             lhs = Infix:
-//│ >               op = Keyword(`*`, 5, 5)
+//│ >               op = Keyword(`*`, 22, 22)
 //│ >               lhs = App:
 //│ >                 callee = Ident of "tree"
 //│ >                 argument = Ident of "'a"
@@ -237,24 +237,24 @@ and t' = Int of int | List of t list
 //│ >       lhs = Ident of "t"
 //│ >       rhs = Bracketed#Curly of Sequence of Stack of 
 //│ >         Infix:
-//│ >           op = Keyword(`:`, 6, 6)
+//│ >           op = Keyword(`:`, 4, 3)
 //│ >           lhs = Ident of "decoration"
 //│ >           rhs = Ident of "string"
 //│ >         Infix:
-//│ >           op = Keyword(`:`, 6, 6)
+//│ >           op = Keyword(`:`, 4, 3)
 //│ >           lhs = Ident of "substance"
 //│ >           rhs = Ident of "t'"
 //│ >     Infix:
 //│ >       op = Keyword(`=`, 3, 3)
 //│ >       lhs = Ident of "t'"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`|`, N/A, 4)
+//│ >         op = Keyword(`|`, N/A, N/A)
 //│ >         lhs = Infix:
-//│ >           op = Keyword(`of`, 8, 8)
+//│ >           op = Keyword(`of`, N/A, N/A)
 //│ >           lhs = Ident of "Int"
 //│ >           rhs = Ident of "int"
 //│ >         rhs = Infix:
-//│ >           op = Keyword(`of`, 8, 8)
+//│ >           op = Keyword(`of`, N/A, N/A)
 //│ >           lhs = Ident of "List"
 //│ >           rhs = App:
 //│ >             callee = Ident of "list"
@@ -274,10 +274,10 @@ exception E of int * string
 //│ >   kind = Exception
 //│ >   items = Stack of 
 //│ >     Infix:
-//│ >       op = Keyword(`of`, 8, 8)
+//│ >       op = Keyword(`of`, N/A, N/A)
 //│ >       lhs = Ident of "E"
 //│ >       rhs = Infix:
-//│ >         op = Keyword(`*`, 5, 5)
+//│ >         op = Keyword(`*`, 22, 22)
 //│ >         lhs = Ident of "int"
 //│ >         rhs = Ident of "string"
 //│ > «exception E of int * string»

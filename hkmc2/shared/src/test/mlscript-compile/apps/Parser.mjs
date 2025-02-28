@@ -44,7 +44,7 @@ Parser1 = class Parser {
     parseKind = function parseKind(kind, prec) {
       let scrut, param01, rule, param02, param11, token1, param03, param12, name, scrut1, param04, param13, token2, param05, param14, name1, scrut2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12;
       if (kind === "type") {
-        return typeExpr(prec, Precedence.TypeKeywords.all)
+        return typeExpr(prec, Precedence.Keywords.all)
       } else if (kind === "term") {
         return term(prec, Precedence.Keywords.all)
       } else if (kind === "ident") {
@@ -1731,7 +1731,7 @@ Parser1 = class Parser {
             param12 = param01.symbolic;
             name = param02;
             symbolic = param12;
-            scrut = runtime.safeCall(Precedence.TypeKeywords.all.get(name));
+            scrut = runtime.safeCall(Precedence.Keywords.all.get(name));
             if (scrut instanceof Option.Some.class) {
               param03 = scrut.value;
               keyword = param03;
@@ -1742,7 +1742,7 @@ Parser1 = class Parser {
                 scrut2 = keyword.leftPrecOrMin > prec;
                 if (scrut2 === true) {
                   tmp8 = consume();
-                  tmp9 = parseRule(keyword.rightPrecOrMax, rule, Precedence.TypeKeywords.all);
+                  tmp9 = parseRule(keyword.rightPrecOrMax, rule, Precedence.Keywords.all);
                   acc = tmp9;
                   return typeExprCont(acc, prec)
                 } else {
@@ -1806,7 +1806,7 @@ Parser1 = class Parser {
           param03 = param01.name;
           param12 = param01.symbolic;
           name = param03;
-          scrut3 = runtime.safeCall(Precedence.TypeKeywords.all.get(name));
+          scrut3 = runtime.safeCall(Precedence.Keywords.all.get(name));
           if (scrut3 instanceof Option.Some.class) {
             param04 = scrut3.value;
             keyword = param04;
