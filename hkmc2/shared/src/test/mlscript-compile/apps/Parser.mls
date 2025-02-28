@@ -84,20 +84,22 @@ fun parse(tokens) =
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
               rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
-                // TODO: use `outerPrec` and `innerPrec`
-                do tracer.print of "found an reference to \"" + kind + "\"", source.line
-                parseKind(kind, prec) is
-                  Tree.Error then
-                    do tracer.print of "cannot parse more", source.line
-                    if rule.endChoice is Some(value) then
-                      tracer.print of "found end choice", source.line
-                      value
-                  acc then
-                    let tree = parseRule(prec, rest, allKeywords)
-                    tracer.print of "acc: " + acc Tree.summary(), source.line
-                    tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
-                    process(acc, tree)
-              do tracer.print of "no exprChoice or the prec is less than " + prec, source.line
+                do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+                let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
+                let innerPrec' = innerPrec Option.getOrElse(prec)
+                outerPrec' > prec and
+                  parseKind(kind, prec) is
+                    Tree.Error then
+                      do tracer.print of "cannot parse more", source.line
+                      if rule.endChoice is Some(value) then
+                        tracer.print of "found end choice", source.line
+                        value
+                    acc then
+                      let tree = parseRule(prec, rest, allKeywords)
+                      tracer.print of "acc: " + acc Tree.summary(), source.line
+                      tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
+                      process(acc, tree)
+                do tracer.print of "did not parse kind \"" + kind + "\" because of the precedence", source.line
               rule.endChoice is Some(value) then
                 tracer.print of "found end choice", source.line
                 value
@@ -109,7 +111,7 @@ fun parse(tokens) =
         do tracer.print of "the current rule is " + rule.display
         rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
           // TODO: use `outerPrec` and `innerPrec`
-          do tracer.print of "parse \"" + kind + "\" kind from " + TokenHelpers.preview(tokens), source.line
+          do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
           let acc = parseKind(kind, prec)
           acc Tree.nonEmptyError() then
             tracer.print of "the rest rule: " + rest.display, source.line
