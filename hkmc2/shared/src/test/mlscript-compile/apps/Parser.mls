@@ -255,12 +255,14 @@ fun parse(tokens) =
         typeInfixRule.keywordChoices.get(name) is Some(rule) and
           do tracer.print of "keyword `" + name + "` is found in infix rules", source.line
           keyword.leftPrecOrMin > prec and rule.exprChoice is
-            Some([kind, process, outerPrec, innerPrec, rest]) then
-              // TODO: use `outerPrec` and `innerPrec`
-              consume
-              let rhs = parseKind(kind, keyword.rightPrecOrMin)
-              let acc' = process(rhs)(acc)
-              typeExprCont(acc', prec)
+            Some([kind, process, outerPrec, innerPrec, rest]) and
+              do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+              let outerPrec' = outerPrec Option.getOrElse(Keywords.maxOperatorPrec)
+              let innerPrec' = innerPrec Option.getOrElse(keyword.rightPrecOrMin)
+              outerPrec' > prec then
+                consume
+                let rhs = parseKind(kind, keyword.rightPrecOrMin)
+                process(rhs)(acc) typeExprCont(prec)
             None then acc
           do tracer.print of "keyword `" + name + "` does not have infix rules", source.line
       // * the case of type application
