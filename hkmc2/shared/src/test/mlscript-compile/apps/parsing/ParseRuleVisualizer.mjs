@@ -8,8 +8,6 @@ import Iter from "./../../Iter.mjs";
 import Option from "./../../Option.mjs";
 import TreeTracer from "./../../TreeTracer.mjs";
 import XML from "./../../XML.mjs";
-import path from "path";
-import railroad from "./../../../vendors/railroad/railroad.mjs";
 let RecursiveKnot1, ParseRuleVisualizer1, LinkOpts1;
 RecursiveKnot1 = function RecursiveKnot(getName1) { return new RecursiveKnot.class(getName1); };
 RecursiveKnot1.class = class RecursiveKnot {
@@ -26,76 +24,31 @@ LinkOpts1.class = class LinkOpts {
   toString() { return "LinkOpts(" + globalThis.Predef.render(this.href) + ")"; }
 };
 ParseRuleVisualizer1 = class ParseRuleVisualizer {
-  static #outputPath;
+  static #defaultKinds;
   static #renderedKinds;
   static {
-    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
-    this.rr = railroad;
-    tmp = runtime.safeCall(path.resolve(ParseRuleVisualizer.findProjectRoot, "src", "test", "mlscript", "apps", "output"));
-    tmp1 = ParseRuleVisualizer.ensurePath(tmp);
-    ParseRuleVisualizer.#outputPath = tmp1;
-    tmp2 = path.join(ParseRuleVisualizer.libraryPath, "railroad.css");
-    tmp3 = globalThis.fs.readFileSync(tmp2, "utf-8");
-    this.CSS_CONTENT = tmp3;
-    tmp4 = new TreeTracer.TreeTracer();
-    this.tracer = tmp4;
-    tmp5 = Predef.tuple("type", "term", "typevar", "ident");
-    tmp6 = new globalThis.Set(tmp5);
-    ParseRuleVisualizer.#renderedKinds = tmp6;
+    let tmp, tmp1, tmp2;
+    tmp = new TreeTracer.TreeTracer();
+    this.tracer = tmp;
+    tmp1 = Predef.tuple("type", "term", "typevar", "ident");
+    ParseRuleVisualizer.#defaultKinds = tmp1;
+    tmp2 = new globalThis.Set(ParseRuleVisualizer.#defaultKinds);
+    ParseRuleVisualizer.#renderedKinds = tmp2;
   }
-  static ensurePath(pathString) {
-    let scrut, tmp, tmp1;
-    tmp = runtime.safeCall(globalThis.fs.statSync(pathString));
-    scrut = runtime.safeCall(tmp.isDirectory());
-    if (scrut === false) {
-      throw globalThis.Error("The output directory does not exist.");
-    } else {
-      tmp1 = runtime.Unit;
-    }
-    return pathString
-  } 
-  static get findProjectRoot() {
-    let base, fragments, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
-    tmp = runtime.safeCall(globalThis.process.cwd());
-    base = tmp;
-    tmp1 = runtime.safeCall(base.split(path.sep));
-    fragments = tmp1;
-    tmp2 = - 1;
-    scrut = runtime.safeCall(fragments.at(tmp2));
-    if (scrut === "shared") {
-      tmp3 = - 2;
-      scrut1 = runtime.safeCall(fragments.at(tmp3));
-      if (scrut1 === "hkmc2") {
-        return base
-      } else {
-        tmp4 = base + path.sep;
-        tmp5 = tmp4 + "hkmc2";
-        tmp6 = tmp5 + path.sep;
-        return tmp6 + "shared"
-      }
-    } else {
-      tmp7 = base + path.sep;
-      tmp8 = tmp7 + "hkmc2";
-      tmp9 = tmp8 + path.sep;
-      return tmp9 + "shared"
-    }
-  } 
-  static filePath(...fragments) {
-    return path.join(ParseRuleVisualizer.#outputPath, ...fragments)
-  } 
-  static get libraryPath() {
+  static reset() {
     let tmp;
-    tmp = runtime.safeCall(path.resolve(ParseRuleVisualizer.findProjectRoot, "src", "test", "vendors", "railroad"));
-    return ParseRuleVisualizer.ensurePath(tmp);
+    tmp = new globalThis.Set(ParseRuleVisualizer.#defaultKinds);
+    ParseRuleVisualizer.#renderedKinds = tmp;
+    return runtime.Unit
   } 
-  static render(title, rule) {
+  static render(rr, title, rule) {
     let diagram, sequence, renderChoice, renderRule, helperRules, referencedKinds, renderCache, diagrams, scrut, currentKinds, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
     sequence = function sequence(lhs, rhsOpt) {
       let param0, rhs;
       if (rhsOpt instanceof Option.Some.class) {
         param0 = rhsOpt.value;
         rhs = param0;
-        return ParseRuleVisualizer.rr.Sequence(lhs, rhs)
+        return rr.Sequence(lhs, rhs)
       } else if (rhsOpt instanceof Option.None.class) {
         return lhs
       } else {
@@ -111,7 +64,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       } else {
         tmp10 = [];
       }
-      return runtime.safeCall(ParseRuleVisualizer.rr.Diagram(tmp10))
+      return runtime.safeCall(rr.Diagram(tmp10))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
       let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, param21, rule2, optional, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53;
@@ -124,7 +77,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         keyword = param05;
         rest2 = param13;
         tmp11 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Keyword"));
-        tmp12 = runtime.safeCall(ParseRuleVisualizer.rr.Terminal(keyword.name));
+        tmp12 = runtime.safeCall(rr.Terminal(keyword.name));
         tmp13 = renderRule(rest2, currentRule);
         tmp14 = sequence(tmp12, tmp13);
         return Option.Some(tmp14)
@@ -142,7 +95,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
           param04 = scrut3.value;
           optionalPart = param04;
           if (optional === true) {
-            tmp16 = runtime.safeCall(ParseRuleVisualizer.rr.Optional(optionalPart));
+            tmp16 = runtime.safeCall(rr.Optional(optionalPart));
             tmp17 = sequence(tmp16, latterPart);
           } else {
             tmp17 = sequence(optionalPart, latterPart);
@@ -173,7 +126,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         }
         tmp21 = "#" + kind;
         tmp22 = LinkOpts1(tmp21);
-        tmp23 = ParseRuleVisualizer.rr.NonTerminal(kind, tmp22);
+        tmp23 = rr.NonTerminal(kind, tmp22);
         tmp24 = renderRule(rest, currentRule);
         tmp25 = sequence(tmp23, tmp24);
         return Option.Some(tmp25)
@@ -189,7 +142,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
           ruleName1 = tmp27;
           tmp28 = "#" + ruleName1;
           tmp29 = LinkOpts1(tmp28);
-          tmp30 = ParseRuleVisualizer.rr.NonTerminal(ruleName1, tmp29);
+          tmp30 = rr.NonTerminal(ruleName1, tmp29);
           return Option.Some(tmp30)
         } else {
           tmp31 = runtime.safeCall(get());
@@ -205,7 +158,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
             tmp37 = runtime.safeCall(getName());
             tmp38 = "#" + tmp37;
             tmp39 = LinkOpts1(tmp38);
-            tmp40 = ParseRuleVisualizer.rr.NonTerminal(tmp36, tmp39);
+            tmp40 = rr.NonTerminal(tmp36, tmp39);
             return Option.Some(tmp40)
           } else {
             tmp41 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Lazy not in cache"));
@@ -235,7 +188,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
             tmp49 = runtime.safeCall(helperRules.push(tmp48));
             tmp50 = "#" + ruleName;
             tmp51 = LinkOpts1(tmp50);
-            tmp52 = ParseRuleVisualizer.rr.NonTerminal(ruleName, tmp51);
+            tmp52 = rr.NonTerminal(ruleName, tmp51);
             return Option.Some(tmp52)
           }
         }
@@ -284,9 +237,9 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         if (scrut2 === 0) {
           return Option.None
         } else {
-          choice = ParseRuleVisualizer.rr.Choice(0, ...nodes);
+          choice = rr.Choice(0, ...nodes);
           if (optional === true) {
-            tmp16 = runtime.safeCall(ParseRuleVisualizer.rr.Optional(choice));
+            tmp16 = runtime.safeCall(rr.Optional(choice));
             return Option.Some(tmp16)
           } else {
             return Option.Some(choice)

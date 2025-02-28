@@ -7,8 +7,6 @@ import "../../Iter.mls"
 import "../../Option.mls"
 import "../../TreeTracer.mls"
 import "../../XML.mls"
-import "path"
-import "../../../vendors/railroad/railroad.mjs"
 
 open Predef
 open Stack
@@ -24,39 +22,17 @@ class LinkOpts(val href: Str)
 
 module ParseRuleVisualizer with ...
 
-val rr = railroad
-
-// Check if the given path exists.
-fun ensurePath(pathString) =
-  if fs.statSync(pathString).isDirectory() is false do
-    throw Error("The output directory does not exist.")
-  pathString
-
-// `process.cwd()` is different in `hkmc2AllTests / test` and
-// `~hkmc2DiffTests / Test / run`. This is a workaround to make the path.
-fun findProjectRoot =
-  let base = process.cwd()
-  let fragments = base.split(path.sep)
-  if fragments.at(-1) is "shared" and fragments.at(-2) is "hkmc2" then
-    base
-  else
-    base + path.sep + "hkmc2" + path.sep + "shared"
-
-let outputPath = ensurePath of path.resolve of
-  findProjectRoot, "src", "test", "mlscript", "apps", "output"
-
-fun filePath(...fragments) = path.join(outputPath, ...fragments)
-
-fun libraryPath = ensurePath of path.resolve of
-  findProjectRoot, "src", "test", "vendors", "railroad"
-
-val CSS_CONTENT = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
-
 val tracer = new TreeTracer()
 
-let renderedKinds = new Set of tuple of "type", "term", "typevar", "ident"
+let defaultKinds = tuple of "type", "term", "typevar", "ident"
 
-fun render(title: Str, rule: ParseRule) =
+let renderedKinds = new Set of defaultKinds
+
+fun reset() =
+  set renderedKinds = new Set of defaultKinds
+
+// * `rr` is the railroad library.
+fun render(rr, title: Str, rule: ParseRule) =
   let helperRules = []
   let referencedKinds = new Set()
   let renderCache = new globalThis.Map()
@@ -136,7 +112,7 @@ fun render(title: Str, rule: ParseRule) =
     set renderedKinds = renderedKinds.union of currentKinds
     referencedKinds = new Set()
     diagrams.push of ...currentKinds
-      Iter.mapping of kind =>
+      Iter.mapping of kind => 
         let theRule = syntaxKinds.get(kind) Option.unsafe.get()
         [kind, diagram of renderRule of theRule]
       Iter.toArray()

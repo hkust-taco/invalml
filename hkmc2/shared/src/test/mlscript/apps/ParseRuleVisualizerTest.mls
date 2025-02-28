@@ -3,12 +3,42 @@
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
 import "../../mlscript-compile/apps/parsing/Rules.mls"
+import "../../mlscript-compile/apps/parsing/vendors/railroad/railroad.mjs"
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
+import "path"
+//│ path = [object Object]
+//│ railroad = [object Object]
 
-open ParseRuleVisualizer { render, CSS_CONTENT, filePath }
+open ParseRuleVisualizer { render }
 open Rules { termRule, declRule, typeRule }
 open XML { html, tag, elem, style }
+
+// Check if the given path exists.
+fun ensurePath(pathString) =
+  if fs.statSync(pathString).isDirectory() is false do
+    throw Error("The output directory does not exist.")
+  pathString
+
+// `process.cwd()` is different in `hkmc2AllTests / test` and
+// `~hkmc2DiffTests / Test / run`. This is a workaround to make the path.
+fun findProjectRoot =
+  let base = process.cwd()
+  let fragments = base.split(path.sep)
+  if fragments.at(-1) is "shared" and fragments.at(-2) is "hkmc2" then
+    base
+  else
+    base + path.sep + "hkmc2" + path.sep + "shared"
+
+fun outputPath = ensurePath of path.resolve of
+  findProjectRoot, "src", "test", "mlscript", "apps", "output"
+
+fun filePath(...fragments) = path.join(outputPath, ...fragments)
+
+fun libraryPath = ensurePath of path.resolve of
+  findProjectRoot, "src", "test", "mlscript-compile", "apps", "parsing", "vendors", "railroad"
+
+fun loadRailroadStylesheet = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
 
 fun toHTML(...elements) = html(["lang", "en"]) of
   elem("head") of
@@ -34,7 +64,7 @@ fun toHTML(...elements) = html(["lang", "en"]) of
       "figure:target figcaption{color:#007bff}"
       "figure:target figcaption::before{font-style:normal;content:'⯈ '}"
       "figure:target figcaption::after{font-style:normal;content:' ⯇'}"
-      CSS_CONTENT
+      loadRailroadStylesheet
 
 fun toElements(diagrams) =
   diagrams
@@ -49,9 +79,9 @@ fs.writeFileSync of
   toHTML of
     elem("h1") of "Parse Rules"
     elem("h2") of "Terms"
-    ...toElements of render("term", termRule)
+    ...toElements of render(railroad, "term", termRule)
     elem("h2") of "Types"
-    ...toElements of render("type", typeRule)
+    ...toElements of render(railroad, "type", typeRule)
     elem("h2") of "Definitions"
-    ...toElements of render("definition", declRule)
+    ...toElements of render(railroad, "definition", declRule)
   "utf-8"
