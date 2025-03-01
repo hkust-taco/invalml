@@ -50,12 +50,18 @@ const outputPanel = document.getElementById("output");
 parseButton.addEventListener("click", () => {
   const source = editor.value;
   const tokens = Lexer.lex(source, true);
-  const trees = Parser.parse(tokens);
   outputPanel.innerHTML = "";
-  for (const tree of Iter.fromStack(trees)) {
-    const collapsibleTree = document.createElement('collapsible-tree');
-    collapsibleTree.textContent = TreeHelpers.showAsTree(tree);
-    outputPanel.appendChild(collapsibleTree);
+  try {
+    const trees = Parser.parse(tokens);
+    for (const tree of Iter.fromStack(trees)) {
+      const collapsibleTree = document.createElement('collapsible-tree');
+      collapsibleTree.textContent = TreeHelpers.showAsTree(tree);
+      outputPanel.appendChild(collapsibleTree);
+    }
+  } catch (error) {
+    const errorDisplay = document.createElement('error-display');
+    errorDisplay.error = error;
+    outputPanel.appendChild(errorDisplay);
   }
 });
 
@@ -111,6 +117,67 @@ class CollapsibleTree extends HTMLElement {
 if (!customElements.get('collapsible-tree')) {
   customElements.define('collapsible-tree', CollapsibleTree);
 }
+
+class ErrorDisplay extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  set error(value) {
+    this._error = value;
+    this.render();
+  }
+
+  render() {
+    if (!this._error) return;
+
+    const stackLines = this._error.stack.split('\n');
+    if (stackLines[0]?.startsWith(this._error.name)) {
+      stackLines.shift();
+    }
+    this.shadowRoot.innerHTML = `
+      <div class="error-container">
+        <h3 class="error-message">
+          ${this._error.name}: ${this._error.message}
+        </h3>
+        <ul class="stack-trace">
+          ${stackLines.map(line => `<li>${line.trim()}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+    this.shadowRoot.appendChild(document.createElement('style')).textContent = `
+      .error-container {
+        background-color: #fdd;
+        padding: 0.375rem 0.75rem 0.5rem;
+        font-family: var(--monospace);
+        color: #991b1bff;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .error-message {
+        margin: 0;
+        font-weight: bold;
+        font-size: 1.125rem;
+      }
+
+      .stack-trace {
+        font-size: 0.875rem;
+        margin: 0;
+        list-style-type: none;
+        padding-left: 0.5rem;
+      }
+    `;
+  }
+}
+
+customElements.define('error-display', ErrorDisplay);
 
 import('./parsing/vendors/railroad/railroad.mjs').then(({ default: rr }) => {
   globalThis.rr = rr;
