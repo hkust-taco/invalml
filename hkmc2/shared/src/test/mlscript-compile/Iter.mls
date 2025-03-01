@@ -176,6 +176,13 @@ fun some(xs, op) =
     else set next = iterator.next()
   result Option.getOrElse(false)
 
+fun each(xs, op) =
+  let iterator = getIterator of xs
+  let next = iterator.next()
+  while next.done is false do
+    op(next.value)
+    set next = iterator.next()
+
 fun toArray(view) = Array.from(view)
 
 fun fromStack(stack) = Iterable of () =>
