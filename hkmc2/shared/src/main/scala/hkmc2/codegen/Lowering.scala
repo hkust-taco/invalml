@@ -55,7 +55,8 @@ import Subst.subst
 class Lowering()(using Config, TL, Raise, State, Ctx):
   
   val lowerHandlers: Bool = config.effectHandlers.isDefined
-  
+  val lift: Bool = config.liftDefns.isDefined
+
   private lazy val unreachableFn =
     Select(Select(Value.Ref(State.globalThisSymbol), Tree.Ident("Predef"))(N), Tree.Ident("unreachable"))(N)
   
@@ -280,7 +281,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
         cls.ext match
         case N =>
           Define(
-            ClsLikeDefn(cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, N,
+            ClsLikeDefn(cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, Nil, N,
               mtds, privateFlds, publicFlds, End(), ctor),
             term_nonTail(st.Blk(stats, res))(k)
           )
@@ -291,7 +292,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
               args(ext.args): args =>
                 Return(Call(Value.Ref(State.builtinOpsMap("super")), args)(true, true), implct = true)
             Define(
-              ClsLikeDefn(cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, S(clsp),
+              ClsLikeDefn(cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, Nil, S(clsp),
                 mtds, privateFlds, publicFlds, pctor, ctor),
               term_nonTail(st.Blk(stats, res))(k)
             )
@@ -490,7 +491,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
         val pctor =
           args(as): args =>
             Return(Call(Value.Ref(State.builtinOpsMap("super")), args)(true, true), implct = true)
-        val clsDef = ClsLikeDefn(N, isym, sym, syntax.Cls, N, S(clsp),
+        val clsDef = ClsLikeDefn(N, isym, sym, syntax.Cls, N, Nil, S(clsp),
           mtds, privateFlds, publicFlds, pctor, ctor)
         Define(clsDef, term_nonTail(New(sym.ref(), Nil, N))(k))
     
@@ -582,18 +583,23 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
   // val resSym = new TermSymbol(N, Tree.Ident("$res"))
   // def topLevel(t: st): Block =
   //   subTerm(t)(r => codegen.Assign(resSym, r, codegen.End()))(using Subst.empty)
-  
+
   def topLevel(t: st): Block =
-    val res = term(t)(ImplctRet)(using Subst.empty)
+    val res = LambdaRewriter.desugar(term(t)(ImplctRet)(using Subst.empty))
+    val handlerPaths = new HandlerPaths
     val stackSafe = config.stackSafety match
       case N => res
-      case S(sts) => StackSafeTransform(sts.stackLimit).transformTopLevel(res)
-    val withHandlers = if lowerHandlers
-      then HandlerLowering().translateTopLevel(stackSafe)
+      case S(sts) => StackSafeTransform(sts.stackLimit, handlerPaths).transformTopLevel(res)
+    val withHandlers = if lowerHandlers 
+      then HandlerLowering(handlerPaths).translateTopLevel(stackSafe)
       else stackSafe
     val flattened = withHandlers.flattened
     
-    MergeMatchArmTransformer.applyBlock(flattened)
+    val lifted = 
+      if lift then Lifter(S(handlerPaths)).transform(flattened)
+      else flattened
+    
+    MergeMatchArmTransformer.applyBlock(lifted)
   
   def program(main: st): Program =
     def go(acc: Ls[Local -> Str], trm: st): Program =

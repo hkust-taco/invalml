@@ -5,14 +5,18 @@ Predef1 = class Predef {
   static {
     this.assert = globalThis.console.assert;
     this.foldl = Predef.fold;
-    this.MatchResult = function MatchResult(captures1) { return new MatchResult.class(captures1); };
+    this.MatchResult = function MatchResult(captures1) {
+      return new MatchResult.class(captures1);
+    };
     this.MatchResult.class = class MatchResult {
       constructor(captures) {
         this.captures = captures;
       }
       toString() { return "MatchResult(" + globalThis.Predef.render(this.captures) + ")"; }
     };
-    this.MatchFailure = function MatchFailure(errors1) { return new MatchFailure.class(errors1); };
+    this.MatchFailure = function MatchFailure(errors1) {
+      return new MatchFailure.class(errors1);
+    };
     this.MatchFailure.class = class MatchFailure {
       constructor(errors) {
         this.errors = errors;
@@ -198,15 +202,16 @@ Predef1 = class Predef {
     }
   } 
   static render(arg1) {
-    let ts, p, scrut, scrut1, scrut2, nme, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20;
+    let ts, p, scrut, scrut1, scrut2, nme, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, lambda, lambda1, lambda2;
     if (arg1 === undefined) {
       return "undefined"
     } else if (arg1 === null) {
       return "null"
     } else if (arg1 instanceof globalThis.Array) {
-      tmp = Predef.fold((arg11, arg2) => {
+      lambda = (undefined, function (arg11, arg2) {
         return arg11 + arg2
       });
+      tmp = Predef.fold(lambda);
       tmp1 = Predef.interleave(", ");
       tmp2 = Predef.map(Predef.render);
       tmp3 = runtime.safeCall(tmp2(...arg1));
@@ -215,18 +220,20 @@ Predef1 = class Predef {
     } else if (typeof arg1 === 'string') {
       return runtime.safeCall(globalThis.JSON.stringify(arg1))
     } else if (arg1 instanceof globalThis.Set) {
-      tmp5 = Predef.fold((arg11, arg2) => {
+      lambda1 = (undefined, function (arg11, arg2) {
         return arg11 + arg2
       });
+      tmp5 = Predef.fold(lambda1);
       tmp6 = Predef.interleave(", ");
       tmp7 = Predef.map(Predef.render);
       tmp8 = runtime.safeCall(tmp7(...arg1));
       tmp9 = runtime.safeCall(tmp6(...tmp8));
       return runtime.safeCall(tmp5("Set{", ...tmp9, "}"))
     } else if (arg1 instanceof globalThis.Map) {
-      tmp10 = Predef.fold((arg11, arg2) => {
+      lambda2 = (undefined, function (arg11, arg2) {
         return arg11 + arg2
       });
+      tmp10 = Predef.fold(lambda2);
       tmp11 = Predef.interleave(", ");
       tmp12 = Predef.map(Predef.render);
       tmp13 = runtime.safeCall(tmp12(...arg1));
@@ -369,7 +376,7 @@ Predef1 = class Predef {
     throw globalThis.Error("unreachable");
   } 
   static checkArgs(functionName, expected, isUB, got) {
-    let scrut, name, scrut1, scrut2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
+    let scrut, name, scrut1, scrut2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, lambda;
     tmp = got < expected;
     tmp1 = got > expected;
     tmp2 = isUB && tmp1;
@@ -383,9 +390,10 @@ Predef1 = class Predef {
         tmp4 = "";
       }
       name = tmp4;
-      tmp5 = Predef.fold((arg11, arg2) => {
+      lambda = (undefined, function (arg11, arg2) {
         return arg11 + arg2
       });
+      tmp5 = Predef.fold(lambda);
       if (isUB === true) {
         tmp6 = "";
       } else {

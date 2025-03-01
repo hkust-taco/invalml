@@ -3,7 +3,9 @@ import Predef from "./Predef.mjs";
 let Option1;
 Option1 = class Option {
   static {
-    this.Some = function Some(value1) { return new Some.class(value1); };
+    this.Some = function Some(value1) {
+      return new Some.class(value1);
+    };
     this.Some.class = class Some {
       constructor(value) {
         this.value = value;
@@ -16,7 +18,9 @@ Option1 = class Option {
     };
     this.None = new None$class;
     this.None.class = None$class;
-    this.Both = function Both(fst1, snd1) { return new Both.class(fst1, snd1); };
+    this.Both = function Both(fst1, snd1) {
+      return new Both.class(fst1, snd1);
+    };
     this.Both.class = class Both {
       constructor(fst, snd) {
         this.fst = fst;

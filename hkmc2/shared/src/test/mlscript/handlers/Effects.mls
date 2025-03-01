@@ -165,14 +165,16 @@ if true do
 //│       tmp13 = super();
 //│     }
 //│     perform(arg) {
-//│       return runtime.mkEffect(h, (k) => {
+//│       return runtime.mkEffect(this, (k) => {
 //│         return arg
 //│       })
 //│     }
 //│     toString() { return "Handler$h$"; }
 //│   };
 //│   h = new Handler$h$12();
-//│   Cont$handleBlock$h$11 = function Cont$handleBlock$h$(pc1) { return new Cont$handleBlock$h$.class(pc1); };
+//│   Cont$handleBlock$h$11 = function Cont$handleBlock$h$(pc1) {
+//│     return new Cont$handleBlock$h$.class(pc1);
+//│   };
 //│   Cont$handleBlock$h$11.class = class Cont$handleBlock$h$10 extends runtime.FunctionContFrame.class {
 //│     constructor(pc) {
 //│       let tmp13;
@@ -202,7 +204,7 @@ if true do
 //│   if (scrut === true) {
 //│     tmp12 = f();
 //│     if (tmp12 instanceof runtime.EffectSig.class) {
-//│       tmp12.contTrace.last.next = new Cont$handleBlock$h$11(0, null);
+//│       tmp12.contTrace.last.next = Cont$handleBlock$h$11(0);
 //│       return runtime.handleBlockImpl(tmp12, h)
 //│     }
 //│   } else {
