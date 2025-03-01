@@ -1,20 +1,76 @@
 :js
 
 
+tuple(
+  )
+//│ = []
+
+tuple(
+  )
+  tuple()
+//│ = [[]]
+
+tuple(
+  ) tuple()
+//│ = [[]]
+
+tuple(
+  id(2
+    +2))
+            tuple()
+//│ = [[4]]
+
+tuple(
+  id(2
+    +2))
+    tuple()
+//│ = [[4]]
+
+tuple(
+  id(2
+    +2))
+tuple()
+//│ = []
+
+:fixme
+tuple(
+)
+//│ ╔══[PARSE ERROR] Expected an expression; found new line instead
+//│ ║  l.36: 	tuple(
+//│ ║        	      ^
+//│ ║  l.37: 	)
+//│ ╙──      	
+
+tuple(
+  )
+//│ = []
+
 print(
   2)
 1
 //│ > 2
 //│ = 1
 
+id(
+  1)
+//│ = 1
+
+id(
+  id)(1)
+//│ = 1
+
 :p
 id(
   2)
   print()
-//│ |id|(|→|2|←|)|→|↵|print|(||)|←|
+//│ |id|(|→|2|←|)|→|print|(||)|←|
 //│ Parsed:
 //│ 	Jux(App(Ident(id),Tup(List(IntLit(2)))),Block(List(App(Ident(print),Tup(List())))))
 //│ > 2
+
+id(0
+  passTo(id))(2)
+//│ = 0
 
 :p
 id(
@@ -25,6 +81,40 @@ id(
 //│ Parsed:
 //│ 	Jux(App(Ident(id),Tup(List(IntLit(2)))),Block(List(App(Ident(print),Tup(List())))))
 //│ > 2
+
+:p
+id(
+  id
+)(1)
+//│ |id|(|→|id|←|↵|)|(|1|)|
+//│ Parsed:
+//│ 	App(App(Ident(id),Tup(List(Ident(id)))),Tup(List(IntLit(1))))
+//│ = 1
+
+:e
+:p
+id
+  1
+//│ |id|→|1|←|
+//│ Parsed:
+//│ 	Jux(Ident(id),Block(List(IntLit(1))))
+//│ ╔══[ERROR] Illegal juxtaposition right-hand side.
+//│ ║  l.97: 	  1
+//│ ╙──      	  ^
+//│ = [function id]
+
+:e
+:re
+:p
+id(0
+  id)(1)
+//│ |id|(|0|→|id|←|)|(|1|)|
+//│ Parsed:
+//│ 	App(App(Ident(id),Tup(List(Jux(IntLit(0),Block(List(Ident(id))))))),Tup(List(IntLit(1))))
+//│ ╔══[ERROR] Illegal juxtaposition right-hand side.
+//│ ║  l.110: 	  id)(1)
+//│ ╙──       	  ^^
+//│ ═══[RUNTIME ERROR] TypeError: tmp18 is not a function
 
 
 fun test2() =
@@ -74,10 +164,10 @@ module P with
   )
   module TraceLogger
 //│ ╔══[PARSE ERROR] Expected an expression; found new line instead
-//│ ║  l.73: 	  (
-//│ ║        	   ^
-//│ ║  l.74: 	  )
-//│ ╙──      	^^
+//│ ║  l.163: 	  (
+//│ ║         	   ^
+//│ ║  l.164: 	  )
+//│ ╙──       	^^
 
 
 module P with ...
