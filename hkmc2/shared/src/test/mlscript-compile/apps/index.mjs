@@ -3,6 +3,7 @@ import Lexer from "./Lexer.mjs";
 import Iter from "../Iter.mjs"
 import Predef from "../Predef.mjs";
 import TreeHelpers from "./parsing/TreeHelpers.mjs";
+import Extension from "./parsing/Extension.mjs";
 import ParseRuleVisualizer from "./parsing/ParseRuleVisualizer.mjs";
 import Rules from "./parsing/Rules.mjs";
 
@@ -54,6 +55,10 @@ parseButton.addEventListener("click", () => {
   try {
     const trees = Parser.parse(tokens);
     for (const tree of Iter.fromStack(trees)) {
+      if (Extension.isDiagramDirective(tree)) {
+        displayRules;
+        continue;
+      }
       const collapsibleTree = document.createElement('collapsible-tree');
       collapsibleTree.textContent = TreeHelpers.showAsTree(tree);
       outputPanel.appendChild(collapsibleTree);
@@ -179,19 +184,31 @@ class ErrorDisplay extends HTMLElement {
 
 customElements.define('error-display', ErrorDisplay);
 
-import('./parsing/vendors/railroad/railroad.mjs').then(({ default: rr }) => {
-  globalThis.rr = rr;
-  ParseRuleVisualizer.reset();
-  const sections = [];
-  function addElements(entries) {
-    const figures = entries.map(([name, svg]) => `<figure><figcaption id="${name}">${name}</figcaption>${svg}</figure>`);
-    sections.push("<section>" + figures.join('') + "</section>");
+function displayRules() {
+  function display(rr) {
+    ParseRuleVisualizer.reset();
+    const sections = [];
+    function addElements(entries) {
+      const figures = entries.map(([name, svg]) => `<figure><figcaption id="${name}">${name}</figcaption>${svg}</figure>`);
+      sections.push("<section>" + figures.join('') + "</section>");
+    }
+    sections.push(`<h3>Term</h3>`);
+    addElements(ParseRuleVisualizer.render(rr, "term", Rules.termRule));
+    sections.push(`<h3>Type</h3>`);
+    addElements(ParseRuleVisualizer.render(rr, "type", Rules.typeRule));
+    sections.push(`<h3>Definition</h3>`);
+    addElements(ParseRuleVisualizer.render(rr, "definition", Rules.declRule));
+    document.querySelector("#syntax-diagrams > main").innerHTML = sections.join('');
   }
-  sections.push(`<h3>Term</h3>`);
-  addElements(ParseRuleVisualizer.render(rr, "term", Rules.termRule));
-  sections.push(`<h3>Type</h3>`);
-  addElements(ParseRuleVisualizer.render(rr, "type", Rules.typeRule));
-  sections.push(`<h3>Definition</h3>`);
-  addElements(ParseRuleVisualizer.render(rr, "definition", Rules.declRule));
-  document.querySelector("#syntax-diagrams > main").innerHTML = sections.join('');
-})
+
+  if (globalThis.rr) {
+    display(globalThis.rr);
+  } else {
+    import('./parsing/vendors/railroad/railroad.mjs').then(({ default: rr }) => {
+      globalThis.rr = rr;
+      display(rr);
+    })
+  }
+}
+
+displayRules();

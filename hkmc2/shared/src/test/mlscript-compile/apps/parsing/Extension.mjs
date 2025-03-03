@@ -93,19 +93,59 @@ Extension1 = class Extension {
     this.ClosedCategory = new ClosedCategory$class;
     this.ClosedCategory.class = ClosedCategory$class;
   }
-  static parsePrecedenceTree(tree) {
+  static isDiagramDirective(tree) {
+    let param0, param1, param01, param11, first1, first0, param02, param12;
+    if (tree instanceof Tree.Define.class) {
+      param0 = tree.kind;
+      param1 = tree.items;
+      if (param0 instanceof Tree.DefineKind.Directive.class) {
+        if (param1 instanceof Stack.Cons.class) {
+          param01 = param1.head;
+          param11 = param1.tail;
+          if (globalThis.Array.isArray(param01) && param01.length === 2) {
+            first0 = param01[0];
+            first1 = param01[1];
+            if (first0 instanceof Tree.Ident.class) {
+              param02 = first0.name;
+              param12 = first0.symbolic;
+              if (param02 === "diagram") {
+                if (param11 instanceof Stack.Nil.class) {
+                  return true
+                } else {
+                  return false
+                }
+              } else {
+                return false
+              }
+            } else {
+              return false
+            }
+          } else {
+            return false
+          }
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
+    } else {
+      return false
+    }
+  } 
+  static parsePrecedenceTree(tree1) {
     let param0, param1, param01, param11, param02, param12, value, param03, param13, tmp;
-    if (tree instanceof Tree.Ident.class) {
-      param03 = tree.name;
-      param13 = tree.symbolic;
+    if (tree1 instanceof Tree.Ident.class) {
+      param03 = tree1.name;
+      param13 = tree1.symbolic;
       if (param03 === "None") {
         return Option.None
       } else {
         throw new globalThis.Error("match error");
       }
-    } else if (tree instanceof Tree.App.class) {
-      param0 = tree.callee;
-      param1 = tree.argument;
+    } else if (tree1 instanceof Tree.App.class) {
+      param0 = tree1.callee;
+      param1 = tree1.argument;
       if (param0 instanceof Tree.Ident.class) {
         param01 = param0.name;
         param11 = param0.symbolic;
@@ -133,10 +173,10 @@ Extension1 = class Extension {
       throw new globalThis.Error("match error");
     }
   } 
-  static extendKeyword(tree1) {
+  static extendKeyword(tree2) {
     let param0, param01, param1, keyword, param02, param11, leftPrec, param03, param12, rightPrec, param04, param13, name, leftPrec$_, rightPrec$_, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
-    if (tree1 instanceof Tree.Tuple.class) {
-      param0 = tree1.trees;
+    if (tree2 instanceof Tree.Tuple.class) {
+      param0 = tree2.trees;
       if (param0 instanceof Stack.Cons.class) {
         param01 = param0.head;
         param1 = param0.tail;
@@ -169,31 +209,31 @@ Extension1 = class Extension {
                 return Predef.print(tmp3)
               }
             } else {
-              tmp4 = "expect a tuple but found " + tree1;
+              tmp4 = "expect a tuple but found " + tree2;
               return Predef.print(tmp4)
             }
           } else {
-            tmp5 = "expect a tuple but found " + tree1;
+            tmp5 = "expect a tuple but found " + tree2;
             return Predef.print(tmp5)
           }
         } else {
-          tmp6 = "expect a tuple but found " + tree1;
+          tmp6 = "expect a tuple but found " + tree2;
           return Predef.print(tmp6)
         }
       } else {
-        tmp7 = "expect a tuple but found " + tree1;
+        tmp7 = "expect a tuple but found " + tree2;
         return Predef.print(tmp7)
       }
     } else {
-      tmp8 = "expect a tuple but found " + tree1;
+      tmp8 = "expect a tuple but found " + tree2;
       return Predef.print(tmp8)
     }
   } 
-  static newCategory(tree2) {
+  static newCategory(tree3) {
     let param0, param1, name, scrut, param01, rule, tmp, tmp1, tmp2, tmp3, tmp4;
-    if (tree2 instanceof Tree.Literal.class) {
-      param0 = tree2.kind;
-      param1 = tree2.value;
+    if (tree3 instanceof Tree.Literal.class) {
+      param0 = tree3.kind;
+      param1 = tree3.value;
       if (param0 instanceof Token.LiteralKind.String.class) {
         name = param1;
         scrut = runtime.safeCall(Rules.syntaxKinds.get(name));
@@ -206,15 +246,15 @@ Extension1 = class Extension {
           tmp1 = ParseRule.ParseRule(name, Stack.Nil);
           return Rules.syntaxKinds.insert(name, tmp1)
         } else {
-          tmp2 = "expect a string literal but found " + tree2;
+          tmp2 = "expect a string literal but found " + tree3;
           return Predef.print(tmp2)
         }
       } else {
-        tmp3 = "expect a string literal but found " + tree2;
+        tmp3 = "expect a string literal but found " + tree3;
         return Predef.print(tmp3)
       }
     } else {
-      tmp4 = "expect a string literal but found " + tree2;
+      tmp4 = "expect a string literal but found " + tree3;
       return Predef.print(tmp4)
     }
   } 
@@ -286,7 +326,7 @@ Extension1 = class Extension {
       throw new globalThis.Error("match error");
     }
   } 
-  static parseChoiceTree(tree3) {
+  static parseChoiceTree(tree4) {
     let go, param0, param01, param1, categoryIdent, param02, param11, choiceTree, param03, param12, funcIdent, param04, param13, categoryName, op, param05, param14, other, param06, elements, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36;
     go = function go(trees) {
       let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp37, tmp38, tmp39;
@@ -351,8 +391,8 @@ Extension1 = class Extension {
       res = tmp38;
       return res
     };
-    if (tree3 instanceof Tree.Tuple.class) {
-      param0 = tree3.trees;
+    if (tree4 instanceof Tree.Tuple.class) {
+      param0 = tree4.trees;
       if (param0 instanceof Stack.Cons.class) {
         param01 = param0.head;
         param1 = param0.tail;
@@ -429,31 +469,31 @@ Extension1 = class Extension {
                 return Option.None
               }
             } else {
-              tmp22 = Tree.summary(tree3);
+              tmp22 = Tree.summary(tree4);
               tmp23 = "Expect the definition to be a tuple but found " + tmp22;
               tmp24 = Predef.print(tmp23);
               return Option.None
             }
           } else {
-            tmp25 = Tree.summary(tree3);
+            tmp25 = Tree.summary(tree4);
             tmp26 = "Expect the definition to be a tuple but found " + tmp25;
             tmp27 = Predef.print(tmp26);
             return Option.None
           }
         } else {
-          tmp28 = Tree.summary(tree3);
+          tmp28 = Tree.summary(tree4);
           tmp29 = "Expect the definition to be a tuple but found " + tmp28;
           tmp30 = Predef.print(tmp29);
           return Option.None
         }
       } else {
-        tmp31 = Tree.summary(tree3);
+        tmp31 = Tree.summary(tree4);
         tmp32 = "Expect the definition to be a tuple but found " + tmp31;
         tmp33 = Predef.print(tmp32);
         return Option.None
       }
     } else {
-      tmp34 = Tree.summary(tree3);
+      tmp34 = Tree.summary(tree4);
       tmp35 = "Expect the definition to be a tuple but found " + tmp34;
       tmp36 = Predef.print(tmp35);
       return Option.None

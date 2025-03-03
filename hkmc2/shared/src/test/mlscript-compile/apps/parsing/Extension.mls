@@ -18,6 +18,9 @@ open ParseRule { Choice, ParseRule }
 
 module Extension with ...
 
+fun isDiagramDirective(tree: Tree) = tree is
+  Tree.Define(Tree.DefineKind.Directive, [Tree.Ident("diagram", _), _] :: Nil)
+
 fun parsePrecedenceTree(tree: Tree) = if tree is
   Tree.Ident("None", _) then None
   Tree.App(Tree.Ident("Some", _), Tree.Literal(Token.LiteralKind.Integer, value)) then
