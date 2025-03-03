@@ -42,6 +42,7 @@ fun newCategory(tree: Tree) =
       Some(rule) then print of "Category already exists: " + rule.display
       None then
         Rules.syntaxKinds.insert(name, ParseRule(name, Nil))
+        Rules.extendedKinds.add(name)
   else
     print of "expect a string literal but found " + tree
 

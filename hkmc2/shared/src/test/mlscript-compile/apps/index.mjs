@@ -10,7 +10,9 @@ import Rules from "./parsing/Rules.mjs";
 globalThis.Predef = Predef;
 
 const editor = document.getElementById("editor");
-editor.value = `let spaces n = make_string n " ";;
+
+function showExample1() {
+  editor.value = `let spaces n = make_string n " ";;
 let disk size =
     let right_half = make_string size ">"
     and left_half = make_string size "<"
@@ -33,7 +35,30 @@ let rec join_lines l1 l2 l3 =
   match (l1, l2, l3) with
   | ([], [], []) -> []
   | (t1::r1, t2::r2, t3::r3) -> (t1 ^ t2 ^ t3) :: join_lines r1 r2 r3
-  | _ -> failwith "join_lines";;`
+  | _ -> failwith "join_lines";;
+  `;
+}
+
+function showExample2() {
+  editor.value = `#newKeyword ("hello", Some 3, Some 3)
+#newKeyword ("goodbye", None, None)
+  
+#newCategory("greeting")
+  
+#extendCategory("greeting", [ keyword("hello"), "term", "greeting" ], foo)
+#extendCategory("greeting", [ keyword("goodbye") ], bar)
+  
+#extendCategory("decl", [ "greeting" ], baz)
+  
+  
+hello "Rob" hello "Bob" goodbye
+  
+#diagram ""
+`;
+}
+
+showExample1();
+
 editor.addEventListener("keydown", function (event) {
   if (event.key === "Tab") {
     event.preventDefault();
@@ -41,6 +66,17 @@ editor.addEventListener("keydown", function (event) {
     let end = this.selectionEnd;
     this.value = this.value.substring(0, start) + "  " + this.value.substring(end);
     this.selectionStart = this.selectionEnd = start + 2;
+  }
+});
+
+document.querySelector("select#example").addEventListener("change", function () {
+  switch (this.value) {
+    case "example-1":
+      showExample1();
+      break;
+    case "example-2":
+      showExample2();
+      break;
   }
 });
 
@@ -56,7 +92,7 @@ parseButton.addEventListener("click", () => {
     const trees = Parser.parse(tokens);
     for (const tree of Iter.fromStack(trees)) {
       if (Extension.isDiagramDirective(tree)) {
-        displayRules;
+        displayRules();
         continue;
       }
       const collapsibleTree = document.createElement('collapsible-tree');
@@ -198,6 +234,12 @@ function displayRules() {
     addElements(ParseRuleVisualizer.render(rr, "type", Rules.typeRule));
     sections.push(`<h3>Definition</h3>`);
     addElements(ParseRuleVisualizer.render(rr, "definition", Rules.declRule));
+    sections.push(`<h3>Extension</h3>`);
+    // Render the extended rules.
+    for (const kindName of Rules.extendedKinds) {
+      const extendedRule = Rules.getRuleByKind(kindName);
+      addElements(ParseRuleVisualizer.render(rr, kindName, extendedRule));
+    }
     document.querySelector("#syntax-diagrams > main").innerHTML = sections.join('');
   }
 

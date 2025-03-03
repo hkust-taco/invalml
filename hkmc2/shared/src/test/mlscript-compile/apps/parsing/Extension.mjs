@@ -230,7 +230,7 @@ Extension1 = class Extension {
     }
   } 
   static newCategory(tree3) {
-    let param0, param1, name, scrut, param01, rule, tmp, tmp1, tmp2, tmp3, tmp4;
+    let param0, param1, name, scrut, param01, rule, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
     if (tree3 instanceof Tree.Literal.class) {
       param0 = tree3.kind;
       param1 = tree3.value;
@@ -244,18 +244,19 @@ Extension1 = class Extension {
           return Predef.print(tmp)
         } else if (scrut instanceof Option.None.class) {
           tmp1 = ParseRule.ParseRule(name, Stack.Nil);
-          return Rules.syntaxKinds.insert(name, tmp1)
+          tmp2 = Rules.syntaxKinds.insert(name, tmp1);
+          return runtime.safeCall(Rules.extendedKinds.add(name))
         } else {
-          tmp2 = "expect a string literal but found " + tree3;
-          return Predef.print(tmp2)
+          tmp3 = "expect a string literal but found " + tree3;
+          return Predef.print(tmp3)
         }
       } else {
-        tmp3 = "expect a string literal but found " + tree3;
-        return Predef.print(tmp3)
+        tmp4 = "expect a string literal but found " + tree3;
+        return Predef.print(tmp4)
       }
     } else {
-      tmp4 = "expect a string literal but found " + tree3;
-      return Predef.print(tmp4)
+      tmp5 = "expect a string literal but found " + tree3;
+      return Predef.print(tmp5)
     }
   } 
   static extendCategory(choiceBodyTree) {

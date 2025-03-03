@@ -26,6 +26,8 @@ module Rules with ...
 
 val syntaxKinds = new Map()
 
+val extendedKinds = new Set()
+
 fun getRuleByKind(kind: Str) = syntaxKinds.get(kind) Option.unsafe.get()
 
 fun defineKind(name: Str, ...choices) =

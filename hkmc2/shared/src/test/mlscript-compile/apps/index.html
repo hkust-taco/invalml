@@ -16,6 +16,12 @@ https://cdn.jsdelivr.net/npm/modern-normalize@3.0.1/modern-normalize.min.css
     <div id="input">
       <header class="toolbar">
         <button class="button" id="parse">Parse</button>
+        <select class="select" id="example">
+          <option value="example-1">Hanoi from Caml Light</option>
+          <option value="example-2">Extensible Syntax</option>
+          <!-- <option value="example-3">Example 3</option>
+          <option value="example-4">Example 4</option> -->
+        </select>
       </header>
       <textarea id="editor" spellcheck="false" autocapitalize="off"></textarea>
     </div>
@@ -106,6 +112,18 @@ https://cdn.jsdelivr.net/npm/modern-normalize@3.0.1/modern-normalize.min.css
 
     #editor:focus {
       outline: none;
+    }
+    
+    .select {
+      line-height: 1.5;
+      background: #ffffff;
+      border: 1px solid #000;
+      box-shadow: rgb(187, 187, 187) 2px 2px 0px 0px;
+    }
+    
+    .select:focus {
+      outline: none;
+      box-shadow: rgb(187, 187, 187) 2px 2px 0px 0px, 0 0 0 .1rem rgba(52, 130, 255, 0.84);
     }
 
     .button {
