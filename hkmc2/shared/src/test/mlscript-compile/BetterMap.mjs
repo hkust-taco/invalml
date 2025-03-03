@@ -28,6 +28,12 @@ BetterMap1 = class BetterMap {
         tmp = this.#storage.set(key1, value);
         return runtime.Unit
       } 
+      get keysIterator() {
+        return runtime.safeCall(this.#storage.keys());
+      } 
+      get valuesIterator() {
+        return runtime.safeCall(this.#storage.values());
+      } 
       get values() {
         let tmp;
         tmp = runtime.safeCall(this.#storage.values());

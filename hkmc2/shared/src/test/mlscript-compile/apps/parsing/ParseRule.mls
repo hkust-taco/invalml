@@ -53,6 +53,30 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
       Iter.flattening()
       Iter.toStack()
   
+  fun andThen2(rest: ParseRule, process) =
+    fun go(rule: ParseRule) = ParseRule of
+      rule.name
+      rule.choices
+        Iter.fromStack()
+        Iter.mapping of case
+          Choice.Keyword(keyword, rest') then tuple of
+            Choice.Keyword(keyword, go(rest'))
+          Choice.Ref(isType, process, outerPrec, innerPrec, rest') then
+            let process' = (lhs, rhs) => if rhs is [rhs, innerResult] then
+              [process(lhs, rhs), innerResult]
+            tuple of
+              Choice.Ref(isType, process', outerPrec, innerPrec, go(rest'))
+          Choice.End(value) then
+            rest.choices
+              Iter.fromStack()
+              Iter.mapping of choice => choice Choice.map(result => [value, result])
+          Choice.Siding(rule, optional, rest') then tuple of
+            Choice.Siding(rule, optional, go(rest'))
+        Iter.flattening()
+        Iter.toStack()
+    go(this).map of case [outerResult, innerResult] then
+      process(outerResult, innerResult)
+  
   let _endChoice = None
   
   let _computeEndChoice = () => choices
@@ -117,25 +141,35 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
       computed
     Some(cache) then cache
   
+  fun extendChoices(newChoices: Stack[Choice]) =
+    set choices = choices ::: newChoices
+    // Invalidate memoized values.
+    set _endChoice = None
+    set _keywordChoices = None
+    set _exprChoice = None
+  
   // Display parse rules as a tree in a BNF-like format.
   fun display =
     object Knot
-    fun displayChoice(choice) = if choice is
+    /// Display a single `Choice`.
+    fun displayChoice(choice: Choice) = if choice is
       Choice.Keyword(keyword, rest) and
         let prefix = "\"" + keyword.name + "\""
-        tail(rest) is [name, line] then [prefix + line]
+        tail(rest) is [name, line] then prefix + line
       Choice.Ref(kind, _, _, _, rest) and
         let prefix = "<" + kind + ">"
-        tail(rest) is [name, line] then [prefix + line]
+        tail(rest) is [name, line] then prefix + line
       Choice.Siding(rule, optional, rest) then
         let ruleContent = if go(rule, false) is [name, line] then line
         let prefix = if optional then "[" + ruleContent + "]" else "(" + ruleContent + ")"
-        if tail(rest) is [name, line] then [prefix + line]
-      Choice.End then [""]
+        if tail(rest) is [name, line] then prefix + line
+      Choice.End then ""
       Choice.Lazy(get, make) and
-        get() is Knot then ["<rec>"]
+        get() is Knot then "<rec>"
         else displayChoice(make(() => Knot))
-      other then ["<unknown>" + JSON.stringify(other)]
+      other then "<unknown:" + other + ">"
+    
+    // Display the remaining list of choices.
     fun tail(rest) = if rest is ParseRule(_, choices) and
       choices is Choice.End :: Nil then ["", ""]
       go(rest, false) is [name, line] and
@@ -144,20 +178,23 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
             [name, " [" + line + "]"]
           else [name, " (" + line + ")"]
         else [name, " " + line]
+    
     fun go(rule, top) =
-      let content = rule.choices
+      let lines = rule.choices
         Iter.fromStack()
         Iter.filtering of case
           Choice.End then false
           else true
         Iter.mapping of displayChoice
-        Iter.joined of if top then "\n  | " else " | "
+        Iter.toArray()
       tuple of
         rule.name
         if
-          top then "\n  | " + content
-          rule.choices.length > 1 then "(" + content + ")"
-          else content
+          lines is [] then "ε"
+          lines is [line] then line
+          top then "\n  | " + lines.join("\n  | ")
+          else lines.join(" | ")
+    
     if go(this, true) is [name, line] then "<" + name + "> ::= " + line
 
 // Shorthands for constructing parse rules.
@@ -190,7 +227,7 @@ module Choice with
     Lazy(get, _) then get() rest()
     Keyword(_, rest) then Some(rest)
     Ref(_, _, _, _, rest) then Some(rest)
-    Siding(_, rest) then Some(rest)
+    Siding(_, _, rest) then Some(rest)
     End then None
   
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice

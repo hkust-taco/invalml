@@ -5,6 +5,7 @@ import "../BetterMap.mls"
 import "../TreeTracer.mls"
 import "../Iter.mls"
 import "../apps/Lexer.mls"
+import "./parsing/Extension.mls"
 import "./parsing/Token.mls"
 import "./parsing/TokenHelpers.mls"
 import "./parsing/Precedence.mls"
@@ -152,7 +153,7 @@ fun parse(tokens) =
               let acc = parseRule(keyword.rightPrecOrMax, rule, Keywords.all)
               termCont(acc, prec)
             else
-              tracer.print of "the left precedence is less" + name, source.line
+              tracer.print of "the left precedence of \"" + name + "\" is less", source.line
               Tree.empty
           None then
             tracer.print("no rule starting with " + name, source.line)
@@ -242,7 +243,7 @@ fun parse(tokens) =
             Tree.error("unexpected symbolic identifier: " + name)
           else
             consume
-            typeExprCont(Tree.Ident(name), prec)
+            typeExprCont(Tree.Ident(name, symbolic), prec)
       token :: _ then Tree.error("unrecognized token: " + token)
       else Tree.error("unexpected end of input")
   
@@ -286,6 +287,22 @@ fun parse(tokens) =
         None then acc
       Nil then acc
   
+  fun handleDirective(tree: Tree, acc: Tree) = if tree is
+    // Call the corresponding handler for the directive.
+    Tree.Define(Tree.DefineKind.Directive, [name, body] :: Nil) as tree and name is
+      Tree.Ident("newKeyword", _) then
+        Extension.extendKeyword(body)
+        modCont(acc)
+      Tree.Ident("newCategory", _) then
+        Extension.newCategory(body)
+        modCont(acc)
+      Tree.Ident("extendCategory", _) then
+        Extension.extendCategory(body)
+        modCont(acc)
+      else
+        modCont(tree :: acc)
+    tree then modCont(tree :: acc)
+  
   fun mod(acc: Stack[Tree]) = if tokens is
     do tracer.print of ">>>>>> mod <<<<<<", source.line
     Token.Identifier(";;", _) :: _ then
@@ -293,6 +310,7 @@ fun parse(tokens) =
       mod
     Token.Identifier(name, _) :: _ and
       Keywords.all.get(name) is Some(keyword) and
+        // First, try if the keyword is the prefix of the term.
         termRule.keywordChoices.get(name) is Some(rule) then
           let tree = term(0)
           if tree is Tree.LetIn(bindings, Tree.Empty) then
@@ -300,10 +318,10 @@ fun parse(tokens) =
             modCont of Tree.Define(Tree.DefineKind.Let(false), bindings) :: acc
           else
             modCont of tree :: acc
+        // Then try to parse according to the rules of the definition.
         declRule.keywordChoices.get(name) is Some(rule) then
           consume
-          let tree = parseRule(0, rule, Keywords.all)
-          modCont(tree :: acc)
+          parseRule(0, rule, Keywords.all) handleDirective(acc)
     _ :: _ then modCont of term(0, None) :: acc
     Nil then acc reverse()
   
@@ -312,7 +330,7 @@ fun parse(tokens) =
     Token.Identifier(";;", _) :: _ then
       consume
       acc mod()
-    _ :: _ then modCont of parseRule(0, declRule, Keywords.all) :: acc
+    _ :: _ then parseRule(0, declRule, Keywords.all) handleDirective(acc)
     Nil then acc reverse()
   
   let tree = tracer.trace of

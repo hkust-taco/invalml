@@ -481,11 +481,11 @@ class Desugarer(val elaborator: Elaborator)
         val arity = cls.arity
         if arity =/= args.length then
           val m = args.length.toString
-          ErrorReport:
+          error:
             if arity == 0 then
-              msg"the constructor does not take any arguments but found $m" -> app.toLoc :: Nil
+              msg"the constructor does not take any arguments but found $m" -> app.toLoc
             else
-              msg"mismatched arity: expect ${arity.toString}, found $m" -> app.toLoc :: Nil
+              msg"mismatched arity: expect ${arity.toString}, found $m" -> app.toLoc
         val params = scrutSymbol.getSubScrutinees(cls)
         Branch(
           ref,

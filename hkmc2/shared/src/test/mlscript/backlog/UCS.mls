@@ -158,3 +158,25 @@ fun parse(text: Str): [Int, Str] =
 
 // ——— ——— ———
 
+class
+  Tuple(a, b, c)
+  Ident(n)
+
+fun foo(tree) =
+  fun go(x) = ???
+  if tree is
+    Tuple(category, choice, function) and
+      category is Ident(categoryName) and
+        function is Ident(functionName) and
+          choice is
+            Tuple(elements) then Some(go(elements))
+            other then Some(go(other))
+        else
+          console.warn("expect the choice to be a bracketed term but found " + choice)
+          None
+      else
+        console.warn("expect a the category to be an identifier but found " + category)
+        None
+    else
+      console.warn("expect the definition to be a tuple but found " + tree)
+      None

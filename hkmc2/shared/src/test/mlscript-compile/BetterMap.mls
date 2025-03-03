@@ -18,7 +18,11 @@ class Map with
   fun insert(key, value) =
     storage.set(key, value)
     ()
-    
+  
+  fun keysIterator = storage.keys()
+  
+  fun valuesIterator = storage.values()
+  
   fun values = globalThis.Array.from of storage.values()
 
 fun toMap(entries) =

@@ -1,4 +1,5 @@
 import "../../Option.mls"
+import "../../Iter.mls"
 import "../../Predef.mls"
 import "../../BetterMap.mls"
 import "./Keyword.mls"
@@ -129,6 +130,12 @@ module Keywords with
   val _rightCurly = keyword of "}", basePrec, None
   val _begin = keyword of "begin", bracketPrec, basePrec
   val _end = keyword of "end", basePrec, None
+  
+  let builtinKeywords = new Set(all.keysIterator)
+  fun extended = all
+    Iter.filtering of case [k, _] then builtinKeywords.has(k) is false
+    Iter.toArray()
+    toMap()
 
 pattern Letter = "a" ..= "z" | "A" ..= "Z"
 

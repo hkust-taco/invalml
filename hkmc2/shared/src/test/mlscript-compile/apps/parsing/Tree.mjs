@@ -295,6 +295,7 @@ Tree2 = class Tree {
         } else if (tree1 instanceof Tree.Lambda.class) {
           return Precedence.Keywords._fun.leftPrecOrMax
         } else {
+          console.log(tree1);
           throw new globalThis.Error("match error");
         }
       }

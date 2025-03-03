@@ -1,5 +1,6 @@
 import runtime from "./../../Runtime.mjs";
 import Option from "./../../Option.mjs";
+import Iter from "./../../Iter.mjs";
 import Predef from "./../../Predef.mjs";
 import BetterMap from "./../../BetterMap.mjs";
 import Keyword from "./Keyword.mjs";
@@ -16,8 +17,9 @@ Precedence1 = class Precedence {
       static #thenPrec;
       static #precMap;
       static #bracketPrec;
+      static #builtinKeywords;
       static {
-        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58;
+        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59;
         tmp = new BetterMap.Map();
         this.all = tmp;
         Keywords.#prec = 0;
@@ -137,6 +139,8 @@ Precedence1 = class Precedence {
         this._begin = tmp57;
         tmp58 = Keywords.keyword("end", Keywords.#basePrec, Option.None);
         this._end = tmp58;
+        tmp59 = new globalThis.Set(Keywords.all.keysIterator);
+        Keywords.#builtinKeywords = tmp59;
       }
       static keyword(name, leftPrec, rightPrec) {
         let result, tmp, tmp1;
@@ -161,6 +165,28 @@ Precedence1 = class Precedence {
       } 
       static charPrecOpt(op1) {
         return runtime.safeCall(Keywords.#precMap.get(op1))
+      } 
+      static get extended() {
+        let tmp, tmp1, tmp2;
+        tmp = (caseScrut) => {
+          let first1, first0, k, scrut;
+          if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+            first0 = caseScrut[0];
+            first1 = caseScrut[1];
+            k = first0;
+            scrut = runtime.safeCall(Keywords.#builtinKeywords.has(k));
+            if (scrut === false) {
+              return true
+            } else {
+              return false
+            }
+          } else {
+            throw new globalThis.Error("match error");
+          }
+        };
+        tmp1 = Iter.filtering(Keywords.all, tmp);
+        tmp2 = Iter.toArray(tmp1);
+        return BetterMap.toMap(tmp2);
       }
       static toString() { return "Keywords"; }
     };

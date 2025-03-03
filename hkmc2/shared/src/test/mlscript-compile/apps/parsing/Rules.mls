@@ -587,3 +587,7 @@ val declRule = rule of
     "term"
     (body, _) => body
     "directive body"
+
+syntaxKinds.insert of "term", termRule
+syntaxKinds.insert of "type", typeRule
+syntaxKinds.insert of "decl", declRule
