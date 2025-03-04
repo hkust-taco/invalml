@@ -8,6 +8,8 @@ fun id(x) = x
 fun not(x) = x is false
 
 
+fun (@) apply(f, ...args) = f(...args)
+
 fun (|>) pipeInto(x, f) = f(x)
 fun (<|) pipeFrom(f, x) = f(x)
 
@@ -114,6 +116,9 @@ fun foldr(f)(first, ...rest) =
       i -= 1
       init = f(rest.at(i), init)
   f(first, init)
+
+fun mkStr(...xs) =
+  fold((acc, x) => assert(x is Str); acc + x) of ...xs
 
 
 fun stringStartsWith(string, prefix) = string.startsWith(prefix)

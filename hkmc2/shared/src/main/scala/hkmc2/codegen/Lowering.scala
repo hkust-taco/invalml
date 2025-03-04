@@ -198,12 +198,28 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
                 // Fail silently.
                 false -> Term.Error
           val l = new TempSymbol(S(t))
-            def rec(as: Ls[Bool -> st], asr: Ls[Arg]): Block = as match
-              case Nil => k(Call(fr, asr.reverse)(isMlsFun, true))
-              case (spd, a) :: as =>
-                subTerm_nonTail(a): ar =>
-                  rec(as, Arg(spd, ar) :: asr)
-            rec(as, Nil)
+          // * The straightforward way to lower arguments creates too much recursion depth
+          // * and makes Lowering stack overflow when lowering functions with lots of arguments.
+          /* 
+          def rec(as: Ls[Bool -> st], asr: Ls[Arg]): Block = as match
+            case Nil => k(Call(fr, asr.reverse)(isMlsFun, true))
+            case (spd, a) :: as =>
+              subTerm_nonTail(a): ar =>
+                rec(as, Arg(spd, ar) :: asr)
+          rec(as, Nil)
+          */
+          var asr: Ls[Arg] = Nil
+          def rec(as: Ls[Bool -> st]): Block = as match
+            case Nil => End()
+            case (spd, a) :: as =>
+              subTerm_nonTail(a): ar =>
+                asr ::= Arg(spd, ar)
+                rec(as)
+          val b = rec(as)
+          Begin(
+            b,
+            k(Call(fr, asr.reverse)(isMlsFun, true))
+          )
         case _ =>
           // Application arguments that are not tuples represent spreads, as in `f(...arg)`
           subTerm_nonTail(arg): ar =>
