@@ -65,10 +65,15 @@ fun render(arg) = if
       let p = Object.getOwnPropertyDescriptor(arg, "prototype")
       (p is Object and p.("writable")) || (p is undefined) then
         "[function" + (if arg.name is
-          "" then ""
+          ""  then ""
           nme then " " + nme
         ) + "]"
-    Object    then String(arg)
+    Object then
+      if arg.constructor.name is "Object"
+      then
+        let es = Object.entries(arg)
+        fold(+)("{", ...interleave(", ")(...map(case [k, v] then k + ": " + render(v))(...es)), "}")
+      else String(arg)
   let ts = arg.("toString") // not accessing as `arg.toString` to avoid the sanity check
   ts is undefined then "[" + typeof(arg) + "]"
   else ts.call(arg)

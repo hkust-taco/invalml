@@ -205,7 +205,7 @@ Predef1 = class Predef {
     }
   } 
   static render(arg1) {
-    let ts, p, scrut, scrut1, scrut2, nme, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, lambda, lambda1, lambda2;
+    let ts, scrut, es, p, scrut1, scrut2, scrut3, nme, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, lambda, lambda1, lambda2, lambda3, lambda4, lambda5, lambda6;
     if (arg1 === undefined) {
       return "undefined"
     } else if (arg1 === null) {
@@ -245,8 +245,8 @@ Predef1 = class Predef {
     } else if (arg1 instanceof globalThis.Function) {
       p = globalThis.Object.getOwnPropertyDescriptor(arg1, "prototype");
       if (p instanceof globalThis.Object) {
-        scrut = p["writable"];
-        if (scrut === true) {
+        scrut1 = p["writable"];
+        if (scrut1 === true) {
           tmp15 = true;
         } else {
           tmp15 = false;
@@ -259,28 +259,88 @@ Predef1 = class Predef {
       } else {
         tmp16 = false;
       }
-      scrut1 = tmp15 || tmp16;
-      if (scrut1 === true) {
-        scrut2 = arg1.name;
-        if (scrut2 === "") {
+      scrut2 = tmp15 || tmp16;
+      if (scrut2 === true) {
+        scrut3 = arg1.name;
+        if (scrut3 === "") {
           tmp17 = "";
         } else {
-          nme = scrut2;
+          nme = scrut3;
           tmp17 = " " + nme;
         }
         tmp18 = "[function" + tmp17;
         return tmp18 + "]"
       } else {
-        return globalThis.String(arg1)
+        scrut = arg1.constructor.name;
+        if (scrut === "Object") {
+          tmp19 = runtime.safeCall(globalThis.Object.entries(arg1));
+          es = tmp19;
+          lambda3 = (undefined, function (arg11, arg2) {
+            return arg11 + arg2
+          });
+          tmp20 = Predef.fold(lambda3);
+          tmp21 = Predef.interleave(", ");
+          lambda4 = (undefined, function (caseScrut) {
+            let first1, first0, k, v, tmp35, tmp36;
+            if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+              first0 = caseScrut[0];
+              first1 = caseScrut[1];
+              k = first0;
+              v = first1;
+              tmp35 = k + ": ";
+              tmp36 = Predef.render(v);
+              return tmp35 + tmp36
+            } else {
+              throw new globalThis.Error("match error");
+            }
+          });
+          tmp22 = lambda4;
+          tmp23 = Predef.map(tmp22);
+          tmp24 = runtime.safeCall(tmp23(...es));
+          tmp25 = runtime.safeCall(tmp21(...tmp24));
+          return runtime.safeCall(tmp20("{", ...tmp25, "}"))
+        } else {
+          return globalThis.String(arg1)
+        }
       }
     } else if (arg1 instanceof globalThis.Object) {
-      return globalThis.String(arg1)
+      scrut = arg1.constructor.name;
+      if (scrut === "Object") {
+        tmp26 = runtime.safeCall(globalThis.Object.entries(arg1));
+        es = tmp26;
+        lambda5 = (undefined, function (arg11, arg2) {
+          return arg11 + arg2
+        });
+        tmp27 = Predef.fold(lambda5);
+        tmp28 = Predef.interleave(", ");
+        lambda6 = (undefined, function (caseScrut) {
+          let first1, first0, k, v, tmp35, tmp36;
+          if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+            first0 = caseScrut[0];
+            first1 = caseScrut[1];
+            k = first0;
+            v = first1;
+            tmp35 = k + ": ";
+            tmp36 = Predef.render(v);
+            return tmp35 + tmp36
+          } else {
+            throw new globalThis.Error("match error");
+          }
+        });
+        tmp29 = lambda6;
+        tmp30 = Predef.map(tmp29);
+        tmp31 = runtime.safeCall(tmp30(...es));
+        tmp32 = runtime.safeCall(tmp28(...tmp31));
+        return runtime.safeCall(tmp27("{", ...tmp32, "}"))
+      } else {
+        return globalThis.String(arg1)
+      }
     } else {
       ts = arg1["toString"];
       if (ts === undefined) {
-        tmp19 = typeof arg1;
-        tmp20 = "[" + tmp19;
-        return tmp20 + "]"
+        tmp33 = typeof arg1;
+        tmp34 = "[" + tmp33;
+        return tmp34 + "]"
       } else {
         return runtime.safeCall(ts.call(arg1))
       }

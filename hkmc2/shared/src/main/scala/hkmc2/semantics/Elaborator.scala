@@ -11,6 +11,7 @@ import utils.TraceLogger
 
 import syntax.*
 import Tree.*
+import Term.{ Blk, Rcd }
 import hkmc2.Message.MessageContext
 
 import Keyword.{`let`, `set`}
@@ -245,13 +246,15 @@ extends Importer:
     case Bra(k, e) =>
       k match
       case BracketKind.Round =>
+      case BracketKind.Curly =>
       case _ =>
         raise(ErrorReport(msg"Unsupported ${k.name} in this position" -> tree.toLoc :: Nil))
       term(e)
-    case Block(s :: Nil) =>
-      term(s)
     case b: Block =>
-      block(b, hasResult = true)._1
+      ctx.nest(N).givenIn:
+        block(b, hasResult = true)._1 match
+        case Term.Blk(Nil, res) => res
+        case res => res
     case lit: Literal =>
       Term.Lit(lit)
     case d: Def =>
@@ -271,10 +274,10 @@ extends Importer:
       case id: Ident =>
         val lt = term(lhs)
         val sym = TempSymbol(S(lt), "old")
-        Term.Blk(
-        LetDecl(sym, Nil) :: DefineVar(sym, lt) :: Nil, Term.Try(Term.Blk(
-          Term.Assgn(lt, term(rhs)) :: Nil,
-          term(bod),
+        Blk(
+          LetDecl(sym, Nil) :: DefineVar(sym, lt) :: Nil, Term.Try(Blk(
+            Term.Assgn(lt, term(rhs)) :: Nil,
+            term(bod),
         ), Term.Assgn(lt, sym.ref(id))))
       case _ => ??? // TODO error
     case (hd @ Hndl(id: Ident, c, Block(sts_), S(bod))) => ctx.nest(N).givenIn:
@@ -286,7 +289,7 @@ extends Importer:
       derivedClsSym.defn = S(ClassDef(
         N, syntax.Cls, derivedClsSym,
         BlockMemberSymbol(derivedClsSym.name, Nil),
-        Nil, N, N, ObjBody(Term.Blk(Nil, Term.Lit(Tree.UnitLit(false)))), List()))
+        Nil, N, N, ObjBody(Blk(Nil, Term.Lit(Tree.UnitLit(false)))), List()))
       
       val elabed = ctx.nest(S(derivedClsSym)).givenIn:
         block(sts_, hasResult = false)._1
@@ -317,10 +320,7 @@ extends Importer:
           (cls(c, inAppPrefix = false), Nil)
       
       val newCtx = ctx + (id.name -> sym)
-      Term.Blk(
-        Term.Handle(sym, cp, p, derivedClsSym, tds) :: Nil,
-        term(bod)(using newCtx)
-      )
+      Term.Handle(sym, cp, p, derivedClsSym, tds, term(bod)(using newCtx))
     case h: Hndl =>
       raise(ErrorReport(
         msg"Unsupported handle binding shape" ->
@@ -388,8 +388,12 @@ extends Importer:
       ctx.nest(N).givenIn:
         val (syms, nestCtx) = params(lhs)
         Term.Lam(syms, term(rhs)(using nestCtx))
-    case InfixApp(lhs, Keyword.`:`, rhs) =>
+    case InfixApp(lhs, Keyword.`as`, rhs) =>
       Term.Asc(term(lhs), term(rhs))
+    case InfixApp(lhs, Keyword.`:`, rhs) =>
+      raise:
+        ErrorReport(msg"Unexpected colon in this position." -> tree.toLoc :: Nil, S(tree))
+      term(lhs)
     case tree @ InfixApp(lhs, Keyword.`is` | Keyword.`and`, rhs) =>
       val des = new ucs.Desugarer(this)(tree)
       scoped("ucs:desugared"):
@@ -590,7 +594,7 @@ extends Importer:
     case Modified(Keyword.`throw`, kwLoc, body) =>
       Term.Throw(term(body))
     case Modified(Keyword.`do`, kwLoc, body) =>
-      Term.Blk(term(body) :: Nil, unit)
+      Blk(term(body) :: Nil, unit)
     case TypeDef(Mod, head, N, N) =>
       term(head)
     case Tree.Region(id: Tree.Ident, body) =>
@@ -736,15 +740,20 @@ extends Importer:
   
   
   
-  def block(sts: Ls[Tree], hasResult: Bool)(using c: Ctx): (Term.Blk, Ctx) =
+  def block(sts: Ls[Tree], hasResult: Bool)(using c: Ctx): (Blk, Ctx) =
     block(new Tree.Block(sts), hasResult)
+  
+  def block(blk: Tree.Block, hasResult: Bool)(using c: Ctx): (Blk, Ctx) =
+    blockOrRcd(blk, hasResult) match
+      case (blk: Blk, ctx) => (blk, ctx)
+      case (rcd: Rcd, ctx) => (Blk(Nil, rcd), ctx)
   
   // * Some blocks do not have a meaningful result,
   // * e.g., constructor blocks or top-level blocks (in MLscript files and diff-tests);
   // * for these, elaborate with `hasResult = false`, which uses `undefined` as the result
   // * when there is no other result available. This is fine since the value is never used.
   // * These useless trailing `undefined`s are then removed by `Lowering`.
-  def block(blk: Tree.Block, hasResult: Bool)(using c: Ctx): (Term.Blk, Ctx) = trace[(Term.Blk, Ctx)](
+  def blockOrRcd(blk: Tree.Block, hasResult: Bool)(using c: Ctx): (Blk | Rcd, Ctx) = trace[(Blk | Rcd, Ctx)](
     pre = s"Elab block ${blk.desugStmts.toString.truncate(100, "[...]")} ${ctx.outer}", r => s"~> ${r._1}"
   ):
     
@@ -777,7 +786,7 @@ extends Importer:
     // * @param funs:
     // *  While elaborating a block, we move all function definitions to the top (similar to JS function semantics)
     @tailrec
-    def go(sts: Ls[Tree], funs: Ls[TermDefinition], annotations: Ls[Annot], acc: Ls[Statement]): Ctxl[(Term.Blk, Ctx)] =
+    def go(sts: Ls[Tree], funs: Ls[TermDefinition], annotations: Ls[Annot], acc: Ls[Statement]): Ctxl[(Blk | Rcd, Ctx)] =
       /** Call this function when the following term cannot be annotated. */
       def reportUnusedAnnotations: Unit = if annotations.nonEmpty then raise:
         WarningReport:
@@ -792,10 +801,7 @@ extends Importer:
       sts match
       case Nil =>
         reportUnusedAnnotations
-        val res = if hasResult
-          then unit
-          else Term.Lit(UnitLit(false))
-        (Term.Blk(funs reverse_::: acc.reverse, res), ctx)
+        (mkBlk(funs, acc, N, hasResult), ctx)
       case Open(bod) :: sts =>
         reportUnusedAnnotations
         bod match
@@ -854,8 +860,30 @@ extends Importer:
         newCtx.givenIn:
           go(sts, funs, Nil, newAcc)
       
+      case InfixApp(lhs, Keyword.`:`, rhs) :: sts =>
+        var newCtx = ctx
+        val newAcc = lhs match
+          case id: Ident =>
+            val sym = new VarSymbol(id)
+            newCtx += id.name -> sym
+            RcdField(Term.Lit(StrLit(id.name)).withLocOf(id), sym.ref(id)) ::
+            DefineVar(sym, term(rhs)) ::
+            LetDecl(sym, annotations) ::
+            acc
+          case lit: Literal =>
+            reportUnusedAnnotations
+            RcdField(Term.Lit(lit).withLocOf(lit), term(rhs)) :: acc
+          case Bra(BracketKind.Round, inner) =>
+            reportUnusedAnnotations
+            RcdField(term(inner), term(rhs)) :: acc
+          case _ =>
+            raise(ErrorReport(msg"Unexpected record key shape." -> lhs.toLoc :: Nil))
+            RcdField(Term.Error, term(rhs)) :: acc
+        newCtx.givenIn:
+          go(sts, funs, Nil, newAcc)
       case (hd @ LetLike(`let`, Apps(id: Ident, tups), rhso, N)) :: sts
-        if tups.isEmpty || id.name.headOption.exists(_.isLower) =>
+      if tups.isEmpty || id.name.headOption.exists(_.isLower) =>
+        reportUnusedAnnotations
         val sym =
           fieldOrVarSym(LetBind, id)
         log(s"Processing `let` statement $id (${sym}) ${ctx.outer}")
@@ -1051,7 +1079,7 @@ extends Importer:
               Nil, // ps.map(_.params).getOrElse(Nil), // TODO[Luyu]: remove pattern parameters
               td.rhs.getOrElse(die))
             val pd = PatternDef(owner, patSym, sym, tps, ps,
-              ObjBody(Term.Blk(bod, Term.Lit(UnitLit(false)))), annotations)
+              ObjBody(Blk(bod, Term.Lit(UnitLit(false)))), annotations)
             patSym.defn = S(pd)
             pd
         case k: (Mod.type | Obj.type) =>
@@ -1064,7 +1092,7 @@ extends Importer:
                 case S(b: Tree.Block) => block(b, hasResult = false)
                 // case S(t) => block(t :: Nil)
                 case S(t) => ???
-                case N => (new Term.Blk(Nil, Term.Lit(UnitLit(false))), ctx)
+                case N => (new Blk(Nil, Term.Lit(UnitLit(false))), ctx)
               ModuleDef(owner, clsSym, sym, tps, ps, newOf(td), k, ObjBody(bod), annotations)
             clsSym.defn = S(cd)
             cd
@@ -1078,7 +1106,7 @@ extends Importer:
                 case S(b: Tree.Block) => block(b, hasResult = false)
                 // case S(t) => block(t :: Nil)
                 case S(t) => ???
-                case N => (new Term.Blk(Nil, Term.Lit(UnitLit(false))), ctx)
+                case N => (new Blk(Nil, Term.Lit(UnitLit(false))), ctx)
               ClassDef(owner, Cls, clsSym, sym, tps, ps, newOf(td), ObjBody(bod), annotations)
             clsSym.defn = S(cd)
             cd
@@ -1091,13 +1119,25 @@ extends Importer:
         val res = annotations.foldLeft(term(st)):
           case (acc, ann) => Term.Annotated(ann, acc)
         sts match
-        case Nil => (Term.Blk(funs reverse_::: acc.reverse, res), ctx)
+        case Nil => (mkBlk(funs, acc, S(res), hasResult), ctx)
         case _ => go(sts, funs, Nil, res :: acc)
     end go
     
     c.withMembers(members, c.outer).givenIn:
       go(blk.desugStmts, Nil, Nil, Nil)
   
+  
+  def mkBlk(funs: Ls[TermDefinition], acc: Ls[Statement], res: Opt[Term], hasResult: Bool): Blk | Rcd =
+    // TODO forbid certain kinds of terms in records
+    val isRcd = acc.exists:
+      case RcdField(_, _) => true
+      case _ => false
+    if isRcd then Term.Rcd(funs reverse_::: (res.toList ::: acc).reverse)
+    else Blk(funs reverse_::: acc.reverse, res.getOrElse:
+      if hasResult
+        then unit
+        else Term.Lit(UnitLit(false))
+    )
   
   def newOf(td: TypeDef)(using Ctx): Opt[Term.New] =
     td.extension
@@ -1167,12 +1207,12 @@ extends Importer:
           Param(FldFlags.empty, sym, N)
       (vs, ctx ++ vs.map(p => p.sym.name -> p.sym))
   
-  def importFrom(sts: Tree.Block)(using c: Ctx): (Term.Blk, Ctx) =
+  def importFrom(sts: Tree.Block)(using c: Ctx): (Blk, Ctx) =
     val (res, newCtx) = block(sts, hasResult = false)
     // TODO handle name clashes
     (res, newCtx)
   
-  def topLevel(sts: Tree.Block)(using c: Ctx): (Term.Blk, Ctx) =
+  def topLevel(sts: Tree.Block)(using c: Ctx): (Blk, Ctx) =
     val (res, ctx) = block(sts, hasResult = false)
     computeVariances(res)
     (res, ctx)

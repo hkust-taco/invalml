@@ -35,6 +35,18 @@ new Predef.Test
 //│ ═══[RUNTIME ERROR] Error: Access to required field 'x' yielded 'undefined'
 
 
+id(123)
+//│ = 123
+
+:e
+:re
+id()
+//│ ╔══[ERROR] Expected 1 arguments, got 0
+//│ ║  l.43: 	id()
+//│ ╙──      	^^
+//│ ═══[RUNTIME ERROR] Error: MLscript call unexpectedly returned `undefined`, the forbidden value.
+
+
 print(1, 2, 3)
 //│ > 1 2 3
 

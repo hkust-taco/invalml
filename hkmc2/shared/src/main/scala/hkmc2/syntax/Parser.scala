@@ -525,7 +525,7 @@ abstract class Parser(
     case (LITVAL(lit), loc) :: _ =>
       consume
       exprCont(lit.asTree.withLoc(S(loc)), prec, allowNewlines = true)
-    case (br @ BRACKETS(bk @ (Round | Square), toks), loc) :: _ =>
+    case (br @ BRACKETS(bk @ (Round | Curly | Square), toks), loc) :: _ =>
       consume
       val ps = rec(toks, S(br.innerLoc), br.describe).concludeWith(_.blockMaybeIndented)
       yeetSpaces match
@@ -535,6 +535,7 @@ abstract class Parser(
             val rhs = effectfulRhs(kw.rightPrecOrMin)
             val lhs = bk match
               case Round => Tup(ps)
+              case Curly => Bra(Curly, Block(ps))
               case Square => TyTup(ps)
             exprCont(
               Quoted(InfixApp(lhs, kw, Unquoted(rhs)).withLoc(S(loc))).withLoc(S(l ++ loc)),
@@ -545,6 +546,7 @@ abstract class Parser(
           val rhs = effectfulRhs(kw.rightPrecOrMin)
           val lhs = bk match
             case Round => Tup(ps)
+            case Curly => ???
             case Square => TyTup(ps)
           val res = InfixApp(lhs, kw, rhs).withLoc(S(loc))
           exprCont(res, prec, allowNewlines = true)
@@ -556,6 +558,7 @@ abstract class Parser(
               case Nil => Unt().withLoc(S(loc))
               case e :: Nil => Bra(Round, e).withLoc(S(loc))
               case es => Bra(Round, Block(es).withLoc(S(loc)))
+            case Curly => Bra(Curly, Block(ps))
           exprCont(res, prec, allowNewlines = true)
     case (QUOTE, loc) :: _ =>
       consume

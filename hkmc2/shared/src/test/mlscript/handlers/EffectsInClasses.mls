@@ -147,6 +147,7 @@ oops.h
 //│ = Handler$h$
 
 let obj = {}
+//│ obj = ()
 
 handle h = Effect with
   fun perform(arg)(k) =
