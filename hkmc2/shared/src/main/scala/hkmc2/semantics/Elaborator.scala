@@ -103,7 +103,6 @@ object Elaborator:
       val Object = assumeBuiltinCls("Object")
       val untyped = assumeBuiltinTpe("untyped")
       // println(s"Builtins: $Int, $Num, $Str, $untyped")
-      val Predef = assumeBuiltinMod("Predef")
       object source:
         private val module = assumeBuiltinMod("source")
         private def assumeObject(nme: Str): BlockMemberSymbol =
@@ -152,8 +151,14 @@ object Elaborator:
     given State = this
     val globalThisSymbol = TopLevelSymbol("globalThis")
     val runtimeSymbol = TempSymbol(N, "runtime")
-    val effectSigSymbol = ClassSymbol(Tree.TypeDef(syntax.Cls, Tree.Error(), N, N), Tree.Ident("EffectSig"))
-    val returnClsSymbol = ClassSymbol(Tree.TypeDef(syntax.Cls, Tree.Error(), N, N), Tree.Ident("Return"))
+    val effectSigSymbol = ClassSymbol(TypeDef(syntax.Cls, Dummy, N, N), Ident("EffectSig"))
+    val returnClsSymbol = ClassSymbol(TypeDef(syntax.Cls, Dummy, N, N), Ident("Return"))
+    val matchResultClsSymbol =
+      val id = new Ident("MatchResult")
+      ClassSymbol(TypeDef(syntax.Cls, App(id, Tup(Ident("captures") :: Nil)), N, N), id)
+    val matchFailureClsSymbol =
+      val id = new Ident("MatchFailure")
+      ClassSymbol(TypeDef(syntax.Cls, App(id, Tup(Ident("errors") :: Nil)), N, N), id)
     val builtinOpsMap =
       val baseBuiltins = builtins.map: op =>
           op -> BuiltinSymbol(op,

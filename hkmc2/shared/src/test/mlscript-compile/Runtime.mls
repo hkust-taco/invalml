@@ -20,6 +20,11 @@ fun deboundMethod(mtdName, clsName) =
     "[debinding error] Method '" + mtdName + "' of class '" + clsName + "' was accessed without being called."
 
 
+// For `pattern` definitions
+class MatchResult(captures)
+class MatchFailure(errors)
+
+
 // Private definitions for algebraic effects
 
 abstract class FunctionContFrame(next) with

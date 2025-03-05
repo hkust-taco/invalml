@@ -74,9 +74,9 @@ enum Term extends Statement:
     case sel: SelProj => sel.sym
     case _ => N
   
-  def sel(id: Tree.Ident, sym: Opt[FieldSymbol]) =
+  def sel(id: Tree.Ident, sym: Opt[FieldSymbol]): Sel =
     Sel(this, id)(sym)
-  def selNoSym(nme: Str, synth: Bool = false) =
+  def selNoSym(nme: Str, synth: Bool = false): Sel | SynthSel =
     val id = new Tree.Ident(nme)
     if synth
     then SynthSel(this, id)(N)
