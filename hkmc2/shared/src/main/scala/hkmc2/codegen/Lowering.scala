@@ -190,6 +190,12 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
       }(Nil)
     case ref @ st.Ref(sym) =>
       sym match
+      case ctx.builtins.source.bms | ctx.builtins.js.bms =>
+        raise:
+          ErrorReport(
+            msg"Module '${sym.nme}' is virtual (i.e., \"compiler fiction\"); cannot be used directly" -> t.toLoc ::
+            Nil, S(t), source = Diagnostic.Source.Compilation)
+        return End("error")
       case sym: BuiltinSymbol =>
         warnStmt
         if sym.binary then
@@ -318,6 +324,8 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
           subTerm_nonTail(arg): ar =>
             k(Call(fr, Arg(spread = true, ar) :: Nil)(isMlsFun, true))
       f match
+      case t if t.symbol.isDefined && (t.symbol.get is ctx.builtins.js.try_catch) =>
+        conclude(Value.Ref(State.runtimeSymbol).selN(Tree.Ident("try_catch")))
       // * Due to whacky JS semantics, we need to make sure that selections leading to a call
       // * are preserved in the call and not moved to a temporary variable.
       case sel @ Sel(prefix, nme) =>

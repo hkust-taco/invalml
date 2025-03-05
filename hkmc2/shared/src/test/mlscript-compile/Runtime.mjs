@@ -1,4 +1,5 @@
 import runtime from "./Runtime.mjs";
+import RuntimeJS from "./RuntimeJS.mjs";
 let Runtime1;
 Runtime1 = class Runtime {
   static {
@@ -10,6 +11,7 @@ Runtime1 = class Runtime {
     };
     this.Unit = new Unit$class;
     this.Unit.class = Unit$class;
+    this.try_catch = RuntimeJS.try_catch;
     this.MatchResult = function MatchResult(captures1) {
       return new MatchResult.class(captures1);
     };

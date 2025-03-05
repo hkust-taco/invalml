@@ -15,8 +15,8 @@ declare class String
 declare class RegExp
 declare class Set
 declare class Map
-declare class Error(msg)
-declare class TypeError(msg)
+declare class Error
+declare class TypeError
 declare class Symbol
 
 // MLscript-specific types
@@ -48,5 +48,9 @@ declare module source with
     line
     name
     file
+
+declare module js with
+  fun
+    try_catch
 
 
