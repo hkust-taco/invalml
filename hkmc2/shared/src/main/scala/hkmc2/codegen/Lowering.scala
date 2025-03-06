@@ -82,6 +82,12 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
       case R(res) => term(res)(k)
       case L(flds) =>
         k(Value.Rcd(flds.reverse))
+    case RcdSpread(bod) :: stats =>
+      res match
+      case R(_) => wat("RcdField in non-Rcd context", res)
+      case L(flds) =>
+        subTerm(bod): l =>
+          block(stats, L(RcdArg(N, l) :: flds))(k)
     case RcdField(lhs, rhs) :: stats =>
       res match
       case R(_) => wat("RcdField in non-Rcd context", res)
