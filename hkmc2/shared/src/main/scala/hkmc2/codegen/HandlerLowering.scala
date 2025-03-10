@@ -518,7 +518,11 @@ class HandlerLowering(paths: HandlerPaths)(using TL, Raise, Elaborator.State, El
       clsSym,
       BlockMemberSymbol(clsSym.nme, Nil),
       syntax.Cls,
-      S(PlainParamList(Param(FldFlags.empty, pcVar, N) :: Nil)),
+      S(PlainParamList({
+        val p = Param(FldFlags.empty.copy(value = true), pcVar, N)
+        pcVar.decl = S(p)
+        p
+      } :: Nil)),
       Nil,
       S(paths.contClsPath),
       resumeFnDef :: Nil,
@@ -527,7 +531,12 @@ class HandlerLowering(paths: HandlerPaths)(using TL, Raise, Elaborator.State, El
       Assign(freshTmp(), PureCall(
         Value.Ref(State.builtinOpsMap("super")), // refers to runtime.FunctionContFrame which is pure
         Value.Lit(Tree.UnitLit(true)) :: Nil), End()),
-      End()))
+      AssignField(
+        clsSym.asPath,
+        pcVar.id,
+        Value.Ref(pcVar),
+        End()
+      )(S(pcSymbol))))
   
   private def genNormalBody(b: Block, clsSym: BlockMemberSymbol)(using HandlerCtx): Block =
     val transform = new BlockTransformerShallow(SymbolSubst()):

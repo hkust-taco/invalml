@@ -267,7 +267,7 @@ extends Importer:
     case _ => trm
   
   def annot(tree: Tree): Ctxl[Opt[Annot]] = tree match
-    case Keywrd(kw @ (Keyword.`abstract` | Keyword.`declare`)) => S(Annot.Modifier(kw))
+    case Keywrd(kw @ (Keyword.`abstract` | Keyword.`declare` | Keyword.`data`)) => S(Annot.Modifier(kw))
     case _ => term(tree) match
       case Term.Error => N
       case trm =>
@@ -431,7 +431,7 @@ extends Importer:
       Term.FunTy(term(lhs), term(rhs), N)
     case InfixApp(lhs, Keyword.`=>`, rhs) =>
       ctx.nest(OuterCtx.LambdaOrHandlerBlock).givenIn:
-        val (syms, nestCtx) = params(lhs)
+        val (syms, nestCtx) = params(lhs, false)
         Term.Lam(syms, term(rhs)(using nestCtx))
     case InfixApp(lhs, Keyword.`as`, rhs) =>
       Term.Asc(term(lhs), term(rhs))
@@ -1012,7 +1012,7 @@ extends Importer:
               // * Add parameters to context
               var newCtx = newCtx1
               val pss = td.paramLists.map: ps =>
-                val (res, newCtx2) = params(ps)(using newCtx)
+                val (res, newCtx2) = params(ps, false)(using newCtx)
                 newCtx = newCtx2
                 res
               // * Elaborate signature
@@ -1102,6 +1102,9 @@ extends Importer:
               res :: Nil
           case N => Nil
         newCtx ++= tps.map(tp => tp.sym.name -> tp.sym) // TODO: correct ++?
+        val isDataClass = annotations.exists:
+          case Annot.Modifier(Keyword.`data`) => true
+          case _ => false
         val ps =
           td.paramLists.match
             case Nil => N
@@ -1115,9 +1118,51 @@ extends Importer:
           .map: ps =>
             val (res, newCtx2) =
               given Ctx = newCtx
-              params(ps)
+              params(ps, isDataClass)
             newCtx = newCtx2
             res
+        def withFields(using Ctx)(fn: (Ctx) ?=> (Term.Blk, Ctx)): (Term.Blk, Ctx) =
+          val fields: Opt[List[TermDefinition | LetDecl | DefineVar]] = ps.map: ps =>
+            ps.params.flatMap: p =>
+              // For class-like types, "desugar" the parameters into additional class fields.
+              val owner = td.symbol match
+                // Any MemberSymbol should be an InnerSymbol, except for TypeAliasSymbol, 
+                // but type aliases should not call this function.
+                case s: InnerSymbol => S(s)
+                case _: TypeAliasSymbol => die
+
+              if p.flags.value || isDataClass then
+                val fsym = BlockMemberSymbol(p.sym.nme, Nil)
+                val fdef = TermDefinition(
+                  owner,
+                  ImmutVal,
+                  fsym,
+                  Nil, N, N,
+                  S(Term.Ref(p.sym)(p.sym.id, 666)), // FIXME: 666 is a dummy value
+                  FlowSymbol("‹class-param-res›"),
+                  TermDefFlags.empty.copy(isModMember = k is Mod),
+                  Nil
+                )
+                sym.defn = S(fdef)
+                fdef :: Nil
+              else
+                val psym = TermSymbol(LetBind, owner, p.sym.id)
+                val decl = LetDecl(psym, Nil)
+                val defn = DefineVar(psym, Term.Ref(p.sym)(p.sym.id, 666)) // FIXME: 666 is a dummy value
+                decl :: defn :: Nil
+              
+          val ctxWithFields = ctx
+            .withMembers(
+              fields.fold(Nil)(_.collect:
+                case f: TermDefinition => f.sym.nme -> f.sym // class fields
+              ),
+              ctx.outer.inner
+            ) ++ fields.fold(Nil)(_.collect:
+              case d: LetDecl => d.sym.nme -> d.sym // class params
+            )
+          val (blk, c) = fn(using ctxWithFields)
+          val blkWithFields = fields.fold[Term.Blk](blk)(fs => blk.copy(stats = fs ::: blk.stats))
+          (blkWithFields, c)
         val defn = k match
         case Als =>
           val alsSym = td.symbol.asInstanceOf[TypeAliasSymbol] // TODO improve `asInstanceOf`
@@ -1140,8 +1185,8 @@ extends Importer:
               case S(tree) =>
                 val (patternParams, extractionParams) = ps match // Filter out pattern parameters.
                   case S(ParamList(_, params, _)) => params.partition:
-                    case param @ Param(FldFlags(false, false, false, false, true), _, _) => true
-                    case param @ Param(FldFlags(_, _, _, _, false), _, _) => false
+                    case param @ Param(FldFlags(false, false, false, false, true, false), _, _) => true
+                    case param @ Param(FldFlags(_, _, _, _, false, _), _, _) => false
                   case N => (Nil, Nil)
                 // TODO: Implement extraction parameters.
                 if extractionParams.nonEmpty then
@@ -1169,7 +1214,8 @@ extends Importer:
           newCtx.nestInner(clsSym).givenIn:
             log(s"Processing type definition $nme")
             val cd =
-              val (bod, c) = body match
+              val (bod, c) = withFields: 
+                body match
                 case S(b: Tree.Block) => block(b, hasResult = false)
                 // case S(t) => block(t :: Nil)
                 case S(t) => ???
@@ -1183,7 +1229,8 @@ extends Importer:
           newCtx.nestInner(clsSym).givenIn:
             log(s"Processing type definition $nme")
             val cd =
-              val (bod, c) = body match
+              val (bod, c) = withFields: 
+                body match
                 case S(b: Tree.Block) => block(b, hasResult = false)
                 // case S(t) => block(t :: Nil)
                 case S(t) => ???
@@ -1234,13 +1281,14 @@ extends Importer:
       N
     case N => N
   
-  def fieldOrVarSym(k: TermDefKind, id: Ident)(using Ctx): LocalSymbol & NamedSymbol =
+  def fieldOrVarSym(k: TermDefKind, id: Ident)(using Ctx): TermSymbol | VarSymbol =
     if ctx.outer.inner.isDefined then TermSymbol(k, ctx.outer.inner, id)
     else VarSymbol(id)
   
-  def param(t: Tree, inUsing: Bool): Ctxl[Opt[Opt[Bool] -> Param]] = t match
+  def param(t: Tree, inUsing: Bool, inDataClass: Bool): Ctxl[Opt[Opt[Bool] -> Param]] =
+    def go(t: Tree, inUsing: Bool, flags: FldFlags): Ctxl[Opt[Opt[Bool] -> Param]] = t match
     case TypeDef(Mod, inner, N, N) =>
-      val ps = param(inner, inUsing).map(_.mapSecond(p => p.copy(flags = p.flags.copy(mod = true))))
+      val ps = go(inner, inUsing, flags.copy(mod = true))
       for p <- ps if p._2.flags.mod do p._2.sign match
         case N =>
           raise(ErrorReport(msg"Module parameters must have explicit types." -> t.toLoc :: Nil))
@@ -1249,18 +1297,26 @@ extends Importer:
         case _ => ()
       ps
     case TypeDef(Pat, inner, N, N) =>
-      param(inner, inUsing).map(_.mapSecond(p => p.copy(flags = p.flags.copy(pat = true))))
+      go(inner, inUsing, flags.copy(pat = true))
+    case TermDef(ImmutVal, inner, _) =>
+      go(inner, inUsing, flags.copy(value = true))
     case _ =>
       t.asParam(inUsing).map: (isSpd, p, t) =>
-        isSpd -> Param(FldFlags.empty, fieldOrVarSym(ParamBind, p), t.map(term(_)))
+        val sym = VarSymbol(p)
+        val sign = t.map(term(_))
+        val param = Param(flags, sym, sign)
+        sym.decl = S(param)
+        isSpd -> param
+    go(t, inUsing, if inDataClass then FldFlags.empty.copy(value = true) else FldFlags.empty)
+      
   
-  def params(t: Tree): Ctxl[(ParamList, Ctx)] = t match
+  def params(t: Tree, inDataClass: Bool): Ctxl[(ParamList, Ctx)] = t match
     case Tup(ps) =>
       def go(ps: Ls[Tree], acc: Ls[Param], ctx: Ctx, flags: ParamListFlags): (ParamList, Ctx) =
         ps match
         case Nil => (ParamList(flags, acc.reverse, N), ctx)
         case hd :: tl =>
-          param(hd, flags.ctx)(using ctx) match
+          param(hd, flags.ctx, inDataClass)(using ctx) match
           case S((isSpd, p)) =>
             val isCtx = hd match
               case Modified(Keyword.`using`, _, _) => true

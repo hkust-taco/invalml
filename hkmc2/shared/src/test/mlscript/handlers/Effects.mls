@@ -229,7 +229,7 @@ if true do
 //│ = 3
 
 module A with
-  class Effect(x) with
+  data class Effect(x) with
     fun test() = x
     fun perform(arg)
 handle h = A.Effect(3) with
