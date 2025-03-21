@@ -62,8 +62,8 @@ object Elaborator:
     def +(local: Str -> Symbol): Ctx = copy(outer, env = env + local.mapSecond(Ctx.RefElem(_)))
     def ++(locals: IterableOnce[Str -> Symbol]): Ctx =
       copy(outer, env = env ++ locals.mapValues(Ctx.RefElem(_)))
-    def elem_++(locals: IterableOnce[Str -> Ctx.Elem]): Ctx =
-      copy(outer, env = env ++ locals)
+    def elem_++(locals: IterableOnce[Str -> Ctx.Elem], overrideEnv: Bool): Ctx =
+      copy(outer, env = env ++ (if overrideEnv then locals else locals.iterator.filterNot(_._1 |> env.contains)))
     
     def withMembers(members: Iterable[Str -> MemberSymbol[?]], out: Opt[Symbol] = N): Ctx =
       copy(env = env ++ members.map:
@@ -896,13 +896,15 @@ extends Importer:
                     Nil
                 case S(sts) => sts.flatMap:
                   case id: Ident =>
+                    if ctx.env.contains(id.name) then
+                      raise(WarningReport(msg"Imported name '${id.name}' is shadowed by a name already defined in the same scope" -> id.toLoc :: Nil))
                     val sym = resolveField(id, baseElem.symbol, id)
                     val e = Ctx.SelElem(baseElem, id.name, sym)
                     id.name -> e :: Nil
                   case t =>
                     raise(ErrorReport(msg"Illegal 'open' statement element." -> t.toLoc :: Nil))
                     Nil
-              (ctx elem_++ importedNames).givenIn:
+              ctx.elem_++(importedNames, overrideEnv = false).givenIn:
                 go(sts, Nil, acc)
             case N =>
               raise(ErrorReport(msg"Name not found: ${baseId.name}" -> baseId.toLoc :: Nil))

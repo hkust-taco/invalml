@@ -43,7 +43,7 @@ open OtherModule
 console.log(None)
 none()
 //│ > None { class: [class None] }
-//│ > 123
+//│ > None { class: [class None] }
 //│ = None
 
 
