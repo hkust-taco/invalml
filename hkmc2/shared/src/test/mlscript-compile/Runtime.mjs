@@ -2,8 +2,9 @@ import runtime from "./Runtime.mjs";
 import RuntimeJS from "./RuntimeJS.mjs";
 import Rendering from "./Rendering.mjs";
 let Runtime1;
-Runtime1 = class Runtime {
+(class Runtime {
   static {
+    Runtime1 = Runtime;
     const Unit$class = class Unit {
       constructor() {}
       toString() {
@@ -696,5 +697,5 @@ Runtime1 = class Runtime {
     return result
   }
   static toString() { return "Runtime"; }
-};
+});
 let Runtime = Runtime1; export default Runtime;

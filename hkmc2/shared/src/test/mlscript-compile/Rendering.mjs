@@ -1,7 +1,9 @@
 import runtime from "./Runtime.mjs";
 let Rendering1;
-Rendering1 = class Rendering {
-  static {}
+(class Rendering {
+  static {
+    Rendering1 = Rendering;
+  }
   static pass1(f) {
     return (...xs) => {
       return runtime.safeCall(f(xs[0]))
@@ -233,5 +235,5 @@ Rendering1 = class Rendering {
     }
   }
   static toString() { return "Rendering"; }
-};
+});
 let Rendering = Rendering1; export default Rendering;

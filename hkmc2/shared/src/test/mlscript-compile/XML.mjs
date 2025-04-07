@@ -12,8 +12,10 @@ StyleAttributeValue1.class = class StyleAttributeValue {
   }
   toString() { return "StyleAttributeValue(" + "" + ")"; }
 };
-XML1 = class XML {
-  static {}
+(class XML {
+  static {
+    XML1 = XML;
+  }
   static serializeValue(value) {
     let param0, rules, tmp, tmp1, tmp2, lambda;
     if (typeof value === 'string') {
@@ -106,5 +108,5 @@ XML1 = class XML {
     }
   }
   static toString() { return "XML"; }
-};
+});
 let XML = XML1; export default XML;

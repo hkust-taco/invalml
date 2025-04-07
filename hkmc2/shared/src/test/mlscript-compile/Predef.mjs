@@ -2,8 +2,9 @@ import runtime from "./Runtime.mjs";
 import Runtime from "./Runtime.mjs";
 import Rendering from "./Rendering.mjs";
 let Predef1;
-Predef1 = class Predef {
+(class Predef {
   static {
+    Predef1 = Predef;
     this.pass1 = Rendering.pass1;
     this.pass2 = Rendering.pass2;
     this.pass3 = Rendering.pass3;
@@ -14,8 +15,9 @@ Predef1 = class Predef {
     this.render = Rendering.render;
     this.assert = globalThis.console.assert;
     this.foldl = Predef.fold;
-    this.TraceLogger = class TraceLogger {
+    (class TraceLogger {
       static {
+        Predef.TraceLogger = TraceLogger;
         this.enabled = false;
         this.indentLvl = 0;
       }
@@ -56,7 +58,7 @@ Predef1 = class Predef {
         }
       }
       static toString() { return "TraceLogger"; }
-    };
+    });
     this.Test = class Test {
       constructor() {
         let tmp;
@@ -259,5 +261,5 @@ Predef1 = class Predef {
     return Runtime.mkEffect(Runtime.FatalEffect, null)
   }
   static toString() { return "Predef"; }
-};
+});
 let Predef = Predef1; export default Predef;
