@@ -153,18 +153,17 @@ fun build(htmlPath, outputPath, git) =
   
   ()
 
-build of
-  path.join of projectRoot, "src", "test", "mlscript-compile", "apps", "index.html"
-  // - - - - -
-  // Be careful with the output path! Everything in it will be purged.
-  // The path here is just an example. Do not output to the test folder because
-  // it will trigger the test.
-  // Some of path.resolve of projectRoot, "..", "..", "..", "parsing-web-demo"
-  None
-  // - - - - -
-  // Some of tuple of
-  //   "" // Remote URL
-  //   "" // Username
-  //   "" // Email
-  None
-//│ > Collected 23 files
+// build of
+//   path.join of projectRoot, "src", "test", "mlscript-compile", "apps", "index.html"
+//   // - - - - -
+//   // Be careful with the output path! Everything in it will be purged.
+//   // The path here is just an example. Do not output to the test folder because
+//   // it will trigger the test.
+//   // Some of path.resolve of projectRoot, "..", "..", "..", "parsing-web-demo"
+//   None
+//   // - - - - -
+//   // Some of tuple of
+//   //   "" // Remote URL
+//   //   "" // Username
+//   //   "" // Email
+//   None
