@@ -78,7 +78,7 @@ fun parseChoiceTree(tree: Tree) =
     let res = if trees is
       Tree.App(Tree.Ident("keyword", _), Tree.Literal(LiteralKind.String, name)) :: rest and
         Keywords.all.get(name) is Some(keyword) then
-          Choice.keyword(keyword, go(rest))
+          Choice.keyword(keyword)(go(rest))
       Tree.Literal(LiteralKind.String, name) :: rest then
         Choice.reference(name, (head, tail) => head :: tail, "unnamed", go(rest))
       Nil then Choice.end(Nil)

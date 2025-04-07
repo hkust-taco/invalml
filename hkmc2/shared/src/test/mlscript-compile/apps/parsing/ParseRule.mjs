@@ -4,6 +4,7 @@ import Iter from "./../../Iter.mjs";
 import Option from "./../../Option.mjs";
 import Stack from "./../../Stack.mjs";
 import Predef from "./../../Predef.mjs";
+import Keyword1 from "./Keyword.mjs";
 import Token from "./Token.mjs";
 import Tree from "./Tree.mjs";
 let ParseRule2;
@@ -816,31 +817,33 @@ ParseRule2 = class ParseRule {
           return choice1
         }
       } 
-      static keyword(keyword, ...choices) {
-        let tmp, tmp1, tmp2;
-        tmp = "`" + keyword.name;
-        tmp1 = tmp + "` keyword";
-        tmp2 = ParseRule.rule(tmp1, ...choices);
-        return Choice.Keyword(keyword, tmp2)
+      static keyword(keyword) {
+        return (...choices) => {
+          let tmp, tmp1, tmp2;
+          tmp = "`" + keyword.name;
+          tmp1 = tmp + "` keyword";
+          tmp2 = ParseRule.rule(tmp1, ...choices);
+          return Choice.Keyword(keyword, tmp2)
+        }
       } 
-      static reference(kind, process, name, ...choices1) {
+      static reference(kind, process, name, ...choices) {
         let tmp;
-        tmp = ParseRule.rule(name, ...choices1);
+        tmp = ParseRule.rule(name, ...choices);
         return Choice.Ref(kind, process, Option.None, Option.None, tmp)
       } 
-      static term(process1, name1, ...choices2) {
+      static term(process1, name1, ...choices1) {
         let tmp;
-        tmp = ParseRule.rule(name1, ...choices2);
+        tmp = ParseRule.rule(name1, ...choices1);
         return Choice.Ref("term", process1, Option.None, Option.None, tmp)
       } 
-      static termWithPrec(process2, name2, outerPrec, innerPrec, ...choices3) {
+      static termWithPrec(process2, name2, outerPrec, innerPrec, ...choices2) {
         let tmp;
-        tmp = ParseRule.rule(name2, ...choices3);
+        tmp = ParseRule.rule(name2, ...choices2);
         return Choice.Ref("term", process2, outerPrec, innerPrec, tmp)
       } 
-      static typeExpr(process3, name3, ...choices4) {
+      static typeExpr(process3, name3, ...choices3) {
         let tmp;
-        tmp = ParseRule.rule(name3, ...choices4);
+        tmp = ParseRule.rule(name3, ...choices3);
         return Choice.Ref("type", process3, Option.None, Option.None, tmp)
       } 
       static optional(rule, rest) {

@@ -18,8 +18,6 @@ open XML { html, tag, elem, style }
 
 class RecursiveKnot(val getName: () -> Str)
 
-class LinkOpts(val href: Str)
-
 module ParseRuleVisualizer with ...
 
 val tracer = new TreeTracer.TreeTracer()
@@ -61,18 +59,18 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
       tracer.print of "found Choice.Ref to " + kind
       if renderedKinds.has(kind) is false do
         referencedKinds.add of kind
-      Some of rr.NonTerminal(kind, LinkOpts("#" + kind))
+      Some of rr.NonTerminal(kind, href: "#" + kind)
         sequence(renderRule(rest, currentRule))
     Choice.Lazy(get, make) and
       renderCache.has(make) then
         tracer.print of "found Choice.Lazy in cache"
         let ruleName = renderCache.get(make)
-        Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+        Some of rr.NonTerminal(ruleName, href: "#" + ruleName)
       else
         let rule = get()
         if rule is RecursiveKnot(getName) then
           tracer.print of "found RecursiveKnot of \"" + getName() + "\""
-          Some of rr.NonTerminal(getName(), LinkOpts("#" + getName()))
+          Some of rr.NonTerminal(getName(), href: "#" + getName())
         else
           tracer.print of "found Choice.Lazy not in cache"
           let proxyChoice = null
@@ -84,7 +82,7 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
           renderCache.set(make, ruleName)
           helperRules.push of tuple of
             ruleName, diagram of renderChoice(parentRule, proxyChoice, None)
-          Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
+          Some of rr.NonTerminal(ruleName, href: "#" + ruleName)
     do console.log("unexpected choice: " + choice)
   fun renderRule(rule: ParseRule.ParseRule, currentRule) = tracer.trace of
     "renderRule <<< " + rule.name

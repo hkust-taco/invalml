@@ -3,12 +3,13 @@ import "../../Iter.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
 import "../../Predef.mls"
+import "./Keyword.mls"
 import "./Token.mls"
 import "./Tree.mls"
 
 open BetterMap { Map, toMap }
 open Option { Some, None }
-open Predef { tuple }
+open Predef { assert, tuple }
 open Stack
 
 type Opt[A] = Some[A] | None
@@ -230,8 +231,9 @@ module Choice with
     End then None
   
   fun forced(choice) = if choice is Lazy(get, _) then get() else choice
+  
   // Shorthands for constructing rule choices.
-  fun keyword(keyword, ...choices) =
+  fun keyword(keyword)(...choices) =
     Keyword(keyword, rule("`" + keyword.name + "` keyword", ...choices))
   fun reference(kind, process, name, ...choices) =
     Ref(kind, process, None, None, rule(name, ...choices))

@@ -329,7 +329,7 @@ Extension1 = class Extension {
   static parseChoiceTree(tree4) {
     let go, param0, param01, param1, categoryIdent, param02, param11, choiceTree, param03, param12, funcIdent, param04, param13, categoryName, op, param05, param14, other, param06, elements, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, op1;
     go = function go(trees) {
-      let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp37, tmp38, tmp39, lambda;
+      let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp37, tmp38, tmp39, tmp40, lambda;
       if (trees instanceof Stack.Cons.class) {
         param07 = trees.head;
         param15 = trees.tail;
@@ -350,8 +350,9 @@ Extension1 = class Extension {
                   if (scrut instanceof Option.Some.class) {
                     param012 = scrut.value;
                     keyword = param012;
-                    tmp37 = go(rest1);
-                    tmp38 = ParseRule.Choice.keyword(keyword, tmp37);
+                    tmp37 = ParseRule.Choice.keyword(keyword);
+                    tmp38 = go(rest1);
+                    tmp39 = runtime.safeCall(tmp37(tmp38));
                   } else {
                     throw new globalThis.Error("match error");
                   }
@@ -373,11 +374,11 @@ Extension1 = class Extension {
           if (param08 instanceof Token.LiteralKind.String.class) {
             name = param16;
             rest = param15;
-            tmp39 = go(rest);
+            tmp40 = go(rest);
             lambda = (undefined, function (head, tail) {
               return Stack.Cons(head, tail)
             });
-            tmp38 = ParseRule.Choice.reference(name, lambda, "unnamed", tmp39);
+            tmp39 = ParseRule.Choice.reference(name, lambda, "unnamed", tmp40);
           } else {
             throw new globalThis.Error("match error");
           }
@@ -385,11 +386,11 @@ Extension1 = class Extension {
           throw new globalThis.Error("match error");
         }
       } else if (trees instanceof Stack.Nil.class) {
-        tmp38 = ParseRule.Choice.end(Stack.Nil);
+        tmp39 = ParseRule.Choice.end(Stack.Nil);
       } else {
         throw new globalThis.Error("match error");
       }
-      res = tmp38;
+      res = tmp39;
       return res
     };
     if (tree4 instanceof Tree.Tuple.class) {
