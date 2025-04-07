@@ -1,4 +1,5 @@
 :bbml
+//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -35,17 +36,17 @@ letreg of r =>
     read(r)
   write(r)
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.31: 	letreg of r =>
+//│ ║  l.32: 	letreg of r =>
 //│ ║        	^^^^^^^^^^^^^^
-//│ ║  l.32: 	  read(r)
+//│ ║  l.33: 	  read(r)
 //│ ║        	^^^^^^^^^
-//│ ║  l.33: 	  borrow(r) of () =>
+//│ ║  l.34: 	  borrow(r) of () =>
 //│ ║        	^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.34: 	    write(r)
+//│ ║  l.35: 	    write(r)
 //│ ║        	^^^^^^^^^^^^
-//│ ║  l.35: 	    read(r)
+//│ ║  l.36: 	    read(r)
 //│ ║        	^^^^^^^^^^^
-//│ ║  l.36: 	  write(r)
+//│ ║  l.37: 	  write(r)
 //│ ║        	^^^^^^^^^^
 //│ ╟── because: cannot constrain  'E  <:  ⊥
 //│ ╟── because: cannot constrain  'E  <:  ¬()
@@ -74,17 +75,17 @@ letreg of r =>
     read(r)
   write(r)
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.70: 	letreg of r =>
+//│ ║  l.71: 	letreg of r =>
 //│ ║        	^^^^^^^^^^^^^^
-//│ ║  l.71: 	  read(r)
+//│ ║  l.72: 	  read(r)
 //│ ║        	^^^^^^^^^
-//│ ║  l.72: 	  borrow(r) of () =>
+//│ ║  l.73: 	  borrow(r) of () =>
 //│ ║        	^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.73: 	    write(r)
+//│ ║  l.74: 	    write(r)
 //│ ║        	^^^^^^^^^^^^
-//│ ║  l.74: 	    read(r)
+//│ ║  l.75: 	    read(r)
 //│ ║        	^^^^^^^^^^^
-//│ ║  l.75: 	  write(r)
+//│ ║  l.76: 	  write(r)
 //│ ║        	^^^^^^^^^^
 //│ ╟── because: cannot constrain  'E  <:  ⊥
 //│ ╟── because: cannot constrain  'E  <:  ¬()

@@ -15,6 +15,7 @@ while
 // ——— ——— ———
 
 let arrMatches = ()
+//│ arrMatches = ()
 
 // * Note: produces a match error
 :fixme
@@ -87,9 +88,9 @@ else
   1
 //│ ╔══[ERROR] The following branches are unreachable.
 //│ ╟── Because the previous split is full.
-//│ ║  l.84: 	if audits.has(1) === true do
+//│ ║  l.85: 	if audits.has(1) === true do
 //│ ║        	   ^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.85: 	  print("ok")
+//│ ║  l.86: 	  print("ok")
 //│ ╙──      	^^^^^^^^^^^^^
 //│ = 1
 
@@ -115,7 +116,7 @@ class Some(v)
 Some(1) is
   Some of [process, rest] do "hi"
 //│ ╔══[ERROR] Unrecognized pattern (infix operation)
-//│ ║  l.116: 	  Some of [process, rest] do "hi"
+//│ ║  l.117: 	  Some of [process, rest] do "hi"
 //│ ╙──       	          ^^^^^^^^^^^^^^^^^^^^^^^
 //│ = false
 
@@ -180,3 +181,44 @@ fun foo(tree) =
     else
       console.warn("expect the definition to be a tuple but found " + tree)
       None
+//│ ╔══[ERROR] mismatched arity: expect 3, found 1
+//│ ║  l.173: 	            Tuple(elements) then Some(go(elements))
+//│ ╙──       	            ^^^^^^^^^^^^^^^
+
+// ——— ——— ———
+
+module Foo with
+  class
+    Bar
+    Baz
+
+fun foo(x) = if x is Foo.
+  Bar then "Bar"
+  Foo then "Foo"
+//│ ╔══[ERROR] Unrecognized pattern split.
+//│ ║  l.195: 	fun foo(x) = if x is Foo.
+//│ ╙──       	                     ^^^
+//│ ╔══[ERROR] Cannot use this identifier as an extractor
+//│ ║  l.195: 	fun foo(x) = if x is Foo.
+//│ ╙──       	                        ^
+//│ ╔══[ERROR] Cannot use this identifier as an extractor
+//│ ║  l.195: 	fun foo(x) = if x is Foo.
+//│ ╙──       	                        ^
+
+fun foo(x) = if x is Foo
+  .Bar then "Bar"
+  .Foo then "Foo"
+//│ ╔══[PARSE ERROR] Expected an expression; found selector instead
+//│ ║  l.209: 	  .Bar then "Bar"
+//│ ╙──       	  ^^^^
+//│ ╔══[PARSE ERROR] Unexpected selector here
+//│ ║  l.209: 	  .Bar then "Bar"
+//│ ╙──       	  ^^^^
+//│ ╔══[ERROR] Unrecognized pattern split.
+//│ ║  l.208: 	fun foo(x) = if x is Foo
+//│ ║         	                     ^^^
+//│ ║  l.209: 	  .Bar then "Bar"
+//│ ╙──       	^^
+
+// ——— ——— ———
+

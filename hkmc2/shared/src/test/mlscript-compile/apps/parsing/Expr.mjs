@@ -5,8 +5,8 @@ import Predef from "./../../Predef.mjs";
 let Expr1;
 Expr1 = class Expr {
   static {
-    let tmp;
-    tmp = (caseScrut) => {
+    let tmp, lambda;
+    lambda = (undefined, function (caseScrut) {
       if (caseScrut === "**") {
         return [
           70,
@@ -35,23 +35,30 @@ Expr1 = class Expr {
       } else {
         throw new globalThis.Error("match error");
       }
-    };
+    });
+    tmp = lambda;
     this.opPrec = tmp;
-    this.Lit = function Lit(value1) { return new Lit.class(value1); };
+    this.Lit = function Lit(value1) {
+      return new Lit.class(value1);
+    };
     this.Lit.class = class Lit {
       constructor(value) {
         this.value = value;
       }
       toString() { return "Lit(" + globalThis.Predef.render(this.value) + ")"; }
     };
-    this.Var = function Var(name1) { return new Var.class(name1); };
+    this.Var = function Var(name1) {
+      return new Var.class(name1);
+    };
     this.Var.class = class Var {
       constructor(name) {
         this.name = name;
       }
       toString() { return "Var(" + globalThis.Predef.render(this.name) + ")"; }
     };
-    this.Inf = function Inf(op1, left1, right1) { return new Inf.class(op1, left1, right1); };
+    this.Inf = function Inf(op1, left1, right1) {
+      return new Inf.class(op1, left1, right1);
+    };
     this.Inf.class = class Inf {
       constructor(op, left, right) {
         this.op = op;
@@ -60,7 +67,9 @@ Expr1 = class Expr {
       }
       toString() { return "Inf(" + globalThis.Predef.render(this.op) + ", " + globalThis.Predef.render(this.left) + ", " + globalThis.Predef.render(this.right) + ")"; }
     };
-    this.Err = function Err(expr1, msg1) { return new Err.class(expr1, msg1); };
+    this.Err = function Err(expr1, msg1) {
+      return new Err.class(expr1, msg1);
+    };
     this.Err.class = class Err {
       constructor(expr, msg) {
         this.expr = expr;

@@ -1,5 +1,6 @@
 :js
 
+:silent
 import "../../mlscript-compile/apps/Parser.mls"
 import "../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
 import "../../mlscript-compile/apps/parsing/Rules.mls"
@@ -7,8 +8,6 @@ import "../../mlscript-compile/apps/parsing/vendors/railroad/railroad.mjs"
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/XML.mls"
 import "path"
-//│ path = [object Object]
-//│ railroad = [object Object]
 
 open ParseRuleVisualizer { render }
 open Rules { termRule, declRule, typeRule }

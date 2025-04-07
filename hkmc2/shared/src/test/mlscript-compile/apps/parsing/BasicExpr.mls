@@ -11,12 +11,13 @@ type Option[A] = Some[A] | None
 module BasicExpr with
   type Expr = Lit | Var | Add | Mul | Err
   
-  class
-    Lit(value: Int)
-    Var(name: Str)
-    Add(left: Expr, right: Expr)
-    Mul(left: Expr, right: Expr)
-    Err(expr: Option[Expr], msg: Str)
+  data
+    class
+      Lit(value: Int)
+      Var(name: Str)
+      Add(left: Expr, right: Expr)
+      Mul(left: Expr, right: Expr)
+      Err(expr: Option[Expr], msg: Str)
   
   fun withErr(expr, msg) = Err(Some(expr), msg)
   fun justErr(msg) = Err(None, msg)

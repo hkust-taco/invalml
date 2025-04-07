@@ -3,6 +3,7 @@
 
 :global
 :bbml
+//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 
@@ -11,16 +12,16 @@ fun test1() =
   fun sayHi = print("Hi")
   sayHi, sayHi, sayHi
 //│ ╔══[ERROR] Function definition shape not yet supported for sayHi
-//│ ║  l.11: 	  fun sayHi = print("Hi")
+//│ ║  l.12: 	  fun sayHi = print("Hi")
 //│ ╙──      	              ^^^^^^^^^^^
 //│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.12: 	  sayHi, sayHi, sayHi
+//│ ║  l.13: 	  sayHi, sayHi, sayHi
 //│ ╙──      	  ^^^^^
 //│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.12: 	  sayHi, sayHi, sayHi
+//│ ║  l.13: 	  sayHi, sayHi, sayHi
 //│ ╙──      	         ^^^^^
 //│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.12: 	  sayHi, sayHi, sayHi
+//│ ║  l.13: 	  sayHi, sayHi, sayHi
 //│ ╙──      	                ^^^^^
 //│ Type: ⊤
 
@@ -38,9 +39,9 @@ fun test2() =
     n then funny(n - 1) + 1
   funny
 //│ ╔══[ERROR] Expected a monomorphic type or an instantiable type here, but () ->{⊥} [outer, 'caseScrut, 'eff] -> 'caseScrut ->{'eff} Int found
-//│ ║  l.38: 	    n then funny(n - 1) + 1
+//│ ║  l.39: 	    n then funny(n - 1) + 1
 //│ ║        	           ^^^^^^^^^^^^^^^^
-//│ ║  l.39: 	  funny
+//│ ║  l.40: 	  funny
 //│ ╙──      	^^^^^^^
 //│ Type: ⊤
 
@@ -85,24 +86,26 @@ fun test2() =
 //│ test22 = function test2() {
 //│   let funny, tmp1;
 //│   funny = function funny() {
-//│     return (caseScrut) => {
+//│     let lambda;
+//│     lambda = (undefined, function (caseScrut) {
 //│       let n, tmp2, tmp3, tmp4;
 //│       n = caseScrut;
 //│       tmp2 = funny();
 //│       tmp3 = n - 1;
 //│       tmp4 = tmp2(tmp3);
 //│       return tmp4 + 1
-//│     }
+//│     });
+//│     return lambda
 //│   };
 //│   tmp1 = funny();
 //│   return tmp1
 //│ };
 //│ ═══[WARNING] Pure expression in statement position
 //│ ╔══[ERROR] Function definition shape not yet supported for funny
-//│ ║  l.80: 	    case n then funny(n - 1) + 1
+//│ ║  l.81: 	    case n then funny(n - 1) + 1
 //│ ╙──      	                ^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Variable not found: funny
-//│ ║  l.81: 	  funny
+//│ ║  l.82: 	  funny
 //│ ╙──      	  ^^^^^
 //│ Type: ⊤
 
@@ -111,7 +114,7 @@ fun test2() =
 fun test3 =
   print("Hi")
 //│ ╔══[ERROR] Function definition shape not yet supported for test3
-//│ ║  l.112: 	  print("Hi")
+//│ ║  l.115: 	  print("Hi")
 //│ ╙──       	  ^^^^^^^^^^^
 //│ Type: ⊤
 

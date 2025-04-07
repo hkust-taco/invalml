@@ -58,6 +58,7 @@ abstract class MLsDiffMaker extends DiffMaker:
   val noSanityCheck = NullaryCommand("noSanityCheck")
   val effectHandlers = NullaryCommand("effectHandlers")
   val stackSafe = Command("stackSafe")(_.trim)
+  val liftDefns = NullaryCommand("lift")
   
   def mkConfig: Config =
     import Config.*
@@ -79,6 +80,7 @@ abstract class MLsDiffMaker extends DiffMaker:
                 S(StackSafety(stackLimit = value))
         ,
       )),
+      liftDefns = Opt.when(liftDefns.isSet)(LiftDefns())
     )
   
   
@@ -121,7 +123,7 @@ abstract class MLsDiffMaker extends DiffMaker:
       given Config = mkConfig
       importFile(preludeFile, verbose = false)
       prelude = curCtx
-    curCtx = curCtx.nest(N)
+    curCtx = curCtx.nestLocal
     super.run()
   
   
@@ -150,7 +152,7 @@ abstract class MLsDiffMaker extends DiffMaker:
     
     val block = os.read(file)
     val fph = new FastParseHelpers(block)
-    val origin = Origin(file.toString, 0, fph)
+    val origin = Origin(file, 0, fph)
     
     val lexer = new syntax.Lexer(origin, dbg = dbgParsing.isSet)
     val tokens = lexer.bracketedTokens
@@ -164,7 +166,7 @@ abstract class MLsDiffMaker extends DiffMaker:
     val res = p.parseAll(p.block(allowNewlines = true))
     val imprtSymbol =
       semantics.TopLevelSymbol("import#"+file.baseName)
-    given Elaborator.Ctx = curCtx.nest(N)
+    given Elaborator.Ctx = curCtx.nestLocal
     val elab = Elaborator(etl, wd, Ctx.empty)
     try
       val resBlk = new syntax.Tree.Block(res)
@@ -228,7 +230,7 @@ abstract class MLsDiffMaker extends DiffMaker:
     //   semantics.TopLevelSymbol("block#"+blockNum)
     blockNum += 1
     // given Elaborator.Ctx = curCtx.nest(S(blockSymbol))
-    given Elaborator.Ctx = curCtx.nest(N)
+    given Elaborator.Ctx = curCtx.nestLocal
     val blk = new syntax.Tree.Block(trees)
     val (e, newCtx) = elab.topLevel(blk)
     curCtx = newCtx

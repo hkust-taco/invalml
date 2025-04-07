@@ -167,8 +167,8 @@ Precedence1 = class Precedence {
         return runtime.safeCall(Keywords.#precMap.get(op1))
       } 
       static get extended() {
-        let tmp, tmp1, tmp2;
-        tmp = (caseScrut) => {
+        let tmp, tmp1, tmp2, lambda;
+        lambda = (undefined, function (caseScrut) {
           let first1, first0, k, scrut;
           if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
             first0 = caseScrut[0];
@@ -183,7 +183,8 @@ Precedence1 = class Precedence {
           } else {
             throw new globalThis.Error("match error");
           }
-        };
+        });
+        tmp = lambda;
         tmp1 = Iter.filtering(Keywords.all, tmp);
         tmp2 = Iter.toArray(tmp1);
         return BetterMap.toMap(tmp2);
@@ -198,18 +199,18 @@ Precedence1 = class Precedence {
         if (gtLo === true) {
           ltHi = scrut <= "z";
           if (ltHi === true) {
-            return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            return runtime.safeCall(runtime.MatchResult([]))
           } else {
             gtLo1 = "A" <= scrut;
             if (gtLo1 === true) {
               ltHi1 = scrut <= "Z";
               if (ltHi1 === true) {
-                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+                return runtime.safeCall(runtime.MatchResult([]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           }
         } else {
@@ -217,12 +218,12 @@ Precedence1 = class Precedence {
           if (gtLo1 === true) {
             ltHi1 = scrut <= "Z";
             if (ltHi1 === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              return runtime.safeCall(runtime.MatchResult([]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       } 
@@ -230,7 +231,7 @@ Precedence1 = class Precedence {
         let emptyTest, head, tail, gtLo, ltHi, emptyTest1, head1, tail1, gtLo1, ltHi1;
         emptyTest = topic == "";
         if (emptyTest === true) {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         } else {
           head = globalThis.Predef.stringGet(topic, 0);
           tail = globalThis.Predef.stringDrop(topic, 1);
@@ -238,13 +239,13 @@ Precedence1 = class Precedence {
           if (gtLo === true) {
             ltHi = head <= "z";
             if (ltHi === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 tail
               ]))
             } else {
               emptyTest1 = topic == "";
               if (emptyTest1 === true) {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               } else {
                 head1 = globalThis.Predef.stringGet(topic, 0);
                 tail1 = globalThis.Predef.stringDrop(topic, 1);
@@ -252,21 +253,21 @@ Precedence1 = class Precedence {
                 if (gtLo1 === true) {
                   ltHi1 = head1 <= "Z";
                   if (ltHi1 === true) {
-                    return runtime.safeCall(globalThis.Predef.MatchResult([
+                    return runtime.safeCall(runtime.MatchResult([
                       tail1
                     ]))
                   } else {
-                    return runtime.safeCall(globalThis.Predef.MatchFailure())
+                    return runtime.safeCall(runtime.MatchFailure())
                   }
                 } else {
-                  return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  return runtime.safeCall(runtime.MatchFailure())
                 }
               }
             }
           } else {
             emptyTest1 = topic == "";
             if (emptyTest1 === true) {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             } else {
               head1 = globalThis.Predef.stringGet(topic, 0);
               tail1 = globalThis.Predef.stringDrop(topic, 1);
@@ -274,14 +275,14 @@ Precedence1 = class Precedence {
               if (gtLo1 === true) {
                 ltHi1 = head1 <= "Z";
                 if (ltHi1 === true) {
-                  return runtime.safeCall(globalThis.Predef.MatchResult([
+                  return runtime.safeCall(runtime.MatchResult([
                     tail1
                   ]))
                 } else {
-                  return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  return runtime.safeCall(runtime.MatchFailure())
                 }
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             }
           }
@@ -295,15 +296,15 @@ Precedence1 = class Precedence {
       constructor() {}
       unapply(scrut) {
         if (scrut === "+.") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "-.") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "*.") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "/.") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
@@ -311,32 +312,32 @@ Precedence1 = class Precedence {
         cond = globalThis.Predef.stringStartsWith(topic, "+.");
         if (cond === true) {
           sliced = globalThis.Predef.stringDrop(topic, 2);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
           cond1 = globalThis.Predef.stringStartsWith(topic, "-.");
           if (cond1 === true) {
             sliced1 = globalThis.Predef.stringDrop(topic, 2);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
             cond2 = globalThis.Predef.stringStartsWith(topic, "*.");
             if (cond2 === true) {
               sliced2 = globalThis.Predef.stringDrop(topic, 2);
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
               cond3 = globalThis.Predef.stringStartsWith(topic, "/.");
               if (cond3 === true) {
                 sliced3 = globalThis.Predef.stringDrop(topic, 2);
-                return runtime.safeCall(globalThis.Predef.MatchResult([
+                return runtime.safeCall(runtime.MatchResult([
                   sliced3
                 ]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             }
           }
@@ -350,15 +351,15 @@ Precedence1 = class Precedence {
       constructor() {}
       unapply(scrut) {
         if (scrut === "@") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "/") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === ",") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === ":") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
@@ -366,32 +367,32 @@ Precedence1 = class Precedence {
         cond = globalThis.Predef.stringStartsWith(topic, "@");
         if (cond === true) {
           sliced = globalThis.Predef.stringDrop(topic, 1);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
           cond1 = globalThis.Predef.stringStartsWith(topic, "/");
           if (cond1 === true) {
             sliced1 = globalThis.Predef.stringDrop(topic, 1);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
             cond2 = globalThis.Predef.stringStartsWith(topic, ",");
             if (cond2 === true) {
               sliced2 = globalThis.Predef.stringDrop(topic, 1);
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
               cond3 = globalThis.Predef.stringStartsWith(topic, ":");
               if (cond3 === true) {
                 sliced3 = globalThis.Predef.stringDrop(topic, 1);
-                return runtime.safeCall(globalThis.Predef.MatchResult([
+                return runtime.safeCall(runtime.MatchResult([
                   sliced3
                 ]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             }
           }
@@ -403,7 +404,7 @@ Precedence1 = class Precedence {
     this.RightAssociative.class = RightAssociative$class;
   }
   static makePrecMap(startPrec, ...ops) {
-    let m, i, scrut, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    let m, i, scrut, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, lambda;
     tmp = new BetterMap.Map();
     m = tmp;
     i = 0;
@@ -412,7 +413,7 @@ Precedence1 = class Precedence {
       if (scrut === true) {
         tmp1 = runtime.safeCall(ops.at(i));
         tmp2 = runtime.safeCall(tmp1.split(" "));
-        tmp3 = (op, _, _1) => {
+        lambda = (undefined, function (op, _, _1) {
           let scrut1, tmp8;
           scrut1 = op.length > 0;
           if (scrut1 === true) {
@@ -421,7 +422,8 @@ Precedence1 = class Precedence {
           } else {
             return runtime.Unit
           }
-        };
+        });
+        tmp3 = lambda;
         tmp4 = runtime.safeCall(tmp2.forEach(tmp3));
         tmp5 = i + 1;
         i = tmp5;
@@ -435,16 +437,17 @@ Precedence1 = class Precedence {
     return m
   } 
   static hasLetter(s) {
-    let tmp;
-    tmp = (ch, _, _1) => {
+    let tmp, lambda;
+    lambda = (undefined, function (ch, _, _1) {
       let matchResult;
       matchResult = runtime.safeCall(Precedence.Letter.unapply(ch));
-      if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+      if (matchResult instanceof runtime.MatchResult.class) {
         return true
       } else {
         return false
       }
-    };
+    });
+    tmp = lambda;
     return runtime.safeCall([
       ...s
     ].some(tmp))
@@ -452,7 +455,7 @@ Precedence1 = class Precedence {
   static opPrec(opStr) {
     let lastChar, rightPrec, matchResult, scrut, matchResult1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
     matchResult1 = runtime.safeCall(Precedence.FloatOperator.unapply(opStr));
-    if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+    if (matchResult1 instanceof runtime.MatchResult.class) {
       tmp = runtime.safeCall(opStr.at(0));
       tmp1 = Precedence.Keywords.charPrec(tmp);
       tmp2 = runtime.safeCall(opStr.at(0));
@@ -470,7 +473,7 @@ Precedence1 = class Precedence {
         tmp6 = Precedence.Keywords.charPrec(tmp5);
         tmp7 = Precedence.Keywords.charPrec(lastChar);
         matchResult = runtime.safeCall(Precedence.RightAssociative.unapply(lastChar));
-        if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+        if (matchResult instanceof runtime.MatchResult.class) {
           tmp8 = - 1;
         } else {
           tmp8 = 0;
@@ -486,7 +489,7 @@ Precedence1 = class Precedence {
       return Option.None
     } else {
       matchResult1 = runtime.safeCall(Precedence.FloatOperator.unapply(opStr1));
-      if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+      if (matchResult1 instanceof runtime.MatchResult.class) {
         tmp = runtime.safeCall(opStr1.at(0));
         tmp1 = Precedence.Keywords.charPrec(tmp);
         tmp2 = runtime.safeCall(opStr1.at(0));
@@ -511,7 +514,7 @@ Precedence1 = class Precedence {
               param01 = scrut1.value;
               leftPrec = param01;
               matchResult = runtime.safeCall(Precedence.RightAssociative.unapply(lastChar));
-              if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+              if (matchResult instanceof runtime.MatchResult.class) {
                 tmp8 = - 1;
               } else {
                 tmp8 = 0;

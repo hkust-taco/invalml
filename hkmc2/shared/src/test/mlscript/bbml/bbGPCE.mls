@@ -1,4 +1,5 @@
 :bbml
+//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -65,7 +66,7 @@ fun body(x, y) = case
   1 then y
   n then bind of x `+ y, (z => body(y, z)(n - 1)): [C] -> CodeBase[out Int, out C, out Any] -> CodeBase[out C, out Any]
 //│ ╔══[ERROR] Type error in application with expected type CodeBase[out Int, out G, ?]
-//│ ║  l.66: 	  n then bind of x `+ y, (z => body(y, z)(n - 1)): [C] -> CodeBase[out Int, out C, out Any] -> CodeBase[out C, out Any]
+//│ ║  l.67: 	  n then bind of x `+ y, (z => body(y, z)(n - 1)): [C] -> CodeBase[out Int, out C, out Any] -> CodeBase[out C, out Any]
 //│ ║        	         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  CodeBase[out 'cde, out 'ctx ∨ 'ctx1, ?]  <:  CodeBase[out Int, out G, ?]
 //│ ╟── because: cannot constrain  'ctx ∨ 'ctx1  <:  G

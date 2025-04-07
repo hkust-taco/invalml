@@ -437,7 +437,7 @@ TreeHelpers1 = class TreeHelpers {
       }
     };
     go = function go(something) {
-      let scrut, first1, first0, intro, fields, dialogue, intro1, first01, field, scrut1, intro2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+      let scrut, first1, first0, intro, fields, dialogue, intro1, first01, field, scrut1, intro2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, lambda, lambda1;
       scrut = itemize(something);
       if (globalThis.Array.isArray(scrut) && scrut.length === 2) {
         first0 = scrut[0];
@@ -457,13 +457,14 @@ TreeHelpers1 = class TreeHelpers {
           } else {
             intro = first0;
             fields = first1;
-            tmp2 = (field1, _, _1) => {
+            lambda = (undefined, function (field1, _, _1) {
               let tmp12, tmp13, tmp14;
               tmp12 = TreeHelpers.first(field1);
               tmp13 = tmp12 + " = ";
               tmp14 = TreeHelpers.second(field1);
               return tmp13 + tmp14
-            };
+            });
+            tmp2 = lambda;
             tmp3 = runtime.safeCall(fields.map(tmp2));
             dialogue = tmp3;
             tmp4 = intro + ":\n  ";
@@ -474,13 +475,14 @@ TreeHelpers1 = class TreeHelpers {
         } else {
           intro = first0;
           fields = first1;
-          tmp7 = (field1, _, _1) => {
+          lambda1 = (undefined, function (field1, _, _1) {
             let tmp12, tmp13, tmp14;
             tmp12 = TreeHelpers.first(field1);
             tmp13 = tmp12 + " = ";
             tmp14 = TreeHelpers.second(field1);
             return tmp13 + tmp14
-          };
+          });
+          tmp7 = lambda1;
           tmp8 = runtime.safeCall(fields.map(tmp7));
           dialogue = tmp8;
           tmp9 = intro + ":\n  ";

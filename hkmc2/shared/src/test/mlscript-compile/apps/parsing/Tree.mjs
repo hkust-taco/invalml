@@ -16,7 +16,9 @@ Tree2 = class Tree {
     };
     this.DefineKind = class DefineKind {
       static {
-        this.Let = function Let(recursive1) { return new Let.class(recursive1); };
+        this.Let = function Let(recursive1) {
+          return new Let.class(recursive1);
+        };
         this.Let.class = class Let {
           constructor(recursive) {
             this.recursive = recursive;
@@ -44,14 +46,18 @@ Tree2 = class Tree {
       }
       static toString() { return "DefineKind"; }
     };
-    this.Empty = function Empty() { return new Empty.class(); };
+    this.Empty = function Empty() {
+      return new Empty.class();
+    };
     this.Empty.class = class Empty extends Tree.Tree {
       constructor() {
         super();
       }
       toString() { return "Empty(" + "" + ")"; }
     };
-    this.Error = function Error(tree1, message1) { return new Error.class(tree1, message1); };
+    this.Error = function Error(tree1, message1) {
+      return new Error.class(tree1, message1);
+    };
     this.Error.class = class Error extends Tree.Tree {
       constructor(tree, message) {
         super();
@@ -60,7 +66,9 @@ Tree2 = class Tree {
       }
       toString() { return "Error(" + globalThis.Predef.render(this.tree) + ", " + globalThis.Predef.render(this.message) + ")"; }
     };
-    this.Bracketed = function Bracketed(kind1, tree1) { return new Bracketed.class(kind1, tree1); };
+    this.Bracketed = function Bracketed(kind1, tree1) {
+      return new Bracketed.class(kind1, tree1);
+    };
     this.Bracketed.class = class Bracketed extends Tree.Tree {
       constructor(kind, tree) {
         super();
@@ -69,7 +77,9 @@ Tree2 = class Tree {
       }
       toString() { return "Bracketed(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.tree) + ")"; }
     };
-    this.Ident = function Ident(name1, symbolic1) { return new Ident.class(name1, symbolic1); };
+    this.Ident = function Ident(name1, symbolic1) {
+      return new Ident.class(name1, symbolic1);
+    };
     this.Ident.class = class Ident extends Tree.Tree {
       constructor(name, symbolic) {
         super();
@@ -78,14 +88,18 @@ Tree2 = class Tree {
       }
       toString() { return "Ident(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.symbolic) + ")"; }
     };
-    this.Underscore = function Underscore() { return new Underscore.class(); };
+    this.Underscore = function Underscore() {
+      return new Underscore.class();
+    };
     this.Underscore.class = class Underscore extends Tree.Tree {
       constructor() {
         super();
       }
       toString() { return "Underscore(" + "" + ")"; }
     };
-    this.Modified = function Modified(modifier1, subject1) { return new Modified.class(modifier1, subject1); };
+    this.Modified = function Modified(modifier1, subject1) {
+      return new Modified.class(modifier1, subject1);
+    };
     this.Modified.class = class Modified extends Tree.Tree {
       constructor(modifier, subject) {
         super();
@@ -94,7 +108,9 @@ Tree2 = class Tree {
       }
       toString() { return "Modified(" + globalThis.Predef.render(this.modifier) + ", " + globalThis.Predef.render(this.subject) + ")"; }
     };
-    this.Tuple = function Tuple(trees1) { return new Tuple.class(trees1); };
+    this.Tuple = function Tuple(trees1) {
+      return new Tuple.class(trees1);
+    };
     this.Tuple.class = class Tuple extends Tree.Tree {
       constructor(trees) {
         super();
@@ -102,7 +118,9 @@ Tree2 = class Tree {
       }
       toString() { return "Tuple(" + globalThis.Predef.render(this.trees) + ")"; }
     };
-    this.Sequence = function Sequence(trees1) { return new Sequence.class(trees1); };
+    this.Sequence = function Sequence(trees1) {
+      return new Sequence.class(trees1);
+    };
     this.Sequence.class = class Sequence extends Tree.Tree {
       constructor(trees) {
         super();
@@ -110,7 +128,9 @@ Tree2 = class Tree {
       }
       toString() { return "Sequence(" + globalThis.Predef.render(this.trees) + ")"; }
     };
-    this.Literal = function Literal(kind1, value1) { return new Literal.class(kind1, value1); };
+    this.Literal = function Literal(kind1, value1) {
+      return new Literal.class(kind1, value1);
+    };
     this.Literal.class = class Literal extends Tree.Tree {
       constructor(kind, value) {
         super();
@@ -119,7 +139,9 @@ Tree2 = class Tree {
       }
       toString() { return "Literal(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.value) + ")"; }
     };
-    this.Match = function Match(scrutinee1, branches1) { return new Match.class(scrutinee1, branches1); };
+    this.Match = function Match(scrutinee1, branches1) {
+      return new Match.class(scrutinee1, branches1);
+    };
     this.Match.class = class Match extends Tree.Tree {
       constructor(scrutinee, branches) {
         super();
@@ -128,7 +150,9 @@ Tree2 = class Tree {
       }
       toString() { return "Match(" + globalThis.Predef.render(this.scrutinee) + ", " + globalThis.Predef.render(this.branches) + ")"; }
     };
-    this.Lambda = function Lambda(params1, body1) { return new Lambda.class(params1, body1); };
+    this.Lambda = function Lambda(params1, body1) {
+      return new Lambda.class(params1, body1);
+    };
     this.Lambda.class = class Lambda extends Tree.Tree {
       constructor(params, body) {
         super();
@@ -137,7 +161,9 @@ Tree2 = class Tree {
       }
       toString() { return "Lambda(" + globalThis.Predef.render(this.params) + ", " + globalThis.Predef.render(this.body) + ")"; }
     };
-    this.App = function App(callee1, argument1) { return new App.class(callee1, argument1); };
+    this.App = function App(callee1, argument1) {
+      return new App.class(callee1, argument1);
+    };
     this.App.class = class App extends Tree.Tree {
       constructor(callee, argument) {
         super();
@@ -146,7 +172,9 @@ Tree2 = class Tree {
       }
       toString() { return "App(" + globalThis.Predef.render(this.callee) + ", " + globalThis.Predef.render(this.argument) + ")"; }
     };
-    this.Infix = function Infix(op1, lhs1, rhs1) { return new Infix.class(op1, lhs1, rhs1); };
+    this.Infix = function Infix(op1, lhs1, rhs1) {
+      return new Infix.class(op1, lhs1, rhs1);
+    };
     this.Infix.class = class Infix extends Tree.Tree {
       constructor(op, lhs, rhs) {
         super();
@@ -156,7 +184,9 @@ Tree2 = class Tree {
       }
       toString() { return "Infix(" + globalThis.Predef.render(this.op) + ", " + globalThis.Predef.render(this.lhs) + ", " + globalThis.Predef.render(this.rhs) + ")"; }
     };
-    this.Define = function Define(kind1, items1) { return new Define.class(kind1, items1); };
+    this.Define = function Define(kind1, items1) {
+      return new Define.class(kind1, items1);
+    };
     this.Define.class = class Define extends Tree.Tree {
       constructor(kind, items) {
         super();
@@ -165,7 +195,9 @@ Tree2 = class Tree {
       }
       toString() { return "Define(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.items) + ")"; }
     };
-    this.LetIn = function LetIn(bindings1, body1) { return new LetIn.class(bindings1, body1); };
+    this.LetIn = function LetIn(bindings1, body1) {
+      return new LetIn.class(bindings1, body1);
+    };
     this.LetIn.class = class LetIn extends Tree.Tree {
       constructor(bindings, body) {
         super();
@@ -174,7 +206,9 @@ Tree2 = class Tree {
       }
       toString() { return "LetIn(" + globalThis.Predef.render(this.bindings) + ", " + globalThis.Predef.render(this.body) + ")"; }
     };
-    this.While = function While(cond1, body1) { return new While.class(cond1, body1); };
+    this.While = function While(cond1, body1) {
+      return new While.class(cond1, body1);
+    };
     this.While.class = class While extends Tree.Tree {
       constructor(cond, body) {
         super();
@@ -183,7 +217,9 @@ Tree2 = class Tree {
       }
       toString() { return "While(" + globalThis.Predef.render(this.cond) + ", " + globalThis.Predef.render(this.body) + ")"; }
     };
-    this.For = function For(head1, start1, end1, body1) { return new For.class(head1, start1, end1, body1); };
+    this.For = function For(head1, start1, end1, body1) {
+      return new For.class(head1, start1, end1, body1);
+    };
     this.For.class = class For extends Tree.Tree {
       constructor(head, start, end, body) {
         super();
@@ -194,7 +230,9 @@ Tree2 = class Tree {
       }
       toString() { return "For(" + globalThis.Predef.render(this.head) + ", " + globalThis.Predef.render(this.start) + ", " + globalThis.Predef.render(this.end) + ", " + globalThis.Predef.render(this.body) + ")"; }
     };
-    this.Ternary = function Ternary(keyword1, lhs1, rhs1, body1) { return new Ternary.class(keyword1, lhs1, rhs1, body1); };
+    this.Ternary = function Ternary(keyword1, lhs1, rhs1, body1) {
+      return new Ternary.class(keyword1, lhs1, rhs1, body1);
+    };
     this.Ternary.class = class Ternary extends Tree.Tree {
       constructor(keyword, lhs, rhs, body) {
         super();
@@ -295,7 +333,6 @@ Tree2 = class Tree {
         } else if (tree1 instanceof Tree.Lambda.class) {
           return Precedence.Keywords._fun.leftPrecOrMax
         } else {
-          console.log(tree1);
           throw new globalThis.Error("match error");
         }
       }
@@ -311,7 +348,7 @@ Tree2 = class Tree {
       }
     };
     go = function go(tree1) {
-      let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, param22, param31, head, start, end, body3, param08, param15, cond, body4, param09, param16, bindings, body5, param010, body6, param011, param17, kind, items, param012, param013, param18, first1, first0, name1, value, param014, param19, param23, op, lhs1, rhs1, param015, param110, param24, target, param016, param111, field, scrut2, first11, first01, leftPrec, param017, param112, callee, argument, param018, param113, op1, arg, op2, param019, param114, lhs2, param020, param115, rhs2, scrut3, first12, first02, leftPrec1, rightPrec, param021, param116, scrutinee, branches, param022, param117, value1, value2, scrut4, param023, trees1, param024, trees2, param025, param118, modifier, subject, param026, param119, name2, param027, param120, kind1, tree3, param028, param121, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129;
+      let rest, trees, param0, param1, param01, tree2, param02, param11, param2, name, param03, param12, params, body, param04, param13, param21, param3, keyword, lhs, rhs, body1, scrut, param05, rhs$_, scrut1, param06, body2, param07, param14, param22, param31, head, start, end, body3, param08, param15, cond, body4, param09, param16, bindings, body5, param010, body6, param011, param17, kind, items, param012, param013, param18, first1, first0, name1, value, param014, param19, param23, op, lhs1, rhs1, param015, param110, param24, target, param016, param111, field, scrut2, first11, first01, leftPrec, param017, param112, callee, argument, param018, param113, op1, arg, op2, param019, param114, lhs2, param020, param115, rhs2, scrut3, first12, first02, leftPrec1, rightPrec, param021, param116, scrutinee, branches, param022, param117, value1, value2, scrut4, param023, trees1, param024, trees2, param025, param118, modifier, subject, param026, param119, name2, param027, param120, kind1, tree3, param028, param121, tree4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, tmp109, tmp110, tmp111, tmp112, tmp113, tmp114, tmp115, tmp116, tmp117, tmp118, tmp119, tmp120, tmp121, tmp122, tmp123, tmp124, tmp125, tmp126, tmp127, tmp128, tmp129, lambda, lambda1, lambda2, lambda3, lambda4, lambda5, lambda6, lambda7, lambda8, lambda9, lambda10;
       if (tree1 instanceof Tree.Empty.class) {
         return "{}"
       } else if (tree1 instanceof Tree.Error.class) {
@@ -439,9 +476,10 @@ Tree2 = class Tree {
                       first12 = scrut3[1];
                       leftPrec1 = first02;
                       rightPrec = first12;
-                      tmp30 = Predef.fold((arg1, arg2) => {
+                      lambda = (undefined, function (arg1, arg2) {
                         return arg1 + arg2
                       });
+                      tmp30 = Predef.fold(lambda);
                       tmp31 = go(lhs2);
                       tmp32 = prec(lhs2, false);
                       tmp33 = tmp32 < leftPrec1;
@@ -533,9 +571,10 @@ Tree2 = class Tree {
                 op = param014;
                 lhs1 = param19;
                 rhs1 = param23;
-                tmp65 = Predef.fold((arg1, arg2) => {
+                lambda1 = (undefined, function (arg1, arg2) {
                   return arg1 + arg2
                 });
+                tmp65 = Predef.fold(lambda1);
                 tmp66 = go(lhs1);
                 tmp67 = go(op);
                 tmp68 = go(rhs1);
@@ -545,9 +584,10 @@ Tree2 = class Tree {
               op = param014;
               lhs1 = param19;
               rhs1 = param23;
-              tmp69 = Predef.fold((arg1, arg2) => {
+              lambda2 = (undefined, function (arg1, arg2) {
                 return arg1 + arg2
               });
+              tmp69 = Predef.fold(lambda2);
               tmp70 = go(lhs1);
               tmp71 = go(op);
               tmp72 = go(rhs1);
@@ -557,9 +597,10 @@ Tree2 = class Tree {
             op = param014;
             lhs1 = param19;
             rhs1 = param23;
-            tmp73 = Predef.fold((arg1, arg2) => {
+            lambda3 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
+            tmp73 = Predef.fold(lambda3);
             tmp74 = go(lhs1);
             tmp75 = go(op);
             tmp76 = go(rhs1);
@@ -601,7 +642,7 @@ Tree2 = class Tree {
                     throw new globalThis.Error("match error");
                   }
                   tmp80 = Iter.fromStack(items);
-                  tmp81 = (caseScrut) => {
+                  lambda4 = (undefined, function (caseScrut) {
                     let first13, first03, lhs3, rhs3, tree5, tmp130, tmp131, tmp132;
                     if (caseScrut instanceof Tree.Tree) {
                       tree5 = caseScrut;
@@ -618,7 +659,8 @@ Tree2 = class Tree {
                     } else {
                       throw new globalThis.Error("match error");
                     }
-                  };
+                  });
+                  tmp81 = lambda4;
                   tmp82 = Iter.mapping(tmp80, tmp81);
                   tmp83 = Iter.joined(tmp82, " and ");
                   return Predef.mkStr(tmp79, tmp83)
@@ -643,7 +685,7 @@ Tree2 = class Tree {
                   throw new globalThis.Error("match error");
                 }
                 tmp85 = Iter.fromStack(items);
-                tmp86 = (caseScrut) => {
+                lambda5 = (undefined, function (caseScrut) {
                   let first13, first03, lhs3, rhs3, tree5, tmp130, tmp131, tmp132;
                   if (caseScrut instanceof Tree.Tree) {
                     tree5 = caseScrut;
@@ -660,7 +702,8 @@ Tree2 = class Tree {
                   } else {
                     throw new globalThis.Error("match error");
                   }
-                };
+                });
+                tmp86 = lambda5;
                 tmp87 = Iter.mapping(tmp85, tmp86);
                 tmp88 = Iter.joined(tmp87, " and ");
                 return Predef.mkStr(tmp84, tmp88)
@@ -685,7 +728,7 @@ Tree2 = class Tree {
                 throw new globalThis.Error("match error");
               }
               tmp90 = Iter.fromStack(items);
-              tmp91 = (caseScrut) => {
+              lambda6 = (undefined, function (caseScrut) {
                 let first13, first03, lhs3, rhs3, tree5, tmp130, tmp131, tmp132;
                 if (caseScrut instanceof Tree.Tree) {
                   tree5 = caseScrut;
@@ -702,7 +745,8 @@ Tree2 = class Tree {
                 } else {
                   throw new globalThis.Error("match error");
                 }
-              };
+              });
+              tmp91 = lambda6;
               tmp92 = Iter.mapping(tmp90, tmp91);
               tmp93 = Iter.joined(tmp92, " and ");
               return Predef.mkStr(tmp89, tmp93)
@@ -727,7 +771,7 @@ Tree2 = class Tree {
               throw new globalThis.Error("match error");
             }
             tmp95 = Iter.fromStack(items);
-            tmp96 = (caseScrut) => {
+            lambda7 = (undefined, function (caseScrut) {
               let first13, first03, lhs3, rhs3, tree5, tmp130, tmp131, tmp132;
               if (caseScrut instanceof Tree.Tree) {
                 tree5 = caseScrut;
@@ -744,7 +788,8 @@ Tree2 = class Tree {
               } else {
                 throw new globalThis.Error("match error");
               }
-            };
+            });
+            tmp96 = lambda7;
             tmp97 = Iter.mapping(tmp95, tmp96);
             tmp98 = Iter.joined(tmp97, " and ");
             return Predef.mkStr(tmp94, tmp98)
@@ -803,9 +848,10 @@ Tree2 = class Tree {
             lhs = param13;
             rhs = param21;
             body1 = param3;
-            tmp110 = Predef.fold((arg1, arg2) => {
+            lambda8 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
+            tmp110 = Predef.fold(lambda8);
             tmp111 = go(lhs);
             scrut = keyword.name;
             if (scrut === "if") {
@@ -847,9 +893,10 @@ Tree2 = class Tree {
             param12 = tree1.body;
             params = param03;
             body = param12;
-            tmp116 = Predef.fold((arg1, arg2) => {
+            lambda9 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
+            tmp116 = Predef.fold(lambda9);
             tmp117 = Iter.fromStack(params);
             tmp118 = Iter.mapping(tmp117, go);
             tmp119 = Iter.joined(tmp118, " ");
@@ -881,9 +928,10 @@ Tree2 = class Tree {
           } else if (globalThis.Array.isArray(tree1) && tree1.length >= 0) {
             rest = runtime.safeCall(globalThis.Predef.tupleSlice(tree1, 0, 0));
             trees = rest;
-            tmp126 = runtime.safeCall(trees.map((tree5, _, _1) => {
+            lambda10 = (undefined, function (tree5, _, _1) {
               return wrap(tree5)
-            }));
+            });
+            tmp126 = runtime.safeCall(trees.map(lambda10));
             tmp127 = runtime.safeCall(tmp126.join(", "));
             tmp128 = "[" + tmp127;
             return tmp128 + "]"

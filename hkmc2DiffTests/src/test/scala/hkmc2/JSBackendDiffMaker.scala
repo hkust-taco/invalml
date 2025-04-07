@@ -100,7 +100,6 @@ abstract class JSBackendDiffMaker extends MLsDiffMaker:
         case Return(res, implct) =>
           assert(implct)
           Assign(resSym, res, Return(Value.Lit(syntax.Tree.UnitLit(false)), true))
-        case _: HandleBlockReturn => ???
         case tl: (Throw | Break | Continue) => tl
       )
       if showLoweredTree.isSet then
@@ -165,7 +164,7 @@ abstract class JSBackendDiffMaker extends MLsDiffMaker:
       if silent.isUnset then 
         import Elaborator.Ctx.*
         def definedValues = curCtx.env.iterator.flatMap:
-          case (nme, e @ (_: RefElem | SelElem(RefElem(_: InnerSymbol), _, _))) =>
+          case (nme, e @ (_: RefElem | SelElem(base = RefElem(_: InnerSymbol)))) =>
             e.symbol match
             case S(ts: TermSymbol) if ts.k.isInstanceOf[syntax.ValLike] => S((nme, ts, N))
             case S(ts: BlockMemberSymbol)
@@ -192,10 +191,11 @@ abstract class JSBackendDiffMaker extends MLsDiffMaker:
               ErrorReport(msg"Expected: '${expected}', got: '${result}'" -> N :: Nil,
                 source = Diagnostic.Source.Runtime)
             case _ => ()
+            val anon = nme.isEmpty
             result match
-            case "undefined" =>
-            case "()" =>
+            case "undefined" if anon =>
+            case "()" if anon =>
             case _ =>
-              output(s"${if nme.isEmpty then "" else s"$nme "}= ${result.indentNewLines("| ")}")
+              output(s"${if anon then "" else s"$nme "}= ${result.indentNewLines("| ")}")
       
 

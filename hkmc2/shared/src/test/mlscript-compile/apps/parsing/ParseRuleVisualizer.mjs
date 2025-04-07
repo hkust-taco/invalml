@@ -9,14 +9,18 @@ import Option from "./../../Option.mjs";
 import TreeTracer from "./../../TreeTracer.mjs";
 import XML from "./../../XML.mjs";
 let RecursiveKnot1, ParseRuleVisualizer1, LinkOpts1;
-RecursiveKnot1 = function RecursiveKnot(getName1) { return new RecursiveKnot.class(getName1); };
+RecursiveKnot1 = function RecursiveKnot(getName1) {
+  return new RecursiveKnot.class(getName1);
+};
 RecursiveKnot1.class = class RecursiveKnot {
   constructor(getName) {
     this.getName = getName;
   }
   toString() { return "RecursiveKnot(" + globalThis.Predef.render(this.getName) + ")"; }
 };
-LinkOpts1 = function LinkOpts(href1) { return new LinkOpts.class(href1); };
+LinkOpts1 = function LinkOpts(href1) {
+  return new LinkOpts.class(href1);
+};
 LinkOpts1.class = class LinkOpts {
   constructor(href) {
     this.href = href;
@@ -42,7 +46,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
     return runtime.Unit
   } 
   static render(rr, title, rule) {
-    let diagram, sequence, renderChoice, renderRule, helperRules, referencedKinds, renderCache, diagrams, scrut, currentKinds, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+    let diagram, sequence, renderChoice, renderRule, helperRules, referencedKinds, renderCache, diagrams, scrut, currentKinds, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, lambda;
     sequence = function sequence(lhs, rhsOpt) {
       let param0, rhs;
       if (rhsOpt instanceof Option.Some.class) {
@@ -67,7 +71,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return runtime.safeCall(rr.Diagram(tmp10))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
-      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, param21, rule2, optional, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53;
+      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, param21, rule2, optional, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, lambda1, lambda2;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp10 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.End"));
         return Option.None
@@ -163,7 +167,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
           } else {
             tmp41 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Lazy not in cache"));
             proxyChoice = null;
-            tmp42 = () => {
+            lambda1 = (undefined, function () {
               let scrut4, param06, rule3;
               scrut4 = ParseRule.Choice.rest(proxyChoice);
               if (scrut4 instanceof Option.Some.class) {
@@ -173,11 +177,13 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
               } else {
                 return "???"
               }
-            };
+            });
+            tmp42 = lambda1;
             getProxyChoiceName = tmp42;
-            tmp43 = runtime.safeCall(make(() => {
+            lambda2 = (undefined, function () {
               return RecursiveKnot1(getProxyChoiceName)
-            }));
+            });
+            tmp43 = runtime.safeCall(make(lambda2));
             proxyChoice = tmp43;
             tmp44 = runtime.safeCall(getProxyChoiceName());
             ruleName = tmp44;
@@ -199,9 +205,9 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       }
     };
     renderRule = function renderRule(rule1, currentRule) {
-      let tmp10, tmp11;
+      let tmp10, tmp11, lambda1, lambda2;
       tmp10 = "renderRule <<< " + rule1.name;
-      tmp11 = () => {
+      lambda1 = (undefined, function () {
         let rest, optional, nodes, param0, param1, head, tail, scrut1, param01, node, choice, scrut2, tmp12, tmp13, tmp14, tmp15, tmp16;
         rest = rule1.choices;
         optional = false;
@@ -245,10 +251,12 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
             return Option.Some(choice)
           }
         }
-      };
-      return runtime.safeCall(ParseRuleVisualizer.tracer.trace(tmp10, (result) => {
+      });
+      tmp11 = lambda1;
+      lambda2 = (undefined, function (result) {
         return "renderRule >>> "
-      }, tmp11))
+      });
+      return runtime.safeCall(ParseRuleVisualizer.tracer.trace(tmp10, lambda2, tmp11))
     };
     helperRules = [];
     tmp = new globalThis.Set();
@@ -271,7 +279,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         ParseRuleVisualizer.#renderedKinds = tmp4;
         tmp5 = new globalThis.Set();
         referencedKinds = tmp5;
-        tmp6 = (kind) => {
+        lambda = (undefined, function (kind) {
           let theRule, tmp11, tmp12, tmp13, tmp14;
           tmp11 = runtime.safeCall(Rules.syntaxKinds.get(kind));
           tmp12 = Option.unsafe.get(tmp11);
@@ -282,7 +290,8 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
             kind,
             tmp14
           ]
-        };
+        });
+        tmp6 = lambda;
         tmp7 = Iter.mapping(currentKinds, tmp6);
         tmp8 = Iter.toArray(tmp7);
         tmp9 = runtime.safeCall(diagrams.push(...tmp8));

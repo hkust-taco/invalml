@@ -12,8 +12,8 @@ f(2)
 :sjs
 let f = foo(1, _, _)
 //│ JS (unsanitized):
-//│ let f1; f1 = (_, _1) => { return foo(1, _, _1) };
-//│ f = [function f1]
+//│ let f2, f3; f3 = function f(_, _1) { return foo(1, _, _1) }; f2 = f3;
+//│ f = [function f]
 
 f(2, 3)
 //│ = [1, 2, 3]
@@ -44,6 +44,7 @@ foo(..._)
 :todo
 [..._]
 //│ ═══[ERROR] Illegal position for '_' placeholder.
+//│ = []
 
 
 let h = _ - 2
@@ -104,10 +105,10 @@ let j = _.x(1, _)
 :todo // really support this?
 let j = _.x.y(1, _)
 //│ ═══[ERROR] Illegal position for '_' placeholder.
-//│ j = [function j1]
+//│ j = [function j]
 
 
-class C(a, b, c)
+data class C(a, b, c)
 
 2 |> C(1, _, 3) |> print
 //│ > C(1, 2, 3)
@@ -123,7 +124,7 @@ class C(a, b, c)
 
 
 _ - _ of 1, 2
-//│ = [function block$res33]
+//│ = [function]
 
 (_ - _) of 1, 2
 //│ = -1
@@ -140,10 +141,10 @@ _ - 2 <| 1
 1
 |> _ - 2
 //│ ╔══[PARSE ERROR] Expected end of input; found '_' keyword instead
-//│ ║  l.141: 	|> _ - 2
+//│ ║  l.142: 	|> _ - 2
 //│ ╙──       	   ^
 //│ ╔══[WARNING] Pure expression in statement position
-//│ ║  l.140: 	1
+//│ ║  l.141: 	1
 //│ ╙──       	^
 //│ = [function pipeInto]
 
@@ -154,13 +155,18 @@ _ - 2 <| 1
 :sjs
 1 . _ - 2
 //│ JS (unsanitized):
-//│ ((_) => { return Predef.passTo(1, _) }) - 2
+//│ let lambda24; lambda24 = (undefined, function (_) { return Predef.passTo(1, _) }); lambda24 - 2
 //│ = NaN
 
 :sjs
 1 . (_ - 2)()
 //│ JS (unsanitized):
-//│ let tmp9; tmp9 = Predef.passTo(1, (_) => { return _ - 2 }); runtime.safeCall(tmp9())
+//│ let tmp9, lambda25;
+//│ lambda25 = (undefined, function (_) {
+//│   return _ - 2
+//│ });
+//│ tmp9 = Predef.passTo(1, lambda25);
+//│ runtime.safeCall(tmp9())
 //│ = -1
 
 1 . (_ - _)(2)

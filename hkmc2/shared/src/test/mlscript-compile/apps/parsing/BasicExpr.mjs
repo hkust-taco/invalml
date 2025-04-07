@@ -5,21 +5,27 @@ import Predef from "./../../Predef.mjs";
 let BasicExpr1;
 BasicExpr1 = class BasicExpr {
   static {
-    this.Lit = function Lit(value1) { return new Lit.class(value1); };
+    this.Lit = function Lit(value1) {
+      return new Lit.class(value1);
+    };
     this.Lit.class = class Lit {
       constructor(value) {
         this.value = value;
       }
       toString() { return "Lit(" + globalThis.Predef.render(this.value) + ")"; }
     };
-    this.Var = function Var(name1) { return new Var.class(name1); };
+    this.Var = function Var(name1) {
+      return new Var.class(name1);
+    };
     this.Var.class = class Var {
       constructor(name) {
         this.name = name;
       }
       toString() { return "Var(" + globalThis.Predef.render(this.name) + ")"; }
     };
-    this.Add = function Add(left1, right1) { return new Add.class(left1, right1); };
+    this.Add = function Add(left1, right1) {
+      return new Add.class(left1, right1);
+    };
     this.Add.class = class Add {
       constructor(left, right) {
         this.left = left;
@@ -27,7 +33,9 @@ BasicExpr1 = class BasicExpr {
       }
       toString() { return "Add(" + globalThis.Predef.render(this.left) + ", " + globalThis.Predef.render(this.right) + ")"; }
     };
-    this.Mul = function Mul(left1, right1) { return new Mul.class(left1, right1); };
+    this.Mul = function Mul(left1, right1) {
+      return new Mul.class(left1, right1);
+    };
     this.Mul.class = class Mul {
       constructor(left, right) {
         this.left = left;
@@ -35,7 +43,9 @@ BasicExpr1 = class BasicExpr {
       }
       toString() { return "Mul(" + globalThis.Predef.render(this.left) + ", " + globalThis.Predef.render(this.right) + ")"; }
     };
-    this.Err = function Err(expr1, msg1) { return new Err.class(expr1, msg1); };
+    this.Err = function Err(expr1, msg1) {
+      return new Err.class(expr1, msg1);
+    };
     this.Err.class = class Err {
       constructor(expr, msg) {
         this.expr = expr;

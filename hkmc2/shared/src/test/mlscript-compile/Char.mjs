@@ -10,19 +10,19 @@ Char1 = class Char {
         if (gtLo === true) {
           ltHi = scrut <= "z";
           if (ltHi === true) {
-            return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            return runtime.safeCall(runtime.MatchResult([]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
         let emptyTest, head, tail, gtLo, ltHi;
         emptyTest = topic == "";
         if (emptyTest === true) {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         } else {
           head = globalThis.Predef.stringGet(topic, 0);
           tail = globalThis.Predef.stringDrop(topic, 1);
@@ -30,14 +30,14 @@ Char1 = class Char {
           if (gtLo === true) {
             ltHi = head <= "z";
             if (ltHi === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 tail
               ]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -53,19 +53,19 @@ Char1 = class Char {
         if (gtLo === true) {
           ltHi = scrut <= "Z";
           if (ltHi === true) {
-            return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            return runtime.safeCall(runtime.MatchResult([]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
         let emptyTest, head, tail, gtLo, ltHi;
         emptyTest = topic == "";
         if (emptyTest === true) {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         } else {
           head = globalThis.Predef.stringGet(topic, 0);
           tail = globalThis.Predef.stringDrop(topic, 1);
@@ -73,14 +73,14 @@ Char1 = class Char {
           if (gtLo === true) {
             ltHi = head <= "Z";
             if (ltHi === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 tail
               ]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -93,36 +93,36 @@ Char1 = class Char {
       unapply(scrut) {
         let matchResult, matchResult1;
         matchResult = runtime.safeCall(Char.Lowercase.unapply(scrut));
-        if (matchResult instanceof globalThis.Predef.MatchResult.class) {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+        if (matchResult instanceof runtime.MatchResult.class) {
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
           matchResult1 = runtime.safeCall(Char.Uppercase.unapply(scrut));
-          if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
-            return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          if (matchResult1 instanceof runtime.MatchResult.class) {
+            return runtime.safeCall(runtime.MatchResult([]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       } 
       unapplyStringPrefix(topic) {
         let matchResult, arg, postfix, matchResult1, arg1, postfix1;
         matchResult = runtime.safeCall(Char.Lowercase.unapplyStringPrefix(topic));
-        if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+        if (matchResult instanceof runtime.MatchResult.class) {
           arg = matchResult.captures;
           postfix = globalThis.Predef.tupleGet(arg, 0);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             postfix
           ]))
         } else {
           matchResult1 = runtime.safeCall(Char.Uppercase.unapplyStringPrefix(topic));
-          if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+          if (matchResult1 instanceof runtime.MatchResult.class) {
             arg1 = matchResult1.captures;
             postfix1 = globalThis.Predef.tupleGet(arg1, 0);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            return runtime.safeCall(runtime.MatchResult([
               postfix1
             ]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -138,19 +138,19 @@ Char1 = class Char {
         if (gtLo === true) {
           ltHi = scrut <= "9";
           if (ltHi === true) {
-            return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            return runtime.safeCall(runtime.MatchResult([]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
         let emptyTest, head, tail, gtLo, ltHi;
         emptyTest = topic == "";
         if (emptyTest === true) {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         } else {
           head = globalThis.Predef.stringGet(topic, 0);
           tail = globalThis.Predef.stringDrop(topic, 1);
@@ -158,14 +158,14 @@ Char1 = class Char {
           if (gtLo === true) {
             ltHi = head <= "9";
             if (ltHi === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 tail
               ]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -178,25 +178,25 @@ Char1 = class Char {
       unapply(scrut) {
         let matchResult, gtLo, ltHi, gtLo1, ltHi1;
         matchResult = runtime.safeCall(Char.Digit.unapply(scrut));
-        if (matchResult instanceof globalThis.Predef.MatchResult.class) {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+        if (matchResult instanceof runtime.MatchResult.class) {
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
           gtLo = "a" <= scrut;
           if (gtLo === true) {
             ltHi = scrut <= "f";
             if (ltHi === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([]))
+              return runtime.safeCall(runtime.MatchResult([]))
             } else {
               gtLo1 = "A" <= scrut;
               if (gtLo1 === true) {
                 ltHi1 = scrut <= "F";
                 if (ltHi1 === true) {
-                  return runtime.safeCall(globalThis.Predef.MatchResult([]))
+                  return runtime.safeCall(runtime.MatchResult([]))
                 } else {
-                  return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  return runtime.safeCall(runtime.MatchFailure())
                 }
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             }
           } else {
@@ -204,12 +204,12 @@ Char1 = class Char {
             if (gtLo1 === true) {
               ltHi1 = scrut <= "F";
               if (ltHi1 === true) {
-                return runtime.safeCall(globalThis.Predef.MatchResult([]))
+                return runtime.safeCall(runtime.MatchResult([]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           }
         }
@@ -217,16 +217,16 @@ Char1 = class Char {
       unapplyStringPrefix(topic) {
         let matchResult, arg, postfix, emptyTest, head, tail, gtLo, ltHi, emptyTest1, head1, tail1, gtLo1, ltHi1;
         matchResult = runtime.safeCall(Char.Digit.unapplyStringPrefix(topic));
-        if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+        if (matchResult instanceof runtime.MatchResult.class) {
           arg = matchResult.captures;
           postfix = globalThis.Predef.tupleGet(arg, 0);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             postfix
           ]))
         } else {
           emptyTest = topic == "";
           if (emptyTest === true) {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           } else {
             head = globalThis.Predef.stringGet(topic, 0);
             tail = globalThis.Predef.stringDrop(topic, 1);
@@ -234,13 +234,13 @@ Char1 = class Char {
             if (gtLo === true) {
               ltHi = head <= "f";
               if (ltHi === true) {
-                return runtime.safeCall(globalThis.Predef.MatchResult([
+                return runtime.safeCall(runtime.MatchResult([
                   tail
                 ]))
               } else {
                 emptyTest1 = topic == "";
                 if (emptyTest1 === true) {
-                  return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  return runtime.safeCall(runtime.MatchFailure())
                 } else {
                   head1 = globalThis.Predef.stringGet(topic, 0);
                   tail1 = globalThis.Predef.stringDrop(topic, 1);
@@ -248,21 +248,21 @@ Char1 = class Char {
                   if (gtLo1 === true) {
                     ltHi1 = head1 <= "F";
                     if (ltHi1 === true) {
-                      return runtime.safeCall(globalThis.Predef.MatchResult([
+                      return runtime.safeCall(runtime.MatchResult([
                         tail1
                       ]))
                     } else {
-                      return runtime.safeCall(globalThis.Predef.MatchFailure())
+                      return runtime.safeCall(runtime.MatchFailure())
                     }
                   } else {
-                    return runtime.safeCall(globalThis.Predef.MatchFailure())
+                    return runtime.safeCall(runtime.MatchFailure())
                   }
                 }
               }
             } else {
               emptyTest1 = topic == "";
               if (emptyTest1 === true) {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               } else {
                 head1 = globalThis.Predef.stringGet(topic, 0);
                 tail1 = globalThis.Predef.stringDrop(topic, 1);
@@ -270,14 +270,14 @@ Char1 = class Char {
                 if (gtLo1 === true) {
                   ltHi1 = head1 <= "F";
                   if (ltHi1 === true) {
-                    return runtime.safeCall(globalThis.Predef.MatchResult([
+                    return runtime.safeCall(runtime.MatchResult([
                       tail1
                     ]))
                   } else {
-                    return runtime.safeCall(globalThis.Predef.MatchFailure())
+                    return runtime.safeCall(runtime.MatchFailure())
                   }
                 } else {
-                  return runtime.safeCall(globalThis.Predef.MatchFailure())
+                  return runtime.safeCall(runtime.MatchFailure())
                 }
               }
             }
@@ -296,19 +296,19 @@ Char1 = class Char {
         if (gtLo === true) {
           ltHi = scrut <= "7";
           if (ltHi === true) {
-            return runtime.safeCall(globalThis.Predef.MatchResult([]))
+            return runtime.safeCall(runtime.MatchResult([]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
         let emptyTest, head, tail, gtLo, ltHi;
         emptyTest = topic == "";
         if (emptyTest === true) {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         } else {
           head = globalThis.Predef.stringGet(topic, 0);
           tail = globalThis.Predef.stringDrop(topic, 1);
@@ -316,14 +316,14 @@ Char1 = class Char {
           if (gtLo === true) {
             ltHi = head <= "7";
             if (ltHi === true) {
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 tail
               ]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -335,11 +335,11 @@ Char1 = class Char {
       constructor() {}
       unapply(scrut) {
         if (scrut === "0") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "1") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
@@ -347,18 +347,18 @@ Char1 = class Char {
         cond = globalThis.Predef.stringStartsWith(topic, "0");
         if (cond === true) {
           sliced = globalThis.Predef.stringDrop(topic, 1);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
           cond1 = globalThis.Predef.stringStartsWith(topic, "1");
           if (cond1 === true) {
             sliced1 = globalThis.Predef.stringDrop(topic, 1);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
-            return runtime.safeCall(globalThis.Predef.MatchFailure())
+            return runtime.safeCall(runtime.MatchFailure())
           }
         }
       }
@@ -370,15 +370,15 @@ Char1 = class Char {
       constructor() {}
       unapply(scrut) {
         if (scrut === " ") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "\t") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "\n") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "\r") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
@@ -386,32 +386,32 @@ Char1 = class Char {
         cond = globalThis.Predef.stringStartsWith(topic, " ");
         if (cond === true) {
           sliced = globalThis.Predef.stringDrop(topic, 1);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
           cond1 = globalThis.Predef.stringStartsWith(topic, "\t");
           if (cond1 === true) {
             sliced1 = globalThis.Predef.stringDrop(topic, 1);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
             cond2 = globalThis.Predef.stringStartsWith(topic, "\n");
             if (cond2 === true) {
               sliced2 = globalThis.Predef.stringDrop(topic, 1);
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
               cond3 = globalThis.Predef.stringStartsWith(topic, "\r");
               if (cond3 === true) {
                 sliced3 = globalThis.Predef.stringDrop(topic, 1);
-                return runtime.safeCall(globalThis.Predef.MatchResult([
+                return runtime.safeCall(runtime.MatchResult([
                   sliced3
                 ]))
               } else {
-                return runtime.safeCall(globalThis.Predef.MatchFailure())
+                return runtime.safeCall(runtime.MatchFailure())
               }
             }
           }

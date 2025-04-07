@@ -1,4 +1,5 @@
 :bbml
+//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -74,21 +75,21 @@ letreg of r =>
     () => next(it)
   k()
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.68: 	letreg of r =>
+//│ ║  l.69: 	letreg of r =>
 //│ ║        	^^^^^^^^^^^^^^
-//│ ║  l.69: 	  let b = mkVec(r)
+//│ ║  l.70: 	  let b = mkVec(r)
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.70: 	  clear(b)
+//│ ║  l.71: 	  clear(b)
 //│ ║        	^^^^^^^^^^
-//│ ║  l.71: 	  let k = iterate(b) of it =>
+//│ ║  l.72: 	  let k = iterate(b) of it =>
 //│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.72: 	    next(it)
+//│ ║  l.73: 	    next(it)
 //│ ║        	^^^^^^^^^^^^
-//│ ║  l.73: 	    123
+//│ ║  l.74: 	    123
 //│ ║        	^^^^^^^
-//│ ║  l.74: 	    () => next(it)
+//│ ║  l.75: 	    () => next(it)
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.75: 	  k()
+//│ ║  l.76: 	  k()
 //│ ║        	^^^^^
 //│ ╟── because: cannot constrain  'E  <:  ⊥
 //│ ╟── because: cannot constrain  'E  <:  ¬()
@@ -108,23 +109,23 @@ letreg of r =>
   clear(b)
   r
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.101: 	letreg of r =>
+//│ ║  l.102: 	letreg of r =>
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.102: 	  let b = mkVec(r)
+//│ ║  l.103: 	  let b = mkVec(r)
 //│ ║         	^^^^^^^^^^^^^^^^^^
-//│ ║  l.103: 	  clear(b)
+//│ ║  l.104: 	  clear(b)
 //│ ║         	^^^^^^^^^^
-//│ ║  l.104: 	  iterate(b) of it =>
+//│ ║  l.105: 	  iterate(b) of it =>
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.105: 	    next(it)
+//│ ║  l.106: 	    next(it)
 //│ ║         	^^^^^^^^^^^^
-//│ ║  l.106: 	    clear(b)
+//│ ║  l.107: 	    clear(b)
 //│ ║         	^^^^^^^^^^^^
-//│ ║  l.107: 	    123
+//│ ║  l.108: 	    123
 //│ ║         	^^^^^^^
-//│ ║  l.108: 	  clear(b)
+//│ ║  l.109: 	  clear(b)
 //│ ║         	^^^^^^^^^^
-//│ ║  l.109: 	  r
+//│ ║  l.110: 	  r
 //│ ║         	^^^
 //│ ╟── because: cannot constrain  'E  <:  ⊥
 //│ ╟── because: cannot constrain  'E  <:  ¬()
@@ -156,19 +157,19 @@ letreg of r =>
   use_(r)
   r
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.151: 	letreg of r =>
+//│ ║  l.152: 	letreg of r =>
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.152: 	  use_(r)
+//│ ║  l.153: 	  use_(r)
 //│ ║         	^^^^^^^^^
-//│ ║  l.153: 	  integers(r) of it =>
+//│ ║  l.154: 	  integers(r) of it =>
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.154: 	    use_(r)
+//│ ║  l.155: 	    use_(r)
 //│ ║         	^^^^^^^^^^^
-//│ ║  l.155: 	    next(it)
+//│ ║  l.156: 	    next(it)
 //│ ║         	^^^^^^^^^^^^
-//│ ║  l.156: 	  use_(r)
+//│ ║  l.157: 	  use_(r)
 //│ ║         	^^^^^^^^^
-//│ ║  l.157: 	  r
+//│ ║  l.158: 	  r
 //│ ║         	^^^
 //│ ╟── because: cannot constrain  'E  <:  ⊥
 //│ ╟── because: cannot constrain  'E  <:  ¬()

@@ -1,19 +1,20 @@
 :bbml
+//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
 
-(x => x + 1): [A extends Int] -> A -> Int
+(x => x + 1) as [A extends Int] -> A -> Int
 //│ Type: (Int) ->{⊥} Int
 
 
-(x => x): [A restricts Int] -> A -> A
+(x => x) as [A restricts Int] -> A -> A
 //│ Type: ['A] -> ('A) ->{⊥} 'A
 //│ Where:
 //│   Int <: 'A
 
 
-(x => x - 1): [A extends Int restricts Int] -> A -> A
+(x => x - 1) as [A extends Int restricts Int] -> A -> A
 //│ Type: ['A] -> ('A) ->{⊥} 'A
 //│ Where:
 //│   Int <: 'A
@@ -31,7 +32,7 @@ iid
 :e
 iid("42")
 //│ ╔══[ERROR] Type error in string literal with expected type 'A
-//│ ║  l.32: 	iid("42")
+//│ ║  l.33: 	iid("42")
 //│ ║        	    ^^^^
 //│ ╟── because: cannot constrain  Str  <:  'A
 //│ ╟── because: cannot constrain  Str  <:  'A
@@ -61,7 +62,7 @@ foo(bar)
 :e
 fun badfoo: [A extends Str restricts Int] -> A -> A
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.62: 	fun badfoo: [A extends Str restricts Int] -> A -> A
+//│ ║  l.63: 	fun badfoo: [A extends Str restricts Int] -> A -> A
 //│ ║        	                                             ^^^^^^
 //│ ╙── because: cannot constrain  Int  <:  Str
 //│ Type: ⊤
@@ -110,16 +111,16 @@ fun h: [C] -> ([A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B
 //│ Type: ⊤
 
 :e
-bazbaz: [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
+bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ ╔══[ERROR] Cannot type non-function term Ref(member:bazbaz) as (A) ->{⊥} ([outer, 'B] -> 'B) ->{⊥} A
-//│ ║  l.113: 	bazbaz: [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
+//│ ║  l.114: 	bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ ╙──       	^^^^^^
 //│ Type: ['A] -> ('A) ->{⊥} ('A -> 'A) ->{⊥} 'A
 //│ Where:
 //│   'A <: Int
 
 
-(x => f => bazbaz(x)(f)): [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
+(x => f => bazbaz(x)(f)) as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ Type: ['A] -> ('A) ->{⊥} ('A -> 'A) ->{⊥} 'A
 //│ Where:
 //│   'A <: Int

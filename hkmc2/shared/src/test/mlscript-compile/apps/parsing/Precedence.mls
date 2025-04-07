@@ -7,7 +7,7 @@ import "./Keyword.mls"
 open Option { Some, None }
 open Predef { tuple }
 open BetterMap
-open Keyword { Keyword, INT_MIN, INT_MAX }
+open Keyword { INT_MIN, INT_MAX }
 
 //  ____                        _
 // |  _ \ _ __ ___  ___ ___  __| | ___ _ __   ___ ___
@@ -33,7 +33,7 @@ fun makePrecMap(startPrec: Int, ...ops) =
 module Keywords with
   val all = new Map()
   fun keyword(name, leftPrec, rightPrec) =
-    let result = Keyword(name, leftPrec, rightPrec)
+    let result = Keyword.Keyword(name, leftPrec, rightPrec)
     all.insert(name, result)
     result
   let prec = 0 

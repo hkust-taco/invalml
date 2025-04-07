@@ -11,7 +11,7 @@ import "../../XML.mls"
 open Predef
 open Stack
 open Option
-open ParseRule { ParseRule, Choice }
+open ParseRule { Choice }
 open Rules { syntaxKinds }
 open TreeTracer
 open XML { html, tag, elem, style }
@@ -22,7 +22,7 @@ class LinkOpts(val href: Str)
 
 module ParseRuleVisualizer with ...
 
-val tracer = new TreeTracer()
+val tracer = new TreeTracer.TreeTracer()
 
 let defaultKinds = tuple of "type", "term", "typevar", "ident"
 
@@ -32,7 +32,7 @@ fun reset() =
   set renderedKinds = new Set of defaultKinds
 
 // * `rr` is the railroad library.
-fun render(rr, title: Str, rule: ParseRule) =
+fun render(rr, title: Str, rule: ParseRule.ParseRule) =
   let helperRules = []
   let referencedKinds = new Set()
   let renderCache = new globalThis.Map()
@@ -86,7 +86,7 @@ fun render(rr, title: Str, rule: ParseRule) =
             ruleName, diagram of renderChoice(parentRule, proxyChoice, None)
           Some of rr.NonTerminal(ruleName, LinkOpts("#" + ruleName))
     do console.log("unexpected choice: " + choice)
-  fun renderRule(rule: ParseRule, currentRule) = tracer.trace of
+  fun renderRule(rule: ParseRule.ParseRule, currentRule) = tracer.trace of
     "renderRule <<< " + rule.name
     result => "renderRule >>> "
     () => ...

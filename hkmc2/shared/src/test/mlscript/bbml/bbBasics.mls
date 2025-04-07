@@ -1,4 +1,5 @@
 :bbml
+//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -43,7 +44,7 @@ x => x
 :e
 114 + "514"
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.44: 	114 + "514"
+//│ ║  l.45: 	114 + "514"
 //│ ║        	      ^^^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: Int
@@ -61,18 +62,18 @@ let x = 1 in let y = 2 in x + y
 :e
 let x = 0 in x + "1"
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.62: 	let x = 0 in x + "1"
+//│ ║  l.63: 	let x = 0 in x + "1"
 //│ ║        	                 ^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: Int
 
-class Foo(x: Int)
+data class Foo(x: Int)
 //│ Type: ⊤
 
 :e
 new Nothingness(0)
 //│ ╔══[ERROR] Name not found: Nothingness
-//│ ║  l.73: 	new Nothingness(0)
+//│ ║  l.74: 	new Nothingness(0)
 //│ ╙──      	    ^^^^^^^^^^^
 //│ ═══[ERROR] Not a valid class: <error>
 //│ Type: ⊥
@@ -80,7 +81,7 @@ new Nothingness(0)
 :e
 new 42
 //│ ╔══[ERROR] Not a valid class: integer literal
-//│ ║  l.81: 	new 42
+//│ ║  l.82: 	new 42
 //│ ╙──      	    ^^
 //│ Type: ⊥
 
@@ -89,7 +90,7 @@ new Foo(42)
 //│ Type: Foo
 
 
-class Point(x: Num, y: Num, z: Num)
+data class Point(x: Num, y: Num, z: Num)
 //│ Type: ⊤
 
 
@@ -99,13 +100,13 @@ new Point(0.0, 0.0, 0.0)
 :e
 new Foo("1!5!")
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.100: 	new Foo("1!5!")
+//│ ║  l.101: 	new Foo("1!5!")
 //│ ║         	        ^^^^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: Foo
 
 
-class Some[A](value: A)
+data class Some[A](value: A)
 //│ Type: ⊤
 
 new Some(true)
@@ -128,21 +129,21 @@ let t = new Some(true) in t.Some#value
 :pe
 42.Some#value
 //│ ╔══[LEXICAL ERROR] Expect at least one digit after the  decimal point
-//│ ║  l.129: 	42.Some#value
+//│ ║  l.130: 	42.Some#value
 //│ ╙──       	   ^
-//│ ╔══[ERROR] Illegal juxtaposition right-hand side.
-//│ ║  l.129: 	42.Some#value
+//│ ╔══[ERROR] Illegal juxtaposition right-hand side (identifier).
+//│ ║  l.130: 	42.Some#value
 //│ ╙──       	   ^^^^
 //│ ╔══[ERROR] Name not found: #
-//│ ║  l.129: 	42.Some#value
+//│ ║  l.130: 	42.Some#value
 //│ ╙──       	       ^
 //│ ╔══[ERROR] Name not found: value
-//│ ║  l.129: 	42.Some#value
+//│ ║  l.130: 	42.Some#value
 //│ ╙──       	        ^^^^^
 //│ Type: ⊥
 
 
-class Printer[T](f: T -> Str)
+data class Printer[T](f: T -> Str)
 //│ Type: ⊤
 
 fun foofoo(x) =
@@ -160,7 +161,7 @@ let ip = new Printer(foofoo) in ip.Printer#f(42)
 :e
 let ip = new Printer(foofoo) in ip.Printer#f("42")
 //│ ╔══[ERROR] Type error in string literal with expected type 'T
-//│ ║  l.161: 	let ip = new Printer(foofoo) in ip.Printer#f("42")
+//│ ║  l.162: 	let ip = new Printer(foofoo) in ip.Printer#f("42")
 //│ ║         	                                             ^^^^
 //│ ╟── because: cannot constrain  Str  <:  'T
 //│ ╟── because: cannot constrain  Str  <:  'T
@@ -169,7 +170,7 @@ let ip = new Printer(foofoo) in ip.Printer#f("42")
 //│ ╙── because: cannot constrain  Str  <:  ¬(¬{Int})
 //│ Type: Str
 
-class TFun[T](f: T -> T)
+data class TFun[T](f: T -> T)
 //│ Type: ⊤
 
 fun inc(x) = x + 1
@@ -187,7 +188,7 @@ let tf = new TFun(inc) in tf.TFun#f(1)
 :e
 let tf = new TFun(inc) in tf.TFun#f("1")
 //│ ╔══[ERROR] Type error in string literal with expected type 'T
-//│ ║  l.188: 	let tf = new TFun(inc) in tf.TFun#f("1")
+//│ ║  l.189: 	let tf = new TFun(inc) in tf.TFun#f("1")
 //│ ║         	                                    ^^^
 //│ ╟── because: cannot constrain  Str  <:  'T
 //│ ╟── because: cannot constrain  Str  <:  'T
@@ -196,7 +197,7 @@ let tf = new TFun(inc) in tf.TFun#f("1")
 //│ ╙── because: cannot constrain  Str  <:  ¬(¬{Int})
 //│ Type: Str ∨ Int
 
-class Pair[A, B](fst: A, snd: B)
+data class Pair[A, B](fst: A, snd: B)
 //│ Type: ⊤
 
 (new Pair(42, true)).Pair#fst
@@ -284,7 +285,7 @@ fact2(0)
 //│ Type: Int
 
 
-class Foo[A](x: A -> A)
+data class Foo[A](x: A -> A)
 //│ Type: ⊤
 
 new Foo(x => x)
@@ -308,7 +309,7 @@ throw new Error("oops")
 :e
 throw 42
 //│ ╔══[ERROR] Type error in throw
-//│ ║  l.309: 	throw 42
+//│ ║  l.310: 	throw 42
 //│ ║         	      ^^
 //│ ╙── because: cannot constrain  Int  <:  Error
 //│ Type: ⊥

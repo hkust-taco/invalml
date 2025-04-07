@@ -22,10 +22,11 @@ object
   Space
   Error
 
-class
-  Comment(content: Str)
-  Identifier(name: Str, symbolic: Bool)
-  Literal(kind: LiteralKind, literal: Str)
+data
+  class
+    Comment(content: Str)
+    Identifier(name: Str, symbolic: Bool)
+    Literal(kind: LiteralKind, literal: Str)
 
 fun same(a, b) = if
   a is Space and b is Space then true

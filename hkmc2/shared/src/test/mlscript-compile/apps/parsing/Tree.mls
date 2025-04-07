@@ -11,7 +11,7 @@ open Predef { fold, mkStr }
 open Stack
 open Option { Some, None }
 open Token { LiteralKind, BracketKind }
-open Keyword { Keyword, INT_MAX }
+open Keyword { INT_MAX }
 open Precedence { Keywords, opPrec }
 
 //  _____
@@ -26,7 +26,7 @@ module Tree with
   abstract class Tree
   
   module DefineKind with
-    class Let(recursive: Bool)
+    data class Let(recursive: Bool)
     object Type
     object Exception
     object Directive
@@ -35,27 +35,28 @@ module Tree with
   
   open DefineKind
   
-  class
-    Empty() extends Tree
-    Error(tree: Tree, message: Str) extends Tree
-    Bracketed(kind: BracketKind, tree: Tree) extends Tree
-    Ident(name: Str, symbolic: Bool) extends Tree
-    Underscore() extends Tree
-    Modified(modifier, subject) extends Tree
-    Tuple(trees: Stack[Tree]) extends Tree
-    Sequence(trees: Stack[Tree]) extends Tree
-    Literal(kind, value) extends Tree
-    Match(scrutinee: Tree, branches: Stack[Tree]) extends Tree
-    Lambda(params: Stack[Tree], body: Tree) extends Tree
-    App(callee: Tree, argument: Tree) extends Tree
-    Infix(op: Keyword, lhs: Tree, rhs: Tree) extends Tree
-    // `items` is separated by `and`
-    Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
-    LetIn(bindings: Stack[Tree], body: Tree) extends Tree
-    While(cond: Tree, body: Tree) extends Tree
-    For(head: Tree, start: Tree, end: Tree, body: Tree) extends Tree
-    // For `if`-`then`-`else`. The last part is optional.
-    Ternary(keyword: Keyword, lhs: Tree, rhs: Tree, body) extends Tree
+  data
+    class
+      Empty() extends Tree
+      Error(tree: Tree, message: Str) extends Tree
+      Bracketed(kind: BracketKind, tree: Tree) extends Tree
+      Ident(name: Str, symbolic: Bool) extends Tree
+      Underscore() extends Tree
+      Modified(modifier, subject) extends Tree
+      Tuple(trees: Stack[Tree]) extends Tree
+      Sequence(trees: Stack[Tree]) extends Tree
+      Literal(kind, value) extends Tree
+      Match(scrutinee: Tree, branches: Stack[Tree]) extends Tree
+      Lambda(params: Stack[Tree], body: Tree) extends Tree
+      App(callee: Tree, argument: Tree) extends Tree
+      Infix(op: Keyword.Keyword, lhs: Tree, rhs: Tree) extends Tree
+      // `items` is separated by `and`
+      Define(kind: DefineKind, items: Stack[[Tree, Tree]]) extends Tree
+      LetIn(bindings: Stack[Tree], body: Tree) extends Tree
+      While(cond: Tree, body: Tree) extends Tree
+      For(head: Tree, start: Tree, end: Tree, body: Tree) extends Tree
+      // For `if`-`then`-`else`. The last part is optional.
+      Ternary(keyword: Keyword.Keyword, lhs: Tree, rhs: Tree, body) extends Tree
   
   fun empty = Empty()
   fun error(message: Str) = empty Error(message)
@@ -123,7 +124,7 @@ module Tree with
         go(callee)
         " "
         par of go(argument), prec(argument, false) <= Keywords.appPrec
-      Infix(Keyword(".", _, _), target, Ident(field)) then
+      Infix(Keyword.Keyword(".", _, _), target, Ident(field, _)) then
         if opPrec(".") is [leftPrec, _] then mkStr of
           par of go(target), prec(target, false) < leftPrec
           "."
@@ -170,7 +171,7 @@ module Tree with
         if body is Some(body) then go(body) else go(body)
       Lambda(params, body) then fold(+) of
         "fun ", params Iter.fromStack() Iter.mapping(go) Iter.joined(" "), " -> ", go(body)
-      Keyword(name, _, _) then name
+      Keyword.Keyword(name, _, _) then name
       Some(tree) then "Some(" + wrap(tree) + ")"
       None then "None"
       _ :: _ then tree Iter.fromStack() Iter.mapping(wrap) Iter.joined(" :: ") + " :: Nil"

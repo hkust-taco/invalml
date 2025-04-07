@@ -8,7 +8,9 @@ Keyword2 = class Keyword {
     tmp = - 2147483648;
     this.INT_MIN = tmp;
     this.INT_MAX = 2147483647;
-    this.Keyword = function Keyword(name1, leftPrec1, rightPrec1) { return new Keyword.class(name1, leftPrec1, rightPrec1); };
+    this.Keyword = function Keyword(name1, leftPrec1, rightPrec1) {
+      return new Keyword.class(name1, leftPrec1, rightPrec1);
+    };
     this.Keyword.class = class Keyword1 {
       constructor(name, leftPrec, rightPrec) {
         this.name = name;
@@ -60,10 +62,11 @@ Keyword2 = class Keyword {
         }
       } 
       toString() {
-        let scrut, param0, prec, scrut1, param01, prec1, tmp1, tmp2, tmp3;
-        tmp1 = Predef.fold((arg1, arg2) => {
+        let scrut, param0, prec, scrut1, param01, prec1, tmp1, tmp2, tmp3, lambda;
+        lambda = (undefined, function (arg1, arg2) {
           return arg1 + arg2
         });
+        tmp1 = Predef.fold(lambda);
         scrut = this.leftPrec;
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;

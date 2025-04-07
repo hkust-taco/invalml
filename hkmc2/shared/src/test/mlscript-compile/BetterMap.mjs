@@ -6,12 +6,14 @@ BetterMap1 = class BetterMap {
     this.Map = class Map {
       #storage;
       constructor() {
-        let tmp;
+        let tmp, lambda;
         tmp = new globalThis.Map();
         this.#storage = tmp;
-        this[globalThis.Symbol.iterator] = () => {
-          return runtime.safeCall(this.#storage[globalThis.Symbol.iterator]())
-        };
+        const this$Map = this;
+        lambda = (undefined, function () {
+          return runtime.safeCall(this$Map.#storage[globalThis.Symbol.iterator]())
+        });
+        this[globalThis.Symbol.iterator] = lambda;
       }
       get(key) {
         let scrut, tmp;

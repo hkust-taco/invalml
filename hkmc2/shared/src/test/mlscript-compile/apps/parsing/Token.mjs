@@ -73,14 +73,18 @@ Token1 = class Token {
     };
     this.Error = new Error$class;
     this.Error.class = Error$class;
-    this.Comment = function Comment(content1) { return new Comment.class(content1); };
+    this.Comment = function Comment(content1) {
+      return new Comment.class(content1);
+    };
     this.Comment.class = class Comment {
       constructor(content) {
         this.content = content;
       }
       toString() { return "Comment(" + globalThis.Predef.render(this.content) + ")"; }
     };
-    this.Identifier = function Identifier(name1, symbolic1) { return new Identifier.class(name1, symbolic1); };
+    this.Identifier = function Identifier(name1, symbolic1) {
+      return new Identifier.class(name1, symbolic1);
+    };
     this.Identifier.class = class Identifier {
       constructor(name, symbolic) {
         this.name = name;
@@ -88,7 +92,9 @@ Token1 = class Token {
       }
       toString() { return "Identifier(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.symbolic) + ")"; }
     };
-    this.Literal = function Literal(kind1, literal1) { return new Literal.class(kind1, literal1); };
+    this.Literal = function Literal(kind1, literal1) {
+      return new Literal.class(kind1, literal1);
+    };
     this.Literal.class = class Literal {
       constructor(kind, literal) {
         this.kind = kind;

@@ -10,23 +10,20 @@ import "./parsing/Token.mls"
 import "./parsing/TokenHelpers.mls"
 import "./parsing/Precedence.mls"
 import "./parsing/Tree.mls"
-import "./parsing/ParseRule.mls"
 import "./parsing/Rules.mls"
 
 open Predef
 open Option
 open Stack
 open BetterMap
-open TreeTracer { TreeTracer }
 open Precedence { Keywords, opPrec }
-open ParseRule { ParseRule }
 open Rules { termRule, termInfixRule, typeRule, typeInfixRule, declRule, syntaxKinds }
 
 type Opt[A] = Some[A] | None
 
 module Parser with ...
 
-val tracer = new TreeTracer
+val tracer = new TreeTracer.TreeTracer
 
 fun parse(tokens) =
   let counter = 0
@@ -62,7 +59,7 @@ fun parse(tokens) =
     else
       throw Error("Unknown syntax kind: \"" + kind + "\"")
   
-  fun parseRule(prec: Int, rule: ParseRule, allKeywords) = tracer.trace of
+  fun parseRule(prec: Int, rule, allKeywords) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
     result => "parsed rule \"" + rule.name + "\": " + result Tree.summary()
     () => ...

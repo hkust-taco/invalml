@@ -22,7 +22,7 @@ test(12)
 //│ = C
 
 fun test(x) =
-  class Foo(x)
+  data class Foo(x)
   Foo(x).toString()
 
 test(3)
@@ -30,13 +30,15 @@ test(3)
 
 :sjs
 fun test(x) =
-  class Foo(a, b)
+  data class Foo(a, b)
   Foo(x, x + 1)
 //│ JS (unsanitized):
 //│ let test2;
 //│ test2 = function test(x) {
 //│   let Foo2, tmp;
-//│   Foo2 = function Foo(a1, b1) { return new Foo.class(a1, b1); };
+//│   Foo2 = function Foo(a1, b1) {
+//│     return new Foo.class(a1, b1);
+//│   };
 //│   Foo2.class = class Foo1 {
 //│     constructor(a, b) {
 //│       this.a = a;

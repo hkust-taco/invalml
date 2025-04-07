@@ -106,35 +106,43 @@ Rules.syntaxKinds
   Iter.mapping of case [name, rule] then rule.display
   Iter.joined("\n")
   print()
-//│ > <let-bindings> ::= 
-//│ >   | <term> "=" <term> ["and" <let-bindings>]
-//│ > <simple-matching> ::= 
-//│ >   | <term> "->" <term> ["|" <simple-matching>]
-//│ > <pattern-list> ::= 
-//│ >   | <term> <pattern-list>
-//│ > <multiple-matching> ::= 
-//│ >   | <pattern-list> "->" <term> ["|" <multiple-matching>]
-//│ > <type-arguments-tail> ::= 
-//│ >   | "," <type> [<type-arguments-tail>]
-//│ > <constr-decl> ::= 
-//│ >   | <ident> ["of" <type>]
-//│ > <variants> ::= 
-//│ >   | <constr-decl> ["|" <variants>]
-//│ > <typedefs> ::= 
-//│ >   | <typedef-lhs> <typedef-rhs> ["and" <typedefs>]
+//│ > <let-bindings> ::= <term> "=" <term> ["and" <let-bindings>]
+//│ > <simple-matching> ::= <term> "->" <term> ["|" <simple-matching>]
+//│ > <pattern-list> ::= <term> <pattern-list>
+//│ > <multiple-matching> ::= <pattern-list> "->" <term> ["|" <multiple-matching>]
+//│ > <type-arguments-tail> ::= "," <type> [<type-arguments-tail>]
+//│ > <constr-decl> ::= <ident> ["of" <type>]
+//│ > <variants> ::= <constr-decl> ["|" <variants>]
+//│ > <typedefs> ::= <typedef-lhs> <typedef-rhs> ["and" <typedefs>]
 //│ > <typedef-rhs> ::= 
 //│ >   | "=" (<variants> | "{" <label-decls> "}")
 //│ >   | "==" <type>
-//│ > <label-decl> ::= 
-//│ >   | <type> ":" <type>
-//│ > <label-decls> ::= 
-//│ >   | <label-decl> [";" <label-decls>]
-//│ > <constr-decls> ::= 
-//│ >   | <constr-decl> ["|" <constr-decls>]
-//│ > <typedef-lhs> ::= 
-//│ >   | <type-params> <ident>
+//│ > <label-decl> ::= <type> ":" <type>
+//│ > <label-decls> ::= <label-decl> [";" <label-decls>]
+//│ > <constr-decls> ::= <constr-decl> ["|" <constr-decls>]
+//│ > <typedef-lhs> ::= <type-params> <ident>
 //│ > <type-params> ::= 
 //│ >   | <typevar>
 //│ >   | "(" <typevar> <type-params-tail> ")"
-//│ > <type-params-tail> ::= 
-//│ >   | "," <typevar> <type-params-tail>
+//│ > <type-params-tail> ::= "," <typevar> <type-params-tail>
+//│ > <prefix rules for expressions> ::= 
+//│ >   | "let" ["rec"] <let-bindings> ["in" <term>]
+//│ >   | "fun" <term> "->" <term>
+//│ >   | "match" <term> "with" ["|"] <term> "->" <term> ["|" <simple-matching>]
+//│ >   | "function" ["|"] <term> "->" <term> ["|" <simple-matching>]
+//│ >   | "if" <term> "then" <term> ["else" <term>]
+//│ >   | "while" <term> "do" <term> "done"
+//│ >   | "for" <term> "=" <term> ("to" | "downto") <term> "do" <term> "done"
+//│ >   | "(" <term> ")"
+//│ >   | "[" <term> "]"
+//│ >   | "{" <term> "}"
+//│ >   | "begin" <term> "end"
+//│ >   | <term> ("," <term> | ";" <term> | "<-" <term> | "==" <term> | "*" <term> | "." ("(" <term> ")" | <term>) | ":" <type> | <term>)
+//│ > <rules for types> ::= 
+//│ >   | "(" <type> (<type-arguments-tail> ")" <ident> | ")" [<ident>])
+//│ >   | <type> ("->" <type> | "*" <type> | <type>)
+//│ > <prefix rules for module items> ::= 
+//│ >   | "let" ["rec"] <let-bindings>
+//│ >   | "type" <typedefs>
+//│ >   | "exception" <constr-decls>
+//│ >   | "#" <ident> <term>

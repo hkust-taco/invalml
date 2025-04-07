@@ -17,11 +17,12 @@ module Expr with
 
   type Expr = Lit | Var | Inf | Err
   
-  class
-    Lit(value: Int)
-    Var(name: Str)
-    Inf(op: Str, left: Expr, right: Expr)
-    Err(expr: Option[Expr], msg: Str)
+  data
+    class
+      Lit(value: Int)
+      Var(name: Str)
+      Inf(op: Str, left: Expr, right: Expr)
+      Err(expr: Option[Expr], msg: Str)
   
   fun withErr(expr, msg) = Err(Some(expr), msg)
   fun justErr(msg) = Err(None, msg)

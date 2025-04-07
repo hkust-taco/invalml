@@ -2,7 +2,6 @@ import "./Precedence.mls"
 import "./Rules.mls"
 import "./Token.mls"
 import "./ParseRule.mls"
-import "./Keyword.mls"
 import "./Tree.mls"
 import "../../Stack.mls"
 import "../../Option.mls"
@@ -14,7 +13,7 @@ open Option { Some, None }
 open Predef { print, tuple }
 open Precedence { Keywords }
 open Token { LiteralKind }
-open ParseRule { Choice, ParseRule }
+open ParseRule { Choice }
 
 module Extension with ...
 
@@ -41,7 +40,7 @@ fun newCategory(tree: Tree) =
     Rules.syntaxKinds.get(name) is
       Some(rule) then print of "Category already exists: " + rule.display
       None then
-        Rules.syntaxKinds.insert(name, ParseRule(name, Nil))
+        Rules.syntaxKinds.insert(name, ParseRule.ParseRule(name, Nil))
         Rules.extendedKinds.add(name)
   else
     print of "expect a string literal but found " + tree

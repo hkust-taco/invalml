@@ -1,7 +1,6 @@
 import runtime from "./../../Runtime.mjs";
 import Lexer from "./../Lexer.mjs";
 import Precedence from "./Precedence.mjs";
-import ParseRule from "./ParseRule.mjs";
 import Token from "./Token.mjs";
 import Tree from "./Tree.mjs";
 import TokenHelpers from "./TokenHelpers.mjs";
@@ -18,13 +17,13 @@ Test1 = class Test {
       constructor() {}
       unapply(scrut) {
         if (scrut === "tree") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "trace") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else if (scrut === "tokens") {
-          return runtime.safeCall(globalThis.Predef.MatchResult([]))
+          return runtime.safeCall(runtime.MatchResult([]))
         } else {
-          return runtime.safeCall(globalThis.Predef.MatchFailure())
+          return runtime.safeCall(runtime.MatchFailure())
         }
       } 
       unapplyStringPrefix(topic) {
@@ -32,25 +31,25 @@ Test1 = class Test {
         cond = globalThis.Predef.stringStartsWith(topic, "tree");
         if (cond === true) {
           sliced = globalThis.Predef.stringDrop(topic, 4);
-          return runtime.safeCall(globalThis.Predef.MatchResult([
+          return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
           cond1 = globalThis.Predef.stringStartsWith(topic, "trace");
           if (cond1 === true) {
             sliced1 = globalThis.Predef.stringDrop(topic, 5);
-            return runtime.safeCall(globalThis.Predef.MatchResult([
+            return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
             cond2 = globalThis.Predef.stringStartsWith(topic, "tokens");
             if (cond2 === true) {
               sliced2 = globalThis.Predef.stringDrop(topic, 6);
-              return runtime.safeCall(globalThis.Predef.MatchResult([
+              return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
-              return runtime.safeCall(globalThis.Predef.MatchFailure())
+              return runtime.safeCall(runtime.MatchFailure())
             }
           }
         }
@@ -83,7 +82,7 @@ Test1 = class Test {
                     param05 = param04.name;
                     param15 = param04.symbolic;
                     matchResult1 = runtime.safeCall(Test.Flag.unapply(param05));
-                    if (matchResult1 instanceof globalThis.Predef.MatchResult.class) {
+                    if (matchResult1 instanceof runtime.MatchResult.class) {
                       flag1 = param05;
                       tail1 = param14;
                       tmp1 = runtime.safeCall(result.add(flag1));
@@ -137,7 +136,7 @@ Test1 = class Test {
                 param03 = param02.name;
                 param13 = param02.symbolic;
                 matchResult = runtime.safeCall(Test.Flag.unapply(param03));
-                if (matchResult instanceof globalThis.Predef.MatchResult.class) {
+                if (matchResult instanceof runtime.MatchResult.class) {
                   flag = param03;
                   tail = param12;
                   tmp3 = runtime.safeCall(result.add(flag));

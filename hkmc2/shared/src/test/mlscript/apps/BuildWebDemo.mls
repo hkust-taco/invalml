@@ -1,26 +1,21 @@
 :js
 
+:silent
 import "fs"
 import "path"
 import "child_process"
+
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/Option.mls"
-//│ child_process = [object Object]
-//│ fs = [object Object]
-//│ path = [object Object]
 
 open Option { Some, None }
 
+:silent
 let css_pattern = new RegExp("""<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>""", "gi")
 let script_pattern = new RegExp("""<script[^>]*src=["']([^"']+)["'][^>]*>""", "gi")
 let import_pattern = new RegExp("""import\s+([\s\S]+?\s+from\s+)?["']([^"']+)["']""", "g")
 let mls_import_pattern = new RegExp("""import\s+["']([^"']+)["']""", "g")
 let dynamic_import_pattern = new RegExp("""import\(["']([^"']+)["']\)""", "g")
-//│ css_pattern = /<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi
-//│ dynamic_import_pattern = /import\(["']([^"']+)["']\)/g
-//│ import_pattern = /import\s+([\s\S]+?\s+from\s+)?["']([^"']+)["']/g
-//│ mls_import_pattern = /import\s+["']([^"']+)["']/g
-//│ script_pattern = /<script[^>]*src=["']([^"']+)["'][^>]*>/gi
 
 // `process.cwd()` is different in `hkmc2AllTests / test` and
 // `~hkmc2DiffTests / Test / run`. This is a workaround to make the path.

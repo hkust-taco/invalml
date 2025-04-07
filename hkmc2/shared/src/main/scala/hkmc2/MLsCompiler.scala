@@ -16,7 +16,7 @@ class ParserSetup(file: os.Path, dbgParsing: Bool)(using Elaborator.State, Raise
   
   val block = os.read(file)
   val fph = new FastParseHelpers(block)
-  val origin = Origin(file.toString, 0, fph)
+  val origin = Origin(file, 0, fph)
   
   val lexer = new syntax.Lexer(origin, dbg = dbgParsing)
   val tokens = lexer.bracketedTokens
@@ -72,15 +72,18 @@ class MLsCompiler(preludeFile: os.Path, mkOutput: ((Str => Unit) => Unit) => Uni
     
     val elab = Elaborator(etl, wd, Ctx.empty)
     
-    val initState = State.init.nest(N)
+    val initState = State.init.nestLocal
     
     val (pblk, newCtx) = elab.importFrom(preludeParse.resultBlk)(using initState)
     
-    newCtx.nest(N).givenIn:
+    newCtx.nestLocal.givenIn:
       val elab = Elaborator(etl, wd, newCtx)
       val parsed = mainParse.resultBlk
       val (blk0, _) = elab.importFrom(parsed)
-      val blk = blk0.copy(stats = semantics.Import(State.runtimeSymbol, runtimeFile.toString) :: blk0.stats)
+      val blk = new semantics.Term.Blk(
+        semantics.Import(State.runtimeSymbol, runtimeFile.toString) :: blk0.stats,
+        blk0.res
+      )
       val low = ltl.givenIn:
         new codegen.Lowering()
           // with codegen.LoweringSelSanityChecks

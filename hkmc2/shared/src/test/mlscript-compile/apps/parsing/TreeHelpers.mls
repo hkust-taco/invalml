@@ -8,7 +8,6 @@ import "./Token.mls"
 open Predef
 open Stack
 open Token { LiteralKind }
-open Keyword { Keyword }
 open Option { Some, None }
 
 module TreeHelpers with ...
@@ -60,7 +59,7 @@ fun showAsTree(thing) =
     Tree.Ternary(n, l, r, b) then tuple of
       "Ternary", [["name", go(n)], ["lhs", go(l)], ["rhs", go(r)], ["body", go(b)]]
     Tree.Lambda(p, b) then tuple of "Lambda", [["params", go(p)], ["body", go(b)]]
-    Keyword as keyword then [keyword.toString(), []]
+    Keyword.Keyword as keyword then [keyword.toString(), []]
     LiteralKind.Integer then tuple of "Integer", []
     LiteralKind.Decimal then tuple of "Decimal", []
     LiteralKind.String then tuple of "String", []
