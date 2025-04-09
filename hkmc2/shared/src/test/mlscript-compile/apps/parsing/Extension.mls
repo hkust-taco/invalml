@@ -80,7 +80,7 @@ fun parseChoiceTree(tree: Tree) =
         Keywords.all.get(name) is Some(keyword) then
           Choice.keyword(keyword)(go(rest))
       Tree.Literal(LiteralKind.String, name) :: rest then
-        Choice.reference(name)(Cons, "unnamed", go(rest))
+        Choice.reference(name)(process: Cons, name: "unnamed", choices: tuple of go(rest))
       Nil then Choice.end(Nil)
     res
   

@@ -465,12 +465,13 @@ ParseRule2 = class ParseRule {
         return runtime.safeCall(this.#_exprChoice.get());
       } 
       extendChoices(newChoices) {
-        let tmp, tmp1, tmp2;
+        let tmp, tmp1, tmp2, tmp3;
         tmp = Stack.concat(this.choices, newChoices);
         this.choices = tmp;
         tmp1 = runtime.safeCall(this.#_endChoice.reset());
         tmp2 = runtime.safeCall(this.#_keywordChoices.reset());
-        return runtime.safeCall(this.#_exprChoice.reset())
+        tmp3 = runtime.safeCall(this.#_exprChoice.reset());
+        return this
       } 
       get display() {
         let tail, go, displayChoice, scrut, first1, first0, name1, line, tmp, tmp1;
@@ -698,7 +699,7 @@ ParseRule2 = class ParseRule {
     this.Choice = class Choice {
       static #ensureChoices;
       static {
-        let ensureChoices;
+        let tmp, tmp1, ensureChoices;
         this.Choice = class Choice1 {
           constructor() {}
           toString() { return "Choice"; }
@@ -752,32 +753,36 @@ ParseRule2 = class ParseRule {
           toString() { return "Siding(" + globalThis.Predef.render(this.init) + ", " + globalThis.Predef.render(this.optional) + ", " + globalThis.Predef.render(this.rest) + ", " + globalThis.Predef.render(this.process) + ")"; }
         };
         ensureChoices = function ensureChoices(xs, name) {
-          let tmp, tmp1, lambda;
-          tmp = Iter.zippingWithIndex(xs);
+          let tmp2, tmp3, lambda;
+          tmp2 = Iter.zippingWithIndex(xs);
           lambda = (undefined, function (caseScrut) {
-            let first1, first0, item, index, tmp2, tmp3, tmp4, tmp5;
+            let first1, first0, item, index, tmp4, tmp5, tmp6, tmp7;
             if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
               first0 = caseScrut[0];
               first1 = caseScrut[1];
               item = first0;
               index = first1;
               if (item instanceof Choice.Choice) {
-                tmp2 = true;
+                tmp4 = true;
               } else {
-                tmp2 = false;
+                tmp4 = false;
               }
-              tmp3 = name + ": element [";
-              tmp4 = tmp3 + index;
-              tmp5 = tmp4 + "] is not Choice";
-              return Predef.assert(tmp2, tmp5)
+              tmp5 = name + ": element [";
+              tmp6 = tmp5 + index;
+              tmp7 = tmp6 + "] is not Choice";
+              return Predef.assert(tmp4, tmp7)
             } else {
               throw new globalThis.Error("match error");
             }
           });
-          tmp1 = lambda;
-          return Iter.each(tmp, tmp1)
+          tmp3 = lambda;
+          return Iter.each(tmp2, tmp3)
         };
         Choice.#ensureChoices = ensureChoices;
+        tmp = Choice.reference("term");
+        this.term = tmp;
+        tmp1 = Choice.reference("type");
+        this.typeExpr = tmp1;
       }
       static keyword(keyword) {
         return (...choices) => {
@@ -791,7 +796,7 @@ ParseRule2 = class ParseRule {
       } 
       static reference(kind) {
         return (fields) => {
-          let kind1, process, process1, scrut, name, name1, rest, choices, rest1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
+          let kind1, process, process1, scrut, name, name1, rest, choices, rest1, outerPrec, outerPrec1, innerPrec, innerPrec1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
           if (typeof kind === 'string') {
             tmp = kind;
           } else if (kind === undefined) {
@@ -835,53 +840,26 @@ ParseRule2 = class ParseRule {
             throw globalThis.TypeError("Choice.reference: choices is not an array");
           }
           rest = tmp4;
-          return Choice.Ref(kind1, process, Option.None, Option.None, rest)
+          outerPrec1 = fields["outerPrec"];
+          if (globalThis.Number.isInteger(outerPrec1)) {
+            tmp6 = Option.Some(outerPrec1);
+          } else if (outerPrec1 === undefined) {
+            tmp6 = Option.None;
+          } else {
+            throw globalThis.TypeError("Choice.reference: outerPrec is not an Int");
+          }
+          outerPrec = tmp6;
+          innerPrec1 = fields["innerPrec"];
+          if (globalThis.Number.isInteger(innerPrec1)) {
+            tmp7 = Option.Some(innerPrec1);
+          } else if (innerPrec1 === undefined) {
+            tmp7 = Option.None;
+          } else {
+            throw globalThis.TypeError("Choice.reference: innerPrec is not an Int");
+          }
+          innerPrec = tmp7;
+          return Choice.Ref(kind1, process, outerPrec, innerPrec, rest)
         }
-      } 
-      static term(process, name, ...choices) {
-        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
-        tmp = typeof process;
-        tmp1 = tmp === "function";
-        tmp2 = Predef.assert(tmp1, "Choice.term: process is not a function");
-        if (typeof name === 'string') {
-          tmp3 = true;
-        } else {
-          tmp3 = false;
-        }
-        tmp4 = Predef.assert(tmp3, "Choice.term: name is not a string");
-        tmp5 = runtime.safeCall(Choice.#ensureChoices(choices, "Choice.term"));
-        tmp6 = ParseRule.rule(name, ...choices);
-        return Choice.Ref("term", process, Option.None, Option.None, tmp6)
-      } 
-      static termWithPrec(process1, name1, outerPrec, innerPrec, ...choices1) {
-        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
-        tmp = typeof process1;
-        tmp1 = tmp === "function";
-        tmp2 = Predef.assert(tmp1, "Choice.termWithPrec: process is not a function");
-        if (typeof name1 === 'string') {
-          tmp3 = true;
-        } else {
-          tmp3 = false;
-        }
-        tmp4 = Predef.assert(tmp3, "Choice.termWithPrec: name is not a string");
-        tmp5 = runtime.safeCall(Choice.#ensureChoices(choices1, "Choice.termWithPrec"));
-        tmp6 = ParseRule.rule(name1, ...choices1);
-        return Choice.Ref("term", process1, outerPrec, innerPrec, tmp6)
-      } 
-      static typeExpr(process2, name2, ...choices2) {
-        let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
-        tmp = typeof process2;
-        tmp1 = tmp === "function";
-        tmp2 = Predef.assert(tmp1, "Choice.typeExpr: process is not a function");
-        if (typeof name2 === 'string') {
-          tmp3 = true;
-        } else {
-          tmp3 = false;
-        }
-        tmp4 = Predef.assert(tmp3, "Choice.typeExpr: name is not a string");
-        tmp5 = runtime.safeCall(Choice.#ensureChoices(choices2, "Choice.typeExpr"));
-        tmp6 = ParseRule.rule(name2, ...choices2);
-        return Choice.Ref("type", process2, Option.None, Option.None, tmp6)
       } 
       static optional(init, rest) {
         let tmp, tmp1, tmp2, tmp3;
@@ -933,7 +911,7 @@ ParseRule2 = class ParseRule {
         return Choice.End(value)
       } 
       static map(choice, op) {
-        let param0, value1, param01, param1, param2, param3, init2, optional, rest2, process3, param02, param11, param21, param31, param4, kind1, process4, outerPrec1, innerPrec1, rest3, param03, param12, keyword1, rest4, tmp, tmp1, lambda, lambda1;
+        let param0, value1, param01, param1, param2, param3, init2, optional, rest2, process, param02, param11, param21, param31, param4, kind1, process1, outerPrec, innerPrec, rest3, param03, param12, keyword1, rest4, tmp, tmp1, lambda, lambda1;
         if (choice instanceof Choice.Keyword.class) {
           param03 = choice.keyword;
           param12 = choice.rest;
@@ -948,16 +926,16 @@ ParseRule2 = class ParseRule {
           param31 = choice.innerPrec;
           param4 = choice.rest;
           kind1 = param02;
-          process4 = param11;
-          outerPrec1 = param21;
-          innerPrec1 = param31;
+          process1 = param11;
+          outerPrec = param21;
+          innerPrec = param31;
           rest3 = param4;
           lambda = (undefined, function (x, y) {
             let tmp2;
-            tmp2 = runtime.safeCall(process4(x, y));
+            tmp2 = runtime.safeCall(process1(x, y));
             return runtime.safeCall(op(tmp2))
           });
-          return Choice.Ref(kind1, lambda, outerPrec1, innerPrec1, rest3)
+          return Choice.Ref(kind1, lambda, outerPrec, innerPrec, rest3)
         } else if (choice instanceof Choice.Siding.class) {
           param01 = choice.init;
           param1 = choice.optional;
@@ -966,10 +944,10 @@ ParseRule2 = class ParseRule {
           init2 = param01;
           optional = param1;
           rest2 = param2;
-          process3 = param3;
+          process = param3;
           lambda1 = (undefined, function (x, y) {
             let tmp2;
-            tmp2 = runtime.safeCall(process3(x, y));
+            tmp2 = runtime.safeCall(process(x, y));
             return runtime.safeCall(op(tmp2))
           });
           return Choice.Siding(init2, optional, rest2, lambda1)

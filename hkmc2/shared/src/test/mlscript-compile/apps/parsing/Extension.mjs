@@ -329,7 +329,7 @@ Extension1 = class Extension {
   static parseChoiceTree(tree4) {
     let go, param0, param01, param1, categoryIdent, param02, param11, choiceTree, param03, param12, funcIdent, param04, param13, categoryName, op, param05, param14, other, param06, elements, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, op1;
     go = function go(trees) {
-      let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp37, tmp38, tmp39, tmp40, tmp41;
+      let res, param07, param15, param08, param16, name, rest, param09, param17, param010, param18, param011, param19, name1, rest1, scrut, param012, keyword, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42;
       if (trees instanceof Stack.Cons.class) {
         param07 = trees.head;
         param15 = trees.tail;
@@ -376,7 +376,10 @@ Extension1 = class Extension {
             rest = param15;
             tmp40 = ParseRule.Choice.reference(name);
             tmp41 = go(rest);
-            tmp39 = runtime.safeCall(tmp40(Stack.Cons, "unnamed", tmp41));
+            tmp42 = Predef.tuple(tmp41);
+            tmp39 = runtime.safeCall(tmp40({
+            "process": Stack.Cons, "name": "unnamed", "choices": tmp42
+            }));
           } else {
             throw new globalThis.Error("match error");
           }

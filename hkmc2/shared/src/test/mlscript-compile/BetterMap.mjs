@@ -30,6 +30,22 @@ BetterMap1 = class BetterMap {
         tmp = this.#storage.set(key1, value);
         return runtime.Unit
       } 
+      updateWith(key2) {
+        return (op) => {
+          let scrut, param0, value1, tmp;
+          tmp = this.get(key2);
+          scrut = runtime.safeCall(op(tmp));
+          if (scrut instanceof Option.Some.class) {
+            param0 = scrut.value;
+            value1 = param0;
+            return this.#storage.set(key2, value1)
+          } else if (scrut instanceof Option.None.class) {
+            return runtime.safeCall(this.#storage.delete(key2))
+          } else {
+            throw new globalThis.Error("match error");
+          }
+        }
+      } 
       get keysIterator() {
         return runtime.safeCall(this.#storage.keys());
       } 

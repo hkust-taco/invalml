@@ -19,6 +19,11 @@ class Map with
     storage.set(key, value)
     ()
   
+  fun updateWith(key)(op) =
+    if op(get(key)) is
+      Some(value) then storage.set(key, value)
+      None then storage.delete(key)
+  
   fun keysIterator = storage.keys()
   
   fun valuesIterator = storage.values()

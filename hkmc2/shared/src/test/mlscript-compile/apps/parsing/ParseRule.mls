@@ -135,6 +135,7 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
     _endChoice.reset()
     _keywordChoices.reset()
     _exprChoice.reset()
+    this
   
   // Display parse rules as a tree in a BNF-like format.
   fun display =
@@ -252,25 +253,21 @@ module Choice with
         rule(name, ...choices)
       choices is undefined then rule(name)
       else throw TypeError("Choice.reference: choices is not an array")
-    Ref(kind, process, None, None, rest)
+    let outerPrec = if
+      let outerPrec = fields.("outerPrec")
+      outerPrec is Int then Some(outerPrec)
+      outerPrec is undefined then None
+      else throw TypeError("Choice.reference: outerPrec is not an Int")
+    let innerPrec = if
+      let innerPrec = fields.("innerPrec")
+      innerPrec is Int then Some(innerPrec)
+      innerPrec is undefined then None
+      else throw TypeError("Choice.reference: innerPrec is not an Int")
+    Ref(kind, process, outerPrec, innerPrec, rest)
   
-  fun term(process, name, ...choices) =
-    assert(typeof(process) === "function", "Choice.term: process is not a function")
-    assert(name is Str, "Choice.term: name is not a string")
-    ensureChoices(choices, "Choice.term")
-    Ref("term", process, None, None, rule(name, ...choices))
+  val term = reference("term")
   
-  fun termWithPrec(process, name, outerPrec, innerPrec, ...choices) =
-    assert(typeof(process) === "function", "Choice.termWithPrec: process is not a function")
-    assert(name is Str, "Choice.termWithPrec: name is not a string")
-    ensureChoices(choices, "Choice.termWithPrec")
-    Ref("term", process, outerPrec, innerPrec, rule(name, ...choices))
-  
-  fun typeExpr(process, name, ...choices) =
-    assert(typeof(process) === "function", "Choice.typeExpr: process is not a function")
-    assert(name is Str, "Choice.typeExpr: name is not a string")
-    ensureChoices(choices, "Choice.typeExpr")
-    Ref("type", process, None, None, rule(name, ...choices))
+  val typeExpr = reference("type")
   
   fun optional(init, rest) =
     assert(init is ParseRule, "Choice.optional: init is not ParseRule")
