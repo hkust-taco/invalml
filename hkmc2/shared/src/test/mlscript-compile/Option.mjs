@@ -54,9 +54,6 @@ Option1 = class Option {
       throw new globalThis.Error("match error");
     }
   } 
-  static test() {
-    return Predef.pipeInto(2134, Predef.print)
-  } 
   static getOrElse(opt, default1) {
     let param0, value;
     if (opt instanceof Option.Some.class) {

@@ -8,16 +8,7 @@ import Iter from "./../../Iter.mjs";
 import Option from "./../../Option.mjs";
 import TreeTracer from "./../../TreeTracer.mjs";
 import XML from "./../../XML.mjs";
-let RecursiveKnot1, ParseRuleVisualizer1;
-RecursiveKnot1 = function RecursiveKnot(getName1) {
-  return new RecursiveKnot.class(getName1);
-};
-RecursiveKnot1.class = class RecursiveKnot {
-  constructor(getName) {
-    this.getName = getName;
-  }
-  toString() { return "RecursiveKnot(" + globalThis.Predef.render(this.getName) + ")"; }
-};
+let ParseRuleVisualizer1;
 ParseRuleVisualizer1 = class ParseRuleVisualizer {
   static #defaultKinds;
   static #renderedKinds;
@@ -62,59 +53,60 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
       return runtime.safeCall(rr.Diagram(tmp10))
     };
     renderChoice = function renderChoice(parentRule, choice, currentRule) {
-      let doTemp, param0, param1, get, make, rule1, proxyChoice, getProxyChoiceName, ruleName, param01, getName, scrut1, ruleName1, param02, param11, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut2, param03, param12, param21, rule2, optional, rest1, scrut3, latterPart, param04, optionalPart, param05, param13, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, lambda1, lambda2;
+      let param0, param1, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut1, param01, param11, param21, param31, rule1, optional, rest1, scrut2, latterPart, param02, optionalPart, param03, param12, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp10 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.End"));
         return Option.None
       } else if (choice instanceof ParseRule.Choice.Keyword.class) {
-        param05 = choice.keyword;
-        param13 = choice.rest;
-        keyword = param05;
-        rest2 = param13;
+        param03 = choice.keyword;
+        param12 = choice.rest;
+        keyword = param03;
+        rest2 = param12;
         tmp11 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Keyword"));
         tmp12 = runtime.safeCall(rr.Terminal(keyword.name));
         tmp13 = renderRule(rest2, currentRule);
         tmp14 = sequence(tmp12, tmp13);
         return Option.Some(tmp14)
       } else if (choice instanceof ParseRule.Choice.Siding.class) {
-        param03 = choice.rule;
-        param12 = choice.optional;
+        param01 = choice.init;
+        param11 = choice.optional;
         param21 = choice.rest;
-        rule2 = param03;
-        optional = param12;
+        param31 = choice.process;
+        rule1 = param01;
+        optional = param11;
         rest1 = param21;
         tmp15 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Siding"));
-        scrut3 = renderRule(rule2, currentRule);
+        scrut2 = renderRule(rule1, currentRule);
         latterPart = renderRule(rest1, currentRule);
-        if (scrut3 instanceof Option.Some.class) {
-          param04 = scrut3.value;
-          optionalPart = param04;
+        if (scrut2 instanceof Option.Some.class) {
+          param02 = scrut2.value;
+          optionalPart = param02;
           if (optional === true) {
             tmp16 = runtime.safeCall(rr.Optional(optionalPart));
             tmp17 = sequence(tmp16, latterPart);
           } else {
             tmp17 = sequence(optionalPart, latterPart);
           }
-        } else if (scrut3 instanceof Option.None.class) {
+        } else if (scrut2 instanceof Option.None.class) {
           tmp17 = latterPart;
         } else {
           throw new globalThis.Error("match error");
         }
         return Option.Some(tmp17)
       } else if (choice instanceof ParseRule.Choice.Ref.class) {
-        param02 = choice.kind;
-        param11 = choice.process;
+        param0 = choice.kind;
+        param1 = choice.process;
         param2 = choice.outerPrec;
         param3 = choice.innerPrec;
         param4 = choice.rest;
-        kind = param02;
+        kind = param0;
         outerPrec = param2;
         innerPrec = param3;
         rest = param4;
         tmp18 = "found Choice.Ref to " + kind;
         tmp19 = runtime.safeCall(ParseRuleVisualizer.tracer.print(tmp18));
-        scrut2 = runtime.safeCall(ParseRuleVisualizer.#renderedKinds.has(kind));
-        if (scrut2 === false) {
+        scrut1 = runtime.safeCall(ParseRuleVisualizer.#renderedKinds.has(kind));
+        if (scrut1 === false) {
           tmp20 = runtime.safeCall(referencedKinds.add(kind));
         } else {
           tmp20 = runtime.Unit;
@@ -126,76 +118,7 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
         tmp23 = renderRule(rest, currentRule);
         tmp24 = sequence(tmp22, tmp23);
         return Option.Some(tmp24)
-      } else if (choice instanceof ParseRule.Choice.Lazy.class) {
-        param0 = choice.get;
-        param1 = choice.make;
-        get = param0;
-        make = param1;
-        scrut1 = runtime.safeCall(renderCache.has(make));
-        if (scrut1 === true) {
-          tmp25 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Lazy in cache"));
-          tmp26 = runtime.safeCall(renderCache.get(make));
-          ruleName1 = tmp26;
-          tmp27 = "#" + ruleName1;
-          tmp28 = rr.NonTerminal(ruleName1, {
-          "href": tmp27
-          });
-          return Option.Some(tmp28)
-        } else {
-          tmp29 = runtime.safeCall(get());
-          rule1 = tmp29;
-          if (rule1 instanceof RecursiveKnot1.class) {
-            param01 = rule1.getName;
-            getName = param01;
-            tmp30 = runtime.safeCall(getName());
-            tmp31 = "found RecursiveKnot of \"" + tmp30;
-            tmp32 = tmp31 + "\"";
-            tmp33 = runtime.safeCall(ParseRuleVisualizer.tracer.print(tmp32));
-            tmp34 = runtime.safeCall(getName());
-            tmp35 = runtime.safeCall(getName());
-            tmp36 = "#" + tmp35;
-            tmp37 = rr.NonTerminal(tmp34, {
-            "href": tmp36
-            });
-            return Option.Some(tmp37)
-          } else {
-            tmp38 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Lazy not in cache"));
-            proxyChoice = null;
-            lambda1 = (undefined, function () {
-              let scrut4, param06, rule3;
-              scrut4 = ParseRule.Choice.rest(proxyChoice);
-              if (scrut4 instanceof Option.Some.class) {
-                param06 = scrut4.value;
-                rule3 = param06;
-                return rule3.name
-              } else {
-                return "???"
-              }
-            });
-            tmp39 = lambda1;
-            getProxyChoiceName = tmp39;
-            lambda2 = (undefined, function () {
-              return RecursiveKnot1(getProxyChoiceName)
-            });
-            tmp40 = runtime.safeCall(make(lambda2));
-            proxyChoice = tmp40;
-            tmp41 = runtime.safeCall(getProxyChoiceName());
-            ruleName = tmp41;
-            tmp42 = renderCache.set(make, ruleName);
-            tmp43 = renderChoice(parentRule, proxyChoice, Option.None);
-            tmp44 = diagram(tmp43);
-            tmp45 = Predef.tuple(ruleName, tmp44);
-            tmp46 = runtime.safeCall(helperRules.push(tmp45));
-            tmp47 = "#" + ruleName;
-            tmp48 = rr.NonTerminal(ruleName, {
-            "href": tmp47
-            });
-            return Option.Some(tmp48)
-          }
-        }
       } else {
-        tmp49 = "unexpected choice: " + choice;
-        doTemp = runtime.safeCall(globalThis.console.log(tmp49));
         throw new globalThis.Error("match error");
       }
     };

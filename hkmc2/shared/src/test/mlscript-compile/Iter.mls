@@ -176,6 +176,18 @@ fun some(xs, op) =
     else set next = iterator.next()
   result Option.getOrElse(false)
 
+// `forall` is a keyword
+fun every(xs, op) =
+  let iterator = getIterator of xs
+  let next = iterator.next()
+  let result = None
+  while result is None do
+    if ...
+    next.done then set result = Some(true)
+    op(next.value) then set next = iterator.next()
+    else set result = Some(false)
+  result Option.getOrElse(true)
+
 fun each(xs, op) =
   let iterator = getIterator of xs
   let next = iterator.next()

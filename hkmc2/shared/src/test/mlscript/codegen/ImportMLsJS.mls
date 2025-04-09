@@ -18,14 +18,6 @@ Option.isDefined(Option.None)
 Option.None Option.isDefined()
 //│ = false
 
-
-Option.test()
-//│ > 2134
-
-// TODO
-// Option.test2()
-
-
 String(Option.None)
 //│ = "None"
 

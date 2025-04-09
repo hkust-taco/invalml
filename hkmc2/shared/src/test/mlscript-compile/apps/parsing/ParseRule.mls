@@ -16,6 +16,16 @@ type Opt[A] = Some[A] | None
 
 module ParseRule with ...
 
+data class Lazy[out A](init: () -> A) with
+  mut val cached: Opt[A] = None
+  fun reset() = set cached = None
+  fun get() = if cached is
+    Some(v) then v
+    else
+      let v = init()
+      set cached = Some(v)
+      v
+
 //  ____                     ____        _
 // |  _ \ __ _ _ __ ___  ___|  _ \ _   _| | ___
 // | |_) / _` | '__/ __|/ _ \ |_) | | | | |/ _ \
@@ -24,9 +34,9 @@ module ParseRule with ...
 //
 // =============================================
 
-class ParseRule(val name: Str, val choices: Stack[Choice]) with
+data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
   
-  fun map(op: Tree -> Tree) =
+  fun map[B](op: A -> B) =
     ParseRule of
       name
       choices
@@ -34,26 +44,7 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
         Iter.mapping of choice => choice Choice.map(op)
         Iter.toStack()
   
-  // Append a rule to the end of all choices in this rule.
-  fun andThen(rest: ParseRule) = ParseRule of
-    name
-    choices
-      Iter.fromStack()
-      Iter.mapping of case
-        Choice.Keyword(keyword, rest') then [Choice.Keyword(keyword, rest'.andThen(rest))]
-        Choice.Ref(isType, process, outerPrec, innerPrec, rest') then
-          [Choice.Ref(isType, process, outerPrec, innerPrec, rest'.andThen(rest))]
-        Choice.End then rest.choices Iter.fromStack()
-        Choice.Siding(rule, optional, rest') then
-          [Choice.Siding(rule, optional, rest'.andThen(rest))]
-        Choice.Lazy(get, make) then
-          let get' = () => get() andThen(rest)
-          let make' = getChoice => make(() => getChoice andThen(rest))
-          [Choice.Lazy(get', make')]
-      Iter.flattening()
-      Iter.toStack()
-  
-  fun andThen2(rest: ParseRule, process) =
+  fun andThen[B, C](rest: ParseRule[B], process: (A, B) -> C) =
     fun go(rule: ParseRule) = ParseRule of
       rule.name
       rule.choices
@@ -62,50 +53,54 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
           Choice.Keyword(keyword, rest') then tuple of
             Choice.Keyword(keyword, go(rest'))
           Choice.Ref(isType, process, outerPrec, innerPrec, rest') then
-            let process' = (lhs, rhs) => if rhs is [rhs, innerResult] then
-              [process(lhs, rhs), innerResult]
+            let process' = (lhs, rhs) => if
+              rhs is [rhs, innerResult] then
+                [process(lhs, rhs), innerResult]
+              do assert(false, "illgeal result from inner")
             tuple of
               Choice.Ref(isType, process', outerPrec, innerPrec, go(rest'))
           Choice.End(value) then
             rest.choices
               Iter.fromStack()
               Iter.mapping of choice => choice Choice.map(result => [value, result])
-          Choice.Siding(rule, optional, rest') then tuple of
-            Choice.Siding(rule, optional, go(rest'))
+          Choice.Siding(rule, optional, rest', process) then
+            let process' = (initRes, restRes) => if
+              restRes is [restRes', innerRes] then [process(initRes, restRes'), innerRes]
+              do assert(false, "illegal result from inner")
+            [Choice.Siding(rule, optional, go(rest'), process')]
         Iter.flattening()
         Iter.toStack()
-    go(this).map of case [outerResult, innerResult] then
-      process(outerResult, innerResult)
+    go(this).map of res => process(res.0, res.1)
   
-  let _endChoice = None
-  
-  let _computeEndChoice = () => choices
+  let _endChoice = Lazy of () => choices
     Iter.fromStack()
-    Iter.firstDefined of choice =>
-      if choice Choice.forced() is
-        Choice.End(value) then Some(value)
-        Choice.Siding(_, _, rest) then rest.endChoice // TODO: is this correct?
-        else None
+    Iter.firstDefined of case
+      Choice.End(value) then Some(value)
+      Choice.Siding(init, optional, rest, process) and
+        optional then
+           // It's actually ambiguous here.
+          rest.endChoice.map of restRes =>
+            process(None, restRes)
+        init.endChoice is Some(initRes) and
+          rest.endChoice is Some(restRes) then
+            process(Some(initRes), restRes)
+      else None
   
   // Collect the first end choice in this rule.
-  fun endChoice = if _endChoice is
-    None then
-      let computed = _computeEndChoice()
-      set _endChoice = Some(computed)
-      computed
-    Some(cache) then cache
+  fun endChoice = _endChoice.get()
   
-  // Manual memoization for keyword choices.
-  let _keywordChoices = None
-  
-  let _computeKeywordsChoices = () => choices
+  let _keywordChoices = Lazy of () => choices
     Iter.fromStack()
-    Iter.mapping of choice => if choice Choice.forced() is
+    Iter.mapping of case
       Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
-      Choice.Siding(rule, optional, rest) then rule.keywordChoices
+      Choice.Siding(init, optional, rest, process) then init.keywordChoices
         Iter.mapping of case [keyword, rule] then
-          [keyword, rule.andThen(rest)]
-        Iter.appended of if optional then [] else rest.keywordChoices
+          [keyword, rule.map(Some).andThen(rest, process)]
+        Iter.appended of
+          if optional then rest.keywordChoices
+            Iter.mapping of case [keyword, rule] then
+              [keyword, rule.map(res => process(None, res))]
+          else []
         Iter.toArray()
       else []
     Iter.flattening()
@@ -113,60 +108,46 @@ class ParseRule(val name: Str, val choices: Stack[Choice]) with
     toMap()
   
   // Collect all keyword choices in this rule.
-  fun keywordChoices = if _keywordChoices is
-    None then
-      let computed = _computeKeywordsChoices()
-      set _keywordChoices = Some(computed)
-      computed
-    Some(cache) then cache
+  fun keywordChoices = _keywordChoices.get()
   
-  let _exprChoice = None
-  
-  let _computeExprChoice = () => choices
+  let _exprChoice = Lazy of () => choices
     Iter.fromStack()
-    Iter.firstDefined of choice => if choice Choice.forced() is
-      Choice.Ref(isType, process, outerPrec, innerPrec, rest) then
-        Some([isType, process, outerPrec, innerPrec, rest])
-      Choice.Siding(rule, optional, rest) and
-        rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest']) then
-          Some([kind, process, outerPrec, innerPrec rest'.andThen(rest)])
-        optional then rest.exprChoice
+    Iter.firstDefined of case
+      Choice.Ref(kind, process, outerPrec, innerPrec, rest) then
+        Some([kind, process, outerPrec, innerPrec, rest])
+      Choice.Siding(init, optional, rest, process) and
+        init.exprChoice is
+          Some([k, process', op, ip, rest']) then
+            let process''(exprRes, pairRes) = if pairRes is [restRes', restRes] then
+              process(process'(exprRes, restRes'), restRes)
+            let rest'' = rest'.andThen(rest, tuple)
+            Some of [k, process'', op, ip, rest'']
+        optional and rest.exprChoice is
+          Some([k, p, op, ip, rest']) then Some of tuple of
+            k, (exprRes, restRes) => process(None, p(exprRes, restRes)), op, ip, rest'
         else None
       else None
   
-  fun exprChoice = if _exprChoice is
-    None then
-      let computed = _computeExprChoice()
-      set _exprChoice = Some(computed)
-      computed
-    Some(cache) then cache
+  fun exprChoice = _exprChoice.get()
   
   fun extendChoices(newChoices: Stack[Choice]) =
     set choices = choices ::: newChoices
-    // Invalidate memoized values.
-    set _endChoice = None
-    set _keywordChoices = None
-    set _exprChoice = None
+    _endChoice.reset()
+    _keywordChoices.reset()
+    _exprChoice.reset()
   
   // Display parse rules as a tree in a BNF-like format.
   fun display =
-    object Knot
     /// Display a single `Choice`.
     fun displayChoice(choice: Choice) = if choice is
-      Choice.Keyword(keyword, rest) and
-        let prefix = "\"" + keyword.name + "\""
-        tail(rest) is [name, line] then prefix + line
-      Choice.Ref(kind, _, _, _, rest) and
-        let prefix = "<" + kind + ">"
-        tail(rest) is [name, line] then prefix + line
-      Choice.Siding(rule, optional, rest) then
-        let ruleContent = if go(rule, false) is [name, line] then line
-        let prefix = if optional then "[" + ruleContent + "]" else "(" + ruleContent + ")"
-        if tail(rest) is [name, line] then prefix + line
+      Choice.Keyword(keyword, rest) then
+        "\"" + keyword.name + "\"" + tail(rest).1
+      Choice.Ref(kind, _, _, _, rest) then
+        "<" + kind + ">" + tail(rest).1
+      Choice.Siding(init, opt, rest, _) then
+        let init' = go(init, false).1
+        (if opt then "[" + init' + "]" else "(" + init' + ")") + tail(rest).1
       Choice.End then ""
-      Choice.Lazy(get, make) and
-        get() is Knot then "<rec>"
-        else displayChoice(make(() => Knot))
       other then "<unknown:" + other + ">"
     
     // Display the remaining list of choices.
@@ -207,12 +188,23 @@ fun rule(name, ...choices) = ParseRule of
     choices Iter.toStack()
 
 module Choice with
-  data class Keyword(keyword: Keyword, rest: ParseRule)
-  data class Ref(kind: Str, process: Tree -> Tree, outerPrec: Opt[Int], innerPrec: Opt[Int], rest: ParseRule)
-  data class End(value: Tree)
+  abstract class Choice[A]
+  
+  data class Keyword[A](keyword: Keyword, rest: ParseRule[A]) extends Choice[A]
+  
+  data class Ref[A, B](
+      kind: Str,
+      process: (Tree, B) -> A,
+      outerPrec: Opt[Int],
+      innerPrec: Opt[Int],
+      rest: ParseRule[B]
+  ) extends Choice[A]
+  
+  data class End[A](value: A) extends Choice[A]
+  
   // * An alternative route that branches off from the main railroad and
   // * eventually connects back to the main railroad. For example, `foo`, `bar`,
-  // * and `baz` are choices represented by `rule`. If `optional` is set to
+  // * and `baz` are choices represented by `init`. If `optional` is set to
   // * `true`, an additional empty choice is added to `rule`, making it possible
   // * to skip the entire `rule`.
   // *                     _______ foo ______
@@ -220,43 +212,65 @@ module Choice with
   // *                   /-------- bar -------\
   // *                  /                      \
   // * ----- start ----+---------- baz ---------+--- end ---------
-  data class Siding(rule: ParseRule, optional: Bool, rest: ParseRule)
-  data class Lazy(get: () -> Choice, make: (() -> Choice) -> Choice)
+  data class Siding[A, B, C](
+      init: ParseRule[B],
+      optional: Bool,
+      rest: ParseRule[C],
+      process: (Opt[B], C) -> A
+  ) extends Choice[A]
   
-  fun rest(choice) = if choice is
-    Lazy(get, _) then get() rest()
-    Keyword(_, rest) then Some(rest)
-    Ref(_, _, _, _, rest) then Some(rest)
-    Siding(_, _, rest) then Some(rest)
-    End then None
-  
-  fun forced(choice) = if choice is Lazy(get, _) then get() else choice
+  let ensureChoices(xs, name) = xs
+    Iter.zippingWithIndex()
+    Iter.each of case [item, index] then
+      assert(item is Choice, name + ": element [" + index + "] is not Choice")
   
   // Shorthands for constructing rule choices.
   fun keyword(keyword)(...choices) =
+    ensureChoices(choices, "Choice.keyword")
     Keyword(keyword, rule("`" + keyword.name + "` keyword", ...choices))
-  fun reference(kind, process, name, ...choices) =
-    Ref(kind, process, None, None, rule(name, ...choices))
-  fun term(process, name, ...choices) =
-    Ref("term", process, None, None, rule(name, ...choices))
-  fun termWithPrec(process, name, outerPrec, innerPrec, ...choices) =
-    Ref("term", process, outerPrec, innerPrec, rule(name, ...choices))
-  fun typeExpr(process, name, ...choices) =
-    Ref("type", process, None, None, rule(name, ...choices))
-  fun optional(rule, rest) = Siding(rule, true, rest)
-  fun siding(rule, rest) = Siding(rule, false, rest)
-  fun end(value) = End(value)
-  fun lazy(makeChoice) =
-    let cache = None
-    fun getChoice() =
-      if cache is Some(choice) then choice else ...
-      set cache = makeChoice(getChoice)
-      cache
-    Lazy(getChoice, makeChoice)
   
-  fun map(choice: Choice, op: Tree -> Tree) = if choice is
+  fun reference(kind)(process, name, ...choices) =
+    assert(kind is Str, "Choice.reference: kind is not a string")
+    assert(typeof(process) === "function", "Choice.reference: process is not a function")
+    assert(name is Str, "Choice.reference: name is not a string")
+    ensureChoices(choices, "Choice.reference")
+    Ref(kind, process, None, None, rule(name, ...choices))
+  
+  fun term(process, name, ...choices) =
+    assert(typeof(process) === "function", "Choice.term: process is not a function")
+    assert(name is Str, "Choice.term: name is not a string")
+    ensureChoices(choices, "Choice.term")
+    Ref("term", process, None, None, rule(name, ...choices))
+  
+  fun termWithPrec(process, name, outerPrec, innerPrec, ...choices) =
+    assert(typeof(process) === "function", "Choice.termWithPrec: process is not a function")
+    assert(name is Str, "Choice.termWithPrec: name is not a string")
+    ensureChoices(choices, "Choice.termWithPrec")
+    Ref("term", process, outerPrec, innerPrec, rule(name, ...choices))
+  
+  fun typeExpr(process, name, ...choices) =
+    assert(typeof(process) === "function", "Choice.typeExpr: process is not a function")
+    assert(name is Str, "Choice.typeExpr: name is not a string")
+    ensureChoices(choices, "Choice.typeExpr")
+    Ref("type", process, None, None, rule(name, ...choices))
+  
+  fun optional(init, rest) =
+    assert(init is ParseRule, "Choice.optional: init is not ParseRule")
+    assert(rest is ParseRule, "Choice.optional: rest is not ParseRule")
+    Siding(init, true, rest, tuple)
+  
+  fun siding(init, rest) =
+    assert(init is ParseRule, "Choice.siding: init is not ParseRule")
+    assert(rest is ParseRule, "Choice.siding: rest is not ParseRule")
+    Siding of init, false, rest, (initRes, restRes) =>
+      if initRes is Some(initRes) then [initRes, restRes]
+  
+  fun end(value) = End(value)
+  
+  fun map[A, B](choice: Choice[A], op: A -> B): Choice[B] = if choice is
     Keyword(keyword, rest) then Keyword(keyword, rest.map(op))
     Ref(kind, process, outerPrec, innerPrec, rest) then
       Ref(kind, (x, y) => op(process(x, y)), outerPrec, innerPrec, rest)
-    Siding(rule, optional, rest) then Siding(rule.map(op), optional, rest.map(op))
+    Siding(init, optional, rest, process) then
+      Siding(init, optional, rest, (x, y) => op(process(x, y)))
     End(value) then End(op(value))

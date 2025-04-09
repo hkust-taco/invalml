@@ -16,8 +16,6 @@ open Rules { syntaxKinds }
 open TreeTracer
 open XML { html, tag, elem, style }
 
-class RecursiveKnot(val getName: () -> Str)
-
 module ParseRuleVisualizer with ...
 
 val tracer = new TreeTracer.TreeTracer()
@@ -47,7 +45,7 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
     Choice.Keyword(keyword, rest) then
       tracer.print of "found Choice.Keyword"
       Some of rr.Terminal(keyword.name) sequence(renderRule(rest, currentRule))
-    Choice.Siding(rule, optional, rest) then
+    Choice.Siding(rule, optional, rest, _) then
       tracer.print of "found Choice.Siding"
       Some of if renderRule(rule, currentRule) is
         let latterPart = renderRule(rest, currentRule)
@@ -61,29 +59,6 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
         referencedKinds.add of kind
       Some of rr.NonTerminal(kind, href: "#" + kind)
         sequence(renderRule(rest, currentRule))
-    Choice.Lazy(get, make) and
-      renderCache.has(make) then
-        tracer.print of "found Choice.Lazy in cache"
-        let ruleName = renderCache.get(make)
-        Some of rr.NonTerminal(ruleName, href: "#" + ruleName)
-      else
-        let rule = get()
-        if rule is RecursiveKnot(getName) then
-          tracer.print of "found RecursiveKnot of \"" + getName() + "\""
-          Some of rr.NonTerminal(getName(), href: "#" + getName())
-        else
-          tracer.print of "found Choice.Lazy not in cache"
-          let proxyChoice = null
-          let getProxyChoiceName = () => if Choice.rest(proxyChoice) is
-            Some(rule) then rule.name
-            else "???"
-          set proxyChoice = make(() => RecursiveKnot(getProxyChoiceName))
-          let ruleName = getProxyChoiceName()
-          renderCache.set(make, ruleName)
-          helperRules.push of tuple of
-            ruleName, diagram of renderChoice(parentRule, proxyChoice, None)
-          Some of rr.NonTerminal(ruleName, href: "#" + ruleName)
-    do console.log("unexpected choice: " + choice)
   fun renderRule(rule: ParseRule.ParseRule, currentRule) = tracer.trace of
     "renderRule <<< " + rule.name
     result => "renderRule >>> "

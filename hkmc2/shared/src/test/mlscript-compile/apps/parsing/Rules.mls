@@ -2,11 +2,7 @@ import "../../Predef.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
 import "../../BetterMap.mls"
-import "../../TreeTracer.mls"
-import "../../Iter.mls"
-import "../../apps/Lexer.mls"
 import "./Token.mls"
-import "./TokenHelpers.mls"
 import "./Keyword.mls"
 import "./Precedence.mls"
 import "./Tree.mls"
@@ -19,6 +15,8 @@ open BetterMap
 open Precedence { Keywords, opPrec }
 open ParseRule { Choice, rule }
 
+open Choice { keyword, reference }
+
 type Opt[A] = Some[A] | None
 
 module Rules with ...
@@ -29,107 +27,104 @@ val extendedKinds = new Set()
 
 fun getRuleByKind(kind: Str) = syntaxKinds.get(kind) Option.unsafe.get()
 
-fun defineKind(name: Str)(...choices) =
+fun define(name: Str)(...choices) =
   syntaxKinds.insert of name, rule(name, ...choices)
 
-defineKind("let-bindings") of
+define("let-bindings") of
   Choice.term of ...
   (lhs, rhsBindings) => if rhsBindings is [rhs, bindings] then
     Tree.Infix(Keywords._equal, lhs, rhs) :: bindings
   "left-hand side"
-  Choice.keyword(Keywords._equal) of ...
+  keyword(Keywords._equal) of ...
   Choice.term of ...
   (rhs, tail) => [rhs, tail]
   "right-hand side"
   Choice.end of Nil
-  Choice.keyword(Keywords._and) of ...
-  Choice.reference of ...
-  "let-bindings"
+  keyword(Keywords._and) of ...
+  reference("let-bindings") of ...
   (tail, _) => tail
   "let-bindings tail"
 
 fun makeLetBindings(hasInClause: Bool) =
   let intro = "let binding: "
-  Choice.keyword(Keywords._let) of
-    Choice.optional of
-      rule of
-        intro + "keyword"
-        Choice.keyword(Keywords._rec) of
-      rule of
-        intro + "body"
-        Choice.reference of
-          "let-bindings"
-          (bindings, body) => Tree.LetIn(bindings, body)
-          "let-bindings"
-          ...if hasInClause then tuple of
-            Choice.keyword(Keywords._in) of
-              Choice.term of
-                (body, _) => Some(body)
-                intro + "body"
-            Choice.end of None
-          else
-            tuple of Choice.end of None
+  keyword(Keywords._let) of
+    Choice.map of
+      Choice.optional of
+        rule of
+          intro + "keyword"
+          keyword(Keywords._rec)()
+        rule of
+          intro + "body"
+          reference("let-bindings") of
+            (bindings, body) => Tree.LetIn(bindings, body)
+            "let-bindings"
+            ...if hasInClause then tuple of
+              keyword(Keywords._in) of
+                Choice.term of
+                  (body, _) => Some(body)
+                  intro + "body"
+              Choice.end of None
+            else
+              tuple of Choice.end of None
+      case [_, res] then res
 
 let letExpression = makeLetBindings(true)
 
 let funTerm =
-  Choice.keyword(Keywords._fun) of ...
+  keyword(Keywords._fun) of ...
   Choice.term of ...
   (params, body) => Tree.Lambda(params :: Nil, body)
   "function parameters"
-  Choice.keyword(Keywords._thinArrow) of ...
+  keyword(Keywords._thinArrow) of ...
   Choice.term of ...
   (body, _) => body
   "function body"
   Choice.end of None
 
-defineKind("simple-matching") of
+define("simple-matching") of
   Choice.term of ...
-  (lhs, rhsTail) => if rhsTail is [rhs, tail] then
-    Tree.Infix(Keywords._thinArrow, lhs, rhs) :: tail
+  (lhs, rhsTail) =>
+    if rhsTail is [rhs, tail] then
+      Tree.Infix(Keywords._thinArrow, lhs, rhs) :: tail
   "pattern"
-  Choice.keyword(Keywords._thinArrow) of ...
+  keyword(Keywords._thinArrow) of ...
   Choice.term of ...
   (rhs, tail) => [rhs, tail]
   "rhs"
   Choice.end of Nil
-  Choice.keyword(Keywords._bar) of ...
-  Choice.reference of ...
-  "simple-matching"
-  (tail, _) => tail
+  keyword(Keywords._bar) of ...
+  reference("simple-matching") of ...
+  (tail, _) =>
+    tail
   "simple-matching tail"
 
-defineKind("pattern-list") of
+define("pattern-list") of
   Choice.term of ...
   (head, tail) => head :: tail
   "pattern"
-  Choice.reference of ...
-  "pattern-list"
+  reference("pattern-list") of ...
   (tail, _) => tail
   "pattern list tail"
 
-defineKind("multiple-matching") of
-  Choice.reference of ...
-  "pattern-list"
+define("multiple-matching") of
+  reference("pattern-list") of ...
   Tree.infix of Keywords._thinArrow
   "the list of patterns"
-  Choice.keyword(Keywords._thinArrow) of ...
+  keyword(Keywords._thinArrow) of ...
   Choice.term of ...
   (rhs, _) => rhs
   "the right-hand side of the arrow"
   Choice.end of Nil
-  Choice.keyword(Keywords._bar) of ...
-  Choice.reference of ...
-  "multiple-matching"
+  keyword(Keywords._bar) of ...
+  reference("multiple-matching") of ...
   (tail, _) => tail
   "multiple-matching tail"
 
-fun makeInfixChoice(keyword: Keyword.Keyword, rhsKind: Str, compose: (Tree, Tree) -> Tree) =
-  Choice.keyword(keyword) of ...
-  Choice.reference of ...
-  rhsKind
+fun makeInfixChoice(kw: Keyword.Keyword, rhsKind: Str, compose: (Tree, Tree) -> Tree) =
+  keyword(kw) of ...
+  reference(rhsKind) of ...
   (rhs, _) => lhs => compose(lhs, rhs)
-  "operator `" + keyword.name + "` right-hand side"
+  "operator `" + kw.name + "` right-hand side"
 
 val termInfixRule = rule of
   "infix rules for expressions"
@@ -152,18 +147,17 @@ val termInfixRule = rule of
     Tree.App(Tree.Ident("*", true), lhs :: rhs :: Nil)
   // Selection: <expr> "." <identifier>
   // Access: <expr> "." "(" <expr> ")"
-  Choice.keyword(Keywords._period) of
-    Choice.keyword(Keywords._leftRound) of
+  keyword(Keywords._period) of
+    keyword(Keywords._leftRound) of
       Choice.term of ...
       (argument, _) => lhs => Tree.Infix(Keywords._period, lhs, Tree.Bracketed(Token.Round, argument))
       "application argument"
-      Choice.keyword(Keywords._rightRound)()
-    Choice.reference of
-      "term"
+      keyword(Keywords._rightRound)()
+    reference("term") of
       (rhs, _) => lhs => Tree.Infix(Keywords._period, lhs, rhs)
       "operator `.` right-hand side"
   // Type ascription: <expr> : <type>
-  Choice.keyword(Keywords._colon) of
+  keyword(Keywords._colon) of
     Choice.typeExpr of
       (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
       "right-hand side type"
@@ -176,14 +170,13 @@ val termInfixRule = rule of
 
 fun makeBracketRule(opening, closing, contentKind, wrapContent) =
   // Pass the error message of closing bracket to the content.
-  Choice.keyword(opening) of ...
-  Choice.reference of ...
-  contentKind
+  keyword(opening) of ...
+  reference(contentKind) of ...
   (tree: Tree, end: Tree) => if end is
     Tree.Error(Tree.Empty, msg) then wrapContent(tree) Tree.Error(msg)
     Tree.Empty                  then wrapContent(tree)
   contentKind + " in bracket"
-  Choice.keyword(closing) of ...
+  keyword(closing) of ...
   Choice.end of Tree.empty
 
 // Prefix rules and infix rules for expressions.
@@ -192,75 +185,80 @@ val termRule = rule of
   letExpression
   funTerm
   // `match`-`with` term
-  Choice.keyword(Keywords._match) of
+  keyword(Keywords._match) of
     Choice.term of ...
     Tree.Match
     "pattern matching scrutinee"
-    Choice.keyword(Keywords._with) of ...
-    Choice.optional of
-      rule of
-        "pattern matching case body"
-        Choice.keyword(Keywords._bar) of
-      getRuleByKind("simple-matching")
+    keyword(Keywords._with) of ...
+    Choice.map of
+      Choice.optional of
+        rule of
+          "pattern matching case body"
+          keyword(Keywords._bar)()
+        getRuleByKind("simple-matching")
+      case [_, res] then res
   // `function` term
-  Choice.keyword(Keywords._function) of
-    Choice.map of ...
-    Choice.optional of
-      rule of
-        "function body"
-        Choice.keyword(Keywords._bar)()
-      getRuleByKind("simple-matching")
-    branches => Tree.Match(Tree.empty, branches)
+  Choice.map of
+    keyword(Keywords._function) of 
+      Choice.optional of
+        rule of
+          "function body"
+          keyword(Keywords._bar)()
+        getRuleByKind("simple-matching")
+    case [_, branches] then
+      Tree.Match(Tree.empty, branches)
   // `if`-`then`-`else` term
-  Choice.keyword(Keywords._if) of
+  keyword(Keywords._if) of
     Choice.term of ...
     (tst, conAlt) => if conAlt is [con, alt] then
       Tree.Ternary(Keywords._if, tst, con, alt)
     "if-then-else condition"
-    Choice.keyword(Keywords._then) of ...
+    keyword(Keywords._then) of ...
     Choice.term of ...
     (con, optAlt) => [con, optAlt]
     "if-then-else consequent"
     Choice.end of None
-    Choice.keyword(Keywords._else) of ...
+    keyword(Keywords._else) of ...
     Choice.term of ...
     (alt, _) => Some(alt)
     "if-then-else alternative"
     Choice.end of None
   // `while` term
-  Choice.keyword(Keywords._while) of
+  keyword(Keywords._while) of
     Choice.term of ...
     Tree.While
     "while body"
-    Choice.keyword(Keywords._do) of ...
+    keyword(Keywords._do) of ...
     Choice.term of ...
     (body, _) => body
     "while end"
-    Choice.keyword(Keywords._done)()
+    keyword(Keywords._done)()
   // `for` term
-  Choice.keyword(Keywords._for) of
+  keyword(Keywords._for) of
     Choice.term of ...
     (head, startEndBody) => Tree.For(head, ...startEndBody)
     "`for` head"
-    Choice.keyword(Keywords._equal) of ...
+    keyword(Keywords._equal) of ...
     Choice.term of ...
     (start, endBody) => [start, ...endBody]
     "`for` `to` or `downto` keyword"
-    Choice.siding of ...
-    rule of
-      "iteration keyword"
-      Choice.keyword(Keywords._to)()
-      Choice.keyword(Keywords._downto)()
-    rule of
-      "the iteration keyword"
-      Choice.term of ...
-      (end, body) => [end, body]
-      "`for` `do` keyword"
-      Choice.keyword(Keywords._do) of ...
-      Choice.term of ...
-      (body, _) => body
-      "`for` `done` keyword"
-      Choice.keyword(Keywords._done)()
+    Choice.map of...
+    Choice.siding of
+      rule of
+        "iteration keyword"
+        keyword(Keywords._to)()
+        keyword(Keywords._downto)()
+      rule of
+        "the iteration keyword"
+        Choice.term of ...
+        (end, body) => [end, body]
+        "`for` `do` keyword"
+        keyword(Keywords._do) of ...
+        Choice.term of ...
+        (body, _) => body
+        "`for` `done` keyword"
+        keyword(Keywords._done)()
+    case [_, res] then res
   // Choices for brackets
   makeBracketRule of
     Keywords._leftRound
@@ -312,28 +310,24 @@ val typeInfixRule = rule of
 val typeRule = rule of
   "rules for types"
   // "(" <type> { "," <type> } ")" [ <ident> ]
-  Choice.keyword(Keywords._leftRound) of
-    Choice.reference of                                                // : Tree
-      "type"
+  keyword(Keywords._leftRound) of
+    reference("type") of                                                // : Tree
       (headArg, tailArgsCtor) => if tailArgsCtor is
         [tailArgs, ctor] then Tree.App(ctor, Tree.Tuple(headArg :: tailArgs))
         Some(ctor) then Tree.App(ctor, headArg)
         None then headArg
       "the first type in the parentheses"
-      Choice.reference of                          // : [List[Tree], Tree.Ident]
-        "type-arguments-tail"
+      reference("type-arguments-tail") of                          // : [List[Tree], Tree.Ident]
         (args, ident) => [args, ident]
         "the remaining type arguments"
-        Choice.keyword(Keywords._rightRound) of                                        // : Tree.Ident  
-          Choice.reference of                                      // Tree.Ident
-            "ident"
+        keyword(Keywords._rightRound) of                                        // : Tree.Ident  
+          reference("ident") of                                      // Tree.Ident
             (ident, _) => Some(ident)
             "the type constructor's name"
-      Choice.keyword(Keywords._rightRound) of                                  // : Option[Tree.Ident]
+      keyword(Keywords._rightRound) of                                  // : Option[Tree.Ident]
         // either an identifier or nothing
         Choice.end of None
-        Choice.reference of
-          "ident"
+        reference("ident") of
           (ident, _) => Some(ident)
           "the type constructor's name"
   // Infix rules
@@ -344,157 +338,134 @@ val typeRule = rule of
     None
     typeInfixRule
 
-defineKind("type-arguments-tail") of
-  Choice.keyword(Keywords._comma) of
-    Choice.reference of ...
-    "type"
+define("type-arguments-tail") of
+  keyword(Keywords._comma) of
+    reference("type") of ...
     Cons
     "the first type argument"
     Choice.end of Nil                                                   // : Nil
-    Choice.reference of                                          // : List[Tree]
-      "type-arguments-tail"
+    reference("type-arguments-tail") of                                          // : List[Tree]
       (tail, _) => tail
       "more type arguments"
   
-defineKind("constr-decl") of
-  Choice.reference of ...
-  "ident"
+define("constr-decl") of
+  reference("ident") of ...
   (ctor, argOpt) => if argOpt is
     Some(arg) then Tree.Infix(Keywords._of, ctor, arg)
     None then ctor
   "the variant constructor's name"
   Choice.end of None
-  Choice.keyword(Keywords._of) of ...
-  Choice.reference of ...
-  "type"
+  keyword(Keywords._of) of ...
+  reference("type") of ...
   (argument, _) => Some(argument)
   "the variant constructor's argument"
 
-defineKind("variants") of
-  Choice.reference of ...
-  "constr-decl"
+define("variants") of
+  reference("constr-decl") of ...
   (lhs, rhsOpt) => if rhsOpt is
     Some(rhs) then Tree.Infix(Keywords._bar, lhs, rhs)
     else lhs
   "variants item"
   Choice.end of None
-  Choice.keyword(Keywords._bar) of ...
-  Choice.reference of ...
-  "variants"
+  keyword(Keywords._bar) of ...
+  reference("variants") of ...
   (more, _) => Some(more)
   "variants end"
 
-defineKind("typedefs") of
-  Choice.reference of ...
-  "typedef-lhs"
+define("typedefs") of
+  reference("typedef-lhs") of ...
   (lhs, rhsMore) => if rhsMore is [rhs, more] then
     rhs(lhs) :: more
   "typedef name"
-  Choice.reference of ...
-  "typedef-rhs"
+  reference("typedef-rhs") of ...
   tuple
   "typedef body"
   Choice.end of Nil
-  Choice.keyword(Keywords._and) of ...
-  Choice.reference of ...
-  "typedefs"
+  keyword(Keywords._and) of ...
+  reference("typedefs") of ...
   (more, _) => more
   "typedef end"
 
-defineKind("typedef-rhs") of
-  Choice.keyword(Keywords._equal) of
-    Choice.reference of
-      "variants"
+define("typedef-rhs") of
+  keyword(Keywords._equal) of
+    reference("variants") of
       (rhs, _) => lhs => Tree.Infix(Keywords._equal, lhs, rhs)
       "typedef-rhs: variants"
     Choice.map of
-      Choice.keyword(Keywords._leftCurly) of
-        Choice.reference of ...
-        "label-decls"
+      keyword(Keywords._leftCurly) of
+        reference("label-decls") of ...
         (content, _) => if content is
           Nil then Tree.Bracketed(Token.Curly, Tree.Sequence(Nil))
           else Tree.Bracketed(Token.Curly, Tree.Sequence(content))
         "label-decl"
-        Choice.keyword(Keywords._rightCurly) of ...
+        keyword(Keywords._rightCurly) of ...
         Choice.end of Tree.empty
       rhs => lhs => Tree.Infix(Keywords._equal, lhs, rhs) 
-  Choice.keyword(Keywords._equalequal) of
-    Choice.reference of ...
-    "type"
+  keyword(Keywords._equalequal) of
+    reference("type") of ...
     (rhs, _) => lhs => Tree.Infix(Keywords._equalequal, lhs, rhs)
     "type alias body"
 
-defineKind("label-decl") of
+define("label-decl") of
   Choice.typeExpr of ...
   Tree.infix of Keywords._colon
   "label-decl name"
-  Choice.keyword(Keywords._colon) of ...
+  keyword(Keywords._colon) of ...
   Choice.typeExpr of ...
   (rhs, _) => rhs
   "label-decl body"
 
-defineKind("label-decls") of
-  Choice.reference of ...
-  "label-decl"
+define("label-decls") of
+  reference("label-decl") of ...
   Cons
   "the first label-decl"
   Choice.end of Nil
-  Choice.keyword(Keywords._semicolon) of ...
-  Choice.reference of ...
-  "label-decls"
+  keyword(Keywords._semicolon) of ...
+  reference("label-decls") of ...
   (more, _) => more
   "more label-decls"
 
-defineKind("constr-decls") of
-  Choice.reference of ...
-  "constr-decl"
+define("constr-decls") of
+  reference("constr-decl") of ...
   Cons
   "the first constructor declaration"
   Choice.end of Nil
-  Choice.keyword(Keywords._bar) of ...
-  Choice.reference of ...
-  "constr-decls"
+  keyword(Keywords._bar) of ...
+  reference("constr-decls") of ...
   (tail, _) => tail
   "more constructor declarations"
 
-defineKind("typedef-lhs") of
-  Choice.reference of ...
-  "type-params"
+define("typedef-lhs") of
+  reference("type-params") of ...
   (params, ident) => if params is
     Nil then ident
     else Tree.App(ident, Tree.Tuple(params))
   "the type parameters"
-  Choice.reference of ...
-  "ident"
+  reference("ident") of ...
   (ident, _) => ident
   "the type identifier"
 
-defineKind("type-params") of
-  Choice.reference of
-    "typevar"
+define("type-params") of
+  reference("typevar") of
     (head, _) => head :: Nil
     "the only type parameter"
-  Choice.keyword(Keywords._leftRound) of
-    Choice.reference of ...
-    "typevar"
+  keyword(Keywords._leftRound) of
+    reference("typevar") of ...
     Cons
     "the first type parameter"
-    Choice.reference of ...
-    "type-params-tail"
+    reference("type-params-tail") of ...
     (tail, _) => tail
     "more type parameters"
-    Choice.keyword(Keywords._rightRound)()
+    keyword(Keywords._rightRound)()
   Choice.end of Nil
 
-defineKind("type-params-tail") of
+define("type-params-tail") of
   Choice.end of Nil
-  Choice.keyword(Keywords._comma) of
-    Choice.reference of ...
-    "typevar"
+  keyword(Keywords._comma) of
+    reference("typevar") of ...
     Cons
     "the first type parameter"
-    Choice.reference of ...
-    "type-params-tail"
+    reference("type-params-tail") of ...
     (tail, _) => tail
     "more type parameters"
     Choice.end of ()
@@ -502,23 +473,19 @@ defineKind("type-params-tail") of
 val declRule = rule of
   "prefix rules for module items"
   makeLetBindings(false) // let definition
-  Choice.keyword(Keywords._type) of
-    Choice.reference of ...
-    "typedefs"
+  keyword(Keywords._type) of
+    reference("typedefs") of ...
     (typedefs, _) => Tree.Define(Tree.DefineKind.Type, typedefs)
     "more typedefs"
-  Choice.keyword(Keywords._exception) of
-    Choice.reference of ...
-    "constr-decls"
+  keyword(Keywords._exception) of
+    reference("constr-decls") of ...
     (decls, _) => Tree.Define(Tree.DefineKind.Exception, decls)
     "constructor declarations"
-  Choice.keyword(Keywords._hash) of
-    Choice.reference of ...
-    "ident"
+  keyword(Keywords._hash) of
+    reference("ident") of ...
     (ident, body) => Tree.Define(Tree.DefineKind.Directive, [ident, body] :: Nil)
     "directive name"
-    Choice.reference of ...
-    "term"
+    reference("term") of ...
     (body, _) => body
     "directive body"
 

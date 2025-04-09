@@ -93,3 +93,20 @@ open BetterMap
   appended of toMap([["bar", 2]])
   toArray()
 //│ = [["foo!", 2], ["bar", 2]]
+
+[1, 2, 3, 4, 5, 6]
+  Iter.some of x => x % 3 == 0
+//│ = true
+
+[1, 2, 3, 4, 5, 6]
+  Iter.some of x => x % 9 == 0
+//│ = false
+
+[1, 2, 3, 4, 5, 6]
+  Iter.every of x => x % 2 == 0
+//│ = false
+
+[1, 2, 3, 4, 5, 6]
+  Iter.mapping of x => x * 2
+  Iter.every of x => x % 2 == 0
+//│ = true

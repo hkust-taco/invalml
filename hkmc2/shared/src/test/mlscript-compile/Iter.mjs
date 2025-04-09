@@ -421,16 +421,51 @@ Iter1 = class Iter {
     }
     return Option.getOrElse(result, false)
   } 
-  static each(xs11, op8) {
-    let iterator1, next, scrut, tmp, tmp1, tmp2, tmp3, tmp4;
+  static every(xs11, op8) {
+    let iterator1, next, result, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
     tmp = Iter.getIterator(xs11);
+    iterator1 = tmp;
+    tmp1 = runtime.safeCall(iterator1.next());
+    next = tmp1;
+    result = Option.None;
+    tmp7: while (true) {
+      if (result instanceof Option.None.class) {
+        scrut1 = next.done;
+        if (scrut1 === true) {
+          tmp2 = Option.Some(true);
+          result = tmp2;
+          tmp3 = runtime.Unit;
+        } else {
+          scrut = runtime.safeCall(op8(next.value));
+          if (scrut === true) {
+            tmp4 = runtime.safeCall(iterator1.next());
+            next = tmp4;
+            tmp3 = runtime.Unit;
+          } else {
+            tmp5 = Option.Some(false);
+            result = tmp5;
+            tmp3 = runtime.Unit;
+          }
+        }
+        tmp6 = tmp3;
+        continue tmp7;
+      } else {
+        tmp6 = runtime.Unit;
+      }
+      break;
+    }
+    return Option.getOrElse(result, true)
+  } 
+  static each(xs12, op9) {
+    let iterator1, next, scrut, tmp, tmp1, tmp2, tmp3, tmp4;
+    tmp = Iter.getIterator(xs12);
     iterator1 = tmp;
     tmp1 = runtime.safeCall(iterator1.next());
     next = tmp1;
     tmp5: while (true) {
       scrut = next.done;
       if (scrut === false) {
-        tmp2 = runtime.safeCall(op8(next.value));
+        tmp2 = runtime.safeCall(op9(next.value));
         tmp3 = runtime.safeCall(iterator1.next());
         next = tmp3;
         tmp4 = runtime.Unit;
@@ -470,8 +505,8 @@ Iter1 = class Iter {
     });
     return Iterable1(lambda)
   } 
-  static toStack(xs12) {
-    return Iter.rightFolded(xs12, Stack.Nil, Stack.Cons)
+  static toStack(xs13) {
+    return Iter.rightFolded(xs13, Stack.Nil, Stack.Cons)
   }
   static toString() { return "Iter"; }
 };

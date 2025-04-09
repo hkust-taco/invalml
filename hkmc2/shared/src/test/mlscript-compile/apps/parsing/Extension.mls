@@ -60,7 +60,7 @@ fun extendCategory(choiceBodyTree: Tree) =
             Rules.syntaxKinds.get(refKindName) is Some(refRule) then
               // TODO: The `process` function should be applied to the referenced rule.
               // TODO: How to handle `outerPrec` and `innerPrec`?
-              rule.extendChoices of refRule.andThen2(rest, process).choices
+              rule.extendChoices of refRule.andThen(rest, process).choices
             else
               // The referenced category is not found in the map. Stop.
               print of "Unknown referenced syntax category: " + refKindName
@@ -80,7 +80,7 @@ fun parseChoiceTree(tree: Tree) =
         Keywords.all.get(name) is Some(keyword) then
           Choice.keyword(keyword)(go(rest))
       Tree.Literal(LiteralKind.String, name) :: rest then
-        Choice.reference(name, (head, tail) => head :: tail, "unnamed", go(rest))
+        Choice.reference(name)(Cons, "unnamed", go(rest))
       Nil then Choice.end(Nil)
     res
   
