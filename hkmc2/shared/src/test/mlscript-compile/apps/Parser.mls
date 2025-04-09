@@ -81,7 +81,7 @@ fun parse(tokens) =
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
               rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
-                do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+                do tracer.print of "try to parse kind \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
                 let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
                 let innerPrec' = innerPrec Option.getOrElse(prec)
                 outerPrec' > prec and
@@ -107,7 +107,7 @@ fun parse(tokens) =
       other :: _ and
         do tracer.print of "the current rule is " + rule.display
         rule.exprChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
-          do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+          do tracer.print of "try to parse kind \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
           let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
           let innerPrec' = innerPrec Option.getOrElse(prec)
           outerPrec' > prec and
@@ -175,7 +175,7 @@ fun parse(tokens) =
         do tracer.print of "the keyword is found in infix rules" + name, source.line
         keyword.leftPrecOrMin > prec and rule.exprChoice is
           Some([kind, process, outerPrec, innerPrec, rest]) and
-            do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+            do tracer.print of "try to parse kind \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
             let outerPrec' = outerPrec Option.getOrElse(Keywords.maxOperatorPrec)
             let innerPrec' = innerPrec Option.getOrElse(keyword.rightPrecOrMin)
             outerPrec' > prec then
@@ -253,7 +253,7 @@ fun parse(tokens) =
           do tracer.print of "keyword `" + name + "` is found in infix rules", source.line
           keyword.leftPrecOrMin > prec and rule.exprChoice is
             Some([kind, process, outerPrec, innerPrec, rest]) and
-              do tracer.print of "found an reference to \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
+              do tracer.print of "try to parse kind \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
               let outerPrec' = outerPrec Option.getOrElse(Keywords.maxOperatorPrec)
               let innerPrec' = innerPrec Option.getOrElse(keyword.rightPrecOrMin)
               outerPrec' > prec then

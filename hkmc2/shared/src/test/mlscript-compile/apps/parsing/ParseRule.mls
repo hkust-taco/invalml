@@ -229,12 +229,30 @@ module Choice with
     ensureChoices(choices, "Choice.keyword")
     Keyword(keyword, rule("`" + keyword.name + "` keyword", ...choices))
   
-  fun reference(kind)(process, name, ...choices) =
-    assert(kind is Str, "Choice.reference: kind is not a string")
-    assert(typeof(process) === "function", "Choice.reference: process is not a function")
-    assert(name is Str, "Choice.reference: name is not a string")
-    ensureChoices(choices, "Choice.reference")
-    Ref(kind, process, None, None, rule(name, ...choices))
+  fun reference(kind: Str)(fields: Object) =
+    let kind = if
+      kind is Str then kind
+      kind is undefined then "term"
+      else throw TypeError("Choice.reference: kind is not a string")
+    let process = if
+      let process = fields.("process")
+      typeof(process) === "function" then process
+      process is undefined then tuple
+      else throw TypeError("Choice.reference: process is not a function")
+    let name = if
+      let name = fields.("name")
+      name is Str then name
+      name is undefined then "unnamed"
+      else throw TypeError("Choice.reference: name is not a string")
+    let rest = if
+      let choices = fields.("choices")
+      choices is ParseRule then choices
+      choices is [..._] then
+        ensureChoices(choices, "Choice.reference")
+        rule(name, ...choices)
+      choices is undefined then rule(name)
+      else throw TypeError("Choice.reference: choices is not an array")
+    Ref(kind, process, None, None, rest)
   
   fun term(process, name, ...choices) =
     assert(typeof(process) === "function", "Choice.term: process is not a function")

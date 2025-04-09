@@ -790,26 +790,52 @@ ParseRule2 = class ParseRule {
         }
       } 
       static reference(kind) {
-        return (process, name, ...choices) => {
-          let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
+        return (fields) => {
+          let kind1, process, process1, scrut, name, name1, rest, choices, rest1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
           if (typeof kind === 'string') {
-            tmp = true;
+            tmp = kind;
+          } else if (kind === undefined) {
+            tmp = "term";
           } else {
-            tmp = false;
+            throw globalThis.TypeError("Choice.reference: kind is not a string");
           }
-          tmp1 = Predef.assert(tmp, "Choice.reference: kind is not a string");
-          tmp2 = typeof process;
-          tmp3 = tmp2 === "function";
-          tmp4 = Predef.assert(tmp3, "Choice.reference: process is not a function");
-          if (typeof name === 'string') {
-            tmp5 = true;
+          kind1 = tmp;
+          process1 = fields["process"];
+          tmp1 = typeof process1;
+          scrut = tmp1 === "function";
+          if (scrut === true) {
+            tmp2 = process1;
           } else {
-            tmp5 = false;
+            if (process1 === undefined) {
+              tmp2 = Predef.tuple;
+            } else {
+              throw globalThis.TypeError("Choice.reference: process is not a function");
+            }
           }
-          tmp6 = Predef.assert(tmp5, "Choice.reference: name is not a string");
-          tmp7 = runtime.safeCall(Choice.#ensureChoices(choices, "Choice.reference"));
-          tmp8 = ParseRule.rule(name, ...choices);
-          return Choice.Ref(kind, process, Option.None, Option.None, tmp8)
+          process = tmp2;
+          name1 = fields["name"];
+          if (typeof name1 === 'string') {
+            tmp3 = name1;
+          } else if (name1 === undefined) {
+            tmp3 = "unnamed";
+          } else {
+            throw globalThis.TypeError("Choice.reference: name is not a string");
+          }
+          name = tmp3;
+          choices = fields["choices"];
+          if (choices instanceof ParseRule.ParseRule.class) {
+            tmp4 = choices;
+          } else if (globalThis.Array.isArray(choices) && choices.length >= 0) {
+            rest1 = runtime.safeCall(globalThis.Predef.tupleSlice(choices, 0, 0));
+            tmp5 = runtime.safeCall(Choice.#ensureChoices(choices, "Choice.reference"));
+            tmp4 = ParseRule.rule(name, ...choices);
+          } else if (choices === undefined) {
+            tmp4 = ParseRule.rule(name);
+          } else {
+            throw globalThis.TypeError("Choice.reference: choices is not an array");
+          }
+          rest = tmp4;
+          return Choice.Ref(kind1, process, Option.None, Option.None, rest)
         }
       } 
       static term(process, name, ...choices) {
