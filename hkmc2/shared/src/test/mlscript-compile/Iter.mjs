@@ -387,74 +387,56 @@ Iter1 = class Iter {
     return result
   } 
   static some(xs10, op7) {
-    let iterator1, next, result, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    let iterator1, next, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4;
     tmp = Iter.getIterator(xs10);
     iterator1 = tmp;
     tmp1 = runtime.safeCall(iterator1.next());
     next = tmp1;
-    result = Option.None;
-    tmp7: while (true) {
-      if (result instanceof Option.None.class) {
-        scrut1 = next.done;
+    tmp5: while (true) {
+      scrut = next.done;
+      if (scrut === false) {
+        scrut1 = runtime.safeCall(op7(next.value));
         if (scrut1 === true) {
-          tmp2 = Option.Some(false);
-          result = tmp2;
-          tmp3 = runtime.Unit;
+          return true
         } else {
-          scrut = runtime.safeCall(op7(next.value));
-          if (scrut === true) {
-            tmp4 = Option.Some(true);
-            result = tmp4;
-            tmp3 = runtime.Unit;
-          } else {
-            tmp5 = runtime.safeCall(iterator1.next());
-            next = tmp5;
-            tmp3 = runtime.Unit;
-          }
+          tmp2 = runtime.Unit;
         }
-        tmp6 = tmp3;
-        continue tmp7;
+        tmp3 = runtime.safeCall(iterator1.next());
+        next = tmp3;
+        tmp4 = runtime.Unit;
+        continue tmp5;
       } else {
-        tmp6 = runtime.Unit;
+        tmp4 = runtime.Unit;
       }
       break;
     }
-    return Option.getOrElse(result, false)
+    return false
   } 
   static every(xs11, op8) {
-    let iterator1, next, result, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+    let iterator1, next, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4;
     tmp = Iter.getIterator(xs11);
     iterator1 = tmp;
     tmp1 = runtime.safeCall(iterator1.next());
     next = tmp1;
-    result = Option.None;
-    tmp7: while (true) {
-      if (result instanceof Option.None.class) {
-        scrut1 = next.done;
-        if (scrut1 === true) {
-          tmp2 = Option.Some(true);
-          result = tmp2;
-          tmp3 = runtime.Unit;
+    tmp5: while (true) {
+      scrut = next.done;
+      if (scrut === false) {
+        scrut1 = runtime.safeCall(op8(next.value));
+        if (scrut1 === false) {
+          return false
         } else {
-          scrut = runtime.safeCall(op8(next.value));
-          if (scrut === true) {
-            tmp4 = runtime.safeCall(iterator1.next());
-            next = tmp4;
-            tmp3 = runtime.Unit;
-          } else {
-            tmp5 = Option.Some(false);
-            result = tmp5;
-            tmp3 = runtime.Unit;
-          }
+          tmp2 = runtime.Unit;
         }
-        tmp6 = tmp3;
-        continue tmp7;
+        tmp3 = runtime.safeCall(iterator1.next());
+        next = tmp3;
+        tmp4 = runtime.Unit;
+        continue tmp5;
       } else {
-        tmp6 = runtime.Unit;
+        tmp4 = runtime.Unit;
       }
       break;
     }
-    return Option.getOrElse(result, true)
+    return true
   } 
   static each(xs12, op9) {
     let iterator1, next, scrut, tmp, tmp1, tmp2, tmp3, tmp4;

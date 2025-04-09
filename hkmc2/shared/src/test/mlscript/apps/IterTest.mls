@@ -110,3 +110,20 @@ open BetterMap
   Iter.mapping of x => x * 2
   Iter.every of x => x % 2 == 0
 //│ = true
+
+[1, 2, -3, 4, 5, 6]
+  Iter.mapping of x => () => print(x + " was accessed"); x
+  Iter.some of get => get() < 0
+//│ > 1 was accessed
+//│ > 2 was accessed
+//│ > -3 was accessed
+//│ = true
+
+[1, 2, 3, -4, 5, 6]
+  Iter.mapping of x => () => print(x + " was accessed"); x
+  Iter.every of get => get() > 0
+//│ > 1 was accessed
+//│ > 2 was accessed
+//│ > 3 was accessed
+//│ > -4 was accessed
+//│ = false
