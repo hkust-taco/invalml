@@ -230,55 +230,69 @@ module Choice with
     ensureChoices(choices, "Choice.keyword")
     Keyword(keyword, rule("`" + keyword.name + "` keyword", ...choices))
   
+  let shouldHaveFunction(options, key: Str, defaultValue, callerName: Str) = if
+    let func = options.(key)
+    typeof(func) === "function" then func
+    func is undefined then defaultValue
+    else throw TypeError(callerName + ": `" + key + "` is not a string")
+  
+  let shouldHaveStr(options, key: Str, defaultValue: Str, callerName: Str) = if
+    let value = options.(key)
+    value is Str then Some(value)
+    value is undefined then defaultValue
+    else throw TypeError(callerName + ": `" + key + "` is not a string")
+  
+  let shouldHaveInt(options, key: Str, callerName: Str) = if
+    let value = options.(key)
+    value is Int then Some(value)
+    value is undefined then None
+    else throw TypeError(callerName + ": `" + key + "` is not an Int")
+  
+  let shouldHaveBool(options, key: Str, defaultValue: Bool, callerName: Str) = if
+    let value = options.(key)
+    value is Bool then value
+    value is undefined then defaultValue
+    else throw TypeError(callerName + ": `" + key + "` is not a Boolean")
+  
+  let shouldHaveRuleLike(options, key: Str, ruleName: Str, callerName: Str) = if
+    let choices = options.(key)
+    choices is ParseRule then choices
+    choices is Choice then rule(ruleName, choices)
+    choices is [..._] then
+      ensureChoices(choices, "Choice.reference")
+      rule(ruleName, ...choices)
+    choices is undefined then rule(ruleName)
+    else throw TypeError(callerName + ": `" + key + "` is neither a rule nor a choice")
+  
   fun reference(kind: Str)(fields: Object) =
-    let kind = if
-      kind is Str then kind
-      kind is undefined then "term"
-      else throw TypeError("Choice.reference: kind is not a string")
-    let process = if
-      let process = fields.("process")
-      typeof(process) === "function" then process
-      process is undefined then tuple
-      else throw TypeError("Choice.reference: process is not a function")
-    let name = if
-      let name = fields.("name")
-      name is Str then name
-      name is undefined then "unnamed"
-      else throw TypeError("Choice.reference: name is not a string")
-    let rest = if
-      let choices = fields.("choices")
-      choices is ParseRule then choices
-      choices is [..._] then
-        ensureChoices(choices, "Choice.reference")
-        rule(name, ...choices)
-      choices is undefined then rule(name)
-      else throw TypeError("Choice.reference: choices is not an array")
-    let outerPrec = if
-      let outerPrec = fields.("outerPrec")
-      outerPrec is Int then Some(outerPrec)
-      outerPrec is undefined then None
-      else throw TypeError("Choice.reference: outerPrec is not an Int")
-    let innerPrec = if
-      let innerPrec = fields.("innerPrec")
-      innerPrec is Int then Some(innerPrec)
-      innerPrec is undefined then None
-      else throw TypeError("Choice.reference: innerPrec is not an Int")
-    Ref(kind, process, outerPrec, innerPrec, rest)
+    let ruleName = fields shouldHaveStr("name", "unnamed", "Choice.reference")
+    Ref of
+      kind
+      fields shouldHaveFunction("process", tuple, "Choice.reference")
+      fields shouldHaveInt("outerPrec", "Choice.reference")
+      fields shouldHaveInt("innerPrec", "Choice.reference")
+      fields shouldHaveRuleLike("choices", ruleName, "Choice.reference")
   
   val term = reference("term")
-  
   val typeExpr = reference("type")
+  val ident = reference("ident")
+  val typeVar = reference("typevar")
   
   fun optional(init, rest) =
     assert(init is ParseRule, "Choice.optional: init is not ParseRule")
     assert(rest is ParseRule, "Choice.optional: rest is not ParseRule")
     Siding(init, true, rest, tuple)
   
-  fun siding(init, rest) =
-    assert(init is ParseRule, "Choice.siding: init is not ParseRule")
-    assert(rest is ParseRule, "Choice.siding: rest is not ParseRule")
-    Siding of init, false, rest, (initRes, restRes) =>
-      if initRes is Some(initRes) then [initRes, restRes]
+  fun siding(fields) =
+    let optional = fields shouldHaveBool("optional", false, "Choice.siding")
+    let initName = fields shouldHaveStr("initName", "unnamed", "Choice.siding")
+    let restName = fields shouldHaveStr("restName", "unnamed", "Choice.siding")
+    let init = fields shouldHaveRuleLike("init", initName, "Choice.siding")
+    let rest = fields shouldHaveRuleLike("rest", restName, "Choice.siding")
+    let defaultProcess = if optional then tuple
+      else (initRes, restRes) => if initRes is Some(initRes) then [initRes, restRes]
+    let process = fields shouldHaveFunction("process", defaultProcess, "Choice.siding")
+    Siding of init, optional, rest, process
   
   fun end(value) = End(value)
   

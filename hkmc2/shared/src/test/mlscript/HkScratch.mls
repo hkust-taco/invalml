@@ -9,23 +9,3 @@
 :todo
 
 
-:sjs
-fun test(a, b, props) =
-  let x = props.a
-  let y = props.b
-  a + b + x * y
-//│ Elab: ( ‹› fun member:test‹540›(Param(‹›,a‹542›,None), Param(‹›,b‹543›,None), Param(‹›,props‹544›,None), ) = ( let x‹545›; x‹545› = props‹544›#666.a; let y‹546›; y‹546› = props‹544›#666.b; builtin:+‹27›#0(builtin:+‹27›#1(a‹542›#666, b‹543›#666), builtin:*‹21›#0(x‹545›#666, y‹546›#666)) ); )
-//│ JS (unsanitized):
-//│ let test;
-//│ test = function test(a, b, props) {
-//│   let x, y, tmp, tmp1;
-//│   x = props.a;
-//│   y = props.b;
-//│   tmp = a + b;
-//│   tmp1 = x * y;
-//│   return tmp + tmp1
-//│ };
-
-test(a: 0, b: 0, 0, 1)
-//│ Elab: ( member:test‹540›#666("a", "b", 0, 1) )
-//│ = 1
