@@ -185,7 +185,7 @@ Parser1 = class Parser {
                 tmp22 = tmp21 + "` is ";
                 tmp23 = tmp22 + keyword.leftPrec;
                 doTemp10 = Parser.tracer.print(tmp23, 82);
-                scrut9 = rule.exprChoice;
+                scrut9 = rule.refChoice;
                 if (scrut9 instanceof Option.Some.class) {
                   param09 = scrut9.value;
                   if (globalThis.Array.isArray(param09) && param09.length === 5) {
@@ -281,7 +281,7 @@ Parser1 = class Parser {
                 other = param02;
                 tmp50 = "the current rule is " + rule.display;
                 doTemp = runtime.safeCall(Parser.tracer.print(tmp50));
-                scrut2 = rule.exprChoice;
+                scrut2 = rule.refChoice;
                 if (scrut2 instanceof Option.Some.class) {
                   param04 = scrut2.value;
                   if (globalThis.Array.isArray(param04) && param04.length === 5) {
@@ -384,7 +384,7 @@ Parser1 = class Parser {
               other = param02;
               tmp77 = "the current rule is " + rule.display;
               doTemp = runtime.safeCall(Parser.tracer.print(tmp77));
-              scrut2 = rule.exprChoice;
+              scrut2 = rule.refChoice;
               if (scrut2 instanceof Option.Some.class) {
                 param04 = scrut2.value;
                 if (globalThis.Array.isArray(param04) && param04.length === 5) {
@@ -484,7 +484,7 @@ Parser1 = class Parser {
             other = param02;
             tmp102 = "the current rule is " + rule.display;
             doTemp = runtime.safeCall(Parser.tracer.print(tmp102));
-            scrut2 = rule.exprChoice;
+            scrut2 = rule.refChoice;
             if (scrut2 instanceof Option.Some.class) {
               param04 = scrut2.value;
               if (globalThis.Array.isArray(param04) && param04.length === 5) {
@@ -717,7 +717,7 @@ Parser1 = class Parser {
               doTemp7 = Parser.tracer.print(tmp9, 175);
               scrut8 = keyword.leftPrecOrMin > prec;
               if (scrut8 === true) {
-                scrut9 = rule.exprChoice;
+                scrut9 = rule.refChoice;
                 if (scrut9 instanceof Option.Some.class) {
                   param06 = scrut9.value;
                   if (globalThis.Array.isArray(param06) && param06.length === 5) {
@@ -783,7 +783,7 @@ Parser1 = class Parser {
                             }
                           } else {
                             token1 = param01;
-                            scrut = Rules.termInfixRule.exprChoice;
+                            scrut = Rules.termInfixRule.refChoice;
                             if (scrut instanceof Option.Some.class) {
                               param02 = scrut.value;
                               if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -797,7 +797,7 @@ Parser1 = class Parser {
                                 outerPrec = first2;
                                 innerPrec = first3;
                                 rest = first4;
-                                tmp31 = "found an exprChoice with outerPrec = " + outerPrec;
+                                tmp31 = "found an refChoice with outerPrec = " + outerPrec;
                                 doTemp1 = Parser.tracer.print(tmp31, 200);
                                 outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                                 scrut1 = outerPrec$_ > prec;
@@ -837,7 +837,7 @@ Parser1 = class Parser {
                           }
                         } else {
                           token1 = param01;
-                          scrut = Rules.termInfixRule.exprChoice;
+                          scrut = Rules.termInfixRule.refChoice;
                           if (scrut instanceof Option.Some.class) {
                             param02 = scrut.value;
                             if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -851,7 +851,7 @@ Parser1 = class Parser {
                               outerPrec = first2;
                               innerPrec = first3;
                               rest = first4;
-                              tmp43 = "found an exprChoice with outerPrec = " + outerPrec;
+                              tmp43 = "found an refChoice with outerPrec = " + outerPrec;
                               doTemp1 = Parser.tracer.print(tmp43, 200);
                               outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                               scrut1 = outerPrec$_ > prec;
@@ -891,7 +891,7 @@ Parser1 = class Parser {
                         }
                       } else {
                         token1 = param01;
-                        scrut = Rules.termInfixRule.exprChoice;
+                        scrut = Rules.termInfixRule.refChoice;
                         if (scrut instanceof Option.Some.class) {
                           param02 = scrut.value;
                           if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -905,7 +905,7 @@ Parser1 = class Parser {
                             outerPrec = first2;
                             innerPrec = first3;
                             rest = first4;
-                            tmp55 = "found an exprChoice with outerPrec = " + outerPrec;
+                            tmp55 = "found an refChoice with outerPrec = " + outerPrec;
                             doTemp1 = Parser.tracer.print(tmp55, 200);
                             outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                             scrut1 = outerPrec$_ > prec;
@@ -981,7 +981,7 @@ Parser1 = class Parser {
                           }
                         } else {
                           token1 = param01;
-                          scrut = Rules.termInfixRule.exprChoice;
+                          scrut = Rules.termInfixRule.refChoice;
                           if (scrut instanceof Option.Some.class) {
                             param02 = scrut.value;
                             if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -995,7 +995,7 @@ Parser1 = class Parser {
                               outerPrec = first2;
                               innerPrec = first3;
                               rest = first4;
-                              tmp80 = "found an exprChoice with outerPrec = " + outerPrec;
+                              tmp80 = "found an refChoice with outerPrec = " + outerPrec;
                               doTemp1 = Parser.tracer.print(tmp80, 200);
                               outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                               scrut1 = outerPrec$_ > prec;
@@ -1035,7 +1035,7 @@ Parser1 = class Parser {
                         }
                       } else {
                         token1 = param01;
-                        scrut = Rules.termInfixRule.exprChoice;
+                        scrut = Rules.termInfixRule.refChoice;
                         if (scrut instanceof Option.Some.class) {
                           param02 = scrut.value;
                           if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1049,7 +1049,7 @@ Parser1 = class Parser {
                             outerPrec = first2;
                             innerPrec = first3;
                             rest = first4;
-                            tmp92 = "found an exprChoice with outerPrec = " + outerPrec;
+                            tmp92 = "found an refChoice with outerPrec = " + outerPrec;
                             doTemp1 = Parser.tracer.print(tmp92, 200);
                             outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                             scrut1 = outerPrec$_ > prec;
@@ -1089,7 +1089,7 @@ Parser1 = class Parser {
                       }
                     } else {
                       token1 = param01;
-                      scrut = Rules.termInfixRule.exprChoice;
+                      scrut = Rules.termInfixRule.refChoice;
                       if (scrut instanceof Option.Some.class) {
                         param02 = scrut.value;
                         if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1103,7 +1103,7 @@ Parser1 = class Parser {
                           outerPrec = first2;
                           innerPrec = first3;
                           rest = first4;
-                          tmp104 = "found an exprChoice with outerPrec = " + outerPrec;
+                          tmp104 = "found an refChoice with outerPrec = " + outerPrec;
                           doTemp1 = Parser.tracer.print(tmp104, 200);
                           outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                           scrut1 = outerPrec$_ > prec;
@@ -1181,7 +1181,7 @@ Parser1 = class Parser {
                         }
                       } else {
                         token1 = param01;
-                        scrut = Rules.termInfixRule.exprChoice;
+                        scrut = Rules.termInfixRule.refChoice;
                         if (scrut instanceof Option.Some.class) {
                           param02 = scrut.value;
                           if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1195,7 +1195,7 @@ Parser1 = class Parser {
                             outerPrec = first2;
                             innerPrec = first3;
                             rest = first4;
-                            tmp129 = "found an exprChoice with outerPrec = " + outerPrec;
+                            tmp129 = "found an refChoice with outerPrec = " + outerPrec;
                             doTemp1 = Parser.tracer.print(tmp129, 200);
                             outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                             scrut1 = outerPrec$_ > prec;
@@ -1235,7 +1235,7 @@ Parser1 = class Parser {
                       }
                     } else {
                       token1 = param01;
-                      scrut = Rules.termInfixRule.exprChoice;
+                      scrut = Rules.termInfixRule.refChoice;
                       if (scrut instanceof Option.Some.class) {
                         param02 = scrut.value;
                         if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1249,7 +1249,7 @@ Parser1 = class Parser {
                           outerPrec = first2;
                           innerPrec = first3;
                           rest = first4;
-                          tmp141 = "found an exprChoice with outerPrec = " + outerPrec;
+                          tmp141 = "found an refChoice with outerPrec = " + outerPrec;
                           doTemp1 = Parser.tracer.print(tmp141, 200);
                           outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                           scrut1 = outerPrec$_ > prec;
@@ -1289,7 +1289,7 @@ Parser1 = class Parser {
                     }
                   } else {
                     token1 = param01;
-                    scrut = Rules.termInfixRule.exprChoice;
+                    scrut = Rules.termInfixRule.refChoice;
                     if (scrut instanceof Option.Some.class) {
                       param02 = scrut.value;
                       if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1303,7 +1303,7 @@ Parser1 = class Parser {
                         outerPrec = first2;
                         innerPrec = first3;
                         rest = first4;
-                        tmp153 = "found an exprChoice with outerPrec = " + outerPrec;
+                        tmp153 = "found an refChoice with outerPrec = " + outerPrec;
                         doTemp1 = Parser.tracer.print(tmp153, 200);
                         outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                         scrut1 = outerPrec$_ > prec;
@@ -1379,7 +1379,7 @@ Parser1 = class Parser {
                       }
                     } else {
                       token1 = param01;
-                      scrut = Rules.termInfixRule.exprChoice;
+                      scrut = Rules.termInfixRule.refChoice;
                       if (scrut instanceof Option.Some.class) {
                         param02 = scrut.value;
                         if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1393,7 +1393,7 @@ Parser1 = class Parser {
                           outerPrec = first2;
                           innerPrec = first3;
                           rest = first4;
-                          tmp178 = "found an exprChoice with outerPrec = " + outerPrec;
+                          tmp178 = "found an refChoice with outerPrec = " + outerPrec;
                           doTemp1 = Parser.tracer.print(tmp178, 200);
                           outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                           scrut1 = outerPrec$_ > prec;
@@ -1433,7 +1433,7 @@ Parser1 = class Parser {
                     }
                   } else {
                     token1 = param01;
-                    scrut = Rules.termInfixRule.exprChoice;
+                    scrut = Rules.termInfixRule.refChoice;
                     if (scrut instanceof Option.Some.class) {
                       param02 = scrut.value;
                       if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1447,7 +1447,7 @@ Parser1 = class Parser {
                         outerPrec = first2;
                         innerPrec = first3;
                         rest = first4;
-                        tmp190 = "found an exprChoice with outerPrec = " + outerPrec;
+                        tmp190 = "found an refChoice with outerPrec = " + outerPrec;
                         doTemp1 = Parser.tracer.print(tmp190, 200);
                         outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                         scrut1 = outerPrec$_ > prec;
@@ -1487,7 +1487,7 @@ Parser1 = class Parser {
                   }
                 } else {
                   token1 = param01;
-                  scrut = Rules.termInfixRule.exprChoice;
+                  scrut = Rules.termInfixRule.refChoice;
                   if (scrut instanceof Option.Some.class) {
                     param02 = scrut.value;
                     if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1501,7 +1501,7 @@ Parser1 = class Parser {
                       outerPrec = first2;
                       innerPrec = first3;
                       rest = first4;
-                      tmp202 = "found an exprChoice with outerPrec = " + outerPrec;
+                      tmp202 = "found an refChoice with outerPrec = " + outerPrec;
                       doTemp1 = Parser.tracer.print(tmp202, 200);
                       outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                       scrut1 = outerPrec$_ > prec;
@@ -1577,7 +1577,7 @@ Parser1 = class Parser {
                     }
                   } else {
                     token1 = param01;
-                    scrut = Rules.termInfixRule.exprChoice;
+                    scrut = Rules.termInfixRule.refChoice;
                     if (scrut instanceof Option.Some.class) {
                       param02 = scrut.value;
                       if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1591,7 +1591,7 @@ Parser1 = class Parser {
                         outerPrec = first2;
                         innerPrec = first3;
                         rest = first4;
-                        tmp227 = "found an exprChoice with outerPrec = " + outerPrec;
+                        tmp227 = "found an refChoice with outerPrec = " + outerPrec;
                         doTemp1 = Parser.tracer.print(tmp227, 200);
                         outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                         scrut1 = outerPrec$_ > prec;
@@ -1631,7 +1631,7 @@ Parser1 = class Parser {
                   }
                 } else {
                   token1 = param01;
-                  scrut = Rules.termInfixRule.exprChoice;
+                  scrut = Rules.termInfixRule.refChoice;
                   if (scrut instanceof Option.Some.class) {
                     param02 = scrut.value;
                     if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1645,7 +1645,7 @@ Parser1 = class Parser {
                       outerPrec = first2;
                       innerPrec = first3;
                       rest = first4;
-                      tmp239 = "found an exprChoice with outerPrec = " + outerPrec;
+                      tmp239 = "found an refChoice with outerPrec = " + outerPrec;
                       doTemp1 = Parser.tracer.print(tmp239, 200);
                       outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                       scrut1 = outerPrec$_ > prec;
@@ -1685,7 +1685,7 @@ Parser1 = class Parser {
                 }
               } else {
                 token1 = param01;
-                scrut = Rules.termInfixRule.exprChoice;
+                scrut = Rules.termInfixRule.refChoice;
                 if (scrut instanceof Option.Some.class) {
                   param02 = scrut.value;
                   if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1699,7 +1699,7 @@ Parser1 = class Parser {
                     outerPrec = first2;
                     innerPrec = first3;
                     rest = first4;
-                    tmp251 = "found an exprChoice with outerPrec = " + outerPrec;
+                    tmp251 = "found an refChoice with outerPrec = " + outerPrec;
                     doTemp1 = Parser.tracer.print(tmp251, 200);
                     outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                     scrut1 = outerPrec$_ > prec;
@@ -1772,7 +1772,7 @@ Parser1 = class Parser {
                   }
                 } else {
                   token1 = param01;
-                  scrut = Rules.termInfixRule.exprChoice;
+                  scrut = Rules.termInfixRule.refChoice;
                   if (scrut instanceof Option.Some.class) {
                     param02 = scrut.value;
                     if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1786,7 +1786,7 @@ Parser1 = class Parser {
                       outerPrec = first2;
                       innerPrec = first3;
                       rest = first4;
-                      tmp274 = "found an exprChoice with outerPrec = " + outerPrec;
+                      tmp274 = "found an refChoice with outerPrec = " + outerPrec;
                       doTemp1 = Parser.tracer.print(tmp274, 200);
                       outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                       scrut1 = outerPrec$_ > prec;
@@ -1826,7 +1826,7 @@ Parser1 = class Parser {
                 }
               } else {
                 token1 = param01;
-                scrut = Rules.termInfixRule.exprChoice;
+                scrut = Rules.termInfixRule.refChoice;
                 if (scrut instanceof Option.Some.class) {
                   param02 = scrut.value;
                   if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1840,7 +1840,7 @@ Parser1 = class Parser {
                     outerPrec = first2;
                     innerPrec = first3;
                     rest = first4;
-                    tmp286 = "found an exprChoice with outerPrec = " + outerPrec;
+                    tmp286 = "found an refChoice with outerPrec = " + outerPrec;
                     doTemp1 = Parser.tracer.print(tmp286, 200);
                     outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                     scrut1 = outerPrec$_ > prec;
@@ -1880,7 +1880,7 @@ Parser1 = class Parser {
               }
             } else {
               token1 = param01;
-              scrut = Rules.termInfixRule.exprChoice;
+              scrut = Rules.termInfixRule.refChoice;
               if (scrut instanceof Option.Some.class) {
                 param02 = scrut.value;
                 if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1894,7 +1894,7 @@ Parser1 = class Parser {
                   outerPrec = first2;
                   innerPrec = first3;
                   rest = first4;
-                  tmp298 = "found an exprChoice with outerPrec = " + outerPrec;
+                  tmp298 = "found an refChoice with outerPrec = " + outerPrec;
                   doTemp1 = Parser.tracer.print(tmp298, 200);
                   outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                   scrut1 = outerPrec$_ > prec;
@@ -1935,7 +1935,7 @@ Parser1 = class Parser {
           }
         } else {
           token1 = param01;
-          scrut = Rules.termInfixRule.exprChoice;
+          scrut = Rules.termInfixRule.refChoice;
           if (scrut instanceof Option.Some.class) {
             param02 = scrut.value;
             if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -1949,7 +1949,7 @@ Parser1 = class Parser {
               outerPrec = first2;
               innerPrec = first3;
               rest = first4;
-              tmp310 = "found an exprChoice with outerPrec = " + outerPrec;
+              tmp310 = "found an refChoice with outerPrec = " + outerPrec;
               doTemp1 = Parser.tracer.print(tmp310, 200);
               outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
               scrut1 = outerPrec$_ > prec;
@@ -2099,7 +2099,7 @@ Parser1 = class Parser {
               doTemp4 = Parser.tracer.print(tmp12, 253);
               scrut5 = keyword.leftPrecOrMin > prec;
               if (scrut5 === true) {
-                scrut6 = rule.exprChoice;
+                scrut6 = rule.refChoice;
                 if (scrut6 instanceof Option.Some.class) {
                   param06 = scrut6.value;
                   if (globalThis.Array.isArray(param06) && param06.length === 5) {
@@ -2134,7 +2134,7 @@ Parser1 = class Parser {
                       doTemp5 = Parser.tracer.print(tmp22, 264);
                       doTemp1 = Parser.tracer.print("not a keyword", 266);
                       token1 = param01;
-                      scrut = Rules.typeInfixRule.exprChoice;
+                      scrut = Rules.typeInfixRule.refChoice;
                       if (scrut instanceof Option.Some.class) {
                         param02 = scrut.value;
                         if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2148,7 +2148,7 @@ Parser1 = class Parser {
                           outerPrec = first2;
                           innerPrec = first3;
                           rest = first4;
-                          tmp23 = "found an exprChoice with outerPrec = " + outerPrec;
+                          tmp23 = "found an refChoice with outerPrec = " + outerPrec;
                           doTemp2 = Parser.tracer.print(tmp23, 269);
                           outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                           scrut1 = outerPrec$_ > prec;
@@ -2190,7 +2190,7 @@ Parser1 = class Parser {
                     doTemp5 = Parser.tracer.print(tmp34, 264);
                     doTemp1 = Parser.tracer.print("not a keyword", 266);
                     token1 = param01;
-                    scrut = Rules.typeInfixRule.exprChoice;
+                    scrut = Rules.typeInfixRule.refChoice;
                     if (scrut instanceof Option.Some.class) {
                       param02 = scrut.value;
                       if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2204,7 +2204,7 @@ Parser1 = class Parser {
                         outerPrec = first2;
                         innerPrec = first3;
                         rest = first4;
-                        tmp35 = "found an exprChoice with outerPrec = " + outerPrec;
+                        tmp35 = "found an refChoice with outerPrec = " + outerPrec;
                         doTemp2 = Parser.tracer.print(tmp35, 269);
                         outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                         scrut1 = outerPrec$_ > prec;
@@ -2248,7 +2248,7 @@ Parser1 = class Parser {
                   doTemp5 = Parser.tracer.print(tmp46, 264);
                   doTemp1 = Parser.tracer.print("not a keyword", 266);
                   token1 = param01;
-                  scrut = Rules.typeInfixRule.exprChoice;
+                  scrut = Rules.typeInfixRule.refChoice;
                   if (scrut instanceof Option.Some.class) {
                     param02 = scrut.value;
                     if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2262,7 +2262,7 @@ Parser1 = class Parser {
                       outerPrec = first2;
                       innerPrec = first3;
                       rest = first4;
-                      tmp47 = "found an exprChoice with outerPrec = " + outerPrec;
+                      tmp47 = "found an refChoice with outerPrec = " + outerPrec;
                       doTemp2 = Parser.tracer.print(tmp47, 269);
                       outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                       scrut1 = outerPrec$_ > prec;
@@ -2304,7 +2304,7 @@ Parser1 = class Parser {
                 doTemp5 = Parser.tracer.print(tmp58, 264);
                 doTemp1 = Parser.tracer.print("not a keyword", 266);
                 token1 = param01;
-                scrut = Rules.typeInfixRule.exprChoice;
+                scrut = Rules.typeInfixRule.refChoice;
                 if (scrut instanceof Option.Some.class) {
                   param02 = scrut.value;
                   if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2318,7 +2318,7 @@ Parser1 = class Parser {
                     outerPrec = first2;
                     innerPrec = first3;
                     rest = first4;
-                    tmp59 = "found an exprChoice with outerPrec = " + outerPrec;
+                    tmp59 = "found an refChoice with outerPrec = " + outerPrec;
                     doTemp2 = Parser.tracer.print(tmp59, 269);
                     outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                     scrut1 = outerPrec$_ > prec;
@@ -2357,7 +2357,7 @@ Parser1 = class Parser {
             } else {
               doTemp1 = Parser.tracer.print("not a keyword", 266);
               token1 = param01;
-              scrut = Rules.typeInfixRule.exprChoice;
+              scrut = Rules.typeInfixRule.refChoice;
               if (scrut instanceof Option.Some.class) {
                 param02 = scrut.value;
                 if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2371,7 +2371,7 @@ Parser1 = class Parser {
                   outerPrec = first2;
                   innerPrec = first3;
                   rest = first4;
-                  tmp69 = "found an exprChoice with outerPrec = " + outerPrec;
+                  tmp69 = "found an refChoice with outerPrec = " + outerPrec;
                   doTemp2 = Parser.tracer.print(tmp69, 269);
                   outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                   scrut1 = outerPrec$_ > prec;
@@ -2410,7 +2410,7 @@ Parser1 = class Parser {
           } else {
             doTemp1 = Parser.tracer.print("not a keyword", 266);
             token1 = param01;
-            scrut = Rules.typeInfixRule.exprChoice;
+            scrut = Rules.typeInfixRule.refChoice;
             if (scrut instanceof Option.Some.class) {
               param02 = scrut.value;
               if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2424,7 +2424,7 @@ Parser1 = class Parser {
                 outerPrec = first2;
                 innerPrec = first3;
                 rest = first4;
-                tmp79 = "found an exprChoice with outerPrec = " + outerPrec;
+                tmp79 = "found an refChoice with outerPrec = " + outerPrec;
                 doTemp2 = Parser.tracer.print(tmp79, 269);
                 outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
                 scrut1 = outerPrec$_ > prec;
@@ -2463,7 +2463,7 @@ Parser1 = class Parser {
         } else {
           doTemp1 = Parser.tracer.print("not a keyword", 266);
           token1 = param01;
-          scrut = Rules.typeInfixRule.exprChoice;
+          scrut = Rules.typeInfixRule.refChoice;
           if (scrut instanceof Option.Some.class) {
             param02 = scrut.value;
             if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -2477,7 +2477,7 @@ Parser1 = class Parser {
               outerPrec = first2;
               innerPrec = first3;
               rest = first4;
-              tmp89 = "found an exprChoice with outerPrec = " + outerPrec;
+              tmp89 = "found an refChoice with outerPrec = " + outerPrec;
               doTemp2 = Parser.tracer.print(tmp89, 269);
               outerPrec$_ = Option.getOrElse(outerPrec, Precedence.Keywords.maxOperatorPrec);
               scrut1 = outerPrec$_ > prec;

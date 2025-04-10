@@ -45,7 +45,7 @@ ParseRule2 = class ParseRule {
     this.ParseRule.class = class ParseRule1 {
       #_endChoice;
       #_keywordChoices;
-      #_exprChoice;
+      #_refChoice;
       constructor(name, choices) {
         let tmp, tmp1, tmp2, tmp3, lambda, lambda1, lambda2;
         this.name = name;
@@ -217,7 +217,7 @@ ParseRule2 = class ParseRule {
               optional = param1;
               rest = param2;
               process = param3;
-              scrut1 = init.exprChoice;
+              scrut1 = init.refChoice;
               if (scrut1 instanceof Option.Some.class) {
                 param02 = scrut1.value;
                 if (globalThis.Array.isArray(param02) && param02.length === 5) {
@@ -257,7 +257,7 @@ ParseRule2 = class ParseRule {
                   ])
                 } else {
                   if (optional === true) {
-                    scrut = rest.exprChoice;
+                    scrut = rest.refChoice;
                     if (scrut instanceof Option.Some.class) {
                       param01 = scrut.value;
                       if (globalThis.Array.isArray(param01) && param01.length === 5) {
@@ -290,7 +290,7 @@ ParseRule2 = class ParseRule {
                 }
               } else {
                 if (optional === true) {
-                  scrut = rest.exprChoice;
+                  scrut = rest.refChoice;
                   if (scrut instanceof Option.Some.class) {
                     param01 = scrut.value;
                     if (globalThis.Array.isArray(param01) && param01.length === 5) {
@@ -329,7 +329,7 @@ ParseRule2 = class ParseRule {
           return Iter.firstDefined(tmp4, tmp5)
         });
         tmp3 = ParseRule.Lazy(lambda2);
-        this.#_exprChoice = tmp3;
+        this.#_refChoice = tmp3;
       }
       map(op) {
         let tmp, tmp1, tmp2, lambda;
@@ -461,8 +461,8 @@ ParseRule2 = class ParseRule {
       get keywordChoices() {
         return runtime.safeCall(this.#_keywordChoices.get());
       } 
-      get exprChoice() {
-        return runtime.safeCall(this.#_exprChoice.get());
+      get refChoice() {
+        return runtime.safeCall(this.#_refChoice.get());
       } 
       extendChoices(newChoices) {
         let tmp, tmp1, tmp2, tmp3;
@@ -470,7 +470,7 @@ ParseRule2 = class ParseRule {
         this.choices = tmp;
         tmp1 = runtime.safeCall(this.#_endChoice.reset());
         tmp2 = runtime.safeCall(this.#_keywordChoices.reset());
-        tmp3 = runtime.safeCall(this.#_exprChoice.reset());
+        tmp3 = runtime.safeCall(this.#_refChoice.reset());
         return this
       } 
       get display() {

@@ -110,31 +110,31 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
   // Collect all keyword choices in this rule.
   fun keywordChoices = _keywordChoices.get()
   
-  let _exprChoice = Lazy of () => choices
+  let _refChoice = Lazy of () => choices
     Iter.fromStack()
     Iter.firstDefined of case
       Choice.Ref(kind, process, outerPrec, innerPrec, rest) then
         Some([kind, process, outerPrec, innerPrec, rest])
       Choice.Siding(init, optional, rest, process) and
-        init.exprChoice is
+        init.refChoice is
           Some([k, process', op, ip, rest']) then
             let process''(exprRes, pairRes) = if pairRes is [restRes', restRes] then
               process(process'(exprRes, restRes'), restRes)
             let rest'' = rest'.andThen(rest, tuple)
             Some of [k, process'', op, ip, rest'']
-        optional and rest.exprChoice is
+        optional and rest.refChoice is
           Some([k, p, op, ip, rest']) then Some of tuple of
             k, (exprRes, restRes) => process(None, p(exprRes, restRes)), op, ip, rest'
         else None
       else None
   
-  fun exprChoice = _exprChoice.get()
+  fun refChoice = _refChoice.get()
   
   fun extendChoices(newChoices: Stack[Choice]) =
     set choices = choices ::: newChoices
     _endChoice.reset()
     _keywordChoices.reset()
-    _exprChoice.reset()
+    _refChoice.reset()
     this
   
   // Display parse rules as a tree in a BNF-like format.
