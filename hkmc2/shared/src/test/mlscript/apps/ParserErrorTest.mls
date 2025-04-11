@@ -20,7 +20,7 @@ example of ":tree ((x) ==> x))"
 //│ >   argument = Stack of 
 //│ >     Ident of "x"
 //│ >     Ident of "x"
-//│ > Error of "unexpected keyword )"
+//│ > Error of "unexpected token Identifier(\")\", true)"
 //│ > «x ==> x»
 //│ > «⚠»
 
@@ -120,9 +120,9 @@ example of """
 id fun x -> x
 """
 //│ > Ident of "id"
-//│ > Error of "unexpected keyword fun"
+//│ > Error of "unexpected token Identifier(\"fun\", false)"
 //│ > Error of "unexpected token Identifier(\"x\", false)"
-//│ > Error of "unexpected keyword ->"
+//│ > Error of "unexpected token Identifier(\"->\", true)"
 //│ > Error of "unexpected token Identifier(\"x\", false)"
 //│ > «id»
 //│ > «⚠»
@@ -135,11 +135,11 @@ example of """
 id if true then 1 else 0
 """
 //│ > Ident of "id"
-//│ > Error of "unexpected keyword if"
+//│ > Error of "unexpected token Identifier(\"if\", false)"
 //│ > Error of "unexpected token Literal(Boolean, \"true\")"
-//│ > Error of "unexpected keyword then"
+//│ > Error of "unexpected token Identifier(\"then\", false)"
 //│ > Error of "unexpected token Literal(Integer, \"1\")"
-//│ > Error of "unexpected keyword else"
+//│ > Error of "unexpected token Identifier(\"else\", false)"
 //│ > Error of "unexpected token Literal(Integer, \"0\")"
 //│ > «id»
 //│ > «⚠»

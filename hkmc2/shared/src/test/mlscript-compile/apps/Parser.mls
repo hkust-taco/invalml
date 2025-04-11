@@ -81,32 +81,7 @@ fun parse(tokens) =
             tracer.print of "the rest of the rule: " + rest.display, source.line
             consume
             parseRule(0, rest)
-          None and
-            do tracer.print of "no rule starting with `" + name + "` was found", source.line
-            do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
-            rule.refChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
-              do tracer.print of "try to parse kind \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
-              let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
-              let innerPrec' = innerPrec Option.getOrElse(prec)
-              outerPrec' > prec and parseKind(kind, prec) is
-                Tree.Error then
-                  do tracer.print of "cannot parse more", source.line
-                  if rule.endChoice is Some(value) then
-                    tracer.print of "found end choice", source.line
-                    value
-                acc then
-                  let tree = parseRule(prec, rest)
-                  tracer.print of "acc: " + acc Tree.summary(), source.line
-                  tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
-                  process(acc, tree)
-              do tracer.print of "did not parse kind \"" + kind + "\" because of the precedence", source.line
-            rule.endChoice is Some(value) then
-              tracer.print of "found end choice", source.line
-              value
-            else
-              consume
-              Tree.error("unexpected keyword " + keyword.name)
-      do tracer.print of "\"" + name + "\" is not a keyword", source.line
+          do tracer.print of "\"" + name + "\" is not a keyword", source.line
     other :: _ and
       do tracer.print of "the current rule is " + rule.display
       rule.refChoice is Some([kind, process, outerPrec, innerPrec, rest]) and
@@ -114,11 +89,11 @@ fun parse(tokens) =
         let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
         let innerPrec' = innerPrec Option.getOrElse(prec)
         outerPrec' > prec and parseKind(kind, prec) is
-          Tree.Error then // Tree.nonEmptyError()
+          Tree.Error then // TODO: Try using `Tree.nonEmptyError()`.
             do tracer.print of "cannot parse more", source.line
             if rule.endChoice is Some(value) then
               tracer.print of "found end choice", source.line
-              value
+              value // TODO: No `else`?
           acc then
             let tree = parseRule(prec, rest)
             tracer.print of "acc: " + acc Tree.summary(), source.line
@@ -132,7 +107,7 @@ fun parse(tokens) =
       do tracer.print of "no end choice", source.line
       else
         consume
-        Tree.error("unexpected token " + other)
+        Tree.error("unexpected token " + other) // TODO: Pretty-print the token.
     Nil and rule.endChoice is
       Some(value) then value
       None then
