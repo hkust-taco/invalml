@@ -989,11 +989,27 @@ Tree2 = class Tree {
       return Tree.Sequence(tmp2)
     }
   } 
-  static nonEmptyError(tree5) {
+  static nonEmpty(tree5) {
     let param0, param1;
-    if (tree5 instanceof Tree.Error.class) {
+    if (tree5 instanceof Tree.Empty.class) {
+      return false
+    } else if (tree5 instanceof Tree.Error.class) {
       param0 = tree5.tree;
       param1 = tree5.message;
+      if (param0 instanceof Tree.Empty.class) {
+        return false
+      } else {
+        return true
+      }
+    } else {
+      return true
+    }
+  } 
+  static nonEmptyError(tree6) {
+    let param0, param1;
+    if (tree6 instanceof Tree.Error.class) {
+      param0 = tree6.tree;
+      param1 = tree6.message;
       if (param0 instanceof Tree.Empty.class) {
         return false
       } else {

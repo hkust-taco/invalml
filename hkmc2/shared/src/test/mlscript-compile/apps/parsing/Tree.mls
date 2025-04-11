@@ -197,6 +197,11 @@ module Tree with
     Sequence(tail) then Sequence(head :: tail)
     else Sequence(head :: tree :: Nil)
   
+  fun nonEmpty(tree) = if tree is
+    Empty then false
+    Error(Empty, _) then false
+    else true
+  
   fun nonEmptyError(tree) = if tree is
     Error(Empty, _) then false
     else true

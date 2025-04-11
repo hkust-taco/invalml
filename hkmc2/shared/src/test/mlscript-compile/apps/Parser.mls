@@ -63,8 +63,19 @@ fun parse(tokens) =
         Tree.Ident(name, false)
       token :: _ then Tree.error("expect a type variable but found " + token)
       Nil then Tree.error("expect a type variable but found the end of input")
-    // * other kinds are rule-only and does not have operator-based parsing.
-    syntaxKinds.get(kind) is Some(rule) then parseRule(prec, rule)
+    // * other rule-based kinds
+    syntaxKinds.get(kind) is Some(rule) then
+      let tree = parseRule(prec, rule)
+      if rule.refChoice is Some(Ref(kind', process, None, None, rest)) and kind == kind' do
+        let shouldParse = true
+        while shouldParse do
+          let tree' = parseRule(prec, rest)
+          if tree' Tree.nonEmpty() then
+            tracer.print of ">>> " + kind + "Cont " + prec + " " + tree Tree.summary() + " <<<", source.line
+            set tree = process(tree, tree')
+          else
+            set shouldParse = false
+      tree
     else throw Error("Unknown syntax kind: \"" + kind + "\"")
   
   fun parseRule(prec: Int, rule) = tracer.trace of
