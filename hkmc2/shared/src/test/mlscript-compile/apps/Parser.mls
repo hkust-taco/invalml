@@ -61,18 +61,17 @@ fun parse(tokens) =
       token :: _ then Tree.error("expect a type variable but found " + token)
       Nil then Tree.error("expect a type variable but found the end of input")
     // * other kinds are rule-only and does not have operator-based parsing.
-    syntaxKinds.get(kind) is Some(rule) then
-      parseRule(prec, rule, Keywords.all)
+    syntaxKinds.get(kind) is Some(rule) then parseRule(prec, rule)
     else throw Error("Unknown syntax kind: \"" + kind + "\"")
   
-  fun parseRule(prec: Int, rule, allKeywords) = tracer.trace of
+  fun parseRule(prec: Int, rule) = tracer.trace of
     "parsing rule \"" + rule.name + "\" with precedence " + prec
     result => "parsed rule \"" + rule.name + "\": " + result Tree.summary()
     () => ...
     if tokens is
       Token.Identifier(name, _) :: _ and
         do tracer.print of "found an identifier \"" + name + "\"", source.line
-        allKeywords.get(name) is Some(keyword) and
+        Keywords.all.get(name) is Some(keyword) and
           do tracer.print of keyword.toString(), source.line
           do tracer.print of "keyword choices: ", rule.keywordChoices
             Iter.mapping of case [k, v] then "`" + k + "`"
@@ -82,7 +81,7 @@ fun parse(tokens) =
               tracer.print of "found a rule starting with `" + name + "`", source.line
               tracer.print of "the rest of the rule: " + rest.display, source.line
               consume
-              parseRule(0, rest, allKeywords)
+              parseRule(0, rest)
             None and
               do tracer.print of "no rule starting with `" + name + "` was found", source.line
               do tracer.print of "the left prec of `" + name + "` is " + keyword.leftPrec, source.line
@@ -98,7 +97,7 @@ fun parse(tokens) =
                         tracer.print of "found end choice", source.line
                         value
                     acc then
-                      let tree = parseRule(prec, rest, allKeywords)
+                      let tree = parseRule(prec, rest)
                       tracer.print of "acc: " + acc Tree.summary(), source.line
                       tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
                       process(acc, tree)
@@ -124,7 +123,7 @@ fun parse(tokens) =
                   tracer.print of "found end choice", source.line
                   value
               acc then
-                let tree = parseRule(prec, rest, allKeywords)
+                let tree = parseRule(prec, rest)
                 tracer.print of "acc: " + acc Tree.summary(), source.line
                 tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
                 process(acc, tree)
@@ -153,8 +152,7 @@ fun parse(tokens) =
         Some(rule) and
           keyword.leftPrecOrMin > prec then
             consume
-            let acc = parseRule(keyword.rightPrecOrMax, rule, Keywords.all)
-            acc exprCont(prec, options)
+            parseRule(keyword.rightPrecOrMax, rule) exprCont(prec, options)
           else
             tracer.print of "the left precedence of \"" + name + "\" is less", source.line
             Tree.empty
@@ -267,16 +265,14 @@ fun parse(tokens) =
         // Then try to parse according to the rules of the definition.
         declRule.keywordChoices.get(name) is Some(rule) then
           consume
-          parseRule(0, rule, Keywords.all) handleDirective(acc)
+          parseRule(0, rule) handleDirective(acc)
     _ :: _ then modCont of expr(0, termOptions) :: acc
     Nil then acc reverse()
   
   fun modCont(acc: Stack[Tree]) = if tokens is
     do tracer.print of ">>>>>> modCont <<<<<< " + TokenHelpers.preview(tokens), source.line
-    Token.Identifier(";;", _) :: _ then
-      consume
-      acc mod()
-    _ :: _ then parseRule(0, declRule, Keywords.all) handleDirective(acc)
+    Token.Identifier(";;", _) :: _ then consume; acc mod()
+    _ :: _ then parseRule(0, declRule) handleDirective(acc)
     Nil then acc reverse()
   
   let tree = tracer.trace of
