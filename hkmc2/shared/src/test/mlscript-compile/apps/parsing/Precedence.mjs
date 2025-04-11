@@ -5,9 +5,10 @@ import Predef from "./../../Predef.mjs";
 import BetterMap from "./../../BetterMap.mjs";
 import Keyword from "./Keyword.mjs";
 let Precedence1;
-Precedence1 = class Precedence {
+(class Precedence {
   static {
-    this.Keywords = class Keywords {
+    Precedence1 = Precedence;
+    (class Keywords {
       static #prec;
       static #basePrec;
       static #semiPrec;
@@ -19,6 +20,7 @@ Precedence1 = class Precedence {
       static #bracketPrec;
       static #builtinKeywords;
       static {
+        Precedence.Keywords = Keywords;
         let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59;
         tmp = new BetterMap.Map();
         this.all = tmp;
@@ -190,7 +192,7 @@ Precedence1 = class Precedence {
         return BetterMap.toMap(tmp2);
       }
       static toString() { return "Keywords"; }
-    };
+    });
     const Letter$class = class Letter {
       constructor() {}
       unapply(scrut) {
@@ -533,5 +535,5 @@ Precedence1 = class Precedence {
     }
   }
   static toString() { return "Precedence"; }
-};
+});
 let Precedence = Precedence1; export default Precedence;

@@ -6,8 +6,10 @@ import Tree from "./Tree.mjs";
 import Keyword from "./Keyword.mjs";
 import Token from "./Token.mjs";
 let TreeHelpers1;
-TreeHelpers1 = class TreeHelpers {
-  static {}
+(class TreeHelpers {
+  static {
+    TreeHelpers1 = TreeHelpers;
+  }
   static first(array) {
     let first0, first;
     if (globalThis.Array.isArray(array) && array.length >= 1) {
@@ -497,5 +499,5 @@ TreeHelpers1 = class TreeHelpers {
     return go(thing)
   }
   static toString() { return "TreeHelpers"; }
-};
+});
 let TreeHelpers = TreeHelpers1; export default TreeHelpers;

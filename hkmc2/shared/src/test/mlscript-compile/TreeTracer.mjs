@@ -1,8 +1,9 @@
 import runtime from "./Runtime.mjs";
 import Predef from "./Predef.mjs";
 let TreeTracer2;
-TreeTracer2 = class TreeTracer {
+(class TreeTracer {
   static {
+    TreeTracer2 = TreeTracer;
     this.TreeTracer = class TreeTracer1 {
       constructor() {
         this.steps = 0;
@@ -68,7 +69,7 @@ TreeTracer2 = class TreeTracer {
         lambda = (undefined, function (arg1, arg2) {
           return arg1 + arg2
         });
-        tmp4 = Predef.fold(lambda);
+        tmp4 = runtime.safeCall(Predef.fold(lambda));
         tmp5 = runtime.safeCall(tmp4(...pieces));
         tmp6 = this.output(tmp2, tmp3, "\u2502 ", tmp5);
         tmp7 = this.steps + 1;
@@ -86,7 +87,7 @@ TreeTracer2 = class TreeTracer {
             lambda = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
-            tmp = Predef.fold(lambda);
+            tmp = runtime.safeCall(Predef.fold(lambda));
             tmp1 = " [Ln " + line;
             tmp2 = tmp1 + "]";
             tmp3 = runtime.safeCall(tmp(...pieces2, tmp2));
@@ -94,14 +95,14 @@ TreeTracer2 = class TreeTracer {
             lambda1 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
-            tmp4 = Predef.fold(lambda1);
+            tmp4 = runtime.safeCall(Predef.fold(lambda1));
             tmp3 = runtime.safeCall(tmp4(...pieces1));
           }
         } else {
           lambda2 = (undefined, function (arg1, arg2) {
             return arg1 + arg2
           });
-          tmp5 = Predef.fold(lambda2);
+          tmp5 = runtime.safeCall(Predef.fold(lambda2));
           tmp3 = runtime.safeCall(tmp5(...pieces1));
         }
         message1 = tmp3;
@@ -128,7 +129,7 @@ TreeTracer2 = class TreeTracer {
         lambda = (undefined, function (arg1, arg2) {
           return arg1 + arg2
         });
-        tmp2 = Predef.fold(lambda);
+        tmp2 = runtime.safeCall(Predef.fold(lambda));
         tmp3 = runtime.safeCall(tmp2(...pieces2));
         return this.output(tmp1, "\u2515 ", "  ", tmp3)
       } 
@@ -149,5 +150,5 @@ TreeTracer2 = class TreeTracer {
     };
   }
   static toString() { return "TreeTracer"; }
-};
+});
 let TreeTracer = TreeTracer2; export default TreeTracer;

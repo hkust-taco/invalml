@@ -11,8 +11,9 @@ import Option from "./../../Option.mjs";
 import Predef from "./../../Predef.mjs";
 import Stack from "./../../Stack.mjs";
 let Test1;
-Test1 = class Test {
+(class Test {
   static {
+    Test1 = Test;
     const Flag$class = class Flag {
       constructor() {}
       unapply(scrut) {
@@ -226,5 +227,5 @@ Test1 = class Test {
     }
   }
   static toString() { return "Test"; }
-};
+});
 let Test = Test1; export default Test;

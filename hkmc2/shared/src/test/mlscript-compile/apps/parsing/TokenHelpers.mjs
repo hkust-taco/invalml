@@ -3,8 +3,10 @@ import Token from "./Token.mjs";
 import Stack from "./../../Stack.mjs";
 import Predef from "./../../Predef.mjs";
 let TokenHelpers1;
-TokenHelpers1 = class TokenHelpers {
-  static {}
+(class TokenHelpers {
+  static {
+    TokenHelpers1 = TokenHelpers;
+  }
   static display(tokens, limit) {
     let i, values, scrut, param0, param1, head, tail, param01, param11, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
     i = 0;
@@ -49,5 +51,5 @@ TokenHelpers1 = class TokenHelpers {
     return TokenHelpers.display(tokens2, 5)
   }
   static toString() { return "TokenHelpers"; }
-};
+});
 let TokenHelpers = TokenHelpers1; export default TokenHelpers;

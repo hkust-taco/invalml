@@ -9,10 +9,11 @@ import Option from "./../../Option.mjs";
 import TreeTracer from "./../../TreeTracer.mjs";
 import XML from "./../../XML.mjs";
 let ParseRuleVisualizer1;
-ParseRuleVisualizer1 = class ParseRuleVisualizer {
+(class ParseRuleVisualizer {
   static #defaultKinds;
   static #renderedKinds;
   static {
+    ParseRuleVisualizer1 = ParseRuleVisualizer;
     let tmp, tmp1, tmp2;
     tmp = new TreeTracer.TreeTracer();
     this.tracer = tmp;
@@ -222,5 +223,5 @@ ParseRuleVisualizer1 = class ParseRuleVisualizer {
     return diagrams
   }
   static toString() { return "ParseRuleVisualizer"; }
-};
+});
 let ParseRuleVisualizer = ParseRuleVisualizer1; export default ParseRuleVisualizer;

@@ -14,10 +14,11 @@ import Tree from "./parsing/Tree.mjs";
 import Rules from "./parsing/Rules.mjs";
 import ParseRule from "./parsing/ParseRule.mjs";
 let Parser1;
-Parser1 = class Parser {
+(class Parser {
   static #termOptions;
   static #typeOptions;
   static {
+    Parser1 = Parser;
     let kind, rule, allowOperators, allowLiterals, kind1, rule1, allowOperators1, allowLiterals1, tmp;
     tmp = new TreeTracer.TreeTracer();
     this.tracer = tmp;
@@ -2722,5 +2723,5 @@ Parser1 = class Parser {
     }
   }
   static toString() { return "Parser"; }
-};
+});
 let Parser = Parser1; export default Parser;

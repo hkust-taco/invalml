@@ -3,8 +3,9 @@ import Str from "./../../Str.mjs";
 import Option from "./../../Option.mjs";
 import Predef from "./../../Predef.mjs";
 let Expr1;
-Expr1 = class Expr {
+(class Expr {
   static {
+    Expr1 = Expr;
     let tmp, lambda;
     lambda = (undefined, function (caseScrut) {
       if (caseScrut === "**") {
@@ -187,5 +188,5 @@ Expr1 = class Expr {
     }
   }
   static toString() { return "Expr"; }
-};
+});
 let Expr = Expr1; export default Expr;

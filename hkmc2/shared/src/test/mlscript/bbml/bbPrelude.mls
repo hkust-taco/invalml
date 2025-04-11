@@ -40,6 +40,10 @@ declare module source with
 declare module js with
   fun try_catch
 
+declare module debug with
+  fun printStack
+  fun getLocals
+
 
 declare module source with
   object line: Int

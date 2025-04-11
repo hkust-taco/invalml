@@ -9,8 +9,9 @@ import Option from "./../../Option.mjs";
 import Predef from "./../../Predef.mjs";
 import Iter from "./../../Iter.mjs";
 let Extension1;
-Extension1 = class Extension {
+(class Extension {
   static {
+    Extension1 = Extension;
     const OpenCategory$class = class OpenCategory {
       constructor() {}
       unapply(scrut) {
@@ -505,5 +506,5 @@ Extension1 = class Extension {
     }
   }
   static toString() { return "Extension"; }
-};
+});
 let Extension = Extension1; export default Extension;

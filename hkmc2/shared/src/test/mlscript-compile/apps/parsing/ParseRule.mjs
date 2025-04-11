@@ -8,8 +8,9 @@ import Keyword1 from "./Keyword.mjs";
 import Token from "./Token.mjs";
 import Tree from "./Tree.mjs";
 let ParseRule2;
-ParseRule2 = class ParseRule {
+(class ParseRule {
   static {
+    ParseRule2 = ParseRule;
     this.Lazy = function Lazy(init1) {
       return new Lazy.class(init1);
     };
@@ -682,7 +683,7 @@ ParseRule2 = class ParseRule {
       }
       toString() { return "ParseRule(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.choices) + ")"; }
     };
-    this.Choice = class Choice {
+    (class Choice {
       static #ensureChoices;
       static #shouldHaveFunction;
       static #shouldHaveStr;
@@ -690,6 +691,7 @@ ParseRule2 = class ParseRule {
       static #shouldHaveBool;
       static #shouldHaveRuleLike;
       static {
+        ParseRule.Choice = Choice;
         let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, ensureChoices, lambda, lambda1, lambda2, lambda3, lambda4;
         this.Choice = class Choice1 {
           constructor() {}
@@ -997,7 +999,7 @@ ParseRule2 = class ParseRule {
         }
       }
       static toString() { return "Choice"; }
-    };
+    });
   }
   static rule(name, ...choices) {
     let scrut, tmp, tmp1;
@@ -1011,5 +1013,5 @@ ParseRule2 = class ParseRule {
     return ParseRule.ParseRule(name, tmp1)
   }
   static toString() { return "ParseRule"; }
-};
+});
 let ParseRule = ParseRule2; export default ParseRule;

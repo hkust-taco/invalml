@@ -2,8 +2,9 @@ import runtime from "./../../Runtime.mjs";
 import Predef from "./../../Predef.mjs";
 import Option from "./../../Option.mjs";
 let Keyword2;
-Keyword2 = class Keyword {
+(class Keyword {
   static {
+    Keyword2 = Keyword;
     let tmp;
     tmp = - 2147483648;
     this.INT_MIN = tmp;
@@ -66,7 +67,7 @@ Keyword2 = class Keyword {
         lambda = (undefined, function (arg1, arg2) {
           return arg1 + arg2
         });
-        tmp1 = Predef.fold(lambda);
+        tmp1 = runtime.safeCall(Predef.fold(lambda));
         scrut = this.leftPrec;
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
@@ -88,5 +89,5 @@ Keyword2 = class Keyword {
     };
   }
   static toString() { return "Keyword"; }
-};
+});
 let Keyword = Keyword2; export default Keyword;

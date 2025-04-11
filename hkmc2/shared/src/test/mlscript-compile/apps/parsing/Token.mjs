@@ -1,7 +1,8 @@
 import runtime from "./../../Runtime.mjs";
 let Token1;
-Token1 = class Token {
+(class Token {
   static {
+    Token1 = Token;
     const Angle$class = class Angle {
       constructor() {}
       toString() { return "Angle"; }
@@ -32,8 +33,9 @@ Token1 = class Token {
     };
     this.BeginEnd = new BeginEnd$class;
     this.BeginEnd.class = BeginEnd$class;
-    this.LiteralKind = class LiteralKind {
+    (class LiteralKind {
       static {
+        Token.LiteralKind = LiteralKind;
         const Integer$class = class Integer {
           constructor() {}
           toString() { return "Integer"; }
@@ -60,7 +62,7 @@ Token1 = class Token {
         this.Boolean.class = Boolean$class;
       }
       static toString() { return "LiteralKind"; }
-    };
+    });
     const Space$class = class Space {
       constructor() {}
       toString() { return "Space"; }
@@ -212,5 +214,5 @@ Token1 = class Token {
     return runtime.safeCall(token1.toString())
   }
   static toString() { return "Token"; }
-};
+});
 let Token = Token1; export default Token;

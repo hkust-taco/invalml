@@ -7,8 +7,10 @@ import Lexer from "./../Lexer.mjs";
 import Token from "./Token.mjs";
 import Expr from "./Expr.mjs";
 let PrattParsing1;
-PrattParsing1 = class PrattParsing {
-  static {}
+(class PrattParsing {
+  static {
+    PrattParsing1 = PrattParsing;
+  }
   static parse(tokens) {
     let require, exprCont, advance, expr, consume, peek, result, param0, token, tmp, tmp1, tmp2, tmp3;
     advance = function advance() {
@@ -182,5 +184,5 @@ PrattParsing1 = class PrattParsing {
     }
   }
   static toString() { return "PrattParsing"; }
-};
+});
 let PrattParsing = PrattParsing1; export default PrattParsing;

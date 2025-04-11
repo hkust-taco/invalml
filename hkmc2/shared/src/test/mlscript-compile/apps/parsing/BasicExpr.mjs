@@ -3,8 +3,9 @@ import Str from "./../../Str.mjs";
 import Option from "./../../Option.mjs";
 import Predef from "./../../Predef.mjs";
 let BasicExpr1;
-BasicExpr1 = class BasicExpr {
+(class BasicExpr {
   static {
+    BasicExpr1 = BasicExpr;
     this.Lit = function Lit(value1) {
       return new Lit.class(value1);
     };
@@ -127,5 +128,5 @@ BasicExpr1 = class BasicExpr {
     }
   }
   static toString() { return "BasicExpr"; }
-};
+});
 let BasicExpr = BasicExpr1; export default BasicExpr;

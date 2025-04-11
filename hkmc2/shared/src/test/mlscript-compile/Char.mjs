@@ -1,7 +1,8 @@
 import runtime from "./Runtime.mjs";
 let Char1;
-Char1 = class Char {
+(class Char {
   static {
+    Char1 = Char;
     const Lowercase$class = class Lowercase {
       constructor() {}
       unapply(scrut) {
@@ -423,5 +424,5 @@ Char1 = class Char {
     this.Whitespace.class = Whitespace$class;
   }
   static toString() { return "Char"; }
-};
+});
 let Char = Char1; export default Char;

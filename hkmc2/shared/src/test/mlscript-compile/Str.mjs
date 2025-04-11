@@ -1,17 +1,17 @@
 import runtime from "./Runtime.mjs";
 let Str1;
-Str1 = class Str {
-  static {}
-  static concat2(a, b) {
+const Str$class = class Str {
+  constructor() {}
+  concat2(a, b) {
     return a + b
   } 
-  static concat(...xs) {
+  concat(...xs) {
     return runtime.safeCall(xs.join(""))
   } 
-  static from(value) {
+  from(value) {
     return runtime.safeCall(globalThis.String(value))
   } 
-  static parenthesizedIf(x, cond) {
+  parenthesizedIf(x, cond) {
     let tmp;
     if (cond === true) {
       tmp = "(" + x;
@@ -20,6 +20,7 @@ Str1 = class Str {
       return x
     }
   }
-  static toString() { return "Str"; }
-};
+  toString() { return "Str"; }
+}; Str1 = new Str$class;
+Str1.class = Str$class;
 let Str = Str1; export default Str;

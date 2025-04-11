@@ -8,14 +8,16 @@ import Keyword from "./Keyword.mjs";
 import Precedence from "./Precedence.mjs";
 import Token from "./Token.mjs";
 let Tree2;
-Tree2 = class Tree {
+(class Tree {
   static {
+    Tree2 = Tree;
     this.Tree = class Tree1 {
       constructor() {}
       toString() { return "Tree"; }
     };
-    this.DefineKind = class DefineKind {
+    (class DefineKind {
       static {
+        Tree.DefineKind = DefineKind;
         this.Let = function Let(recursive1) {
           return new Let.class(recursive1);
         };
@@ -45,7 +47,7 @@ Tree2 = class Tree {
         this.Directive.class = Directive$class;
       }
       static toString() { return "DefineKind"; }
-    };
+    });
     this.Empty = function Empty() {
       return new Empty.class();
     };
@@ -479,7 +481,7 @@ Tree2 = class Tree {
                       lambda = (undefined, function (arg1, arg2) {
                         return arg1 + arg2
                       });
-                      tmp30 = Predef.fold(lambda);
+                      tmp30 = runtime.safeCall(Predef.fold(lambda));
                       tmp31 = go(lhs2);
                       tmp32 = prec(lhs2, false);
                       tmp33 = tmp32 < leftPrec1;
@@ -574,7 +576,7 @@ Tree2 = class Tree {
                 lambda1 = (undefined, function (arg1, arg2) {
                   return arg1 + arg2
                 });
-                tmp65 = Predef.fold(lambda1);
+                tmp65 = runtime.safeCall(Predef.fold(lambda1));
                 tmp66 = go(lhs1);
                 tmp67 = go(op);
                 tmp68 = go(rhs1);
@@ -587,7 +589,7 @@ Tree2 = class Tree {
               lambda2 = (undefined, function (arg1, arg2) {
                 return arg1 + arg2
               });
-              tmp69 = Predef.fold(lambda2);
+              tmp69 = runtime.safeCall(Predef.fold(lambda2));
               tmp70 = go(lhs1);
               tmp71 = go(op);
               tmp72 = go(rhs1);
@@ -600,7 +602,7 @@ Tree2 = class Tree {
             lambda3 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
-            tmp73 = Predef.fold(lambda3);
+            tmp73 = runtime.safeCall(Predef.fold(lambda3));
             tmp74 = go(lhs1);
             tmp75 = go(op);
             tmp76 = go(rhs1);
@@ -851,7 +853,7 @@ Tree2 = class Tree {
             lambda8 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
-            tmp110 = Predef.fold(lambda8);
+            tmp110 = runtime.safeCall(Predef.fold(lambda8));
             tmp111 = go(lhs);
             scrut = keyword.name;
             if (scrut === "if") {
@@ -896,7 +898,7 @@ Tree2 = class Tree {
             lambda9 = (undefined, function (arg1, arg2) {
               return arg1 + arg2
             });
-            tmp116 = Predef.fold(lambda9);
+            tmp116 = runtime.safeCall(Predef.fold(lambda9));
             tmp117 = Iter.fromStack(params);
             tmp118 = Iter.mapping(tmp117, go);
             tmp119 = Iter.joined(tmp118, " ");
@@ -1020,5 +1022,5 @@ Tree2 = class Tree {
     }
   }
   static toString() { return "Tree"; }
-};
+});
 let Tree = Tree2; export default Tree;

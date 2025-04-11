@@ -6,8 +6,10 @@ import Iter from "./../../Iter.mjs";
 import Token from "./Token.mjs";
 import BasicExpr from "./BasicExpr.mjs";
 let RecursiveDescent1;
-RecursiveDescent1 = class RecursiveDescent {
-  static {}
+(class RecursiveDescent {
+  static {
+    RecursiveDescent1 = RecursiveDescent;
+  }
   static parse(tokens) {
     let require, addSeq, advance, expr, atom, product, mulSeq, consume, peek, result, param0, token, tmp, tmp1, tmp2, tmp3;
     advance = function advance() {
@@ -199,5 +201,5 @@ RecursiveDescent1 = class RecursiveDescent {
     }
   }
   static toString() { return "RecursiveDescent"; }
-};
+});
 let RecursiveDescent = RecursiveDescent1; export default RecursiveDescent;

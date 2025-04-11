@@ -7,8 +7,9 @@ import Option from "./../Option.mjs";
 import Iter from "./../Iter.mjs";
 import Token from "./parsing/Token.mjs";
 let Lexer1;
-Lexer1 = class Lexer {
+(class Lexer {
   static {
+    Lexer1 = Lexer;
     this.Location = function Location(start1, end1) {
       return new Location.class(start1, end1);
     };
@@ -1748,5 +1749,5 @@ Lexer1 = class Lexer {
     return scan(0, Stack.Nil)
   }
   static toString() { return "Lexer"; }
-};
+});
 let Lexer = Lexer1; export default Lexer;

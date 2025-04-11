@@ -1,8 +1,9 @@
 import runtime from "./Runtime.mjs";
 import Option from "./Option.mjs";
 let BetterMap1;
-BetterMap1 = class BetterMap {
+(class BetterMap {
   static {
+    BetterMap1 = BetterMap;
     this.Map = class Map {
       #storage;
       constructor() {
@@ -83,5 +84,5 @@ BetterMap1 = class BetterMap {
     return m
   }
   static toString() { return "BetterMap"; }
-};
+});
 let BetterMap = BetterMap1; export default BetterMap;
