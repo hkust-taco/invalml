@@ -18,6 +18,7 @@ Option.isDefined(Option.None)
 Option.None Option.isDefined()
 //│ = false
 
+
 String(Option.None)
 //│ = "None"
 
