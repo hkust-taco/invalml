@@ -104,46 +104,6 @@ fun makeInfixChoice(kw: Keyword.Keyword, rhsKind: Str, compose: (Tree, Tree) -> 
     process: (rhs, _) => lhs => compose(lhs, rhs)
     name: "operator `" + kw.name + "` right-hand side"
 
-val termInfixRule = rule of
-  "infix rules for expressions"
-  // Tuple (separated by commas)
-  makeInfixChoice of Keywords._comma, "term", (lhs, rhs) => if rhs is
-    Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
-    else Tree.Tuple(lhs :: rhs :: Nil)
-  // Sequence (separated by semicolons)
-  makeInfixChoice of Keywords._semicolon, "term", (lhs, rhs) => if rhs is
-    Tree.Sequence(tail) then Tree.Sequence(lhs :: tail)
-    else Tree.Sequence(lhs :: rhs :: Nil)
-  // Assignment: <expr> <- <expr>
-  makeInfixChoice of Keywords._leftArrow, "term", (lhs, rhs) =>
-    Tree.Infix(Keywords._leftArrow, lhs, rhs)
-  // Comparison: <expr> == <expr>
-  makeInfixChoice of Keywords._equalequal, "term", (lhs, rhs) =>
-    Tree.Infix(Keywords._equalequal, lhs, rhs)
-  // Comparison: <expr> * <expr>
-  makeInfixChoice of Keywords._asterisk, "term", (lhs, rhs) =>
-    Tree.App(Tree.Ident("*", true), lhs :: rhs :: Nil)
-  // Selection: <expr> "." <identifier>
-  // Access: <expr> "." "(" <expr> ")"
-  keyword(Keywords._period) of
-    keyword(Keywords._leftRound) of term of
-      process: (argument, _) => lhs =>
-        Tree.Infix(Keywords._period, lhs, Tree.Bracketed(Round, argument))
-      name: "application argument"
-      choices: tuple of keyword(Keywords._rightRound)()
-    term of
-      process: (rhs, _) => lhs => Tree.Infix(Keywords._period, lhs, rhs)
-      name: "operator `.` right-hand side"
-  // Type ascription: <expr> : <type>
-  keyword(Keywords._colon) of typeExpr of
-    process: (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
-    name: "right-hand side type"
-  // Application: <expr> <expr>
-  term of
-    process: (argument, _) => callee => Tree.App(callee, argument)
-    name: "application argument"
-    outerPrec: Keywords.appPrec
-
 fun makeBracketRule(fields) = // opening, closing, kind, wrapContent
   // Pass the error message of closing bracket to the content.
   keyword(fields.opening) of reference(fields.kind) of
@@ -226,21 +186,47 @@ val termRule = rule of
   makeBracketRule of
     opening: Keywords._begin, closing: Keywords._end, kind: "term"
     wrapContent: (tree) => if tree is Tree.Empty then Tree.Sequence(Nil) else tree
-  // We put the infix rules here for the railroad diagrams.
-  term of process: pipeInto, choices: termInfixRule
-
-val typeInfixRule = rule of
-  "infix rules for types"
-  // <type> "->" <type>
-  makeInfixChoice of Keywords._thinArrow, "type", (lhs, rhs) =>
-    Tree.Infix(Keywords._thinArrow, lhs, rhs)
-  // <type> "*" <type>
-  makeInfixChoice of Keywords._asterisk, "type", (lhs, rhs) =>
-    Tree.Infix(Keywords._asterisk, lhs, rhs)
-  // Application: <type> <type>
-  typeExpr of
-    process: (callee, _) => argument => Tree.App(callee, argument)
-    outerPrec: Keywords.appPrec
+  // "infix" rule starting with <term>
+  term of
+    process: pipeInto
+    choices: tuple of
+      // Tuple (separated by commas)
+      makeInfixChoice of Keywords._comma, "term", (lhs, rhs) => if rhs is
+        Tree.Tuple(tail) then Tree.Tuple(lhs :: tail)
+        else Tree.Tuple(lhs :: rhs :: Nil)
+      // Sequence (separated by semicolons)
+      makeInfixChoice of Keywords._semicolon, "term", (lhs, rhs) => if rhs is
+        Tree.Sequence(tail) then Tree.Sequence(lhs :: tail)
+        else Tree.Sequence(lhs :: rhs :: Nil)
+      // Assignment: <expr> <- <expr>
+      makeInfixChoice of Keywords._leftArrow, "term", (lhs, rhs) =>
+        Tree.Infix(Keywords._leftArrow, lhs, rhs)
+      // Comparison: <expr> == <expr>
+      makeInfixChoice of Keywords._equalequal, "term", (lhs, rhs) =>
+        Tree.Infix(Keywords._equalequal, lhs, rhs)
+      // Comparison: <expr> * <expr>
+      makeInfixChoice of Keywords._asterisk, "term", (lhs, rhs) =>
+        Tree.App(Tree.Ident("*", true), lhs :: rhs :: Nil)
+      // Selection: <expr> "." <identifier>
+      // Access: <expr> "." "(" <expr> ")"
+      keyword(Keywords._period) of
+        keyword(Keywords._leftRound) of term of
+          process: (argument, _) => lhs =>
+            Tree.Infix(Keywords._period, lhs, Tree.Bracketed(Round, argument))
+          name: "application argument"
+          choices: tuple of keyword(Keywords._rightRound)()
+        term of
+          process: (rhs, _) => lhs => Tree.Infix(Keywords._period, lhs, rhs)
+          name: "operator `.` right-hand side"
+      // Type ascription: <expr> : <type>
+      keyword(Keywords._colon) of typeExpr of
+        process: (rhs, _) => lhs => Tree.Infix(Keywords._colon, lhs, rhs)
+        name: "right-hand side type"
+      // Application: <expr> <expr>
+      term of
+        process: (argument, _) => callee => Tree.App(callee, argument)
+        name: "application argument"
+        outerPrec: Keywords.appPrec
 
 // Prefix rules and infix rules for types.
 val typeRule = rule of
@@ -260,8 +246,20 @@ val typeRule = rule of
       keyword(Keywords._rightRound) of // either an identifier or nothing
         end of None
         ident of process: someFirst, name: "the type constructor's name"
-  // Infix rules
-  typeExpr of process: pipeInto, choices: typeInfixRule
+  // "infix" rule starting with <type>
+  typeExpr of
+    process: pipeInto
+    choices: tuple of
+      // <type> "->" <type>
+      makeInfixChoice of Keywords._thinArrow, "type", (lhs, rhs) =>
+        Tree.Infix(Keywords._thinArrow, lhs, rhs)
+      // <type> "*" <type>
+      makeInfixChoice of Keywords._asterisk, "type", (lhs, rhs) =>
+        Tree.Infix(Keywords._asterisk, lhs, rhs)
+      // Application: <type> <type>
+      typeExpr of
+        process: (callee, _) => argument => Tree.App(callee, argument)
+        outerPrec: Keywords.appPrec
 
 define("type-arguments-tail") of keyword(Keywords._comma) of listLike of
   head: "type", tail: "type-arguments-tail", name: "type argument"

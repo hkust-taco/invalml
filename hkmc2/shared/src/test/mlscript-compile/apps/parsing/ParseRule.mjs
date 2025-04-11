@@ -189,25 +189,10 @@ ParseRule2 = class ParseRule {
           let tmp4, tmp5, lambda3;
           tmp4 = Iter.fromStack(this$ParseRule.choices);
           lambda3 = (undefined, function (caseScrut) {
-            let param0, param1, param2, param3, init, optional, rest, process, scrut, param01, first4, first3, first2, first1, first0, k, p, op, ip, rest$_, scrut1, param02, first41, first31, first21, first11, first01, k1, process$_, op1, ip1, rest$_1, process$_$_, rest$_$_, param03, param11, param21, param31, param4, kind, process1, outerPrec, innerPrec, rest1, tmp6, tmp7, tmp8, tmp9, lambda4, lambda5, lambda6;
+            let param0, param1, param2, param3, init, optional, rest, process, scrut, param01, param02, param11, param21, param31, param4, k, process$_, op, ip, rest$_, process$_$_, scrut1, param03, param04, param12, param22, param32, param41, k1, process$_1, op1, ip1, rest$_1, process$_$_1, rest$_$_, ref, tmp6, tmp7, tmp8, tmp9, tmp10, lambda4, process$_$_2, process$_$_3;
             if (caseScrut instanceof ParseRule.Choice.Ref.class) {
-              param03 = caseScrut.kind;
-              param11 = caseScrut.process;
-              param21 = caseScrut.outerPrec;
-              param31 = caseScrut.innerPrec;
-              param4 = caseScrut.rest;
-              kind = param03;
-              process1 = param11;
-              outerPrec = param21;
-              innerPrec = param31;
-              rest1 = param4;
-              return Option.Some([
-                kind,
-                process1,
-                outerPrec,
-                innerPrec,
-                rest1
-              ])
+              ref = caseScrut;
+              return Option.Some(ref)
             } else if (caseScrut instanceof ParseRule.Choice.Siding.class) {
               param0 = caseScrut.init;
               param1 = caseScrut.optional;
@@ -219,65 +204,61 @@ ParseRule2 = class ParseRule {
               process = param3;
               scrut1 = init.refChoice;
               if (scrut1 instanceof Option.Some.class) {
-                param02 = scrut1.value;
-                if (globalThis.Array.isArray(param02) && param02.length === 5) {
-                  first01 = param02[0];
-                  first11 = param02[1];
-                  first21 = param02[2];
-                  first31 = param02[3];
-                  first41 = param02[4];
-                  k1 = first01;
-                  process$_ = first11;
-                  op1 = first21;
-                  ip1 = first31;
-                  rest$_1 = first41;
+                param03 = scrut1.value;
+                if (param03 instanceof ParseRule.Choice.Ref.class) {
+                  param04 = param03.kind;
+                  param12 = param03.process;
+                  param22 = param03.outerPrec;
+                  param32 = param03.innerPrec;
+                  param41 = param03.rest;
+                  k1 = param04;
+                  process$_1 = param12;
+                  op1 = param22;
+                  ip1 = param32;
+                  rest$_1 = param41;
                   lambda4 = (undefined, function (exprRes, pairRes) {
-                    let first12, first02, restRes$_, restRes, tmp10;
+                    let first1, first0, restRes$_, restRes, tmp11;
                     if (globalThis.Array.isArray(pairRes) && pairRes.length === 2) {
-                      first02 = pairRes[0];
-                      first12 = pairRes[1];
-                      restRes$_ = first02;
-                      restRes = first12;
-                      tmp10 = runtime.safeCall(process$_(exprRes, restRes$_));
-                      return runtime.safeCall(process(tmp10, restRes))
+                      first0 = pairRes[0];
+                      first1 = pairRes[1];
+                      restRes$_ = first0;
+                      restRes = first1;
+                      tmp11 = runtime.safeCall(process$_1(exprRes, restRes$_));
+                      return runtime.safeCall(process(tmp11, restRes))
                     } else {
                       throw new globalThis.Error("match error");
                     }
                   });
                   tmp6 = lambda4;
-                  process$_$_ = tmp6;
+                  process$_$_1 = tmp6;
                   tmp7 = rest$_1.andThen(rest, Predef.tuple);
                   rest$_$_ = tmp7;
-                  return Option.Some([
-                    k1,
-                    process$_$_,
-                    op1,
-                    ip1,
-                    rest$_$_
-                  ])
+                  tmp8 = ParseRule.Choice.Ref(k1, process$_$_1, op1, ip1, rest$_$_);
+                  return Option.Some(tmp8)
                 } else {
                   if (optional === true) {
                     scrut = rest.refChoice;
                     if (scrut instanceof Option.Some.class) {
                       param01 = scrut.value;
-                      if (globalThis.Array.isArray(param01) && param01.length === 5) {
-                        first0 = param01[0];
-                        first1 = param01[1];
-                        first2 = param01[2];
-                        first3 = param01[3];
-                        first4 = param01[4];
-                        k = first0;
-                        p = first1;
-                        op = first2;
-                        ip = first3;
-                        rest$_ = first4;
-                        lambda5 = (undefined, function (exprRes, restRes) {
-                          let tmp10;
-                          tmp10 = runtime.safeCall(p(exprRes, restRes));
-                          return runtime.safeCall(process(Option.None, tmp10))
-                        });
-                        tmp8 = Predef.tuple(k, lambda5, op, ip, rest$_);
-                        return Option.Some(tmp8)
+                      if (param01 instanceof ParseRule.Choice.Ref.class) {
+                        param02 = param01.kind;
+                        param11 = param01.process;
+                        param21 = param01.outerPrec;
+                        param31 = param01.innerPrec;
+                        param4 = param01.rest;
+                        k = param02;
+                        process$_ = param11;
+                        op = param21;
+                        ip = param31;
+                        rest$_ = param4;
+                        process$_$_2 = function (exprRes, restRes) {
+                          let tmp11;
+                          tmp11 = runtime.safeCall(process$_(exprRes, restRes));
+                          return runtime.safeCall(process(Option.None, tmp11))
+                        };
+                        process$_$_ = process$_$_2;
+                        tmp9 = ParseRule.Choice.Ref(k, process$_$_, op, ip, rest$_);
+                        return Option.Some(tmp9)
                       } else {
                         return Option.None
                       }
@@ -293,24 +274,25 @@ ParseRule2 = class ParseRule {
                   scrut = rest.refChoice;
                   if (scrut instanceof Option.Some.class) {
                     param01 = scrut.value;
-                    if (globalThis.Array.isArray(param01) && param01.length === 5) {
-                      first0 = param01[0];
-                      first1 = param01[1];
-                      first2 = param01[2];
-                      first3 = param01[3];
-                      first4 = param01[4];
-                      k = first0;
-                      p = first1;
-                      op = first2;
-                      ip = first3;
-                      rest$_ = first4;
-                      lambda6 = (undefined, function (exprRes, restRes) {
-                        let tmp10;
-                        tmp10 = runtime.safeCall(p(exprRes, restRes));
-                        return runtime.safeCall(process(Option.None, tmp10))
-                      });
-                      tmp9 = Predef.tuple(k, lambda6, op, ip, rest$_);
-                      return Option.Some(tmp9)
+                    if (param01 instanceof ParseRule.Choice.Ref.class) {
+                      param02 = param01.kind;
+                      param11 = param01.process;
+                      param21 = param01.outerPrec;
+                      param31 = param01.innerPrec;
+                      param4 = param01.rest;
+                      k = param02;
+                      process$_ = param11;
+                      op = param21;
+                      ip = param31;
+                      rest$_ = param4;
+                      process$_$_3 = function (exprRes, restRes) {
+                        let tmp11;
+                        tmp11 = runtime.safeCall(process$_(exprRes, restRes));
+                        return runtime.safeCall(process(Option.None, tmp11))
+                      };
+                      process$_$_ = process$_$_3;
+                      tmp10 = ParseRule.Choice.Ref(k, process$_$_, op, ip, rest$_);
+                      return Option.Some(tmp10)
                     } else {
                       return Option.None
                     }
@@ -349,7 +331,7 @@ ParseRule2 = class ParseRule {
           let tmp1, tmp2, tmp3, tmp4, tmp5, lambda1;
           tmp1 = Iter.fromStack(rule.choices);
           lambda1 = (undefined, function (caseScrut) {
-            let param0, param1, param2, param3, rule1, optional, rest$_, process1, process$_, param01, value, param02, param11, param21, param31, param4, isType, process2, outerPrec, innerPrec, rest$_1, process$_1, param03, param12, keyword, rest$_2, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, lambda2, lambda3, lambda4;
+            let param0, param1, param2, param3, rule1, optional, rest$_, process1, process$_, param01, value, param02, param11, param21, param31, param4, kind, process2, outerPrec, innerPrec, rest$_1, process$_1, param03, param12, keyword, rest$_2, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, lambda2, lambda3, lambda4;
             if (caseScrut instanceof ParseRule.Choice.Keyword.class) {
               param03 = caseScrut.keyword;
               param12 = caseScrut.rest;
@@ -357,26 +339,28 @@ ParseRule2 = class ParseRule {
               rest$_2 = param12;
               tmp6 = go(rest$_2);
               tmp7 = ParseRule.Choice.Keyword(keyword, tmp6);
-              return Predef.tuple(tmp7)
+              return [
+                tmp7
+              ]
             } else if (caseScrut instanceof ParseRule.Choice.Ref.class) {
               param02 = caseScrut.kind;
               param11 = caseScrut.process;
               param21 = caseScrut.outerPrec;
               param31 = caseScrut.innerPrec;
               param4 = caseScrut.rest;
-              isType = param02;
+              kind = param02;
               process2 = param11;
               outerPrec = param21;
               innerPrec = param31;
               rest$_1 = param4;
-              lambda2 = (undefined, function (lhs, rhs) {
-                let doTemp, first1, first0, rhs1, innerResult, tmp15;
-                if (globalThis.Array.isArray(rhs) && rhs.length === 2) {
-                  first0 = rhs[0];
-                  first1 = rhs[1];
-                  rhs1 = first0;
+              lambda2 = (undefined, function (lhs, rhsInnerResult) {
+                let doTemp, first1, first0, rhs, innerResult, tmp15;
+                if (globalThis.Array.isArray(rhsInnerResult) && rhsInnerResult.length === 2) {
+                  first0 = rhsInnerResult[0];
+                  first1 = rhsInnerResult[1];
+                  rhs = first0;
                   innerResult = first1;
-                  tmp15 = runtime.safeCall(process2(lhs, rhs1));
+                  tmp15 = runtime.safeCall(process2(lhs, rhs));
                   return [
                     tmp15,
                     innerResult
@@ -389,8 +373,10 @@ ParseRule2 = class ParseRule {
               tmp8 = lambda2;
               process$_1 = tmp8;
               tmp9 = go(rest$_1);
-              tmp10 = ParseRule.Choice.Ref(isType, process$_1, outerPrec, innerPrec, tmp9);
-              return Predef.tuple(tmp10)
+              tmp10 = ParseRule.Choice.Ref(kind, process$_1, outerPrec, innerPrec, tmp9);
+              return [
+                tmp10
+              ]
             } else if (caseScrut instanceof ParseRule.Choice.End.class) {
               param01 = caseScrut.value;
               value = param01;

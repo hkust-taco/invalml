@@ -120,7 +120,170 @@ Rules1 = class Rules {
     "process": tmp39, "name": "the list of patterns", "choices": tmp49
     }));
     tmp51 = runtime.safeCall(tmp37(tmp50));
-    lambda3 = (undefined, function (lhs, rhs) {
+    tmp52 = ParseRule.Choice.keyword(Precedence.Keywords._fun);
+    tmp53 = ParseRule.Choice.keyword(Precedence.Keywords._thinArrow);
+    tmp54 = runtime.safeCall(ParseRule.Choice.term({
+    "process": Rules.idFirst, "name": "function body"
+    }));
+    tmp55 = runtime.safeCall(tmp53(tmp54));
+    tmp56 = Predef.tuple(tmp55);
+    lambda3 = (undefined, function (params, body) {
+      let tmp295;
+      tmp295 = Stack.Cons(params, Stack.Nil);
+      return Tree.Lambda(tmp295, body)
+    });
+    tmp57 = runtime.safeCall(ParseRule.Choice.term({
+    "process": lambda3, "name": "function parameters", "choices": tmp56
+    }));
+    tmp58 = runtime.safeCall(tmp52(tmp57));
+    tmp59 = ParseRule.Choice.keyword(Precedence.Keywords._match);
+    tmp60 = ParseRule.Choice.keyword(Precedence.Keywords._with);
+    tmp61 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
+    tmp62 = runtime.safeCall(tmp61());
+    tmp63 = Rules.getRuleByKind("simple-matching");
+    tmp64 = ParseRule.Choice.siding({
+    "optional": true, "init": tmp62, "rest": tmp63, "process": Rules.idSecond
+    });
+    tmp65 = runtime.safeCall(tmp60(tmp64));
+    tmp66 = Predef.tuple(tmp65);
+    tmp67 = runtime.safeCall(ParseRule.Choice.term({
+    "process": Tree.Match, "name": "pattern matching scrutinee", "choices": tmp66
+    }));
+    tmp68 = runtime.safeCall(tmp59(tmp67));
+    tmp69 = ParseRule.Choice.keyword(Precedence.Keywords._function);
+    tmp70 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
+    tmp71 = runtime.safeCall(tmp70());
+    tmp72 = Rules.getRuleByKind("simple-matching");
+    lambda4 = (undefined, function (_, branches) {
+      return Tree.Match(Tree.empty, branches)
+    });
+    tmp73 = ParseRule.Choice.siding({
+    "optional": true, "init": tmp71, "rest": tmp72, "process": lambda4
+    });
+    tmp74 = runtime.safeCall(tmp69(tmp73));
+    tmp75 = ParseRule.Choice.keyword(Precedence.Keywords._if);
+    lambda5 = (undefined, function (tst, conAlt) {
+      let first1, first0, con, alt;
+      if (globalThis.Array.isArray(conAlt) && conAlt.length === 2) {
+        first0 = conAlt[0];
+        first1 = conAlt[1];
+        con = first0;
+        alt = first1;
+        return Tree.Ternary(Precedence.Keywords._if, tst, con, alt)
+      } else {
+        throw new globalThis.Error("match error");
+      }
+    });
+    tmp76 = lambda5;
+    tmp77 = ParseRule.Choice.keyword(Precedence.Keywords._then);
+    tmp78 = ParseRule.Choice.end(Option.None);
+    tmp79 = ParseRule.Choice.keyword(Precedence.Keywords._else);
+    tmp80 = runtime.safeCall(ParseRule.Choice.term({
+    "process": Rules.someFirst, "name": "if-then-else alternative"
+    }));
+    tmp81 = runtime.safeCall(tmp79(tmp80));
+    tmp82 = Predef.tuple(tmp78, tmp81);
+    tmp83 = runtime.safeCall(ParseRule.Choice.term({
+    "name": "if-then-else consequent", "choices": tmp82
+    }));
+    tmp84 = runtime.safeCall(tmp77(tmp83));
+    tmp85 = Predef.tuple(tmp84);
+    tmp86 = runtime.safeCall(ParseRule.Choice.term({
+    "process": tmp76, "name": "if-then-else condition", "choices": tmp85
+    }));
+    tmp87 = runtime.safeCall(tmp75(tmp86));
+    tmp88 = ParseRule.Choice.keyword(Precedence.Keywords._while);
+    tmp89 = ParseRule.Choice.keyword(Precedence.Keywords._do);
+    tmp90 = ParseRule.Choice.keyword(Precedence.Keywords._done);
+    tmp91 = runtime.safeCall(tmp90());
+    tmp92 = Predef.tuple(tmp91);
+    tmp93 = runtime.safeCall(ParseRule.Choice.term({
+    "name": "while end", "process": Rules.idFirst, "choices": tmp92
+    }));
+    tmp94 = runtime.safeCall(tmp89(tmp93));
+    tmp95 = Predef.tuple(tmp94);
+    tmp96 = runtime.safeCall(ParseRule.Choice.term({
+    "process": Tree.While, "name": "while body", "choices": tmp95
+    }));
+    tmp97 = runtime.safeCall(tmp88(tmp96));
+    tmp98 = ParseRule.Choice.keyword(Precedence.Keywords._for);
+    tmp99 = ParseRule.Choice.keyword(Precedence.Keywords._equal);
+    tmp100 = ParseRule.Choice.keyword(Precedence.Keywords._to);
+    tmp101 = runtime.safeCall(tmp100());
+    tmp102 = ParseRule.Choice.keyword(Precedence.Keywords._downto);
+    tmp103 = runtime.safeCall(tmp102());
+    tmp104 = Predef.tuple(tmp101, tmp103);
+    tmp105 = ParseRule.Choice.keyword(Precedence.Keywords._do);
+    tmp106 = ParseRule.Choice.keyword(Precedence.Keywords._done);
+    tmp107 = runtime.safeCall(tmp106());
+    tmp108 = Predef.tuple(tmp107);
+    tmp109 = runtime.safeCall(ParseRule.Choice.term({
+    "name": "`for` `done` keyword", "process": Rules.idFirst, "choices": tmp108
+    }));
+    tmp110 = runtime.safeCall(tmp105(tmp109));
+    tmp111 = Predef.tuple(tmp110);
+    tmp112 = runtime.safeCall(ParseRule.Choice.term({
+    "name": "`for` `do` keyword", "choices": tmp111
+    }));
+    tmp113 = ParseRule.Choice.siding({
+    "init": tmp104, "rest": tmp112, "process": Rules.idSecond
+    });
+    tmp114 = Predef.tuple(tmp113);
+    lambda6 = (undefined, function (start, endBody) {
+      return [
+        start,
+        ...endBody
+      ]
+    });
+    tmp115 = runtime.safeCall(ParseRule.Choice.term({
+    "process": lambda6, "name": "`for` `to` or `downto` keyword", "choices": tmp114
+    }));
+    tmp116 = runtime.safeCall(tmp99(tmp115));
+    tmp117 = Predef.tuple(tmp116);
+    lambda7 = (undefined, function (head, startEndBody) {
+      return Tree.For(head, ...startEndBody)
+    });
+    tmp118 = runtime.safeCall(ParseRule.Choice.term({
+    "name": "`for` head", "process": lambda7, "choices": tmp117
+    }));
+    tmp119 = runtime.safeCall(tmp98(tmp118));
+    lambda8 = (undefined, function (tree) {
+      if (tree instanceof Tree.Empty.class) {
+        return Tree.Tuple(Stack.Nil)
+      } else {
+        return tree
+      }
+    });
+    tmp120 = Rules.makeBracketRule({
+    "opening": Precedence.Keywords._leftRound, "closing": Precedence.Keywords._rightRound, "kind": "term", "wrapContent": lambda8
+    });
+    lambda9 = (undefined, function (tree) {
+      let tmp295;
+      if (tree instanceof Tree.Empty.class) {
+        tmp295 = Tree.Sequence(Stack.Nil);
+      } else {
+        tmp295 = tree;
+      }
+      return Tree.Bracketed(Token.Square, tmp295)
+    });
+    tmp121 = lambda9;
+    tmp122 = Rules.makeBracketRule({
+    "opening": Precedence.Keywords._leftSquare, "closing": Precedence.Keywords._rightSquare, "kind": "term", "wrapContent": tmp121
+    });
+    tmp123 = Rules.makeBracketRule({
+    "opening": Precedence.Keywords._leftCurly, "closing": Precedence.Keywords._rightCurly, "kind": "term", "wrapContent": Predef.id
+    });
+    lambda10 = (undefined, function (tree) {
+      if (tree instanceof Tree.Empty.class) {
+        return Tree.Sequence(Stack.Nil)
+      } else {
+        return tree
+      }
+    });
+    tmp124 = Rules.makeBracketRule({
+    "opening": Precedence.Keywords._begin, "closing": Precedence.Keywords._end, "kind": "term", "wrapContent": lambda10
+    });
+    lambda11 = (undefined, function (lhs, rhs) {
       let param0, tail, tmp295, tmp296, tmp297;
       if (rhs instanceof Tree.Tuple.class) {
         param0 = rhs.trees;
@@ -133,9 +296,9 @@ Rules1 = class Rules {
         return Tree.Tuple(tmp297)
       }
     });
-    tmp52 = lambda3;
-    tmp53 = Rules.makeInfixChoice(Precedence.Keywords._comma, "term", tmp52);
-    lambda4 = (undefined, function (lhs, rhs) {
+    tmp125 = lambda11;
+    tmp126 = Rules.makeInfixChoice(Precedence.Keywords._comma, "term", tmp125);
+    lambda12 = (undefined, function (lhs, rhs) {
       let param0, tail, tmp295, tmp296, tmp297;
       if (rhs instanceof Tree.Sequence.class) {
         param0 = rhs.trees;
@@ -148,31 +311,31 @@ Rules1 = class Rules {
         return Tree.Sequence(tmp297)
       }
     });
-    tmp54 = lambda4;
-    tmp55 = Rules.makeInfixChoice(Precedence.Keywords._semicolon, "term", tmp54);
-    lambda5 = (undefined, function (lhs, rhs) {
+    tmp127 = lambda12;
+    tmp128 = Rules.makeInfixChoice(Precedence.Keywords._semicolon, "term", tmp127);
+    lambda13 = (undefined, function (lhs, rhs) {
       return Tree.Infix(Precedence.Keywords._leftArrow, lhs, rhs)
     });
-    tmp56 = Rules.makeInfixChoice(Precedence.Keywords._leftArrow, "term", lambda5);
-    lambda6 = (undefined, function (lhs, rhs) {
+    tmp129 = Rules.makeInfixChoice(Precedence.Keywords._leftArrow, "term", lambda13);
+    lambda14 = (undefined, function (lhs, rhs) {
       return Tree.Infix(Precedence.Keywords._equalequal, lhs, rhs)
     });
-    tmp57 = Rules.makeInfixChoice(Precedence.Keywords._equalequal, "term", lambda6);
-    lambda7 = (undefined, function (lhs, rhs) {
+    tmp130 = Rules.makeInfixChoice(Precedence.Keywords._equalequal, "term", lambda14);
+    lambda15 = (undefined, function (lhs, rhs) {
       let tmp295, tmp296, tmp297;
       tmp295 = Tree.Ident("*", true);
       tmp296 = Stack.Cons(rhs, Stack.Nil);
       tmp297 = Stack.Cons(lhs, tmp296);
       return Tree.App(tmp295, tmp297)
     });
-    tmp58 = lambda7;
-    tmp59 = Rules.makeInfixChoice(Precedence.Keywords._asterisk, "term", tmp58);
-    tmp60 = ParseRule.Choice.keyword(Precedence.Keywords._period);
-    tmp61 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound);
-    tmp62 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
-    tmp63 = runtime.safeCall(tmp62());
-    tmp64 = Predef.tuple(tmp63);
-    lambda8 = (undefined, function (argument, _) {
+    tmp131 = lambda15;
+    tmp132 = Rules.makeInfixChoice(Precedence.Keywords._asterisk, "term", tmp131);
+    tmp133 = ParseRule.Choice.keyword(Precedence.Keywords._period);
+    tmp134 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound);
+    tmp135 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
+    tmp136 = runtime.safeCall(tmp135());
+    tmp137 = Predef.tuple(tmp136);
+    lambda16 = (undefined, function (argument, _) {
       let lambda36;
       lambda36 = (undefined, function (lhs) {
         let tmp295;
@@ -181,235 +344,51 @@ Rules1 = class Rules {
       });
       return lambda36
     });
-    tmp65 = runtime.safeCall(ParseRule.Choice.term({
-    "process": lambda8, "name": "application argument", "choices": tmp64
+    tmp138 = runtime.safeCall(ParseRule.Choice.term({
+    "process": lambda16, "name": "application argument", "choices": tmp137
     }));
-    tmp66 = runtime.safeCall(tmp61(tmp65));
-    lambda9 = (undefined, function (rhs, _) {
+    tmp139 = runtime.safeCall(tmp134(tmp138));
+    lambda17 = (undefined, function (rhs, _) {
       let lambda36;
       lambda36 = (undefined, function (lhs) {
         return Tree.Infix(Precedence.Keywords._period, lhs, rhs)
       });
       return lambda36
     });
-    tmp67 = runtime.safeCall(ParseRule.Choice.term({
-    "process": lambda9, "name": "operator `.` right-hand side"
+    tmp140 = runtime.safeCall(ParseRule.Choice.term({
+    "process": lambda17, "name": "operator `.` right-hand side"
     }));
-    tmp68 = runtime.safeCall(tmp60(tmp66, tmp67));
-    tmp69 = ParseRule.Choice.keyword(Precedence.Keywords._colon);
-    lambda10 = (undefined, function (rhs, _) {
+    tmp141 = runtime.safeCall(tmp133(tmp139, tmp140));
+    tmp142 = ParseRule.Choice.keyword(Precedence.Keywords._colon);
+    lambda18 = (undefined, function (rhs, _) {
       let lambda36;
       lambda36 = (undefined, function (lhs) {
         return Tree.Infix(Precedence.Keywords._colon, lhs, rhs)
       });
       return lambda36
     });
-    tmp70 = runtime.safeCall(ParseRule.Choice.typeExpr({
-    "process": lambda10, "name": "right-hand side type"
+    tmp143 = runtime.safeCall(ParseRule.Choice.typeExpr({
+    "process": lambda18, "name": "right-hand side type"
     }));
-    tmp71 = runtime.safeCall(tmp69(tmp70));
-    lambda11 = (undefined, function (argument, _) {
+    tmp144 = runtime.safeCall(tmp142(tmp143));
+    lambda19 = (undefined, function (argument, _) {
       let lambda36;
       lambda36 = (undefined, function (callee) {
         return Tree.App(callee, argument)
       });
       return lambda36
     });
-    tmp72 = runtime.safeCall(ParseRule.Choice.term({
-    "process": lambda11, "name": "application argument", "outerPrec": Precedence.Keywords.appPrec
+    tmp145 = runtime.safeCall(ParseRule.Choice.term({
+    "process": lambda19, "name": "application argument", "outerPrec": Precedence.Keywords.appPrec
     }));
-    tmp73 = ParseRule.rule("infix rules for expressions", tmp53, tmp55, tmp56, tmp57, tmp59, tmp68, tmp71, tmp72);
-    this.termInfixRule = tmp73;
-    tmp74 = ParseRule.Choice.keyword(Precedence.Keywords._fun);
-    tmp75 = ParseRule.Choice.keyword(Precedence.Keywords._thinArrow);
-    tmp76 = runtime.safeCall(ParseRule.Choice.term({
-    "process": Rules.idFirst, "name": "function body"
-    }));
-    tmp77 = runtime.safeCall(tmp75(tmp76));
-    tmp78 = Predef.tuple(tmp77);
-    lambda12 = (undefined, function (params, body) {
-      let tmp295;
-      tmp295 = Stack.Cons(params, Stack.Nil);
-      return Tree.Lambda(tmp295, body)
-    });
-    tmp79 = runtime.safeCall(ParseRule.Choice.term({
-    "process": lambda12, "name": "function parameters", "choices": tmp78
-    }));
-    tmp80 = runtime.safeCall(tmp74(tmp79));
-    tmp81 = ParseRule.Choice.keyword(Precedence.Keywords._match);
-    tmp82 = ParseRule.Choice.keyword(Precedence.Keywords._with);
-    tmp83 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
-    tmp84 = runtime.safeCall(tmp83());
-    tmp85 = Rules.getRuleByKind("simple-matching");
-    tmp86 = ParseRule.Choice.siding({
-    "optional": true, "init": tmp84, "rest": tmp85, "process": Rules.idSecond
-    });
-    tmp87 = runtime.safeCall(tmp82(tmp86));
-    tmp88 = Predef.tuple(tmp87);
-    tmp89 = runtime.safeCall(ParseRule.Choice.term({
-    "process": Tree.Match, "name": "pattern matching scrutinee", "choices": tmp88
-    }));
-    tmp90 = runtime.safeCall(tmp81(tmp89));
-    tmp91 = ParseRule.Choice.keyword(Precedence.Keywords._function);
-    tmp92 = ParseRule.Choice.keyword(Precedence.Keywords._bar);
-    tmp93 = runtime.safeCall(tmp92());
-    tmp94 = Rules.getRuleByKind("simple-matching");
-    lambda13 = (undefined, function (_, branches) {
-      return Tree.Match(Tree.empty, branches)
-    });
-    tmp95 = ParseRule.Choice.siding({
-    "optional": true, "init": tmp93, "rest": tmp94, "process": lambda13
-    });
-    tmp96 = runtime.safeCall(tmp91(tmp95));
-    tmp97 = ParseRule.Choice.keyword(Precedence.Keywords._if);
-    lambda14 = (undefined, function (tst, conAlt) {
-      let first1, first0, con, alt;
-      if (globalThis.Array.isArray(conAlt) && conAlt.length === 2) {
-        first0 = conAlt[0];
-        first1 = conAlt[1];
-        con = first0;
-        alt = first1;
-        return Tree.Ternary(Precedence.Keywords._if, tst, con, alt)
-      } else {
-        throw new globalThis.Error("match error");
-      }
-    });
-    tmp98 = lambda14;
-    tmp99 = ParseRule.Choice.keyword(Precedence.Keywords._then);
-    tmp100 = ParseRule.Choice.end(Option.None);
-    tmp101 = ParseRule.Choice.keyword(Precedence.Keywords._else);
-    tmp102 = runtime.safeCall(ParseRule.Choice.term({
-    "process": Rules.someFirst, "name": "if-then-else alternative"
-    }));
-    tmp103 = runtime.safeCall(tmp101(tmp102));
-    tmp104 = Predef.tuple(tmp100, tmp103);
-    tmp105 = runtime.safeCall(ParseRule.Choice.term({
-    "name": "if-then-else consequent", "choices": tmp104
-    }));
-    tmp106 = runtime.safeCall(tmp99(tmp105));
-    tmp107 = Predef.tuple(tmp106);
-    tmp108 = runtime.safeCall(ParseRule.Choice.term({
-    "process": tmp98, "name": "if-then-else condition", "choices": tmp107
-    }));
-    tmp109 = runtime.safeCall(tmp97(tmp108));
-    tmp110 = ParseRule.Choice.keyword(Precedence.Keywords._while);
-    tmp111 = ParseRule.Choice.keyword(Precedence.Keywords._do);
-    tmp112 = ParseRule.Choice.keyword(Precedence.Keywords._done);
-    tmp113 = runtime.safeCall(tmp112());
-    tmp114 = Predef.tuple(tmp113);
-    tmp115 = runtime.safeCall(ParseRule.Choice.term({
-    "name": "while end", "process": Rules.idFirst, "choices": tmp114
-    }));
-    tmp116 = runtime.safeCall(tmp111(tmp115));
-    tmp117 = Predef.tuple(tmp116);
-    tmp118 = runtime.safeCall(ParseRule.Choice.term({
-    "process": Tree.While, "name": "while body", "choices": tmp117
-    }));
-    tmp119 = runtime.safeCall(tmp110(tmp118));
-    tmp120 = ParseRule.Choice.keyword(Precedence.Keywords._for);
-    tmp121 = ParseRule.Choice.keyword(Precedence.Keywords._equal);
-    tmp122 = ParseRule.Choice.keyword(Precedence.Keywords._to);
-    tmp123 = runtime.safeCall(tmp122());
-    tmp124 = ParseRule.Choice.keyword(Precedence.Keywords._downto);
-    tmp125 = runtime.safeCall(tmp124());
-    tmp126 = Predef.tuple(tmp123, tmp125);
-    tmp127 = ParseRule.Choice.keyword(Precedence.Keywords._do);
-    tmp128 = ParseRule.Choice.keyword(Precedence.Keywords._done);
-    tmp129 = runtime.safeCall(tmp128());
-    tmp130 = Predef.tuple(tmp129);
-    tmp131 = runtime.safeCall(ParseRule.Choice.term({
-    "name": "`for` `done` keyword", "process": Rules.idFirst, "choices": tmp130
-    }));
-    tmp132 = runtime.safeCall(tmp127(tmp131));
-    tmp133 = Predef.tuple(tmp132);
-    tmp134 = runtime.safeCall(ParseRule.Choice.term({
-    "name": "`for` `do` keyword", "choices": tmp133
-    }));
-    tmp135 = ParseRule.Choice.siding({
-    "init": tmp126, "rest": tmp134, "process": Rules.idSecond
-    });
-    tmp136 = Predef.tuple(tmp135);
-    lambda15 = (undefined, function (start, endBody) {
-      return [
-        start,
-        ...endBody
-      ]
-    });
-    tmp137 = runtime.safeCall(ParseRule.Choice.term({
-    "process": lambda15, "name": "`for` `to` or `downto` keyword", "choices": tmp136
-    }));
-    tmp138 = runtime.safeCall(tmp121(tmp137));
-    tmp139 = Predef.tuple(tmp138);
-    lambda16 = (undefined, function (head, startEndBody) {
-      return Tree.For(head, ...startEndBody)
-    });
-    tmp140 = runtime.safeCall(ParseRule.Choice.term({
-    "name": "`for` head", "process": lambda16, "choices": tmp139
-    }));
-    tmp141 = runtime.safeCall(tmp120(tmp140));
-    lambda17 = (undefined, function (tree) {
-      if (tree instanceof Tree.Empty.class) {
-        return Tree.Tuple(Stack.Nil)
-      } else {
-        return tree
-      }
-    });
-    tmp142 = Rules.makeBracketRule({
-    "opening": Precedence.Keywords._leftRound, "closing": Precedence.Keywords._rightRound, "kind": "term", "wrapContent": lambda17
-    });
-    lambda18 = (undefined, function (tree) {
-      let tmp295;
-      if (tree instanceof Tree.Empty.class) {
-        tmp295 = Tree.Sequence(Stack.Nil);
-      } else {
-        tmp295 = tree;
-      }
-      return Tree.Bracketed(Token.Square, tmp295)
-    });
-    tmp143 = lambda18;
-    tmp144 = Rules.makeBracketRule({
-    "opening": Precedence.Keywords._leftSquare, "closing": Precedence.Keywords._rightSquare, "kind": "term", "wrapContent": tmp143
-    });
-    tmp145 = Rules.makeBracketRule({
-    "opening": Precedence.Keywords._leftCurly, "closing": Precedence.Keywords._rightCurly, "kind": "term", "wrapContent": Predef.id
-    });
-    lambda19 = (undefined, function (tree) {
-      if (tree instanceof Tree.Empty.class) {
-        return Tree.Sequence(Stack.Nil)
-      } else {
-        return tree
-      }
-    });
-    tmp146 = Rules.makeBracketRule({
-    "opening": Precedence.Keywords._begin, "closing": Precedence.Keywords._end, "kind": "term", "wrapContent": lambda19
-    });
+    tmp146 = Predef.tuple(tmp126, tmp128, tmp129, tmp130, tmp132, tmp141, tmp144, tmp145);
     tmp147 = runtime.safeCall(ParseRule.Choice.term({
-    "process": Predef.pipeInto, "choices": Rules.termInfixRule
+    "process": Predef.pipeInto, "choices": tmp146
     }));
-    tmp148 = ParseRule.rule("prefix rules for expressions", Rules.#letExpression, tmp80, tmp90, tmp96, tmp109, tmp119, tmp141, tmp142, tmp144, tmp145, tmp146, tmp147);
+    tmp148 = ParseRule.rule("prefix rules for expressions", Rules.#letExpression, tmp58, tmp68, tmp74, tmp87, tmp97, tmp119, tmp120, tmp122, tmp123, tmp124, tmp147);
     this.termRule = tmp148;
-    lambda20 = (undefined, function (lhs, rhs) {
-      return Tree.Infix(Precedence.Keywords._thinArrow, lhs, rhs)
-    });
-    tmp149 = Rules.makeInfixChoice(Precedence.Keywords._thinArrow, "type", lambda20);
-    lambda21 = (undefined, function (lhs, rhs) {
-      return Tree.Infix(Precedence.Keywords._asterisk, lhs, rhs)
-    });
-    tmp150 = Rules.makeInfixChoice(Precedence.Keywords._asterisk, "type", lambda21);
-    lambda22 = (undefined, function (callee, _) {
-      let lambda36;
-      lambda36 = (undefined, function (argument) {
-        return Tree.App(callee, argument)
-      });
-      return lambda36
-    });
-    tmp151 = runtime.safeCall(ParseRule.Choice.typeExpr({
-    "process": lambda22, "outerPrec": Precedence.Keywords.appPrec
-    }));
-    tmp152 = ParseRule.rule("infix rules for types", tmp149, tmp150, tmp151);
-    this.typeInfixRule = tmp152;
-    tmp153 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound);
-    lambda23 = (undefined, function (headArg, tailArgsCtor) {
+    tmp149 = ParseRule.Choice.keyword(Precedence.Keywords._leftRound);
+    lambda20 = (undefined, function (headArg, tailArgsCtor) {
       let param0, ctor, first1, first0, tailArgs, ctor1, tmp295, tmp296;
       if (globalThis.Array.isArray(tailArgsCtor) && tailArgsCtor.length === 2) {
         first0 = tailArgsCtor[0];
@@ -429,32 +408,51 @@ Rules1 = class Rules {
         throw new globalThis.Error("match error");
       }
     });
-    tmp154 = lambda23;
-    tmp155 = ParseRule.Choice.reference("type-arguments-tail");
-    tmp156 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
-    tmp157 = runtime.safeCall(ParseRule.Choice.ident({
+    tmp150 = lambda20;
+    tmp151 = ParseRule.Choice.reference("type-arguments-tail");
+    tmp152 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
+    tmp153 = runtime.safeCall(ParseRule.Choice.ident({
     "process": Rules.someFirst, "name": "the type constructor's name"
     }));
-    tmp158 = runtime.safeCall(tmp156(tmp157));
-    tmp159 = Predef.tuple(tmp158);
-    tmp160 = runtime.safeCall(tmp155({
-    "name": "the remaining type arguments", "choices": tmp159
+    tmp154 = runtime.safeCall(tmp152(tmp153));
+    tmp155 = Predef.tuple(tmp154);
+    tmp156 = runtime.safeCall(tmp151({
+    "name": "the remaining type arguments", "choices": tmp155
     }));
-    tmp161 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
-    tmp162 = ParseRule.Choice.end(Option.None);
-    tmp163 = runtime.safeCall(ParseRule.Choice.ident({
+    tmp157 = ParseRule.Choice.keyword(Precedence.Keywords._rightRound);
+    tmp158 = ParseRule.Choice.end(Option.None);
+    tmp159 = runtime.safeCall(ParseRule.Choice.ident({
     "process": Rules.someFirst, "name": "the type constructor's name"
     }));
-    tmp164 = runtime.safeCall(tmp161(tmp162, tmp163));
-    tmp165 = Predef.tuple(tmp160, tmp164);
+    tmp160 = runtime.safeCall(tmp157(tmp158, tmp159));
+    tmp161 = Predef.tuple(tmp156, tmp160);
+    tmp162 = runtime.safeCall(ParseRule.Choice.typeExpr({
+    "process": tmp150, "name": "the first type in the parentheses", "choices": tmp161
+    }));
+    tmp163 = runtime.safeCall(tmp149(tmp162));
+    lambda21 = (undefined, function (lhs, rhs) {
+      return Tree.Infix(Precedence.Keywords._thinArrow, lhs, rhs)
+    });
+    tmp164 = Rules.makeInfixChoice(Precedence.Keywords._thinArrow, "type", lambda21);
+    lambda22 = (undefined, function (lhs, rhs) {
+      return Tree.Infix(Precedence.Keywords._asterisk, lhs, rhs)
+    });
+    tmp165 = Rules.makeInfixChoice(Precedence.Keywords._asterisk, "type", lambda22);
+    lambda23 = (undefined, function (callee, _) {
+      let lambda36;
+      lambda36 = (undefined, function (argument) {
+        return Tree.App(callee, argument)
+      });
+      return lambda36
+    });
     tmp166 = runtime.safeCall(ParseRule.Choice.typeExpr({
-    "process": tmp154, "name": "the first type in the parentheses", "choices": tmp165
+    "process": lambda23, "outerPrec": Precedence.Keywords.appPrec
     }));
-    tmp167 = runtime.safeCall(tmp153(tmp166));
+    tmp167 = Predef.tuple(tmp164, tmp165, tmp166);
     tmp168 = runtime.safeCall(ParseRule.Choice.typeExpr({
-    "process": Predef.pipeInto, "choices": Rules.typeInfixRule
+    "process": Predef.pipeInto, "choices": tmp167
     }));
-    tmp169 = ParseRule.rule("rules for types", tmp167, tmp168);
+    tmp169 = ParseRule.rule("rules for types", tmp163, tmp168);
     this.typeRule = tmp169;
     tmp170 = Rules.define("type-arguments-tail");
     tmp171 = ParseRule.Choice.keyword(Precedence.Keywords._comma);

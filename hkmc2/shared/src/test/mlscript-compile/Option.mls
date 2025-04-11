@@ -21,6 +21,10 @@ fun getOrElse(opt, default) = if opt is
   Some(value) then value
   None then default
 
+fun flatMap(opt, f) = if opt is
+  Some(value) then f(value)
+  None then None
+
 module unsafe with
   fun get(opt) = if opt is
     Some(value) then value

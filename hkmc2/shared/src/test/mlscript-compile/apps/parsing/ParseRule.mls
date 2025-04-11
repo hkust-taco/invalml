@@ -35,48 +35,42 @@ data class Lazy[out A](init: () -> A) with
 // =============================================
 
 data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
+  open Choice { Keyword, Ref, End, Siding }
   
   fun map[B](op: A -> B) =
-    ParseRule of
-      name
-      choices
-        Iter.fromStack()
-        Iter.mapping of choice => choice Choice.map(op)
-        Iter.toStack()
+    ParseRule of name, choices
+      Iter.fromStack()
+      Iter.mapping of choice => choice Choice.map(op)
+      Iter.toStack()
   
   fun andThen[B, C](rest: ParseRule[B], process: (A, B) -> C) =
-    fun go(rule: ParseRule) = ParseRule of
-      rule.name
-      rule.choices
-        Iter.fromStack()
-        Iter.mapping of case
-          Choice.Keyword(keyword, rest') then tuple of
-            Choice.Keyword(keyword, go(rest'))
-          Choice.Ref(isType, process, outerPrec, innerPrec, rest') then
-            let process' = (lhs, rhs) => if
-              rhs is [rhs, innerResult] then
-                [process(lhs, rhs), innerResult]
-              do assert(false, "illgeal result from inner")
-            tuple of
-              Choice.Ref(isType, process', outerPrec, innerPrec, go(rest'))
-          Choice.End(value) then
-            rest.choices
-              Iter.fromStack()
-              Iter.mapping of choice => choice Choice.map(result => [value, result])
-          Choice.Siding(rule, optional, rest', process) then
-            let process' = (initRes, restRes) => if
-              restRes is [restRes', innerRes] then [process(initRes, restRes'), innerRes]
-              do assert(false, "illegal result from inner")
-            [Choice.Siding(rule, optional, go(rest'), process')]
-        Iter.flattening()
-        Iter.toStack()
+    fun go(rule: ParseRule) = ParseRule of rule.name, rule.choices
+      Iter.fromStack()
+      Iter.mapping of case
+        Keyword(keyword, rest') then [Keyword(keyword, go(rest'))]
+        Ref(kind, process, outerPrec, innerPrec, rest') then
+          let process' = (lhs, rhsInnerResult) => if
+            rhsInnerResult is [rhs, innerResult] then
+              [process(lhs, rhs), innerResult]
+            do assert(false, "illgeal result from inner")
+          [Ref(kind, process', outerPrec, innerPrec, go(rest'))]
+        End(value) then rest.choices
+          Iter.fromStack()
+          Iter.mapping of choice => choice Choice.map(result => [value, result])
+        Siding(rule, optional, rest', process) then
+          let process' = (initRes, restRes) => if
+            restRes is [restRes', innerRes] then [process(initRes, restRes'), innerRes]
+            do assert(false, "illegal result from inner")
+          [Siding(rule, optional, go(rest'), process')]
+      Iter.flattening()
+      Iter.toStack()
     go(this).map of res => process(res.0, res.1)
   
   let _endChoice = Lazy of () => choices
     Iter.fromStack()
     Iter.firstDefined of case
-      Choice.End(value) then Some(value)
-      Choice.Siding(init, optional, rest, process) and
+      End(value) then Some(value)
+      Siding(init, optional, rest, process) and
         optional then
            // It's actually ambiguous here.
           rest.endChoice.map of restRes =>
@@ -92,8 +86,8 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
   let _keywordChoices = Lazy of () => choices
     Iter.fromStack()
     Iter.mapping of case
-      Choice.Keyword(keyword, rest) then [[keyword.name, rest]]
-      Choice.Siding(init, optional, rest, process) then init.keywordChoices
+      Keyword(keyword, rest) then [[keyword.name, rest]]
+      Siding(init, optional, rest, process) then init.keywordChoices
         Iter.mapping of case [keyword, rule] then
           [keyword, rule.map(Some).andThen(rest, process)]
         Iter.appended of
@@ -113,19 +107,18 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
   let _refChoice = Lazy of () => choices
     Iter.fromStack()
     Iter.firstDefined of case
-      Choice.Ref(kind, process, outerPrec, innerPrec, rest) then
-        Some([kind, process, outerPrec, innerPrec, rest])
-      Choice.Siding(init, optional, rest, process) and
-        init.refChoice is
-          Some([k, process', op, ip, rest']) then
-            let process''(exprRes, pairRes) = if pairRes is [restRes', restRes] then
+      Ref as ref then Some(ref)
+      Siding(init, optional, rest, process) and
+        init.refChoice is Some(Ref(k, process', op, ip, rest')) then
+          let process''(exprRes, pairRes) =
+            if pairRes is [restRes', restRes] then
               process(process'(exprRes, restRes'), restRes)
-            let rest'' = rest'.andThen(rest, tuple)
-            Some of [k, process'', op, ip, rest'']
-        optional and rest.refChoice is
-          Some([k, p, op, ip, rest']) then Some of tuple of
-            k, (exprRes, restRes) => process(None, p(exprRes, restRes)), op, ip, rest'
-        else None
+          let rest'' = rest'.andThen(rest, tuple)
+          Some of Ref(k, process'', op, ip, rest'')
+        optional and rest.refChoice is Some(Ref(k, process', op, ip, rest')) then
+          let process''(exprRes, restRes) =
+            process(None, process'(exprRes, restRes))
+          Some of Ref(k, process'', op, ip, rest')
       else None
   
   fun refChoice = _refChoice.get()
