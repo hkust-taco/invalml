@@ -56,10 +56,10 @@ let ParseRule2;
           let tmp4, tmp5, lambda3;
           tmp4 = Iter.fromStack(this$ParseRule.choices);
           lambda3 = (undefined, function (caseScrut) {
-            let param0, param1, param2, param3, init, optional, rest, process, scrut, param01, initRes, scrut1, param02, restRes, param03, value, tmp6, lambda4;
+            let param0, param1, param2, param3, init, optional, rest, process, scrut, param01, initRes, scrut1, param02, restRes, scrut2, param03, restRes1, param04, value, tmp6, tmp7;
             if (caseScrut instanceof ParseRule.Choice.End.class) {
-              param03 = caseScrut.value;
-              value = param03;
+              param04 = caseScrut.value;
+              value = param04;
               return Option.Some(value)
             } else if (caseScrut instanceof ParseRule.Choice.Siding.class) {
               param0 = caseScrut.init;
@@ -71,10 +71,29 @@ let ParseRule2;
               rest = param2;
               process = param3;
               if (optional === true) {
-                lambda4 = (undefined, function (restRes1) {
+                scrut2 = rest.endChoice;
+                if (scrut2 instanceof Option.Some.class) {
+                  param03 = scrut2.value;
+                  restRes1 = param03;
                   return runtime.safeCall(process(Option.None, restRes1))
-                });
-                return rest.endChoice.map(runtime.Unit, lambda4)
+                } else {
+                  scrut = init.endChoice;
+                  if (scrut instanceof Option.Some.class) {
+                    param01 = scrut.value;
+                    initRes = param01;
+                    scrut1 = rest.endChoice;
+                    if (scrut1 instanceof Option.Some.class) {
+                      param02 = scrut1.value;
+                      restRes = param02;
+                      tmp6 = Option.Some(initRes);
+                      return runtime.safeCall(process(tmp6, restRes))
+                    } else {
+                      return Option.None
+                    }
+                  } else {
+                    return Option.None
+                  }
+                }
               } else {
                 scrut = init.endChoice;
                 if (scrut instanceof Option.Some.class) {
@@ -84,8 +103,8 @@ let ParseRule2;
                   if (scrut1 instanceof Option.Some.class) {
                     param02 = scrut1.value;
                     restRes = param02;
-                    tmp6 = Option.Some(initRes);
-                    return runtime.safeCall(process(tmp6, restRes))
+                    tmp7 = Option.Some(initRes);
+                    return runtime.safeCall(process(tmp7, restRes))
                   } else {
                     return Option.None
                   }
@@ -796,7 +815,7 @@ let ParseRule2;
           let value, tmp9, tmp10, tmp11;
           value = options[key];
           if (typeof value === 'string') {
-            return Option.Some(value)
+            return value
           } else if (value === undefined) {
             return defaultValue
           } else {

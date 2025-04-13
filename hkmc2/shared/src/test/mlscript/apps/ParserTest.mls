@@ -412,3 +412,12 @@ f (expr .( expr ) <- expr)
 //│ >     rhs = Ident of "expr"
 //│ > «f (expr.expr <- expr)»
 
+example of """
+a:;
+"""
+//│ > «a :;»
+
+example of """
+let sub = (-);;
+"""
+//│ > «let sub = -»

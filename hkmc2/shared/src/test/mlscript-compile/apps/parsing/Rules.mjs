@@ -84,7 +84,7 @@ let Rules1;
     tmp27 = runtime.safeCall(tmp19(tmp26));
     tmp28 = Predef.tuple(tmp27);
     tmp29 = runtime.safeCall(ParseRule.Choice.term({
-    "process": tmp18, "name": "pattern", "choices": tmp28
+    "process": tmp18, "name": "case body", "choices": tmp28
     }));
     tmp30 = runtime.safeCall(tmp17(tmp29));
     tmp31 = Rules.define("pattern-list");

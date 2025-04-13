@@ -5,14 +5,8 @@ import "../../mlscript-compile/apps/parsing/Test.mls"
 open Test { example }
 
 example of ":tree ((x) ==> x"
-//│ > Error:
-//│ >   tree = App:
-//│ >     callee = Ident of "==>"
-//│ >     argument = Stack of 
-//│ >       Ident of "x"
-//│ >       Ident of "x"
-//│ >   message = "unexpected end of input"
-//│ > «<⚠:x ==> x>»
+//│ > Error of "unexpected end of input"
+//│ > «⚠»
 
 example of ":tree ((x) ==> x))"
 //│ > App:
@@ -149,4 +143,22 @@ id if true then 1 else 0
 //│ > «⚠»
 //│ > «⚠»
 
+example of """
+type;;
+"""
+//│ > «⚠»
 
+example of """
+function;;
+"""
+//│ > «⚠»
+
+example of """
+let foo_bar = function;;
+"""
+//│ > «⚠»
+
+example of """
+let let = 0;;
+"""
+//│ > «⚠»

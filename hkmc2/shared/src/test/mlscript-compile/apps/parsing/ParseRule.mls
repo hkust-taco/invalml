@@ -71,10 +71,9 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
     Iter.firstDefined of case
       End(value) then Some(value)
       Siding(init, optional, rest, process) and
-        optional then
-           // It's actually ambiguous here.
-          rest.endChoice.map of restRes =>
-            process(None, restRes)
+        optional and rest.endChoice is Some(restRes) then
+          // It's actually ambiguous here.
+          process(None, restRes)
         init.endChoice is Some(initRes) and
           rest.endChoice is Some(restRes) then
             process(Some(initRes), restRes)
@@ -231,7 +230,7 @@ module Choice with
   
   let shouldHaveStr(options, key: Str, defaultValue: Str, callerName: Str) = if
     let value = options.(key)
-    value is Str then Some(value)
+    value is Str then value
     value is undefined then defaultValue
     else throw TypeError(callerName + ": `" + key + "` is not a string")
   

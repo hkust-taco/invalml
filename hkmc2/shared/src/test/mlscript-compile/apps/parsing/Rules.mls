@@ -13,7 +13,7 @@ open Predef
 open Option
 open Stack
 open BetterMap
-open Precedence { Keywords, opPrec }
+open Precedence { Keywords }
 open ParseRule { Choice, rule }
 open Token { Curly, Square, Round }
 
@@ -73,9 +73,11 @@ fun makeLetBindings(hasInClause: Bool) =
 let letExpression = makeLetBindings(true)
 
 define("simple-matching") of term of
-  process: (lhs, rhsTail) => if rhsTail is [rhs, tail] then
-    Tree.Infix(Keywords._thinArrow, lhs, rhs) :: tail
-  name: "pattern"
+  process: (lhs, rhsTail) => if rhsTail is
+    [rhs, tail] then Tree.Infix(Keywords._thinArrow, lhs, rhs) :: tail
+    // TODO: Better error handling?
+    
+  name: "case body"
   choices: tuple of keyword(Keywords._thinArrow) of term of
     name: "rhs"
     choices: tuple of

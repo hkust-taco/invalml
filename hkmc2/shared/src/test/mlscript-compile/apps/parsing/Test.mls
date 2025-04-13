@@ -13,7 +13,6 @@ import "../../Stack.mls"
 open Token { LiteralKind }
 open Parser { parse, tracer }
 open Option { Some, None }
-open Precedence { Keywords, opPrec }
 open Predef { print }
 open Stack
 open TreeHelpers { showAsTree }

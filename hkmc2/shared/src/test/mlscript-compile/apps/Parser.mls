@@ -19,7 +19,7 @@ open Stack
 open BetterMap
 open ParseRule { Choice }
 open Choice { Ref }
-open Precedence { Keywords, opPrec }
+open Precedence { Keywords, opPrecOpt }
 open Rules { termRule, typeRule, declRule, syntaxKinds }
 
 type Opt[A] = Some[A] | None
@@ -102,17 +102,22 @@ fun parse(tokens) =
         do tracer.print of "try to parse kind \"" + kind + "\" at " + TokenHelpers.preview(tokens), source.line
         let outerPrec' = outerPrec Option.getOrElse(Keywords.maxKeywordPrec)
         let innerPrec' = innerPrec Option.getOrElse(prec)
-        outerPrec' > prec and parseKind(kind, prec) is
-          Tree.Error then // TODO: Try using `Tree.nonEmptyError()`.
-            do tracer.print of "cannot parse more", source.line
-            if rule.endChoice is Some(value) then
-              tracer.print of "found end choice", source.line
-              value // TODO: No `else`?
-          acc then
-            let tree = parseRule(prec, rest)
-            tracer.print of "acc: " + acc Tree.summary(), source.line
-            tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
-            process(acc, tree)
+        outerPrec' > prec and
+          let acc = parseKind(kind, prec)
+          acc Tree.nonEmptyError() and parseRule(prec, rest) is
+            Tree.Error(_, message) as tree then
+              do tracer.print of "cannot parse due to error: " + message, source.line
+              tree
+            tree then
+              tracer.print of "acc: " + acc Tree.summary(), source.line
+              tracer.print of "parsed from rest rule: " + tree Tree.summary(), source.line
+              process(acc, tree)
+          do tracer.print of "cannot parse more", source.line
+          rule.endChoice is Some(value) then
+            tracer.print of "found end choice", source.line
+            value
+          do tracer.print of "no end choice", source.line
+          else acc
         do tracer.print of "did not parse kind \"" + kind + "\" because of the precedence", source.line
       do tracer.print of "no reference choice", source.line
       rule.endChoice is Some(value) then
@@ -187,7 +192,7 @@ fun parse(tokens) =
     // * the case of infix operators (non-keywords)
     Token.Identifier(name, true) :: _ and Keywords.all.get(name) is None and options.allowOperators and
       do tracer.print of "found an operator \"" + name + "\"", source.line
-      opPrec(name) is [leftPrec, rightPrec] and
+      opPrecOpt(name) is Some([leftPrec, rightPrec]) and
         do tracer.print of "leftPrec = " + leftPrec + "; rightPrec = " + rightPrec, source.line
         leftPrec > prec then
           consume
