@@ -38,17 +38,17 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
       None then lhs
   fun diagram(choicesOpt) =
     rr.Diagram of if choicesOpt is Some(choices) then choices else []
-  fun renderChoice(parentRule, choice, currentRule) = if choice is
+  fun renderChoice(parentRule, choice) = if choice is
     Choice.End then
       tracer.print of "found Choice.End"
       None
     Choice.Keyword(keyword, rest) then
       tracer.print of "found Choice.Keyword"
-      Some of rr.Terminal(keyword.name) sequence(renderRule(rest, currentRule))
+      Some of rr.Terminal(keyword.name) sequence(renderRule(rest))
     Choice.Siding(rule, optional, rest, _) then
       tracer.print of "found Choice.Siding"
-      Some of if renderRule(rule, currentRule) is
-        let latterPart = renderRule(rest, currentRule)
+      Some of if renderRule(rule) is
+        let latterPart = renderRule(rest)
         Some(optionalPart) and
           optional then rr.Optional(optionalPart) sequence(latterPart)
           else optionalPart sequence(latterPart)
@@ -58,8 +58,8 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
       if renderedKinds.has(kind) is false do
         referencedKinds.add of kind
       Some of rr.NonTerminal(kind, href: "#" + kind)
-        sequence(renderRule(rest, currentRule))
-  fun renderRule(rule: ParseRule.ParseRule, currentRule) = tracer.trace of
+        sequence(renderRule(rest))
+  fun renderRule(rule: ParseRule.ParseRule) = tracer.trace of
     "renderRule <<< " + rule.name
     result => "renderRule >>> "
     () => ...
@@ -68,7 +68,7 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
       optional = false
       nodes = []
     while rest is head :: tail do
-      if renderChoice(rule, head, currentRule) is
+      if renderChoice(rule, head) is
         Some(node) do nodes.push of node
         None do set optional = true
       set rest = tail
@@ -79,7 +79,7 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
       optional is true then Some(rr.Optional(choice))
       else Some(choice)
   // Iteratively render the rule and its dependencies.
-  let diagrams = [[title, diagram of renderRule(rule, None)]]
+  let diagrams = [[title, diagram of renderRule(rule)]]
   while referencedKinds.size > 0 do
     let currentKinds = referencedKinds
     set renderedKinds = renderedKinds.union of currentKinds
@@ -87,6 +87,6 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
     diagrams.push of ...currentKinds
       Iter.mapping of kind => 
         let theRule = syntaxKinds.get(kind) Option.unsafe.get()
-        [kind, diagram of renderRule of theRule]
+        [kind, diagram of renderRule(theRule)]
       Iter.toArray()
   diagrams

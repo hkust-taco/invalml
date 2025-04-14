@@ -53,7 +53,7 @@ let ParseRuleVisualizer1;
       }
       return runtime.safeCall(rr.Diagram(tmp10))
     };
-    renderChoice = function renderChoice(parentRule, choice, currentRule) {
+    renderChoice = function renderChoice(parentRule, choice) {
       let param0, param1, param2, param3, param4, kind, outerPrec, innerPrec, rest, scrut1, param01, param11, param21, param31, rule1, optional, rest1, scrut2, latterPart, param02, optionalPart, param03, param12, keyword, rest2, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24;
       if (choice instanceof ParseRule.Choice.End.class) {
         tmp10 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.End"));
@@ -65,7 +65,7 @@ let ParseRuleVisualizer1;
         rest2 = param12;
         tmp11 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Keyword"));
         tmp12 = runtime.safeCall(rr.Terminal(keyword.name));
-        tmp13 = renderRule(rest2, currentRule);
+        tmp13 = renderRule(rest2);
         tmp14 = sequence(tmp12, tmp13);
         return Option.Some(tmp14)
       } else if (choice instanceof ParseRule.Choice.Siding.class) {
@@ -77,8 +77,8 @@ let ParseRuleVisualizer1;
         optional = param11;
         rest1 = param21;
         tmp15 = runtime.safeCall(ParseRuleVisualizer.tracer.print("found Choice.Siding"));
-        scrut2 = renderRule(rule1, currentRule);
-        latterPart = renderRule(rest1, currentRule);
+        scrut2 = renderRule(rule1);
+        latterPart = renderRule(rest1);
         if (scrut2 instanceof Option.Some.class) {
           param02 = scrut2.value;
           optionalPart = param02;
@@ -116,14 +116,14 @@ let ParseRuleVisualizer1;
         tmp22 = rr.NonTerminal(kind, {
         "href": tmp21
         });
-        tmp23 = renderRule(rest, currentRule);
+        tmp23 = renderRule(rest);
         tmp24 = sequence(tmp22, tmp23);
         return Option.Some(tmp24)
       } else {
         throw new globalThis.Error("match error");
       }
     };
-    renderRule = function renderRule(rule1, currentRule) {
+    renderRule = function renderRule(rule1) {
       let tmp10, tmp11, lambda1, lambda2;
       tmp10 = "renderRule <<< " + rule1.name;
       lambda1 = (undefined, function () {
@@ -137,7 +137,7 @@ let ParseRuleVisualizer1;
             param1 = rest.tail;
             head = param0;
             tail = param1;
-            scrut1 = renderChoice(rule1, head, currentRule);
+            scrut1 = renderChoice(rule1, head);
             if (scrut1 instanceof Option.Some.class) {
               param01 = scrut1.value;
               node = param01;
@@ -182,7 +182,7 @@ let ParseRuleVisualizer1;
     referencedKinds = tmp;
     tmp1 = new globalThis.Map();
     renderCache = tmp1;
-    tmp2 = renderRule(rule, Option.None);
+    tmp2 = renderRule(rule);
     tmp3 = diagram(tmp2);
     diagrams = [
       [

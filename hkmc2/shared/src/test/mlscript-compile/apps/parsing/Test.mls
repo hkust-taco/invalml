@@ -35,7 +35,7 @@ fun flags(tokens) =
 fun example(...lines) =
   let
     source = lines.join("\n")
-    tokens = Lexer.lex(source, true)
+    tokens = Lexer.lex(source, noWhitespace: true)
   if flags(tokens) is [flags, tokens] then ...
   if flags.has("tokens") do
     print of TokenHelpers.panorama(tokens)

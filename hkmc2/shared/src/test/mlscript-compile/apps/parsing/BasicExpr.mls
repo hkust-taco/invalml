@@ -6,7 +6,7 @@ open Str { parenthesizedIf }
 open Option { Some, None }
 open Predef { mkStr }
 
-type Option[A] = Some[A] | None
+type OptionT[A] = Some[A] | None
 
 module BasicExpr with
   type Expr = Lit | Var | Add | Mul | Err
@@ -17,7 +17,7 @@ module BasicExpr with
       Var(name: Str)
       Add(left: Expr, right: Expr)
       Mul(left: Expr, right: Expr)
-      Err(expr: Option[Expr], msg: Str)
+      Err(expr: OptionT[Expr], msg: Str)
   
   fun withErr(expr, msg) = Err(Some(expr), msg)
   fun justErr(msg) = Err(None, msg)

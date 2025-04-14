@@ -5,7 +5,7 @@ import "../../Predef.mls"
 open Str { parenthesizedIf }
 open Option { Some, None }
 
-type Option[A] = Some[A] | None
+type OptionT[A] = Some[A] | None
 
 module Expr with
   val opPrec = case
@@ -22,7 +22,7 @@ module Expr with
       Lit(value: Int)
       Var(name: Str)
       Inf(op: Str, left: Expr, right: Expr)
-      Err(expr: Option[Expr], msg: Str)
+      Err(expr: OptionT[Expr], msg: Str)
   
   fun withErr(expr, msg) = Err(Some(expr), msg)
   fun justErr(msg) = Err(None, msg)

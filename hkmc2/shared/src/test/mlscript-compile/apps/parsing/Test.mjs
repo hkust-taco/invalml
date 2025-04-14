@@ -188,7 +188,9 @@ let Test1;
     let source, tokens1, scrut, first1, first0, flags, tokens2, scrut1, trees, scrut2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13;
     tmp = runtime.safeCall(lines.join("\n"));
     source = tmp;
-    tmp1 = Lexer.lex(source, true);
+    tmp1 = Lexer.lex(source, {
+    "noWhitespace": true
+    });
     tokens1 = tmp1;
     scrut = Test.flags(tokens1);
     if (globalThis.Array.isArray(scrut) && scrut.length === 2) {

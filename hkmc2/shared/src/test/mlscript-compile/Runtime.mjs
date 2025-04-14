@@ -34,7 +34,7 @@ let Runtime1;
         return Runtime1.try(lambda)
       } 
       raise() {
-        return Runtime.topLevelEffect(this.reified)
+        return Runtime.topLevelEffect(this.reified, false)
       }
       toString() { return "EffectHandle(" + "" + ")"; }
     };

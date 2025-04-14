@@ -13,8 +13,11 @@ open Predef { assert, tuple }
 open Stack
 
 type Opt[A] = Some[A] | None
+type StackT[A] = Stack.Cons[A] | Stack.Nil
 
 module ParseRule with ...
+
+type ChoiceT[A] = Choice.Choice[A]
 
 data class Lazy[out A](init: () -> A) with
   mut val cached: Opt[A] = None
@@ -34,7 +37,7 @@ data class Lazy[out A](init: () -> A) with
 //
 // =============================================
 
-data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
+data class ParseRule[A](name: Str, choices: StackT[ChoiceT[A]]) with
   open Choice { Keyword, Ref, End, Siding }
   
   fun map[B](op: A -> B) =
@@ -122,7 +125,7 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
   
   fun refChoice = _refChoice.get()
   
-  fun extendChoices(newChoices: Stack[Choice]) =
+  fun extendChoices(newChoices: StackT[ChoiceT[A]]) =
     set choices = choices ::: newChoices
     _endChoice.reset()
     _keywordChoices.reset()
@@ -132,7 +135,7 @@ data class ParseRule[A](name: Str, choices: Stack[Choice[A]]) with
   // Display parse rules as a tree in a BNF-like format.
   fun display =
     /// Display a single `Choice`.
-    fun displayChoice(choice: Choice) = if choice is
+    fun displayChoice(choice: ChoiceT) = if choice is
       Choice.Keyword(keyword, rest) then
         "\"" + keyword.name + "\"" + tail(rest).1
       Choice.Ref(kind, _, _, _, rest) then
@@ -187,7 +190,7 @@ module Choice with
   
   data class Ref[A, B](
       kind: Str,
-      process: (Tree, B) -> A,
+      process: (Tree.Tree, B) -> A,
       outerPrec: Opt[Int],
       innerPrec: Opt[Int],
       rest: ParseRule[B]
@@ -288,7 +291,7 @@ module Choice with
   
   fun end(value) = End(value)
   
-  fun map[A, B](choice: Choice[A], op: A -> B): Choice[B] = if choice is
+  fun map[A, B](choice: ChoiceT[A], op: A -> B): ChoiceT[B] = if choice is
     Keyword(keyword, rest) then Keyword(keyword, rest.map(op))
     Ref(kind, process, outerPrec, innerPrec, rest) then
       Ref(kind, (x, y) => op(process(x, y)), outerPrec, innerPrec, rest)

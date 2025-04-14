@@ -488,309 +488,352 @@ let Lexer1;
     this.IdentifierQuote = new IdentifierQuote$class;
     this.IdentifierQuote.class = IdentifierQuote$class;
   }
-  static lex(str, noWhitespace) {
-    let number, hex, identifier, digits, char1, scanHexDigits, whitespace, scan, string, escape, take, operator, comment;
+  static makeLineLookupTable(text) {
+    let i, n, ns, scrut, i$_, scrut1, tmp, tmp1, tmp2, tmp3, tmp4;
+    i = 0;
+    n = text.length;
+    ns = [];
+    tmp5: while (true) {
+      scrut = i < n;
+      if (scrut === true) {
+        tmp = text.indexOf("\n", i);
+        i$_ = tmp;
+        tmp1 = - 1;
+        scrut1 = i$_ == tmp1;
+        if (scrut1 === true) {
+          i = n;
+          tmp2 = runtime.safeCall(ns.push(n));
+        } else {
+          tmp3 = i$_ + 1;
+          i = tmp3;
+          tmp2 = runtime.safeCall(ns.push(i$_));
+        }
+        tmp4 = tmp2;
+        continue tmp5;
+      } else {
+        tmp4 = runtime.Unit;
+      }
+      break;
+    }
+    return Token.LineLookupTable(ns)
+  } 
+  static lex(str, options) {
+    let number, hex, instance$Ident$_LineLookupTable$_, identifier, digits, char1, scanHexDigits, whitespace, scan, string, escape, take, operator, comment, tmp;
     char1 = function (idx) {
-      let scrut, tmp;
+      let scrut, tmp1;
       scrut = idx < str.length;
       if (scrut === true) {
-        tmp = runtime.safeCall(str.charAt(idx));
-        return Option.Some(tmp)
+        tmp1 = runtime.safeCall(str.charAt(idx));
+        return Option.Some(tmp1)
       } else {
         return Option.None
       }
     };
     take = function take(pred, idx, acc) {
-      let scrut, param0, ch, scrut1, tmp, tmp1, tmp2;
-      tmp3: while (true) {
+      let scrut, param0, ch, scrut1, tmp1, tmp2, tmp3;
+      tmp4: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           ch = param0;
           scrut1 = runtime.safeCall(pred(ch));
           if (scrut1 === true) {
-            tmp = idx + 1;
-            idx = tmp;
-            tmp1 = acc + ch;
-            acc = tmp1;
-            tmp2 = runtime.Unit;
-            continue tmp3;
+            tmp1 = idx + 1;
+            idx = tmp1;
+            tmp2 = acc + ch;
+            acc = tmp2;
+            tmp3 = runtime.Unit;
+            continue tmp4;
           } else {
-            tmp2 = [
+            tmp3 = [
               idx,
               acc
             ];
           }
         } else {
-          tmp2 = [
+          tmp3 = [
             idx,
             acc
           ];
         }
         break;
       }
-      return tmp2
+      return tmp3
     };
     whitespace = function whitespace(idx) {
-      let scrut, param0, matchResult, tmp, tmp1;
-      tmp2: while (true) {
+      let scrut, param0, matchResult, tmp1, tmp2;
+      tmp3: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           matchResult = runtime.safeCall(Char.Whitespace.unapply(param0));
           if (matchResult instanceof runtime.MatchResult.class) {
-            tmp = idx + 1;
-            idx = tmp;
-            tmp1 = runtime.Unit;
-            continue tmp2;
+            tmp1 = idx + 1;
+            idx = tmp1;
+            tmp2 = runtime.Unit;
+            continue tmp3;
           } else {
-            tmp1 = idx;
+            tmp2 = idx;
           }
         } else {
-          tmp1 = idx;
+          tmp2 = idx;
         }
         break;
       }
-      return tmp1
+      return tmp2
     };
     digits = function digits(idx, acc) {
-      let scrut, param0, ch, matchResult, tmp, tmp1, tmp2;
-      tmp3: while (true) {
+      let scrut, param0, ch, matchResult, tmp1, tmp2, tmp3;
+      tmp4: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           matchResult = runtime.safeCall(Char.Digit.unapply(param0));
           if (matchResult instanceof runtime.MatchResult.class) {
             ch = param0;
-            tmp = idx + 1;
-            idx = tmp;
-            tmp1 = acc + ch;
-            acc = tmp1;
-            tmp2 = runtime.Unit;
-            continue tmp3;
+            tmp1 = idx + 1;
+            idx = tmp1;
+            tmp2 = acc + ch;
+            acc = tmp2;
+            tmp3 = runtime.Unit;
+            continue tmp4;
           } else {
-            tmp2 = [
+            tmp3 = [
               idx,
               acc
             ];
           }
         } else {
-          tmp2 = [
+          tmp3 = [
             idx,
             acc
           ];
         }
         break;
       }
-      return tmp2
+      return tmp3
     };
     hex = function hex(idx, acc) {
-      let scrut, param0, ch, matchResult, tmp, tmp1, tmp2;
-      tmp3: while (true) {
+      let scrut, param0, ch, matchResult, tmp1, tmp2, tmp3;
+      tmp4: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           matchResult = runtime.safeCall(Char.Digit.unapply(param0));
           if (matchResult instanceof runtime.MatchResult.class) {
             ch = param0;
-            tmp = idx + 1;
-            idx = tmp;
-            tmp1 = acc + ch;
-            acc = tmp1;
-            tmp2 = runtime.Unit;
-            continue tmp3;
+            tmp1 = idx + 1;
+            idx = tmp1;
+            tmp2 = acc + ch;
+            acc = tmp2;
+            tmp3 = runtime.Unit;
+            continue tmp4;
           } else {
-            tmp2 = [
+            tmp3 = [
               idx,
               acc
             ];
           }
         } else {
-          tmp2 = [
+          tmp3 = [
             idx,
             acc
           ];
         }
         break;
       }
-      return tmp2
+      return tmp3
     };
     identifier = function identifier(idx, acc) {
-      let scrut, param0, ch, matchResult, tmp, tmp1, tmp2, tmp3, tmp4;
-      tmp5: while (true) {
+      let scrut, param0, ch, matchResult, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+      tmp12: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           matchResult = runtime.safeCall(Lexer.IdentifierBody.unapply(param0));
           if (matchResult instanceof runtime.MatchResult.class) {
             ch = param0;
-            tmp = idx + 1;
-            idx = tmp;
-            tmp1 = acc + ch;
-            acc = tmp1;
-            tmp2 = runtime.Unit;
-            continue tmp5;
+            tmp1 = idx + 1;
+            idx = tmp1;
+            tmp2 = acc + ch;
+            acc = tmp2;
+            tmp3 = runtime.Unit;
+            continue tmp12;
           } else {
             if (acc === "true") {
-              tmp3 = Token.boolean("true");
+              tmp4 = Token.boolean("true", idx);
+              tmp5 = runtime.safeCall(tmp4(instance$Ident$_LineLookupTable$_));
             } else if (acc === "false") {
-              tmp3 = Token.boolean("false");
+              tmp6 = Token.boolean("false", idx);
+              tmp5 = runtime.safeCall(tmp6(instance$Ident$_LineLookupTable$_));
             } else {
-              tmp3 = Token.Identifier(acc, false);
+              tmp7 = Token.identifier(acc, idx);
+              tmp5 = runtime.safeCall(tmp7(instance$Ident$_LineLookupTable$_));
             }
-            tmp2 = Predef.tuple(idx, tmp3);
+            tmp3 = Predef.tuple(idx, tmp5);
           }
         } else {
           if (acc === "true") {
-            tmp4 = Token.boolean("true");
+            tmp8 = Token.boolean("true", idx);
+            tmp9 = runtime.safeCall(tmp8(instance$Ident$_LineLookupTable$_));
           } else if (acc === "false") {
-            tmp4 = Token.boolean("false");
+            tmp10 = Token.boolean("false", idx);
+            tmp9 = runtime.safeCall(tmp10(instance$Ident$_LineLookupTable$_));
           } else {
-            tmp4 = Token.Identifier(acc, false);
+            tmp11 = Token.identifier(acc, idx);
+            tmp9 = runtime.safeCall(tmp11(instance$Ident$_LineLookupTable$_));
           }
-          tmp2 = Predef.tuple(idx, tmp4);
+          tmp3 = Predef.tuple(idx, tmp9);
         }
         break;
       }
-      return tmp2
+      return tmp3
     };
     operator = function operator(idx, acc) {
-      let scrut, param0, ch, matchResult, tmp, tmp1, tmp2, tmp3, tmp4;
-      tmp5: while (true) {
+      let scrut, param0, ch, matchResult, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+      tmp8: while (true) {
         scrut = char1(idx);
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           matchResult = runtime.safeCall(Lexer.Operator.unapply(param0));
           if (matchResult instanceof runtime.MatchResult.class) {
             ch = param0;
-            tmp = idx + 1;
-            idx = tmp;
-            tmp1 = acc + ch;
-            acc = tmp1;
-            tmp2 = runtime.Unit;
-            continue tmp5;
+            tmp1 = idx + 1;
+            idx = tmp1;
+            tmp2 = acc + ch;
+            acc = tmp2;
+            tmp3 = runtime.Unit;
+            continue tmp8;
           } else {
-            tmp3 = Token.Identifier(acc, true);
-            tmp2 = [
+            tmp4 = Token.symbol(acc, idx);
+            tmp5 = runtime.safeCall(tmp4(instance$Ident$_LineLookupTable$_));
+            tmp3 = [
               idx,
-              tmp3
+              tmp5
             ];
           }
         } else {
-          tmp4 = Token.Identifier(acc, true);
-          tmp2 = [
+          tmp6 = Token.symbol(acc, idx);
+          tmp7 = runtime.safeCall(tmp6(instance$Ident$_LineLookupTable$_));
+          tmp3 = [
             idx,
-            tmp4
+            tmp7
           ];
         }
         break;
       }
-      return tmp2
+      return tmp3
     };
     comment = function comment(idx) {
-      let content, scrut, param0, terminated, scrut1, param01, ch, scrut2, param02, scrut3, param03, ch1, scrut4, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17;
+      let start, content, scrut, param0, terminated, scrut1, param01, ch, scrut2, param02, scrut3, param03, ch1, scrut4, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23;
+      start = idx;
       content = "";
       scrut = char1(idx);
       if (scrut instanceof Option.Some.class) {
         param0 = scrut.value;
         if (param0 === "/") {
-          tmp = idx + 1;
-          idx = tmp;
-          tmp18: while (true) {
+          tmp1 = idx + 1;
+          idx = tmp1;
+          tmp24: while (true) {
             scrut3 = char1(idx);
             if (scrut3 instanceof Option.Some.class) {
               param03 = scrut3.value;
               ch1 = param03;
               scrut4 = ch1 !== "\n";
               if (scrut4 === true) {
-                tmp1 = idx + 1;
-                idx = tmp1;
-                tmp2 = content + ch1;
-                content = tmp2;
-                tmp3 = runtime.Unit;
-                continue tmp18;
+                tmp2 = idx + 1;
+                idx = tmp2;
+                tmp3 = content + ch1;
+                content = tmp3;
+                tmp4 = runtime.Unit;
+                continue tmp24;
               } else {
-                tmp4 = Token.Comment(content);
-                tmp3 = [
+                tmp5 = Token.comment(content, start, idx);
+                tmp6 = runtime.safeCall(tmp5(instance$Ident$_LineLookupTable$_));
+                tmp4 = [
                   idx,
-                  tmp4
+                  tmp6
                 ];
               }
             } else {
-              tmp5 = Token.Comment(content);
-              tmp3 = [
+              tmp7 = Token.comment(content, start, idx);
+              tmp8 = runtime.safeCall(tmp7(instance$Ident$_LineLookupTable$_));
+              tmp4 = [
                 idx,
-                tmp5
+                tmp8
               ];
             }
             break;
           }
-          return tmp3
+          return tmp4
         } else if (param0 === "*") {
           terminated = false;
-          tmp6 = idx + 1;
-          idx = tmp6;
-          tmp19: while (true) {
+          tmp9 = idx + 1;
+          idx = tmp9;
+          tmp25: while (true) {
             if (terminated === false) {
               scrut1 = char1(idx);
               if (scrut1 instanceof Option.Some.class) {
                 param01 = scrut1.value;
                 if (param01 === "*") {
-                  tmp7 = idx + 1;
-                  scrut2 = char1(tmp7);
+                  tmp10 = idx + 1;
+                  scrut2 = char1(tmp10);
                   if (scrut2 instanceof Option.Some.class) {
                     param02 = scrut2.value;
                     if (param02 === "/") {
-                      tmp8 = idx + 2;
-                      idx = tmp8;
+                      tmp11 = idx + 2;
+                      idx = tmp11;
                       terminated = true;
-                      tmp9 = runtime.Unit;
-                      continue tmp19;
+                      tmp12 = runtime.Unit;
+                      continue tmp25;
                     } else {
                       ch = param01;
-                      tmp10 = idx + 1;
-                      idx = tmp10;
-                      tmp11 = content + ch;
-                      content = tmp11;
-                      tmp9 = runtime.Unit;
+                      tmp13 = idx + 1;
+                      idx = tmp13;
+                      tmp14 = content + ch;
+                      content = tmp14;
+                      tmp12 = runtime.Unit;
                     }
                   } else {
                     ch = param01;
-                    tmp12 = idx + 1;
-                    idx = tmp12;
-                    tmp13 = content + ch;
-                    content = tmp13;
-                    tmp9 = runtime.Unit;
+                    tmp15 = idx + 1;
+                    idx = tmp15;
+                    tmp16 = content + ch;
+                    content = tmp16;
+                    tmp12 = runtime.Unit;
                   }
                 } else {
                   ch = param01;
-                  tmp14 = idx + 1;
-                  idx = tmp14;
-                  tmp15 = content + ch;
-                  content = tmp15;
-                  tmp9 = runtime.Unit;
+                  tmp17 = idx + 1;
+                  idx = tmp17;
+                  tmp18 = content + ch;
+                  content = tmp18;
+                  tmp12 = runtime.Unit;
                 }
               } else {
                 if (terminated === true) {
-                  tmp16 = Token.Comment(content);
-                  tmp17 = [
+                  tmp19 = Token.comment(content, start, idx);
+                  tmp20 = runtime.safeCall(tmp19(instance$Ident$_LineLookupTable$_));
+                  tmp21 = [
                     idx,
-                    tmp16
+                    tmp20
                   ];
                 } else {
-                  tmp17 = [
+                  tmp22 = Token.error(start, idx);
+                  tmp23 = runtime.safeCall(tmp22(instance$Ident$_LineLookupTable$_));
+                  tmp21 = [
                     idx,
-                    Token.Error
+                    tmp23
                   ];
                 }
-                tmp9 = tmp17;
+                tmp12 = tmp21;
               }
             } else {
               throw new globalThis.Error("match error");
             }
             break;
           }
-          return tmp9
+          return tmp12
         } else {
           return operator(idx, "/")
         }
@@ -799,7 +842,7 @@ let Lexer1;
       }
     };
     scanHexDigits = function scanHexDigits(idx, lim, acc, cnt) {
-      let scrut, param0, ch, matchResult, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6;
+      let scrut, param0, ch, matchResult, scrut1, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
       scrut = char1(idx);
       if (scrut instanceof Option.Some.class) {
         param0 = scrut.value;
@@ -808,16 +851,16 @@ let Lexer1;
           ch = param0;
           scrut1 = cnt < lim;
           if (scrut1 === true) {
-            tmp = idx + 1;
-            tmp1 = acc * 16;
-            tmp2 = globalThis.parseInt(ch, 16);
-            tmp3 = tmp1 + tmp2;
-            tmp4 = cnt + 1;
-            return scanHexDigits(tmp, lim, tmp3, tmp4)
+            tmp1 = idx + 1;
+            tmp2 = acc * 16;
+            tmp3 = globalThis.parseInt(ch, 16);
+            tmp4 = tmp2 + tmp3;
+            tmp5 = cnt + 1;
+            return scanHexDigits(tmp1, lim, tmp4, tmp5)
           } else {
-            tmp5 = idx + 1;
-            tmp6 = cnt + 1;
-            return scanHexDigits(tmp5, lim, acc, tmp6)
+            tmp6 = idx + 1;
+            tmp7 = cnt + 1;
+            return scanHexDigits(tmp6, lim, acc, tmp7)
           }
         } else {
           return [
@@ -835,69 +878,69 @@ let Lexer1;
       }
     };
     escape = function escape(idx) {
-      let scrut, param0, ch, scrut1, first2, first1, first0, idx1, cp, cnt, scrut2, param01, scrut3, first21, first11, first01, idx2, cp1, cnt1, idx3, scrut4, param02, scrut5, first22, first12, first02, idx4, cp2, cnt2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31;
+      let scrut, param0, ch, scrut1, first2, first1, first0, idx1, cp, cnt, scrut2, param01, scrut3, first21, first11, first01, idx2, cp1, cnt1, idx3, scrut4, param02, scrut5, first22, first12, first02, idx4, cp2, cnt2, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32;
       scrut = char1(idx);
       if (scrut instanceof Option.Some.class) {
         param0 = scrut.value;
         if (param0 === "n") {
-          tmp = idx + 1;
-          tmp1 = Option.Some("\n");
+          tmp1 = idx + 1;
+          tmp2 = Option.Some("\n");
           return [
-            tmp,
-            tmp1
+            tmp1,
+            tmp2
           ]
         } else if (param0 === "r") {
-          tmp2 = idx + 1;
-          tmp3 = Option.Some("\r");
+          tmp3 = idx + 1;
+          tmp4 = Option.Some("\r");
           return [
-            tmp2,
-            tmp3
+            tmp3,
+            tmp4
           ]
         } else if (param0 === "t") {
-          tmp4 = idx + 1;
-          tmp5 = Option.Some("\t");
+          tmp5 = idx + 1;
+          tmp6 = Option.Some("\t");
           return [
-            tmp4,
-            tmp5
+            tmp5,
+            tmp6
           ]
         } else if (param0 === "0") {
-          tmp6 = idx + 1;
-          tmp7 = Option.Some("\u0000");
+          tmp7 = idx + 1;
+          tmp8 = Option.Some("\u0000");
           return [
-            tmp6,
-            tmp7
+            tmp7,
+            tmp8
           ]
         } else if (param0 === "b") {
-          tmp8 = idx + 1;
-          tmp9 = Option.Some("\b");
+          tmp9 = idx + 1;
+          tmp10 = Option.Some("\b");
           return [
-            tmp8,
-            tmp9
+            tmp9,
+            tmp10
           ]
         } else if (param0 === "f") {
-          tmp10 = idx + 1;
-          tmp11 = Option.Some("\f");
+          tmp11 = idx + 1;
+          tmp12 = Option.Some("\f");
           return [
-            tmp10,
-            tmp11
+            tmp11,
+            tmp12
           ]
         } else if (param0 === "\"") {
-          tmp12 = idx + 1;
-          tmp13 = Option.Some("\"");
+          tmp13 = idx + 1;
+          tmp14 = Option.Some("\"");
           return [
-            tmp12,
-            tmp13
+            tmp13,
+            tmp14
           ]
         } else if (param0 === "\\") {
-          tmp14 = idx + 1;
-          tmp15 = Option.Some("\\");
+          tmp15 = idx + 1;
+          tmp16 = Option.Some("\\");
           return [
-            tmp14,
-            tmp15
+            tmp15,
+            tmp16
           ]
         } else if (param0 === "x") {
-          tmp16 = idx + 1;
-          scrut5 = scanHexDigits(tmp16, 2, 0, 0);
+          tmp17 = idx + 1;
+          scrut5 = scanHexDigits(tmp17, 2, 0, 0);
           if (globalThis.Array.isArray(scrut5) && scrut5.length === 3) {
             first02 = scrut5[0];
             first12 = scrut5[1];
@@ -906,23 +949,23 @@ let Lexer1;
             cp2 = first12;
             cnt2 = first22;
             if (cnt2 === 0) {
-              tmp17 = Option.None;
+              tmp18 = Option.None;
             } else {
-              tmp18 = runtime.safeCall(globalThis.String.fromCodePoint(cp2));
-              tmp17 = Option.Some(tmp18);
+              tmp19 = runtime.safeCall(globalThis.String.fromCodePoint(cp2));
+              tmp18 = Option.Some(tmp19);
             }
-            return Predef.tuple(idx4, tmp17)
+            return Predef.tuple(idx4, tmp18)
           } else {
             throw new globalThis.Error("match error");
           }
         } else if (param0 === "u") {
-          tmp19 = idx + 1;
-          scrut2 = char1(tmp19);
+          tmp20 = idx + 1;
+          scrut2 = char1(tmp20);
           if (scrut2 instanceof Option.Some.class) {
             param01 = scrut2.value;
             if (param01 === "{") {
-              tmp20 = idx + 2;
-              scrut3 = scanHexDigits(tmp20, 6, 0, 0);
+              tmp21 = idx + 2;
+              scrut3 = scanHexDigits(tmp21, 6, 0, 0);
               if (globalThis.Array.isArray(scrut3) && scrut3.length === 3) {
                 first01 = scrut3[0];
                 first11 = scrut3[1];
@@ -934,27 +977,27 @@ let Lexer1;
                 if (scrut4 instanceof Option.Some.class) {
                   param02 = scrut4.value;
                   if (param02 === "}") {
-                    tmp21 = idx2 + 1;
+                    tmp22 = idx2 + 1;
                   } else {
-                    tmp21 = idx2;
+                    tmp22 = idx2;
                   }
                 } else {
-                  tmp21 = idx2;
+                  tmp22 = idx2;
                 }
-                idx3 = tmp21;
+                idx3 = tmp22;
                 if (cnt1 === 0) {
-                  tmp22 = Option.None;
+                  tmp23 = Option.None;
                 } else {
-                  tmp23 = runtime.safeCall(globalThis.String.fromCodePoint(cp1));
-                  tmp22 = Option.Some(tmp23);
+                  tmp24 = runtime.safeCall(globalThis.String.fromCodePoint(cp1));
+                  tmp23 = Option.Some(tmp24);
                 }
-                return Predef.tuple(idx3, tmp22)
+                return Predef.tuple(idx3, tmp23)
               } else {
                 throw new globalThis.Error("match error");
               }
             } else {
-              tmp24 = idx + 1;
-              scrut1 = scanHexDigits(tmp24, 4, 0, 0);
+              tmp25 = idx + 1;
+              scrut1 = scanHexDigits(tmp25, 4, 0, 0);
               if (globalThis.Array.isArray(scrut1) && scrut1.length === 3) {
                 first0 = scrut1[0];
                 first1 = scrut1[1];
@@ -963,19 +1006,19 @@ let Lexer1;
                 cp = first1;
                 cnt = first2;
                 if (cnt === 0) {
-                  tmp25 = Option.None;
+                  tmp26 = Option.None;
                 } else {
-                  tmp26 = runtime.safeCall(globalThis.String.fromCodePoint(cp));
-                  tmp25 = Option.Some(tmp26);
+                  tmp27 = runtime.safeCall(globalThis.String.fromCodePoint(cp));
+                  tmp26 = Option.Some(tmp27);
                 }
-                return Predef.tuple(idx1, tmp25)
+                return Predef.tuple(idx1, tmp26)
               } else {
                 throw new globalThis.Error("match error");
               }
             }
           } else {
-            tmp27 = idx + 1;
-            scrut1 = scanHexDigits(tmp27, 4, 0, 0);
+            tmp28 = idx + 1;
+            scrut1 = scanHexDigits(tmp28, 4, 0, 0);
             if (globalThis.Array.isArray(scrut1) && scrut1.length === 3) {
               first0 = scrut1[0];
               first1 = scrut1[1];
@@ -984,23 +1027,23 @@ let Lexer1;
               cp = first1;
               cnt = first2;
               if (cnt === 0) {
-                tmp28 = Option.None;
+                tmp29 = Option.None;
               } else {
-                tmp29 = runtime.safeCall(globalThis.String.fromCodePoint(cp));
-                tmp28 = Option.Some(tmp29);
+                tmp30 = runtime.safeCall(globalThis.String.fromCodePoint(cp));
+                tmp29 = Option.Some(tmp30);
               }
-              return Predef.tuple(idx1, tmp28)
+              return Predef.tuple(idx1, tmp29)
             } else {
               throw new globalThis.Error("match error");
             }
           }
         } else {
           ch = param0;
-          tmp30 = idx + 1;
-          tmp31 = Option.Some(ch);
+          tmp31 = idx + 1;
+          tmp32 = Option.Some(ch);
           return [
-            tmp30,
-            tmp31
+            tmp31,
+            tmp32
           ]
         }
       } else if (scrut instanceof Option.None.class) {
@@ -1013,22 +1056,23 @@ let Lexer1;
       }
     };
     string = function string(idx) {
-      let content, terminated, scrut, param0, ch, scrut1, first1, first0, idx$_, chOpt, param01, ch1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+      let startIndex, content, terminated, scrut, param0, ch, scrut1, first1, first0, idx$_, chOpt, param01, ch1, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11;
+      startIndex = idx;
       content = "";
       terminated = false;
-      tmp10: while (true) {
+      tmp12: while (true) {
         if (terminated === false) {
           scrut = char1(idx);
           if (scrut instanceof Option.Some.class) {
             param0 = scrut.value;
             if (param0 === "\"") {
               terminated = true;
-              tmp = idx + 1;
-              idx = tmp;
-              tmp1 = runtime.Unit;
+              tmp1 = idx + 1;
+              idx = tmp1;
+              tmp2 = runtime.Unit;
             } else if (param0 === "\\") {
-              tmp2 = idx + 1;
-              scrut1 = escape(tmp2);
+              tmp3 = idx + 1;
+              scrut1 = escape(tmp3);
               if (globalThis.Array.isArray(scrut1) && scrut1.length === 2) {
                 first0 = scrut1[0];
                 first1 = scrut1[1];
@@ -1038,53 +1082,55 @@ let Lexer1;
                 if (chOpt instanceof Option.Some.class) {
                   param01 = chOpt.value;
                   ch1 = param01;
-                  tmp3 = content + ch1;
-                  content = tmp3;
-                  tmp4 = runtime.Unit;
+                  tmp4 = content + ch1;
+                  content = tmp4;
+                  tmp5 = runtime.Unit;
                 } else {
-                  tmp4 = runtime.Unit;
+                  tmp5 = runtime.Unit;
                 }
-                tmp5 = tmp4;
+                tmp6 = tmp5;
               } else {
                 throw new globalThis.Error("match error");
               }
-              tmp1 = tmp5;
+              tmp2 = tmp6;
             } else {
               ch = param0;
-              tmp6 = idx + 1;
-              idx = tmp6;
-              tmp7 = content + ch;
-              content = tmp7;
-              tmp1 = runtime.Unit;
+              tmp7 = idx + 1;
+              idx = tmp7;
+              tmp8 = content + ch;
+              content = tmp8;
+              tmp2 = runtime.Unit;
             }
           } else if (scrut instanceof Option.None.class) {
             terminated = true;
-            tmp1 = runtime.Unit;
+            tmp2 = runtime.Unit;
           } else {
-            tmp1 = runtime.Unit;
+            tmp2 = runtime.Unit;
           }
-          tmp8 = tmp1;
-          continue tmp10;
+          tmp9 = tmp2;
+          continue tmp12;
         } else {
-          tmp8 = runtime.Unit;
+          tmp9 = runtime.Unit;
         }
         break;
       }
-      tmp9 = Token.Literal(Token.LiteralKind.String, content);
+      tmp10 = Token.string(content, startIndex, idx);
+      tmp11 = runtime.safeCall(tmp10(instance$Ident$_LineLookupTable$_));
       return [
         idx,
-        tmp9
+        tmp11
       ]
     };
     number = function number(idx, head) {
-      let scrut, first1, first0, idx$_, integer, scrut1, param0, scrut2, first11, first01, idx$_$_, fraction, scrut3, param01, scrut4, first12, first02, idx$_1, integer1, scrut5, first13, first03, idx$_2, ds, scrut6, first14, first04, idx$_3, xs, scrut7, first15, first05, idx$_4, os, scrut8, first16, first06, idx$_5, bs, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, lambda, lambda1, lambda2;
+      let scrut, first1, first0, idx$_, integer, scrut1, param0, scrut2, first11, first01, idx$_$_, fraction, scrut3, param01, scrut4, first12, first02, idx$_1, integer1, scrut5, first13, first03, idx$_2, ds, scrut6, first14, first04, idx$_3, xs, scrut7, first15, first05, idx$_4, os, scrut8, first16, first06, idx$_5, bs, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52, tmp53, tmp54, tmp55, tmp56, tmp57, tmp58, tmp59, tmp60, tmp61, tmp62, tmp63, tmp64, tmp65, tmp66, tmp67, tmp68, tmp69, tmp70, tmp71, tmp72, tmp73, tmp74, tmp75, tmp76, tmp77, tmp78, tmp79, tmp80, tmp81, tmp82, tmp83, tmp84, tmp85, tmp86, tmp87, tmp88, tmp89, tmp90, tmp91, tmp92, tmp93, tmp94, tmp95, tmp96, tmp97, tmp98, tmp99, tmp100, tmp101, tmp102, tmp103, tmp104, tmp105, tmp106, tmp107, tmp108, lambda, lambda1, lambda2;
       if (head === "0") {
         scrut3 = char1(idx);
         if (scrut3 instanceof Option.None.class) {
-          tmp = Token.integer("0");
+          tmp1 = Token.integer("0", idx);
+          tmp2 = runtime.safeCall(tmp1(instance$Ident$_LineLookupTable$_));
           return [
             idx,
-            tmp
+            tmp2
           ]
         } else if (scrut3 instanceof Option.Some.class) {
           param01 = scrut3.value;
@@ -1098,19 +1144,20 @@ let Lexer1;
                 return false
               }
             });
-            tmp1 = lambda;
-            tmp2 = idx + 1;
-            scrut8 = take(tmp1, tmp2, "");
+            tmp3 = lambda;
+            tmp4 = idx + 1;
+            scrut8 = take(tmp3, tmp4, "");
             if (globalThis.Array.isArray(scrut8) && scrut8.length === 2) {
               first06 = scrut8[0];
               first16 = scrut8[1];
               idx$_5 = first06;
               bs = first16;
-              tmp3 = Str.concat2("0b", bs);
-              tmp4 = Token.integer(tmp3);
+              tmp5 = Str.concat2("0b", bs);
+              tmp6 = Token.integer(tmp5, idx);
+              tmp7 = runtime.safeCall(tmp6(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_5,
-                tmp4
+                tmp7
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1119,10 +1166,11 @@ let Lexer1;
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp5 = Token.integer(integer1);
+                tmp8 = Token.integer(integer1, idx);
+                tmp9 = runtime.safeCall(tmp8(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_1,
-                  tmp5
+                  tmp9
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1135,39 +1183,43 @@ let Lexer1;
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp6 = idx$_ + 1;
-                      scrut2 = digits(tmp6, "");
+                      tmp10 = idx$_ + 1;
+                      scrut2 = digits(tmp10, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp7 = Str.concat2(integer, ".");
-                        tmp8 = Str.concat2(tmp7, fraction);
-                        tmp9 = Token.decimal(tmp8);
+                        tmp11 = Str.concat2(integer, ".");
+                        tmp12 = Str.concat2(tmp11, fraction);
+                        tmp13 = Token.decimal(tmp12, idx);
+                        tmp14 = runtime.safeCall(tmp13(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_$_,
-                          tmp9
+                          tmp14
                         ]
                       } else {
-                        tmp10 = Token.integer(integer);
+                        tmp15 = Token.integer(integer, idx);
+                        tmp16 = runtime.safeCall(tmp15(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_,
-                          tmp10
+                          tmp16
                         ]
                       }
                     } else {
-                      tmp11 = Token.integer(integer);
+                      tmp17 = Token.integer(integer, idx);
+                      tmp18 = runtime.safeCall(tmp17(instance$Ident$_LineLookupTable$_));
                       return [
                         idx$_,
-                        tmp11
+                        tmp18
                       ]
                     }
                   } else {
-                    tmp12 = Token.integer(integer);
+                    tmp19 = Token.integer(integer, idx);
+                    tmp20 = runtime.safeCall(tmp19(instance$Ident$_LineLookupTable$_));
                     return [
                       idx$_,
-                      tmp12
+                      tmp20
                     ]
                   }
                 } else {
@@ -1185,19 +1237,20 @@ let Lexer1;
                 return false
               }
             });
-            tmp13 = lambda1;
-            tmp14 = idx + 1;
-            scrut7 = take(tmp13, tmp14, "");
+            tmp21 = lambda1;
+            tmp22 = idx + 1;
+            scrut7 = take(tmp21, tmp22, "");
             if (globalThis.Array.isArray(scrut7) && scrut7.length === 2) {
               first05 = scrut7[0];
               first15 = scrut7[1];
               idx$_4 = first05;
               os = first15;
-              tmp15 = Str.concat2("0o", os);
-              tmp16 = Token.integer(tmp15);
+              tmp23 = Str.concat2("0o", os);
+              tmp24 = Token.integer(tmp23, idx);
+              tmp25 = runtime.safeCall(tmp24(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_4,
-                tmp16
+                tmp25
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1206,10 +1259,11 @@ let Lexer1;
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp17 = Token.integer(integer1);
+                tmp26 = Token.integer(integer1, idx);
+                tmp27 = runtime.safeCall(tmp26(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_1,
-                  tmp17
+                  tmp27
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1222,39 +1276,43 @@ let Lexer1;
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp18 = idx$_ + 1;
-                      scrut2 = digits(tmp18, "");
+                      tmp28 = idx$_ + 1;
+                      scrut2 = digits(tmp28, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp19 = Str.concat2(integer, ".");
-                        tmp20 = Str.concat2(tmp19, fraction);
-                        tmp21 = Token.decimal(tmp20);
+                        tmp29 = Str.concat2(integer, ".");
+                        tmp30 = Str.concat2(tmp29, fraction);
+                        tmp31 = Token.decimal(tmp30, idx);
+                        tmp32 = runtime.safeCall(tmp31(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_$_,
-                          tmp21
+                          tmp32
                         ]
                       } else {
-                        tmp22 = Token.integer(integer);
+                        tmp33 = Token.integer(integer, idx);
+                        tmp34 = runtime.safeCall(tmp33(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_,
-                          tmp22
+                          tmp34
                         ]
                       }
                     } else {
-                      tmp23 = Token.integer(integer);
+                      tmp35 = Token.integer(integer, idx);
+                      tmp36 = runtime.safeCall(tmp35(instance$Ident$_LineLookupTable$_));
                       return [
                         idx$_,
-                        tmp23
+                        tmp36
                       ]
                     }
                   } else {
-                    tmp24 = Token.integer(integer);
+                    tmp37 = Token.integer(integer, idx);
+                    tmp38 = runtime.safeCall(tmp37(instance$Ident$_LineLookupTable$_));
                     return [
                       idx$_,
-                      tmp24
+                      tmp38
                     ]
                   }
                 } else {
@@ -1272,19 +1330,20 @@ let Lexer1;
                 return false
               }
             });
-            tmp25 = lambda2;
-            tmp26 = idx + 1;
-            scrut6 = take(tmp25, tmp26, "");
+            tmp39 = lambda2;
+            tmp40 = idx + 1;
+            scrut6 = take(tmp39, tmp40, "");
             if (globalThis.Array.isArray(scrut6) && scrut6.length === 2) {
               first04 = scrut6[0];
               first14 = scrut6[1];
               idx$_3 = first04;
               xs = first14;
-              tmp27 = Str.concat2("0x", xs);
-              tmp28 = Token.integer(tmp27);
+              tmp41 = Str.concat2("0x", xs);
+              tmp42 = Token.integer(tmp41, idx);
+              tmp43 = runtime.safeCall(tmp42(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_3,
-                tmp28
+                tmp43
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1293,10 +1352,11 @@ let Lexer1;
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp29 = Token.integer(integer1);
+                tmp44 = Token.integer(integer1, idx);
+                tmp45 = runtime.safeCall(tmp44(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_1,
-                  tmp29
+                  tmp45
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1309,39 +1369,43 @@ let Lexer1;
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp30 = idx$_ + 1;
-                      scrut2 = digits(tmp30, "");
+                      tmp46 = idx$_ + 1;
+                      scrut2 = digits(tmp46, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp31 = Str.concat2(integer, ".");
-                        tmp32 = Str.concat2(tmp31, fraction);
-                        tmp33 = Token.decimal(tmp32);
+                        tmp47 = Str.concat2(integer, ".");
+                        tmp48 = Str.concat2(tmp47, fraction);
+                        tmp49 = Token.decimal(tmp48, idx);
+                        tmp50 = runtime.safeCall(tmp49(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_$_,
-                          tmp33
+                          tmp50
                         ]
                       } else {
-                        tmp34 = Token.integer(integer);
+                        tmp51 = Token.integer(integer, idx);
+                        tmp52 = runtime.safeCall(tmp51(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_,
-                          tmp34
+                          tmp52
                         ]
                       }
                     } else {
-                      tmp35 = Token.integer(integer);
+                      tmp53 = Token.integer(integer, idx);
+                      tmp54 = runtime.safeCall(tmp53(instance$Ident$_LineLookupTable$_));
                       return [
                         idx$_,
-                        tmp35
+                        tmp54
                       ]
                     }
                   } else {
-                    tmp36 = Token.integer(integer);
+                    tmp55 = Token.integer(integer, idx);
+                    tmp56 = runtime.safeCall(tmp55(instance$Ident$_LineLookupTable$_));
                     return [
                       idx$_,
-                      tmp36
+                      tmp56
                     ]
                   }
                 } else {
@@ -1350,18 +1414,19 @@ let Lexer1;
               }
             }
           } else if (param01 === ".") {
-            tmp37 = idx + 1;
-            scrut5 = digits(tmp37);
+            tmp57 = idx + 1;
+            scrut5 = digits(tmp57, ".");
             if (globalThis.Array.isArray(scrut5) && scrut5.length === 2) {
               first03 = scrut5[0];
               first13 = scrut5[1];
               idx$_2 = first03;
               ds = first13;
-              tmp38 = Str.concat2("0.", ds);
-              tmp39 = Token.decimal(tmp38);
+              tmp58 = Str.concat2("0.", ds);
+              tmp59 = Token.decimal(tmp58, idx);
+              tmp60 = runtime.safeCall(tmp59(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_2,
-                tmp39
+                tmp60
               ]
             } else {
               scrut4 = digits(idx, head);
@@ -1370,10 +1435,11 @@ let Lexer1;
                 first12 = scrut4[1];
                 idx$_1 = first02;
                 integer1 = first12;
-                tmp40 = Token.integer(integer1);
+                tmp61 = Token.integer(integer1, idx);
+                tmp62 = runtime.safeCall(tmp61(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_1,
-                  tmp40
+                  tmp62
                 ]
               } else {
                 scrut = digits(idx, head);
@@ -1386,39 +1452,43 @@ let Lexer1;
                   if (scrut1 instanceof Option.Some.class) {
                     param0 = scrut1.value;
                     if (param0 === ".") {
-                      tmp41 = idx$_ + 1;
-                      scrut2 = digits(tmp41, "");
+                      tmp63 = idx$_ + 1;
+                      scrut2 = digits(tmp63, "");
                       if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                         first01 = scrut2[0];
                         first11 = scrut2[1];
                         idx$_$_ = first01;
                         fraction = first11;
-                        tmp42 = Str.concat2(integer, ".");
-                        tmp43 = Str.concat2(tmp42, fraction);
-                        tmp44 = Token.decimal(tmp43);
+                        tmp64 = Str.concat2(integer, ".");
+                        tmp65 = Str.concat2(tmp64, fraction);
+                        tmp66 = Token.decimal(tmp65, idx);
+                        tmp67 = runtime.safeCall(tmp66(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_$_,
-                          tmp44
+                          tmp67
                         ]
                       } else {
-                        tmp45 = Token.integer(integer);
+                        tmp68 = Token.integer(integer, idx);
+                        tmp69 = runtime.safeCall(tmp68(instance$Ident$_LineLookupTable$_));
                         return [
                           idx$_,
-                          tmp45
+                          tmp69
                         ]
                       }
                     } else {
-                      tmp46 = Token.integer(integer);
+                      tmp70 = Token.integer(integer, idx);
+                      tmp71 = runtime.safeCall(tmp70(instance$Ident$_LineLookupTable$_));
                       return [
                         idx$_,
-                        tmp46
+                        tmp71
                       ]
                     }
                   } else {
-                    tmp47 = Token.integer(integer);
+                    tmp72 = Token.integer(integer, idx);
+                    tmp73 = runtime.safeCall(tmp72(instance$Ident$_LineLookupTable$_));
                     return [
                       idx$_,
-                      tmp47
+                      tmp73
                     ]
                   }
                 } else {
@@ -1433,10 +1503,11 @@ let Lexer1;
               first12 = scrut4[1];
               idx$_1 = first02;
               integer1 = first12;
-              tmp48 = Token.integer(integer1);
+              tmp74 = Token.integer(integer1, idx);
+              tmp75 = runtime.safeCall(tmp74(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_1,
-                tmp48
+                tmp75
               ]
             } else {
               scrut = digits(idx, head);
@@ -1449,39 +1520,43 @@ let Lexer1;
                 if (scrut1 instanceof Option.Some.class) {
                   param0 = scrut1.value;
                   if (param0 === ".") {
-                    tmp49 = idx$_ + 1;
-                    scrut2 = digits(tmp49, "");
+                    tmp76 = idx$_ + 1;
+                    scrut2 = digits(tmp76, "");
                     if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                       first01 = scrut2[0];
                       first11 = scrut2[1];
                       idx$_$_ = first01;
                       fraction = first11;
-                      tmp50 = Str.concat2(integer, ".");
-                      tmp51 = Str.concat2(tmp50, fraction);
-                      tmp52 = Token.decimal(tmp51);
+                      tmp77 = Str.concat2(integer, ".");
+                      tmp78 = Str.concat2(tmp77, fraction);
+                      tmp79 = Token.decimal(tmp78, idx);
+                      tmp80 = runtime.safeCall(tmp79(instance$Ident$_LineLookupTable$_));
                       return [
                         idx$_$_,
-                        tmp52
+                        tmp80
                       ]
                     } else {
-                      tmp53 = Token.integer(integer);
+                      tmp81 = Token.integer(integer, idx);
+                      tmp82 = runtime.safeCall(tmp81(instance$Ident$_LineLookupTable$_));
                       return [
                         idx$_,
-                        tmp53
+                        tmp82
                       ]
                     }
                   } else {
-                    tmp54 = Token.integer(integer);
+                    tmp83 = Token.integer(integer, idx);
+                    tmp84 = runtime.safeCall(tmp83(instance$Ident$_LineLookupTable$_));
                     return [
                       idx$_,
-                      tmp54
+                      tmp84
                     ]
                   }
                 } else {
-                  tmp55 = Token.integer(integer);
+                  tmp85 = Token.integer(integer, idx);
+                  tmp86 = runtime.safeCall(tmp85(instance$Ident$_LineLookupTable$_));
                   return [
                     idx$_,
-                    tmp55
+                    tmp86
                   ]
                 }
               } else {
@@ -1500,39 +1575,43 @@ let Lexer1;
             if (scrut1 instanceof Option.Some.class) {
               param0 = scrut1.value;
               if (param0 === ".") {
-                tmp56 = idx$_ + 1;
-                scrut2 = digits(tmp56, "");
+                tmp87 = idx$_ + 1;
+                scrut2 = digits(tmp87, "");
                 if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                   first01 = scrut2[0];
                   first11 = scrut2[1];
                   idx$_$_ = first01;
                   fraction = first11;
-                  tmp57 = Str.concat2(integer, ".");
-                  tmp58 = Str.concat2(tmp57, fraction);
-                  tmp59 = Token.decimal(tmp58);
+                  tmp88 = Str.concat2(integer, ".");
+                  tmp89 = Str.concat2(tmp88, fraction);
+                  tmp90 = Token.decimal(tmp89, idx);
+                  tmp91 = runtime.safeCall(tmp90(instance$Ident$_LineLookupTable$_));
                   return [
                     idx$_$_,
-                    tmp59
+                    tmp91
                   ]
                 } else {
-                  tmp60 = Token.integer(integer);
+                  tmp92 = Token.integer(integer, idx);
+                  tmp93 = runtime.safeCall(tmp92(instance$Ident$_LineLookupTable$_));
                   return [
                     idx$_,
-                    tmp60
+                    tmp93
                   ]
                 }
               } else {
-                tmp61 = Token.integer(integer);
+                tmp94 = Token.integer(integer, idx);
+                tmp95 = runtime.safeCall(tmp94(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_,
-                  tmp61
+                  tmp95
                 ]
               }
             } else {
-              tmp62 = Token.integer(integer);
+              tmp96 = Token.integer(integer, idx);
+              tmp97 = runtime.safeCall(tmp96(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_,
-                tmp62
+                tmp97
               ]
             }
           } else {
@@ -1550,39 +1629,43 @@ let Lexer1;
           if (scrut1 instanceof Option.Some.class) {
             param0 = scrut1.value;
             if (param0 === ".") {
-              tmp63 = idx$_ + 1;
-              scrut2 = digits(tmp63, "");
+              tmp98 = idx$_ + 1;
+              scrut2 = digits(tmp98, "");
               if (globalThis.Array.isArray(scrut2) && scrut2.length === 2) {
                 first01 = scrut2[0];
                 first11 = scrut2[1];
                 idx$_$_ = first01;
                 fraction = first11;
-                tmp64 = Str.concat2(integer, ".");
-                tmp65 = Str.concat2(tmp64, fraction);
-                tmp66 = Token.decimal(tmp65);
+                tmp99 = Str.concat2(integer, ".");
+                tmp100 = Str.concat2(tmp99, fraction);
+                tmp101 = Token.decimal(tmp100, idx);
+                tmp102 = runtime.safeCall(tmp101(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_$_,
-                  tmp66
+                  tmp102
                 ]
               } else {
-                tmp67 = Token.integer(integer);
+                tmp103 = Token.integer(integer, idx);
+                tmp104 = runtime.safeCall(tmp103(instance$Ident$_LineLookupTable$_));
                 return [
                   idx$_,
-                  tmp67
+                  tmp104
                 ]
               }
             } else {
-              tmp68 = Token.integer(integer);
+              tmp105 = Token.integer(integer, idx);
+              tmp106 = runtime.safeCall(tmp105(instance$Ident$_LineLookupTable$_));
               return [
                 idx$_,
-                tmp68
+                tmp106
               ]
             }
           } else {
-            tmp69 = Token.integer(integer);
+            tmp107 = Token.integer(integer, idx);
+            tmp108 = runtime.safeCall(tmp107(instance$Ident$_LineLookupTable$_));
             return [
               idx$_,
-              tmp69
+              tmp108
             ]
           }
         } else {
@@ -1591,21 +1674,22 @@ let Lexer1;
       }
     };
     scan = function scan(idx, acc) {
-      let go, scrut, param0, other, quote, matchResult, scrut1, param01, ch, matchResult1, scrut2, first1, first0, idx$_, token, param02, param1, name, ch1, matchResult2, ch2, matchResult3, ch3, matchResult4, b, matchResult5, matchResult6, scrut3, param03, matchResult7, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36;
+      let go, scrut, param0, other, quote, matchResult, scrut1, param01, ch, matchResult1, scrut2, first1, first0, idx$_, token, param02, param1, name, ch1, matchResult2, ch2, matchResult3, ch3, matchResult4, b, matchResult5, matchResult6, scrut3, idx$_1, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, tmp38, tmp39, tmp40, tmp41, tmp42, tmp43, tmp44, tmp45, tmp46, tmp47, tmp48, tmp49, tmp50, tmp51, tmp52;
       go = function go(idx1, tok) {
-        let tmp37, tmp38;
-        if (noWhitespace === true) {
+        let scrut4, tmp53, tmp54;
+        scrut4 = options.noWhitespace;
+        if (scrut4 === true) {
           if (tok instanceof Token.Comment.class) {
             return scan(idx1, acc)
           } else if (tok instanceof Token.Space.class) {
             return scan(idx1, acc)
           } else {
-            tmp37 = Stack.Cons(tok, acc);
-            return scan(idx1, tmp37)
+            tmp53 = Stack.Cons(tok, acc);
+            return scan(idx1, tmp53)
           }
         } else {
-          tmp38 = Stack.Cons(tok, acc);
-          return scan(idx1, tmp38)
+          tmp54 = Stack.Cons(tok, acc);
+          return scan(idx1, tmp54)
         }
       };
       scrut = char1(idx);
@@ -1615,39 +1699,24 @@ let Lexer1;
         param0 = scrut.value;
         matchResult6 = runtime.safeCall(Char.Whitespace.unapply(param0));
         if (matchResult6 instanceof runtime.MatchResult.class) {
-          tmp37: while (true) {
-            scrut3 = char1(idx);
-            if (scrut3 instanceof Option.Some.class) {
-              param03 = scrut3.value;
-              matchResult7 = runtime.safeCall(Char.Whitespace.unapply(param03));
-              if (matchResult7 instanceof runtime.MatchResult.class) {
-                tmp = idx + 1;
-                idx = tmp;
-                tmp1 = runtime.Unit;
-                continue tmp37;
-              } else {
-                tmp2 = whitespace(idx);
-                tmp1 = go(tmp2, Token.Space);
-              }
-            } else {
-              tmp3 = whitespace(idx);
-              tmp1 = go(tmp3, Token.Space);
-            }
-            break;
-          }
-          return tmp1
+          scrut3 = whitespace(idx);
+          idx$_1 = scrut3;
+          tmp1 = Token.space(idx, idx$_1);
+          tmp2 = runtime.safeCall(tmp1(instance$Ident$_LineLookupTable$_));
+          return go(idx$_1, tmp2)
         } else {
           if (param0 === "\"") {
-            tmp4 = idx + 1;
-            tmp5 = string(tmp4);
-            return go(...tmp5)
+            tmp3 = idx + 1;
+            tmp4 = string(tmp3);
+            return go(...tmp4)
           } else {
             matchResult5 = runtime.safeCall(Lexer.Bracket.unapply(param0));
             if (matchResult5 instanceof runtime.MatchResult.class) {
               b = param0;
-              tmp6 = idx + 1;
-              tmp7 = Token.Identifier(b, true);
-              return go(tmp6, tmp7)
+              tmp5 = idx + 1;
+              tmp6 = Token.symbol(b, idx);
+              tmp7 = runtime.safeCall(tmp6(instance$Ident$_LineLookupTable$_));
+              return go(tmp5, tmp7)
             } else {
               if (param0 === "/") {
                 tmp8 = idx + 1;
@@ -1697,43 +1766,59 @@ let Lexer1;
                                 param02 = token.name;
                                 param1 = token.symbolic;
                                 name = param02;
-                                tmp19 = Token.Identifier(name, false);
-                                return go(idx$_, tmp19)
+                                tmp19 = Token.identifier(name, idx);
+                                tmp20 = runtime.safeCall(tmp19(instance$Ident$_LineLookupTable$_));
+                                return go(idx$_, tmp20)
                               } else {
-                                tmp20 = idx + 1;
-                                return go(tmp20, Token.Error)
+                                tmp21 = idx + 1;
+                                tmp22 = idx + 1;
+                                tmp23 = Token.error(idx, tmp22);
+                                tmp24 = runtime.safeCall(tmp23(instance$Ident$_LineLookupTable$_));
+                                return go(tmp21, tmp24)
                               }
                             } else {
                               other = param0;
-                              tmp21 = Str.concat2("Unrecognized character: '", other);
-                              tmp22 = Str.concat2(tmp21, "'");
-                              tmp23 = Predef.print(tmp22);
-                              tmp24 = idx + 1;
-                              return go(tmp24, Token.Error)
+                              tmp25 = Str.concat2("Unrecognized character: '", other);
+                              tmp26 = Str.concat2(tmp25, "'");
+                              tmp27 = Predef.print(tmp26);
+                              tmp28 = idx + 1;
+                              tmp29 = idx + 1;
+                              tmp30 = Token.error(idx, tmp29);
+                              tmp31 = runtime.safeCall(tmp30(instance$Ident$_LineLookupTable$_));
+                              return go(tmp28, tmp31)
                             }
                           } else {
                             other = param0;
-                            tmp25 = Str.concat2("Unrecognized character: '", other);
-                            tmp26 = Str.concat2(tmp25, "'");
-                            tmp27 = Predef.print(tmp26);
-                            tmp28 = idx + 1;
-                            return go(tmp28, Token.Error)
+                            tmp32 = Str.concat2("Unrecognized character: '", other);
+                            tmp33 = Str.concat2(tmp32, "'");
+                            tmp34 = Predef.print(tmp33);
+                            tmp35 = idx + 1;
+                            tmp36 = idx + 1;
+                            tmp37 = Token.error(idx, tmp36);
+                            tmp38 = runtime.safeCall(tmp37(instance$Ident$_LineLookupTable$_));
+                            return go(tmp35, tmp38)
                           }
                         } else {
                           other = param0;
-                          tmp29 = Str.concat2("Unrecognized character: '", other);
-                          tmp30 = Str.concat2(tmp29, "'");
-                          tmp31 = Predef.print(tmp30);
-                          tmp32 = idx + 1;
-                          return go(tmp32, Token.Error)
+                          tmp39 = Str.concat2("Unrecognized character: '", other);
+                          tmp40 = Str.concat2(tmp39, "'");
+                          tmp41 = Predef.print(tmp40);
+                          tmp42 = idx + 1;
+                          tmp43 = idx + 1;
+                          tmp44 = Token.error(idx, tmp43);
+                          tmp45 = runtime.safeCall(tmp44(instance$Ident$_LineLookupTable$_));
+                          return go(tmp42, tmp45)
                         }
                       } else {
                         other = param0;
-                        tmp33 = Str.concat2("Unrecognized character: '", other);
-                        tmp34 = Str.concat2(tmp33, "'");
-                        tmp35 = Predef.print(tmp34);
-                        tmp36 = idx + 1;
-                        return go(tmp36, Token.Error)
+                        tmp46 = Str.concat2("Unrecognized character: '", other);
+                        tmp47 = Str.concat2(tmp46, "'");
+                        tmp48 = Predef.print(tmp47);
+                        tmp49 = idx + 1;
+                        tmp50 = idx + 1;
+                        tmp51 = Token.error(idx, tmp50);
+                        tmp52 = runtime.safeCall(tmp51(instance$Ident$_LineLookupTable$_));
+                        return go(tmp49, tmp52)
                       }
                     }
                   }
@@ -1746,6 +1831,8 @@ let Lexer1;
         throw new globalThis.Error("match error");
       }
     };
+    tmp = Lexer.makeLineLookupTable(str);
+    instance$Ident$_LineLookupTable$_ = tmp;
     return scan(0, Stack.Nil)
   }
   static toString() { return "Lexer"; }

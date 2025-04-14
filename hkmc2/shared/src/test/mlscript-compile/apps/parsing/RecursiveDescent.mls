@@ -11,7 +11,7 @@ open Option { Some, None }
 open Token { Round, LiteralKind }
 open BasicExpr { Expr }
 
-type Stack[A] = Cons[A] | Nil
+type StackT[A] = Cons[A] | Nil
 
 module RecursiveDescent with ...
 
@@ -64,7 +64,7 @@ fun parse(tokens) =
       Iter.fromStack()
       Iter.folded of leftmost, BasicExpr.Add
   
-  fun addSeq: Stack[Expr] = if peek is
+  fun addSeq: StackT[Expr] = if peek is
     Some(Token.Identifier("+", _)) then
       consume
       product :: addSeq
@@ -76,7 +76,7 @@ fun parse(tokens) =
       Iter.fromStack()
       Iter.folded of leftmost, BasicExpr.Mul
   
-  fun mulSeq: Stack[Expr] = if peek is
+  fun mulSeq: StackT[Expr] = if peek is
     Some(Token.Identifier("*", _)) then
       consume
       atom :: mulSeq

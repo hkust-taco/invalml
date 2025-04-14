@@ -1,8 +1,10 @@
 import runtime from "./../../Runtime.mjs";
-let Token1;
+import Option from "./../../Option.mjs";
+import Predef from "./../../Predef.mjs";
+let Token2;
 (class Token {
   static {
-    Token1 = Token;
+    Token2 = Token;
     const Angle$class = class Angle {
       constructor() {}
       toString() { return "Angle"; }
@@ -63,23 +65,132 @@ let Token1;
       }
       static toString() { return "LiteralKind"; }
     });
-    const Space$class = class Space {
-      constructor() {}
-      toString() { return "Space"; }
+    this.Token = class Token1 {
+      #_location;
+      constructor() {
+        this.#_location = Option.None;
+      }
+      withLocation(start, end, lookupTable) {
+        let tmp;
+        tmp = Option.Some({
+        "start": start, "end": end, "lookupTable": lookupTable
+        });
+        this.#_location = tmp;
+        return this
+      } 
+      get location() {
+        return this.#_location;
+      } 
+      get displayLocation() {
+        let scrut, param0, location, start1, end1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
+        scrut = this.#_location;
+        if (scrut instanceof Option.Some.class) {
+          param0 = scrut.value;
+          location = param0;
+          tmp = runtime.safeCall(location.lookupTable.lookup(location.start));
+          start1 = tmp;
+          tmp1 = runtime.safeCall(location.lookupTable.lookup(location.end));
+          end1 = tmp1;
+          tmp2 = runtime.safeCall(start1[0].toString());
+          tmp3 = runtime.safeCall(start1[1].toString());
+          tmp4 = runtime.safeCall(end1[0].toString());
+          tmp5 = runtime.safeCall(end1[1].toString());
+          return Predef.mkStr(tmp2, ":", tmp3, "-", tmp4, ":", tmp5)
+        } else {
+          return ""
+        }
+      }
+      toString() { return "Token"; }
     };
-    this.Space = new Space$class;
-    this.Space.class = Space$class;
-    const Error$class = class Error {
-      constructor() {}
-      toString() { return "Error"; }
+    this.LineLookupTable = function LineLookupTable(lines1) {
+      return new LineLookupTable.class(lines1);
     };
-    this.Error = new Error$class;
-    this.Error.class = Error$class;
+    this.LineLookupTable.class = class LineLookupTable {
+      #lines;
+      constructor(lines) {
+        this.#lines = lines;
+      }
+      lookup(index) {
+        let scrut, begin, end, mid, scrut1, scrut2, line, column, scrut3, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
+        scrut = index < 0;
+        if (scrut === true) {
+          index = 0;
+          tmp = runtime.Unit;
+        } else {
+          tmp = runtime.Unit;
+        }
+        begin = 0;
+        end = this.#lines.length;
+        tmp1 = begin + end;
+        tmp2 = tmp1 / 2;
+        tmp3 = runtime.safeCall(globalThis.Math.floor(tmp2));
+        mid = tmp3;
+        tmp15: while (true) {
+          scrut1 = begin < end;
+          if (scrut1 === true) {
+            tmp4 = runtime.safeCall(this.#lines.at(mid));
+            scrut2 = index <= tmp4;
+            if (scrut2 === true) {
+              end = mid;
+              tmp5 = runtime.Unit;
+            } else {
+              tmp6 = mid + 1;
+              begin = tmp6;
+              tmp5 = runtime.Unit;
+            }
+            tmp7 = begin + end;
+            tmp8 = tmp7 / 2;
+            tmp9 = runtime.safeCall(globalThis.Math.floor(tmp8));
+            mid = tmp9;
+            tmp10 = runtime.Unit;
+            continue tmp15;
+          } else {
+            tmp10 = runtime.Unit;
+          }
+          break;
+        }
+        tmp11 = mid + 1;
+        line = tmp11;
+        scrut3 = mid == 0;
+        if (scrut3 === true) {
+          tmp12 = - 1;
+        } else {
+          tmp13 = mid - 1;
+          tmp12 = runtime.safeCall(this.#lines.at(tmp13));
+        }
+        tmp14 = index - tmp12;
+        column = tmp14;
+        return [
+          line,
+          column
+        ]
+      }
+      toString() { return "LineLookupTable(" + "" + ")"; }
+    };
+    this.Space = function Space() {
+      return new Space.class();
+    };
+    this.Space.class = class Space extends Token.Token {
+      constructor() {
+        super();
+      }
+      toString() { return "Space(" + "" + ")"; }
+    };
+    this.Error = function Error() {
+      return new Error.class();
+    };
+    this.Error.class = class Error extends Token.Token {
+      constructor() {
+        super();
+      }
+      toString() { return "Error(" + "" + ")"; }
+    };
     this.Comment = function Comment(content1) {
       return new Comment.class(content1);
     };
-    this.Comment.class = class Comment {
+    this.Comment.class = class Comment extends Token.Token {
       constructor(content) {
+        super();
         this.content = content;
       }
       toString() { return "Comment(" + globalThis.Predef.render(this.content) + ")"; }
@@ -87,8 +198,9 @@ let Token1;
     this.Identifier = function Identifier(name1, symbolic1) {
       return new Identifier.class(name1, symbolic1);
     };
-    this.Identifier.class = class Identifier {
+    this.Identifier.class = class Identifier extends Token.Token {
       constructor(name, symbolic) {
+        super();
         this.name = name;
         this.symbolic = symbolic;
       }
@@ -97,8 +209,9 @@ let Token1;
     this.Literal = function Literal(kind1, literal1) {
       return new Literal.class(kind1, literal1);
     };
-    this.Literal.class = class Literal {
+    this.Literal.class = class Literal extends Token.Token {
       constructor(kind, literal) {
+        super();
         this.kind = kind;
         this.literal = literal;
       }
@@ -175,20 +288,76 @@ let Token1;
       return false
     }
   } 
-  static integer(literal) {
-    return Token.Literal(Token.LiteralKind.Integer, literal)
+  static integer(literal, endIndex) {
+    return (llt) => {
+      let tmp, tmp1;
+      tmp = Token.Literal(Token.LiteralKind.Integer, literal);
+      tmp1 = endIndex - literal.length;
+      return runtime.safeCall(tmp.withLocation(tmp1, endIndex, llt))
+    }
   } 
-  static decimal(literal1) {
-    return Token.Literal(Token.LiteralKind.Decimal, literal1)
+  static decimal(literal1, endIndex1) {
+    return (llt) => {
+      let tmp, tmp1;
+      tmp = Token.Literal(Token.LiteralKind.Decimal, literal1);
+      tmp1 = endIndex1 - literal1.length;
+      return runtime.safeCall(tmp.withLocation(tmp1, endIndex1, llt))
+    }
   } 
-  static string(literal2) {
-    return Token.Literal(Token.LiteralKind.String, literal2)
+  static string(literal2, startIndex, endIndex2) {
+    return (llt) => {
+      let tmp;
+      tmp = Token.Literal(Token.LiteralKind.String, literal2);
+      return runtime.safeCall(tmp.withLocation(startIndex, endIndex2, llt))
+    }
   } 
-  static boolean(literal3) {
-    return Token.Literal(Token.LiteralKind.Boolean, literal3)
+  static boolean(literal3, endIndex3) {
+    return (llt) => {
+      let tmp, tmp1;
+      tmp = Token.Literal(Token.LiteralKind.Boolean, literal3);
+      tmp1 = endIndex3 - literal3.length;
+      return runtime.safeCall(tmp.withLocation(tmp1, endIndex3, llt))
+    }
+  } 
+  static identifier(name, endIndex4) {
+    return (llt) => {
+      let tmp, tmp1;
+      tmp = Token.Identifier(name, false);
+      tmp1 = endIndex4 - name.length;
+      return runtime.safeCall(tmp.withLocation(tmp1, endIndex4, llt))
+    }
+  } 
+  static symbol(name1, endIndex5) {
+    return (llt) => {
+      let tmp, tmp1;
+      tmp = Token.Identifier(name1, true);
+      tmp1 = endIndex5 - name1.length;
+      return runtime.safeCall(tmp.withLocation(tmp1, endIndex5, llt))
+    }
+  } 
+  static comment(content, startIndex1, endIndex6) {
+    return (llt) => {
+      let tmp;
+      tmp = Token.Comment(content);
+      return runtime.safeCall(tmp.withLocation(startIndex1, endIndex6, llt))
+    }
+  } 
+  static error(startIndex2, endIndex7) {
+    return (llt) => {
+      let tmp;
+      tmp = Token.Error();
+      return runtime.safeCall(tmp.withLocation(startIndex2, endIndex7, llt))
+    }
+  } 
+  static space(startIndex3, endIndex8) {
+    return (llt) => {
+      let tmp;
+      tmp = Token.Space();
+      return runtime.safeCall(tmp.withLocation(startIndex3, endIndex8, llt))
+    }
   } 
   static summary(token) {
-    let param0, param1, literal4, param01, param11, name, param02;
+    let param0, param1, literal4, param01, param11, name2, param02;
     if (token instanceof Token.Space.class) {
       return "\u2420"
     } else if (token instanceof Token.Error.class) {
@@ -199,8 +368,8 @@ let Token1;
     } else if (token instanceof Token.Identifier.class) {
       param01 = token.name;
       param11 = token.symbolic;
-      name = param01;
-      return name
+      name2 = param01;
+      return name2
     } else if (token instanceof Token.Literal.class) {
       param0 = token.kind;
       param1 = token.literal;
@@ -211,8 +380,34 @@ let Token1;
     }
   } 
   static display(token1) {
-    return runtime.safeCall(token1.toString())
+    let param0, param1, kind, value, param01, param11, name2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
+    if (token1 instanceof Token.Space.class) {
+      tmp = "space";
+    } else if (token1 instanceof Token.Error.class) {
+      tmp = "error";
+    } else if (token1 instanceof Token.Comment.class) {
+      tmp = "comment";
+    } else if (token1 instanceof Token.Identifier.class) {
+      param01 = token1.name;
+      param11 = token1.symbolic;
+      name2 = param01;
+      tmp1 = "identifier `" + name2;
+      tmp = tmp1 + "`";
+    } else if (token1 instanceof Token.Literal.class) {
+      param0 = token1.kind;
+      param1 = token1.literal;
+      kind = param0;
+      value = param1;
+      tmp2 = runtime.safeCall(kind.toString());
+      tmp3 = runtime.safeCall(tmp2.toLowerCase());
+      tmp4 = runtime.safeCall(globalThis.JSON.stringify(value));
+      tmp = Predef.mkStr(tmp3, " ", tmp4);
+    } else {
+      throw new globalThis.Error("match error");
+    }
+    tmp5 = tmp + " at ";
+    return tmp5 + token1.displayLocation
   }
   static toString() { return "Token"; }
 });
-let Token = Token1; export default Token;
+let Token = Token2; export default Token;
