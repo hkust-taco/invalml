@@ -1,0 +1,228 @@
+import "./Parser.mls"
+import "./Lexer.mls"
+import "../Iter.mls"
+import "../XML.mls"
+import "../Option.mls"
+import "../Runtime.mls"
+import "../Predef.mls"
+import "./parsing/TreeHelpers.mls"
+import "./parsing/Extension.mls"
+import "./parsing/ParseRuleVisualizer.mls"
+import "./parsing/Rules.mls"
+import "./parsing/vendors/railroad/railroad.mjs"
+
+open XML { elem }
+open Predef
+open Option { Some, None }
+
+declare val document
+declare val customElements
+declare class HTMLElement
+
+module Main with ...
+
+set globalThis.Predef = Predef
+
+let query = document.querySelector.bind(document)
+let editor = query("#editor")
+let selector = query("select#example")
+let parseButton = query("button#parse")
+let outputPanel = query("#output")
+
+fun showExample1() =
+  set editor.value = """let spaces n = make_string n " ";;
+let disk size =
+    let right_half = make_string size ">"
+    and left_half = make_string size "<"
+    in left_half ^ "|" ^ right_half;;
+let disk_number n largest_disk_size =
+    let white_part = spaces (largest_disk_size + 1 - n) in
+    white_part ^ (disk n) ^ white_part;;
+let peg_base largest_disk_size =
+    let half = make_string largest_disk_size "_" in
+    " " ^ half ^ "|" ^ half ^ " ";;
+let rec peg largest_disk_size = function
+  | (0, []) -> []
+  | (0, head::rest) ->
+      disk_number head largest_disk_size ::
+      peg largest_disk_size (0, rest)
+  | (offset, lst) ->
+      disk_number 0 largest_disk_size ::
+      peg largest_disk_size (offset-1, lst);;
+let rec join_lines l1 l2 l3 =
+  match (l1, l2, l3) with
+  | ([], [], []) -> []
+  | (t1::r1, t2::r2, t3::r3) -> (t1 ^ t2 ^ t3) :: join_lines r1 r2 r3
+  | _ -> failwith "join_lines";;
+"""
+
+fun showExample2() =
+  set editor.value = """#newKeyword ("hello", Some 3, Some 3)
+#newKeyword ("goodbye", None, None)
+  
+#newCategory("greeting")
+  
+#extendCategory("greeting", [ keyword("hello"), "term", "greeting" ], foo)
+#extendCategory("greeting", [ keyword("goodbye") ], bar)
+  
+#extendCategory("decl", [ "greeting" ], baz)
+  
+  
+hello "Rob" hello "Bob" goodbye
+  
+#diagram ""
+"""
+
+showExample1()
+
+editor.addEventListener of "keydown", event =>
+  if event.key is "Tab" do
+    event.preventDefault()
+    let start = editor.selectionStart
+    let end = editor.selectionEnd
+    set editor.value = editor.value.substring(0, start) + "  " + editor.value.substring(end)
+    set editor.selectionEnd = start + 2
+    set editor.selectionStart = editor.selectionEnd
+
+selector.addEventListener of "change", event => if selector.value is
+  "example-1" do showExample1()
+  "example-2" do showExample2()
+
+parseButton.addEventListener of "click", event =>
+  let tokens = Lexer.lex(editor.value, noWhitespace: true)
+  set outputPanel.innerHTML = ""
+  Runtime.try_catch of
+    () =>
+      let trees = Parser.parse(tokens)
+      trees Iter.fromStack() Iter.each of tree => if
+        Extension.isDiagramDirective(tree) then displayRules()
+        else
+          let collapsibleTree = document.createElement("collapsible-tree")
+          set collapsibleTree.textContent = TreeHelpers.showAsTree(tree)
+          outputPanel.appendChild of collapsibleTree
+    error =>
+      let errorDisplay = document.createElement("error-display")
+      errorDisplay.setError of error
+      outputPanel.appendChild of errorDisplay
+
+let indentRegex = new RegExp("""^(\s*)""")
+
+fun parseIndentedText(text) =
+  console.log("parseIndentedText", text)
+  let root = (text: "", children: [])
+  let stack = [(node: root, indent: -1)]
+  text.split("\n")
+    Iter.filtering(line => line.trim().length > 0)
+    Iter.each of line =>
+      console.log("parseIndentedText (line)", line)
+      let indent = line.match(indentRegex).[1].length
+      let text = line.substring(indent)
+      while indent <= stack.[stack.length - 1].indent do
+        stack.pop()
+      let newNode = (text: text, children: [])
+      stack.[stack.length - 1].node.children.push of newNode
+      stack.push of node: newNode, indent: indent
+  console.log(root)
+  root.children
+
+let errorDisplayStyle = """
+.error-container {
+  background-color: #fdd;
+  padding: 0.375rem 0.75rem 0.5rem;
+  font-family: var(--monospace);
+  color: #991b1bff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.error-message {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1.125rem;
+}
+
+.stack-trace {
+  font-size: 0.875rem;
+  margin: 0;
+  list-style-type: none;
+  padding-left: 0.5rem;
+}"""
+
+class CollapsibleTree extends HTMLElement with
+  fun connectedCallback() =
+    let rawText = this.textContent
+    set this.textContent = ""
+    let treeData = parseIndentedText(rawText)
+    let treeElement = createDetailsTree(treeData)
+    this.appendChild(treeElement)
+  
+  fun createDetailsTree(nodes) =
+    let fragment = document.createDocumentFragment()
+    nodes Iter.each of node =>
+      let details = document.createElement("details")
+      details.setAttribute("open", "")
+      let summary = document.createElement("summary")
+      set summary.textContent = node.text
+      details.appendChild of summary
+      if node.children.length > 0 then
+        details.appendChild of createDetailsTree(node.children)
+      else
+        details.setAttribute("leaf" ,"")
+      fragment.appendChild of details
+      let rule = document.createElement("rule")
+      rule.classList.add("rule")
+      fragment.appendChild of rule
+    fragment
+
+customElements.define of "collapsible-tree", CollapsibleTree
+
+class ErrorDisplay extends HTMLElement with
+  this.attachShadow(mode: "open")
+  
+  let _error = None
+  
+  fun connectedCallback() = this.render()
+  
+  fun setError(value) =
+    set _error = Some(value)
+    this.render()
+  
+  fun render() = if _error is Some(error) do
+    let stackLines = error.stack.split("\n")
+    if stackLines.[0].startsWith(error.name) do
+      stackLines.shift()
+    set this.shadowRoot.innerHTML = elem("div", "class": "error-container") of
+      elem("h3", "class": "error-message") of
+        error.name + ": " + error.message
+      elem("ul", "class": "stack-trace") of
+        stackLines
+          Iter.mapping of line => elem("li") of line.trim()
+          Iter.joined("")
+      elem("style") of errorDisplayStyle
+
+customElements.define of "error-display", ErrorDisplay
+
+fun makeFigures(entries) = entries
+  Iter.mapping of case [name, svg] then
+    elem("figure") of elem("figcaption")(name), svg
+  Iter.joined("")
+
+fun displayRules() =
+  open ParseRuleVisualizer
+  open Rules
+  reset()
+  set query("#syntax-diagrams>main").innerHTML = Iter.joined(_, "") <| tuple of
+    elem("h3") of "Term"
+    makeFigures of render(railroad, "term", termRule)
+    elem("h3") of "Type"
+    makeFigures of render(railroad, "term", typeRule)
+    elem("h3") of "Definition"
+    makeFigures of render(railroad, "term", declRule)
+    elem("h3") of "Extension"
+    extendedKinds
+      Iter.mapping of kindName =>
+        makeFigures of render(railroad, kindName, getRuleByKind(kindName))
+      Iter.joined("")
+
+displayRules()
