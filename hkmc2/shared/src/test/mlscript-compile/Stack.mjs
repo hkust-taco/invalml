@@ -12,7 +12,7 @@ let Stack1;
         this.head = head;
         this.tail = tail;
       }
-      toString() { return "Cons(" + globalThis.Predef.render(this.head) + ", " + globalThis.Predef.render(this.tail) + ")"; }
+      toString() { return "Cons(" + runtime.render(this.head) + ", " + runtime.render(this.tail) + ")"; }
     };
     const Nil$class = class Nil {
       constructor() {}

@@ -17,12 +17,9 @@ open Option { Some, None }
 
 declare val document
 declare val customElements
-declare val eval
 declare class HTMLElement
 
 module Main with ...
-
-set globalThis.Predef = eval("Predef")
 
 let query = document.querySelector.bind(document)
 let editor = query("#editor")
@@ -109,13 +106,11 @@ parseButton.addEventListener of "click", event =>
 let indentRegex = new RegExp("""^(\s*)""")
 
 fun parseIndentedText(text) =
-  console.log("parseIndentedText", text)
   let root = (text: "", children: [])
   let stack = [(node: root, indent: -1)]
   text.split("\n")
     Iter.filtering(line => line.trim().length > 0)
     Iter.each of line =>
-      console.log("parseIndentedText (line)", line)
       let indent = line.match(indentRegex).[1].length
       let text = line.substring(indent)
       while indent <= stack.[stack.length - 1].indent do
@@ -123,7 +118,6 @@ fun parseIndentedText(text) =
       let newNode = (text: text, children: [])
       stack.[stack.length - 1].node.children.push of newNode
       stack.push of node: newNode, indent: indent
-  console.log(root)
   root.children
 
 let errorDisplayStyle = """

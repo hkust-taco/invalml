@@ -30,7 +30,7 @@ StyleAttributeValue1.class = class StyleAttributeValue {
     tmp3 = Iter.joined(tmp2, "; ");
     return runtime.safeCall(globalThis.JSON.stringify(tmp3))
   }
-  toString() { return "StyleAttributeValue(" + globalThis.Predef.render(this.rules) + ")"; }
+  toString() { return "StyleAttributeValue(" + runtime.render(this.rules) + ")"; }
 };
 (class XML {
   static {

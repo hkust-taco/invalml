@@ -11,7 +11,7 @@ let Option1;
       constructor(value) {
         this.value = value;
       }
-      toString() { return "Some(" + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "Some(" + runtime.render(this.value) + ")"; }
     };
     const None$class = class None {
       constructor() {}
@@ -27,7 +27,7 @@ let Option1;
         this.fst = fst;
         this.snd = snd;
       }
-      toString() { return "Both(" + globalThis.Predef.render(this.fst) + ", " + globalThis.Predef.render(this.snd) + ")"; }
+      toString() { return "Both(" + runtime.render(this.fst) + ", " + runtime.render(this.snd) + ")"; }
     };
     (class unsafe {
       static {

@@ -22,7 +22,7 @@ Iterator1.class = class Iterator {
   constructor(next) {
     this.next = next;
   }
-  toString() { return "Iterator(" + globalThis.Predef.render(this.next) + ")"; }
+  toString() { return "Iterator(" + runtime.render(this.next) + ")"; }
 };
 (class Result {
   static {
@@ -35,7 +35,7 @@ Iterator1.class = class Iterator {
         this.value = value;
         this.done = false;
       }
-      toString() { return "Next(" + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "Next(" + runtime.render(this.value) + ")"; }
     };
     const Done$class = class Done {
       constructor() {

@@ -193,7 +193,7 @@ let Token2;
         super();
         this.content = content;
       }
-      toString() { return "Comment(" + globalThis.Predef.render(this.content) + ")"; }
+      toString() { return "Comment(" + runtime.render(this.content) + ")"; }
     };
     this.Identifier = function Identifier(name1, symbolic1) {
       return new Identifier.class(name1, symbolic1);
@@ -204,7 +204,7 @@ let Token2;
         this.name = name;
         this.symbolic = symbolic;
       }
-      toString() { return "Identifier(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.symbolic) + ")"; }
+      toString() { return "Identifier(" + runtime.render(this.name) + ", " + runtime.render(this.symbolic) + ")"; }
     };
     this.Literal = function Literal(kind1, literal1) {
       return new Literal.class(kind1, literal1);
@@ -215,7 +215,7 @@ let Token2;
         this.kind = kind;
         this.literal = literal;
       }
-      toString() { return "Literal(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.literal) + ")"; }
+      toString() { return "Literal(" + runtime.render(this.kind) + ", " + runtime.render(this.literal) + ")"; }
     };
   }
   static same(a, b) {

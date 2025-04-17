@@ -13,7 +13,7 @@ let BasicExpr1;
       constructor(value) {
         this.value = value;
       }
-      toString() { return "Lit(" + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "Lit(" + runtime.render(this.value) + ")"; }
     };
     this.Var = function Var(name1) {
       return new Var.class(name1);
@@ -22,7 +22,7 @@ let BasicExpr1;
       constructor(name) {
         this.name = name;
       }
-      toString() { return "Var(" + globalThis.Predef.render(this.name) + ")"; }
+      toString() { return "Var(" + runtime.render(this.name) + ")"; }
     };
     this.Add = function Add(left1, right1) {
       return new Add.class(left1, right1);
@@ -32,7 +32,7 @@ let BasicExpr1;
         this.left = left;
         this.right = right;
       }
-      toString() { return "Add(" + globalThis.Predef.render(this.left) + ", " + globalThis.Predef.render(this.right) + ")"; }
+      toString() { return "Add(" + runtime.render(this.left) + ", " + runtime.render(this.right) + ")"; }
     };
     this.Mul = function Mul(left1, right1) {
       return new Mul.class(left1, right1);
@@ -42,7 +42,7 @@ let BasicExpr1;
         this.left = left;
         this.right = right;
       }
-      toString() { return "Mul(" + globalThis.Predef.render(this.left) + ", " + globalThis.Predef.render(this.right) + ")"; }
+      toString() { return "Mul(" + runtime.render(this.left) + ", " + runtime.render(this.right) + ")"; }
     };
     this.Err = function Err(expr1, msg1) {
       return new Err.class(expr1, msg1);
@@ -52,7 +52,7 @@ let BasicExpr1;
         this.expr = expr;
         this.msg = msg;
       }
-      toString() { return "Err(" + globalThis.Predef.render(this.expr) + ", " + globalThis.Predef.render(this.msg) + ")"; }
+      toString() { return "Err(" + runtime.render(this.expr) + ", " + runtime.render(this.msg) + ")"; }
     };
   }
   static withErr(expr, msg) {

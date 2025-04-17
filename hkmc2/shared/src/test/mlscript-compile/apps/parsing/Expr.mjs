@@ -46,7 +46,7 @@ let Expr1;
       constructor(value) {
         this.value = value;
       }
-      toString() { return "Lit(" + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "Lit(" + runtime.render(this.value) + ")"; }
     };
     this.Var = function Var(name1) {
       return new Var.class(name1);
@@ -55,7 +55,7 @@ let Expr1;
       constructor(name) {
         this.name = name;
       }
-      toString() { return "Var(" + globalThis.Predef.render(this.name) + ")"; }
+      toString() { return "Var(" + runtime.render(this.name) + ")"; }
     };
     this.Inf = function Inf(op1, left1, right1) {
       return new Inf.class(op1, left1, right1);
@@ -66,7 +66,7 @@ let Expr1;
         this.left = left;
         this.right = right;
       }
-      toString() { return "Inf(" + globalThis.Predef.render(this.op) + ", " + globalThis.Predef.render(this.left) + ", " + globalThis.Predef.render(this.right) + ")"; }
+      toString() { return "Inf(" + runtime.render(this.op) + ", " + runtime.render(this.left) + ", " + runtime.render(this.right) + ")"; }
     };
     this.Err = function Err(expr1, msg1) {
       return new Err.class(expr1, msg1);
@@ -76,7 +76,7 @@ let Expr1;
         this.expr = expr;
         this.msg = msg;
       }
-      toString() { return "Err(" + globalThis.Predef.render(this.expr) + ", " + globalThis.Predef.render(this.msg) + ")"; }
+      toString() { return "Err(" + runtime.render(this.expr) + ", " + runtime.render(this.msg) + ")"; }
     };
   }
   static withErr(expr, msg) {

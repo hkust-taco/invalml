@@ -13,7 +13,7 @@ Accounting1 = class Accounting {
       constructor(num) {
         this.num = num;
       }
-      toString() { return "Project(" + globalThis.Predef.render(this.num) + ")"; }
+      toString() { return "Project(" + runtime.render(this.num) + ")"; }
     };
     const this$Accounting = this;
     this.Line = function Line(name1, proj1, starting_balance1, isMatchable1) {
@@ -47,7 +47,7 @@ Accounting1 = class Accounting {
           return runtime.Unit
         }
       }
-      toString() { return "Line(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.proj) + ", " + globalThis.Predef.render(this.starting_balance) + ", " + globalThis.Predef.render(this.isMatchable) + ")"; }
+      toString() { return "Line(" + runtime.render(this.name) + ", " + runtime.render(this.proj) + ", " + runtime.render(this.starting_balance) + ", " + runtime.render(this.isMatchable) + ")"; }
     };
     this.lines = [];
     this.Report = function Report(fileName1) {
@@ -160,7 +160,7 @@ Accounting1 = class Accounting {
         tmp26 = Str.concat2(tmp25, "|");
         return this.wln(tmp26)
       }
-      toString() { return "Report(" + globalThis.Predef.render(this.fileName) + ")"; }
+      toString() { return "Report(" + runtime.render(this.fileName) + ")"; }
     };
   }
   display(amt) {

@@ -45,7 +45,7 @@ let Runtime1;
       constructor(captures) {
         this.captures = captures;
       }
-      toString() { return "MatchResult(" + globalThis.Predef.render(this.captures) + ")"; }
+      toString() { return "MatchResult(" + runtime.render(this.captures) + ")"; }
     };
     this.MatchFailure = function MatchFailure(errors1) {
       return new MatchFailure.class(errors1);
@@ -54,7 +54,7 @@ let Runtime1;
       constructor(errors) {
         this.errors = errors;
       }
-      toString() { return "MatchFailure(" + globalThis.Predef.render(this.errors) + ")"; }
+      toString() { return "MatchFailure(" + runtime.render(this.errors) + ")"; }
     };
     (class Tuple {
       static {
@@ -97,6 +97,7 @@ let Runtime1;
       }
       static toString() { return "Str"; }
     });
+    this.render = Rendering.render;
     const FatalEffect$class = class FatalEffect {
       constructor() {}
       toString() { return "FatalEffect"; }
@@ -116,7 +117,7 @@ let Runtime1;
       constructor(next) {
         this.next = next;
       }
-      toString() { return "FunctionContFrame(" + globalThis.Predef.render(this.next) + ")"; }
+      toString() { return "FunctionContFrame(" + runtime.render(this.next) + ")"; }
     };
     this.HandlerContFrame = function HandlerContFrame(next1, nextHandler1, handler1) {
       return new HandlerContFrame.class(next1, nextHandler1, handler1);
@@ -127,7 +128,7 @@ let Runtime1;
         this.nextHandler = nextHandler;
         this.handler = handler;
       }
-      toString() { return "HandlerContFrame(" + globalThis.Predef.render(this.next) + ", " + globalThis.Predef.render(this.nextHandler) + ", " + globalThis.Predef.render(this.handler) + ")"; }
+      toString() { return "HandlerContFrame(" + runtime.render(this.next) + ", " + runtime.render(this.nextHandler) + ", " + runtime.render(this.handler) + ")"; }
     };
     this.ContTrace = function ContTrace(next1, last1, nextHandler1, lastHandler1, resumed1) {
       return new ContTrace.class(next1, last1, nextHandler1, lastHandler1, resumed1);
@@ -140,7 +141,7 @@ let Runtime1;
         this.lastHandler = lastHandler;
         this.resumed = resumed;
       }
-      toString() { return "ContTrace(" + globalThis.Predef.render(this.next) + ", " + globalThis.Predef.render(this.last) + ", " + globalThis.Predef.render(this.nextHandler) + ", " + globalThis.Predef.render(this.lastHandler) + ", " + globalThis.Predef.render(this.resumed) + ")"; }
+      toString() { return "ContTrace(" + runtime.render(this.next) + ", " + runtime.render(this.last) + ", " + runtime.render(this.nextHandler) + ", " + runtime.render(this.lastHandler) + ", " + runtime.render(this.resumed) + ")"; }
     };
     this.EffectSig = function EffectSig(contTrace1, handler1, handlerFun1) {
       return new EffectSig.class(contTrace1, handler1, handlerFun1);
@@ -151,7 +152,7 @@ let Runtime1;
         this.handler = handler;
         this.handlerFun = handlerFun;
       }
-      toString() { return "EffectSig(" + globalThis.Predef.render(this.contTrace) + ", " + globalThis.Predef.render(this.handler) + ", " + globalThis.Predef.render(this.handlerFun) + ")"; }
+      toString() { return "EffectSig(" + runtime.render(this.contTrace) + ", " + runtime.render(this.handler) + ", " + runtime.render(this.handlerFun) + ")"; }
     };
     this.NonLocalReturn = class NonLocalReturn {
       constructor() {}
@@ -165,7 +166,7 @@ let Runtime1;
         this.fnName = fnName;
         this.locals = locals;
       }
-      toString() { return "FnLocalsInfo(" + globalThis.Predef.render(this.fnName) + ", " + globalThis.Predef.render(this.locals) + ")"; }
+      toString() { return "FnLocalsInfo(" + runtime.render(this.fnName) + ", " + runtime.render(this.locals) + ")"; }
     };
     this.LocalVarInfo = function LocalVarInfo(localName1, value1) {
       return new LocalVarInfo.class(localName1, value1);
@@ -175,7 +176,7 @@ let Runtime1;
         this.localName = localName;
         this.value = value;
       }
-      toString() { return "LocalVarInfo(" + globalThis.Predef.render(this.localName) + ", " + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "LocalVarInfo(" + runtime.render(this.localName) + ", " + runtime.render(this.value) + ")"; }
     };
     this.stackLimit = 0;
     this.stackDepth = 0;

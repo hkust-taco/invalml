@@ -63,6 +63,9 @@ module Str with
 
   fun drop(string, n) = string.slice(n)
 
+// Re-export rendering functions
+val render = Rendering.render
+
 // Private definitions for algebraic effects
 
 object FatalEffect

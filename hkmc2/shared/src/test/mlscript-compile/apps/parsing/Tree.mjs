@@ -25,7 +25,7 @@ let Tree2;
           constructor(recursive) {
             this.recursive = recursive;
           }
-          toString() { return "Let(" + globalThis.Predef.render(this.recursive) + ")"; }
+          toString() { return "Let(" + runtime.render(this.recursive) + ")"; }
         };
         const Type$class = class Type {
           constructor() {}
@@ -66,7 +66,7 @@ let Tree2;
         this.tree = tree;
         this.message = message;
       }
-      toString() { return "Error(" + globalThis.Predef.render(this.tree) + ", " + globalThis.Predef.render(this.message) + ")"; }
+      toString() { return "Error(" + runtime.render(this.tree) + ", " + runtime.render(this.message) + ")"; }
     };
     this.Bracketed = function Bracketed(kind1, tree1) {
       return new Bracketed.class(kind1, tree1);
@@ -77,7 +77,7 @@ let Tree2;
         this.kind = kind;
         this.tree = tree;
       }
-      toString() { return "Bracketed(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.tree) + ")"; }
+      toString() { return "Bracketed(" + runtime.render(this.kind) + ", " + runtime.render(this.tree) + ")"; }
     };
     this.Ident = function Ident(name1, symbolic1) {
       return new Ident.class(name1, symbolic1);
@@ -88,7 +88,7 @@ let Tree2;
         this.name = name;
         this.symbolic = symbolic;
       }
-      toString() { return "Ident(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.symbolic) + ")"; }
+      toString() { return "Ident(" + runtime.render(this.name) + ", " + runtime.render(this.symbolic) + ")"; }
     };
     this.Underscore = function Underscore() {
       return new Underscore.class();
@@ -108,7 +108,7 @@ let Tree2;
         this.modifier = modifier;
         this.subject = subject;
       }
-      toString() { return "Modified(" + globalThis.Predef.render(this.modifier) + ", " + globalThis.Predef.render(this.subject) + ")"; }
+      toString() { return "Modified(" + runtime.render(this.modifier) + ", " + runtime.render(this.subject) + ")"; }
     };
     this.Tuple = function Tuple(trees1) {
       return new Tuple.class(trees1);
@@ -118,7 +118,7 @@ let Tree2;
         super();
         this.trees = trees;
       }
-      toString() { return "Tuple(" + globalThis.Predef.render(this.trees) + ")"; }
+      toString() { return "Tuple(" + runtime.render(this.trees) + ")"; }
     };
     this.Sequence = function Sequence(trees1) {
       return new Sequence.class(trees1);
@@ -128,7 +128,7 @@ let Tree2;
         super();
         this.trees = trees;
       }
-      toString() { return "Sequence(" + globalThis.Predef.render(this.trees) + ")"; }
+      toString() { return "Sequence(" + runtime.render(this.trees) + ")"; }
     };
     this.Literal = function Literal(kind1, value1) {
       return new Literal.class(kind1, value1);
@@ -139,7 +139,7 @@ let Tree2;
         this.kind = kind;
         this.value = value;
       }
-      toString() { return "Literal(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.value) + ")"; }
+      toString() { return "Literal(" + runtime.render(this.kind) + ", " + runtime.render(this.value) + ")"; }
     };
     this.Match = function Match(scrutinee1, branches1) {
       return new Match.class(scrutinee1, branches1);
@@ -150,7 +150,7 @@ let Tree2;
         this.scrutinee = scrutinee;
         this.branches = branches;
       }
-      toString() { return "Match(" + globalThis.Predef.render(this.scrutinee) + ", " + globalThis.Predef.render(this.branches) + ")"; }
+      toString() { return "Match(" + runtime.render(this.scrutinee) + ", " + runtime.render(this.branches) + ")"; }
     };
     this.Lambda = function Lambda(params1, body1) {
       return new Lambda.class(params1, body1);
@@ -161,7 +161,7 @@ let Tree2;
         this.params = params;
         this.body = body;
       }
-      toString() { return "Lambda(" + globalThis.Predef.render(this.params) + ", " + globalThis.Predef.render(this.body) + ")"; }
+      toString() { return "Lambda(" + runtime.render(this.params) + ", " + runtime.render(this.body) + ")"; }
     };
     this.App = function App(callee1, argument1) {
       return new App.class(callee1, argument1);
@@ -172,7 +172,7 @@ let Tree2;
         this.callee = callee;
         this.argument = argument;
       }
-      toString() { return "App(" + globalThis.Predef.render(this.callee) + ", " + globalThis.Predef.render(this.argument) + ")"; }
+      toString() { return "App(" + runtime.render(this.callee) + ", " + runtime.render(this.argument) + ")"; }
     };
     this.Infix = function Infix(op1, lhs1, rhs1) {
       return new Infix.class(op1, lhs1, rhs1);
@@ -184,7 +184,7 @@ let Tree2;
         this.lhs = lhs;
         this.rhs = rhs;
       }
-      toString() { return "Infix(" + globalThis.Predef.render(this.op) + ", " + globalThis.Predef.render(this.lhs) + ", " + globalThis.Predef.render(this.rhs) + ")"; }
+      toString() { return "Infix(" + runtime.render(this.op) + ", " + runtime.render(this.lhs) + ", " + runtime.render(this.rhs) + ")"; }
     };
     this.Define = function Define(kind1, items1) {
       return new Define.class(kind1, items1);
@@ -195,7 +195,7 @@ let Tree2;
         this.kind = kind;
         this.items = items;
       }
-      toString() { return "Define(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.items) + ")"; }
+      toString() { return "Define(" + runtime.render(this.kind) + ", " + runtime.render(this.items) + ")"; }
     };
     this.LetIn = function LetIn(bindings1, body1) {
       return new LetIn.class(bindings1, body1);
@@ -206,7 +206,7 @@ let Tree2;
         this.bindings = bindings;
         this.body = body;
       }
-      toString() { return "LetIn(" + globalThis.Predef.render(this.bindings) + ", " + globalThis.Predef.render(this.body) + ")"; }
+      toString() { return "LetIn(" + runtime.render(this.bindings) + ", " + runtime.render(this.body) + ")"; }
     };
     this.While = function While(cond1, body1) {
       return new While.class(cond1, body1);
@@ -217,7 +217,7 @@ let Tree2;
         this.cond = cond;
         this.body = body;
       }
-      toString() { return "While(" + globalThis.Predef.render(this.cond) + ", " + globalThis.Predef.render(this.body) + ")"; }
+      toString() { return "While(" + runtime.render(this.cond) + ", " + runtime.render(this.body) + ")"; }
     };
     this.For = function For(head1, start1, end1, body1) {
       return new For.class(head1, start1, end1, body1);
@@ -230,7 +230,7 @@ let Tree2;
         this.end = end;
         this.body = body;
       }
-      toString() { return "For(" + globalThis.Predef.render(this.head) + ", " + globalThis.Predef.render(this.start) + ", " + globalThis.Predef.render(this.end) + ", " + globalThis.Predef.render(this.body) + ")"; }
+      toString() { return "For(" + runtime.render(this.head) + ", " + runtime.render(this.start) + ", " + runtime.render(this.end) + ", " + runtime.render(this.body) + ")"; }
     };
     this.Ternary = function Ternary(keyword1, lhs1, rhs1, body1) {
       return new Ternary.class(keyword1, lhs1, rhs1, body1);
@@ -243,7 +243,7 @@ let Tree2;
         this.rhs = rhs;
         this.body = body;
       }
-      toString() { return "Ternary(" + globalThis.Predef.render(this.keyword) + ", " + globalThis.Predef.render(this.lhs) + ", " + globalThis.Predef.render(this.rhs) + ", " + globalThis.Predef.render(this.body) + ")"; }
+      toString() { return "Ternary(" + runtime.render(this.keyword) + ", " + runtime.render(this.lhs) + ", " + runtime.render(this.rhs) + ", " + runtime.render(this.body) + ")"; }
     };
   }
   static get empty() {

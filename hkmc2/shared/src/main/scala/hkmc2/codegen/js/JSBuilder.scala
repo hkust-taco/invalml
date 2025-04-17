@@ -288,10 +288,10 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
                 else doc""" # ${mtdPrefix}toString() { return "${sym.nme}${
                   if paramsOpt.isEmpty then doc"""""""
                   else doc"""(" + ${
-                      ctorFields.headOption.fold("\"\"")(f => "globalThis.Predef.render(this" + fieldSelect(f._1.name) + ")")
+                      ctorFields.headOption.fold("\"\"")(f => "runtime.render(this" + fieldSelect(f._1.name) + ")")
                     }${
                       ctorFields.tailOption.fold("")(_.map(f =>
-                        """ + ", " + globalThis.Predef.render(this""" + fieldSelect(f._1.name) + ")").mkString)
+                        """ + ", " + runtime.render(this""" + fieldSelect(f._1.name) + ")").mkString)
                     } + ")""""
                 }; }"""
               } #}  # }"

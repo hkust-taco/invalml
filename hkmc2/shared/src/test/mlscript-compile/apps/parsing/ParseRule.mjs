@@ -38,7 +38,7 @@ let ParseRule2;
           return v
         }
       }
-      toString() { return "Lazy(" + globalThis.Predef.render(this.init) + ")"; }
+      toString() { return "Lazy(" + runtime.render(this.init) + ")"; }
     };
     this.ParseRule = function ParseRule(name1, choices1) {
       return new ParseRule.class(name1, choices1);
@@ -700,7 +700,7 @@ let ParseRule2;
           throw new globalThis.Error("match error");
         }
       }
-      toString() { return "ParseRule(" + globalThis.Predef.render(this.name) + ", " + globalThis.Predef.render(this.choices) + ")"; }
+      toString() { return "ParseRule(" + runtime.render(this.name) + ", " + runtime.render(this.choices) + ")"; }
     };
     (class Choice {
       static #ensureChoices;
@@ -725,7 +725,7 @@ let ParseRule2;
             this.keyword = keyword;
             this.rest = rest;
           }
-          toString() { return "Keyword(" + globalThis.Predef.render(this.keyword) + ", " + globalThis.Predef.render(this.rest) + ")"; }
+          toString() { return "Keyword(" + runtime.render(this.keyword) + ", " + runtime.render(this.rest) + ")"; }
         };
         this.Ref = function Ref(kind1, process1, outerPrec1, innerPrec1, rest1) {
           return new Ref.class(kind1, process1, outerPrec1, innerPrec1, rest1);
@@ -739,7 +739,7 @@ let ParseRule2;
             this.innerPrec = innerPrec;
             this.rest = rest;
           }
-          toString() { return "Ref(" + globalThis.Predef.render(this.kind) + ", " + globalThis.Predef.render(this.process) + ", " + globalThis.Predef.render(this.outerPrec) + ", " + globalThis.Predef.render(this.innerPrec) + ", " + globalThis.Predef.render(this.rest) + ")"; }
+          toString() { return "Ref(" + runtime.render(this.kind) + ", " + runtime.render(this.process) + ", " + runtime.render(this.outerPrec) + ", " + runtime.render(this.innerPrec) + ", " + runtime.render(this.rest) + ")"; }
         };
         this.End = function End(value1) {
           return new End.class(value1);
@@ -749,7 +749,7 @@ let ParseRule2;
             super();
             this.value = value;
           }
-          toString() { return "End(" + globalThis.Predef.render(this.value) + ")"; }
+          toString() { return "End(" + runtime.render(this.value) + ")"; }
         };
         this.Siding = function Siding(init1, optional1, rest1, process1) {
           return new Siding.class(init1, optional1, rest1, process1);
@@ -762,7 +762,7 @@ let ParseRule2;
             this.rest = rest;
             this.process = process;
           }
-          toString() { return "Siding(" + globalThis.Predef.render(this.init) + ", " + globalThis.Predef.render(this.optional) + ", " + globalThis.Predef.render(this.rest) + ", " + globalThis.Predef.render(this.process) + ")"; }
+          toString() { return "Siding(" + runtime.render(this.init) + ", " + runtime.render(this.optional) + ", " + runtime.render(this.rest) + ", " + runtime.render(this.process) + ")"; }
         };
         ensureChoices = function ensureChoices(xs, name) {
           let tmp9, tmp10, lambda5;

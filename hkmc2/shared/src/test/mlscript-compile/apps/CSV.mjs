@@ -56,6 +56,6 @@ CSV1.class = class CSV {
     }
     return arrData
   }
-  toString() { return "CSV(" + globalThis.Predef.render(this.strDelimiter) + ")"; }
+  toString() { return "CSV(" + runtime.render(this.strDelimiter) + ")"; }
 };
 let CSV = CSV1; export default CSV;
