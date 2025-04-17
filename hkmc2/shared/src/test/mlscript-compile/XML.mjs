@@ -9,6 +9,27 @@ StyleAttributeValue1.class = class StyleAttributeValue {
   constructor(rules) {
     this.rules = rules;
   }
+  toValue() {
+    let tmp, tmp1, tmp2, tmp3, lambda;
+    tmp = runtime.safeCall(globalThis.Object.entries(this.rules));
+    lambda = (undefined, function (caseScrut) {
+      let first1, first0, name, value, tmp4;
+      if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+        first0 = caseScrut[0];
+        first1 = caseScrut[1];
+        name = first0;
+        value = first1;
+        tmp4 = name + ": ";
+        return tmp4 + value
+      } else {
+        throw new globalThis.Error("match error");
+      }
+    });
+    tmp1 = lambda;
+    tmp2 = Iter.mapping(tmp, tmp1);
+    tmp3 = Iter.joined(tmp2, "; ");
+    return runtime.safeCall(globalThis.JSON.stringify(tmp3))
+  }
   toString() { return "StyleAttributeValue(" + globalThis.Predef.render(this.rules) + ")"; }
 };
 (class XML {
@@ -16,92 +37,81 @@ StyleAttributeValue1.class = class StyleAttributeValue {
     XML1 = XML;
   }
   static serializeValue(value) {
-    let param0, rules, tmp, tmp1, tmp2, lambda;
     if (typeof value === 'string') {
       return runtime.safeCall(globalThis.JSON.stringify(value))
     } else if (value instanceof StyleAttributeValue1.class) {
-      param0 = value.rules;
-      rules = param0;
-      lambda = (undefined, function (caseScrut) {
-        let first1, first0, name, value1, tmp3;
-        if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
-          first0 = caseScrut[0];
-          first1 = caseScrut[1];
-          name = first0;
-          value1 = first1;
-          tmp3 = name + ": ";
-          return tmp3 + value1
-        } else {
-          throw new globalThis.Error("match error");
-        }
-      });
-      tmp = lambda;
-      tmp1 = Iter.mapping(rules, tmp);
-      tmp2 = Iter.joined(tmp1, "; ");
-      return runtime.safeCall(globalThis.JSON.stringify(tmp2))
+      return runtime.safeCall(value.toValue())
     } else {
       throw new globalThis.Error("match error");
     }
   } 
   static joinAttributes(attributes) {
-    let tmp, tmp1, tmp2, lambda;
-    if (globalThis.Array.isArray(attributes) && attributes.length === 0) {
-      return ""
-    } else {
-      lambda = (undefined, function (caseScrut) {
-        let first1, first0, name, value1, tmp3, tmp4;
-        if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
-          first0 = caseScrut[0];
-          first1 = caseScrut[1];
-          name = first0;
-          value1 = first1;
-          tmp3 = name + "=";
-          tmp4 = XML.serializeValue(value1);
-          return tmp3 + tmp4
-        } else {
-          throw new globalThis.Error("match error");
-        }
-      });
-      tmp = lambda;
-      tmp1 = Iter.mapping(attributes, tmp);
-      tmp2 = Iter.joined(tmp1, " ");
-      return " " + tmp2
-    }
+    let tmp, tmp1, lambda;
+    lambda = (undefined, function (caseScrut) {
+      let record, style, first1, first0, name, value1, tmp2, tmp3, tmp4, tmp5;
+      if (globalThis.Array.isArray(caseScrut) && caseScrut.length === 2) {
+        first0 = caseScrut[0];
+        first1 = caseScrut[1];
+        name = first0;
+        value1 = first1;
+        tmp2 = name + "=";
+        tmp3 = XML.serializeValue(value1);
+        return tmp2 + tmp3
+      } else if (caseScrut instanceof StyleAttributeValue1.class) {
+        style = caseScrut;
+        tmp4 = runtime.safeCall(style.toValue());
+        return "style=" + tmp4
+      } else if (caseScrut instanceof globalThis.Object) {
+        record = caseScrut;
+        tmp5 = runtime.safeCall(globalThis.Object.entries(record));
+        return XML.joinAttributes(tmp5)
+      } else {
+        throw new globalThis.Error("match error");
+      }
+    });
+    tmp = lambda;
+    tmp1 = Iter.mapping(attributes, tmp);
+    return Iter.joined(tmp1, " ")
   } 
   static elem(tagName, ...attributes1) {
     return (...elements) => {
-      let tmp, tmp1, lambda;
+      let tmp, tmp1, tmp2, lambda;
       lambda = (undefined, function (arg1, arg2) {
         return arg1 + arg2
       });
       tmp = runtime.safeCall(Predef.fold(lambda));
-      tmp1 = XML.joinAttributes(attributes1);
+      if (globalThis.Array.isArray(attributes1) && attributes1.length === 0) {
+        tmp1 = "";
+      } else {
+        tmp2 = XML.joinAttributes(attributes1);
+        tmp1 = " " + tmp2;
+      }
       return runtime.safeCall(tmp("<", tagName, tmp1, ">", ...elements, "</", tagName, ">"))
     }
   } 
   static tag(tagName1) {
     return (...attributes2) => {
-      let tmp, tmp1, lambda;
+      let tmp, tmp1, tmp2, lambda;
       lambda = (undefined, function (arg1, arg2) {
         return arg1 + arg2
       });
       tmp = runtime.safeCall(Predef.fold(lambda));
-      tmp1 = XML.joinAttributes(attributes2);
+      if (globalThis.Array.isArray(attributes2) && attributes2.length === 0) {
+        tmp1 = "";
+      } else {
+        tmp2 = XML.joinAttributes(attributes2);
+        tmp1 = " " + tmp2;
+      }
       return runtime.safeCall(tmp("<", tagName1, tmp1, " ", "/>"))
     }
   } 
-  static style(...rules) {
-    let tmp;
-    tmp = StyleAttributeValue1(rules);
-    return [
-      "style",
-      tmp
-    ]
+  static style(rules) {
+    return StyleAttributeValue1(rules)
   } 
-  static html(attributes2) {
+  static html(...attributes2) {
     return (...elements) => {
       let tmp, tmp1;
-      tmp = XML.elem("html", attributes2);
+      tmp = XML.elem("html", ...attributes2);
       tmp1 = runtime.safeCall(tmp(...elements));
       return "<!DOCTYPE html>" + tmp1
     }

@@ -14,7 +14,7 @@ open Option
 open ParseRule { Choice }
 open Rules { syntaxKinds }
 open TreeTracer
-open XML { html, tag, elem, style }
+open XML { html, tag, style }
 
 module ParseRuleVisualizer with ...
 

@@ -39,21 +39,21 @@ fun libraryPath = ensurePath of path.resolve of
 
 fun loadRailroadStylesheet = fs.readFileSync of path.join(libraryPath, "railroad.css"), "utf-8"
 
-fun toHTML(...elements) = html(["lang", "en"]) of
+fun toHTML(...elements) = html(lang: "en") of
   elem("head") of
-    tag("meta") of ["charset", "UTF-8"]
+    tag("meta") of charset: "UTF-8"
     tag("meta") of
-      ["name", "viewport"]
-      ["content", "width=device-width, initial-scale=1.0"]
+      name: "viewport"
+      content: "width=device-width, initial-scale=1.0"
     tag("link") of
-      ["href", "https://cdn.jsdelivr.net/npm/typeface-inconsolata@1.1.13/index.min.css"]
-      ["rel", "stylesheet"]
+      href: "https://cdn.jsdelivr.net/npm/typeface-inconsolata@1.1.13/index.min.css"
+      rel: "stylesheet"
     elem("title") of "Parse Rules"
-  elem("body", style of ["padding", "1em"]) of
+  elem("body", style(padding: "1em")) of
     elem("div", style of
-      ["display", "flex"]
-      ["flex-direction", "column"]
-      ["gap", "1em"]
+      display: "flex"
+      "flex-direction": "column"
+      gap: "1em"
     ) of
       ...elements
     elem("style") of
@@ -68,7 +68,7 @@ fun toHTML(...elements) = html(["lang", "en"]) of
 fun toElements(diagrams) =
   diagrams
     Iter.mapping of case [caption, svg] then
-      elem("figure", ["id", caption]) of
+      elem("figure", id: caption) of
         elem("figcaption") of caption
         svg
     Iter.toArray()
