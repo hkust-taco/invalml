@@ -17,6 +17,7 @@ declare class Set
 declare class Map
 declare class Error(msg)
 declare class TypeError(msg)
+declare class RangeError
 declare class Symbol
 
 // MLscript-specific types

@@ -79,8 +79,8 @@ let TreeTracer2;
       print(...pieces1) {
         let message1, last0, rest, line, pieces2, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, lambda, lambda1, lambda2;
         if (globalThis.Array.isArray(pieces1) && pieces1.length >= 1) {
-          rest = runtime.safeCall(globalThis.Predef.tupleSlice(pieces1, 0, 1));
-          last0 = globalThis.Predef.tupleGet(pieces1, -1);
+          rest = runtime.safeCall(runtime.Tuple.slice(pieces1, 0, 1));
+          last0 = runtime.Tuple.get(pieces1, -1);
           pieces2 = rest;
           if (globalThis.Number.isInteger(last0)) {
             line = last0;

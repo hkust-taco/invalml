@@ -29,23 +29,23 @@ let Test1;
       } 
       unapplyStringPrefix(topic) {
         let cond, sliced, cond1, sliced1, cond2, sliced2;
-        cond = globalThis.Predef.stringStartsWith(topic, "tree");
+        cond = runtime.Str.startsWith(topic, "tree");
         if (cond === true) {
-          sliced = globalThis.Predef.stringDrop(topic, 4);
+          sliced = runtime.Str.drop(topic, 4);
           return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, "trace");
+          cond1 = runtime.Str.startsWith(topic, "trace");
           if (cond1 === true) {
-            sliced1 = globalThis.Predef.stringDrop(topic, 5);
+            sliced1 = runtime.Str.drop(topic, 5);
             return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
-            cond2 = globalThis.Predef.stringStartsWith(topic, "tokens");
+            cond2 = runtime.Str.startsWith(topic, "tokens");
             if (cond2 === true) {
-              sliced2 = globalThis.Predef.stringDrop(topic, 6);
+              sliced2 = runtime.Str.drop(topic, 6);
               return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))

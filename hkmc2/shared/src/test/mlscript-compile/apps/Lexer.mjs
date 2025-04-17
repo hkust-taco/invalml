@@ -64,14 +64,14 @@ let Lexer1;
         matchResult = runtime.safeCall(Char.Letter.unapplyStringPrefix(topic));
         if (matchResult instanceof runtime.MatchResult.class) {
           arg = matchResult.captures;
-          postfix = globalThis.Predef.tupleGet(arg, 0);
+          postfix = runtime.Tuple.get(arg, 0);
           return runtime.safeCall(runtime.MatchResult([
             postfix
           ]))
         } else {
-          cond = globalThis.Predef.stringStartsWith(topic, "_");
+          cond = runtime.Str.startsWith(topic, "_");
           if (cond === true) {
-            sliced = globalThis.Predef.stringDrop(topic, 1);
+            sliced = runtime.Str.drop(topic, 1);
             return runtime.safeCall(runtime.MatchResult([
               sliced
             ]))
@@ -111,7 +111,7 @@ let Lexer1;
         matchResult = runtime.safeCall(Char.Letter.unapplyStringPrefix(topic));
         if (matchResult instanceof runtime.MatchResult.class) {
           arg = matchResult.captures;
-          postfix = globalThis.Predef.tupleGet(arg, 0);
+          postfix = runtime.Tuple.get(arg, 0);
           return runtime.safeCall(runtime.MatchResult([
             postfix
           ]))
@@ -119,21 +119,21 @@ let Lexer1;
           matchResult1 = runtime.safeCall(Char.Digit.unapplyStringPrefix(topic));
           if (matchResult1 instanceof runtime.MatchResult.class) {
             arg1 = matchResult1.captures;
-            postfix1 = globalThis.Predef.tupleGet(arg1, 0);
+            postfix1 = runtime.Tuple.get(arg1, 0);
             return runtime.safeCall(runtime.MatchResult([
               postfix1
             ]))
           } else {
-            cond = globalThis.Predef.stringStartsWith(topic, "_");
+            cond = runtime.Str.startsWith(topic, "_");
             if (cond === true) {
-              sliced = globalThis.Predef.stringDrop(topic, 1);
+              sliced = runtime.Str.drop(topic, 1);
               return runtime.safeCall(runtime.MatchResult([
                 sliced
               ]))
             } else {
-              cond1 = globalThis.Predef.stringStartsWith(topic, "'");
+              cond1 = runtime.Str.startsWith(topic, "'");
               if (cond1 === true) {
-                sliced1 = globalThis.Predef.stringDrop(topic, 1);
+                sliced1 = runtime.Str.drop(topic, 1);
                 return runtime.safeCall(runtime.MatchResult([
                   sliced1
                 ]))
@@ -203,149 +203,149 @@ let Lexer1;
       } 
       unapplyStringPrefix(topic) {
         let cond, sliced, cond1, sliced1, cond2, sliced2, cond3, sliced3, cond4, sliced4, cond5, sliced5, cond6, sliced6, cond7, sliced7, cond8, sliced8, cond9, sliced9, cond10, sliced10, cond11, sliced11, cond12, sliced12, cond13, sliced13, cond14, sliced14, cond15, sliced15, cond16, sliced16, cond17, sliced17, cond18, sliced18, cond19, sliced19, cond20, sliced20;
-        cond = globalThis.Predef.stringStartsWith(topic, ",");
+        cond = runtime.Str.startsWith(topic, ",");
         if (cond === true) {
-          sliced = globalThis.Predef.stringDrop(topic, 1);
+          sliced = runtime.Str.drop(topic, 1);
           return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, ";");
+          cond1 = runtime.Str.startsWith(topic, ";");
           if (cond1 === true) {
-            sliced1 = globalThis.Predef.stringDrop(topic, 1);
+            sliced1 = runtime.Str.drop(topic, 1);
             return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
-            cond2 = globalThis.Predef.stringStartsWith(topic, "!");
+            cond2 = runtime.Str.startsWith(topic, "!");
             if (cond2 === true) {
-              sliced2 = globalThis.Predef.stringDrop(topic, 1);
+              sliced2 = runtime.Str.drop(topic, 1);
               return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
-              cond3 = globalThis.Predef.stringStartsWith(topic, "#");
+              cond3 = runtime.Str.startsWith(topic, "#");
               if (cond3 === true) {
-                sliced3 = globalThis.Predef.stringDrop(topic, 1);
+                sliced3 = runtime.Str.drop(topic, 1);
                 return runtime.safeCall(runtime.MatchResult([
                   sliced3
                 ]))
               } else {
-                cond4 = globalThis.Predef.stringStartsWith(topic, "%");
+                cond4 = runtime.Str.startsWith(topic, "%");
                 if (cond4 === true) {
-                  sliced4 = globalThis.Predef.stringDrop(topic, 1);
+                  sliced4 = runtime.Str.drop(topic, 1);
                   return runtime.safeCall(runtime.MatchResult([
                     sliced4
                   ]))
                 } else {
-                  cond5 = globalThis.Predef.stringStartsWith(topic, "&");
+                  cond5 = runtime.Str.startsWith(topic, "&");
                   if (cond5 === true) {
-                    sliced5 = globalThis.Predef.stringDrop(topic, 1);
+                    sliced5 = runtime.Str.drop(topic, 1);
                     return runtime.safeCall(runtime.MatchResult([
                       sliced5
                     ]))
                   } else {
-                    cond6 = globalThis.Predef.stringStartsWith(topic, "*");
+                    cond6 = runtime.Str.startsWith(topic, "*");
                     if (cond6 === true) {
-                      sliced6 = globalThis.Predef.stringDrop(topic, 1);
+                      sliced6 = runtime.Str.drop(topic, 1);
                       return runtime.safeCall(runtime.MatchResult([
                         sliced6
                       ]))
                     } else {
-                      cond7 = globalThis.Predef.stringStartsWith(topic, "+");
+                      cond7 = runtime.Str.startsWith(topic, "+");
                       if (cond7 === true) {
-                        sliced7 = globalThis.Predef.stringDrop(topic, 1);
+                        sliced7 = runtime.Str.drop(topic, 1);
                         return runtime.safeCall(runtime.MatchResult([
                           sliced7
                         ]))
                       } else {
-                        cond8 = globalThis.Predef.stringStartsWith(topic, "-");
+                        cond8 = runtime.Str.startsWith(topic, "-");
                         if (cond8 === true) {
-                          sliced8 = globalThis.Predef.stringDrop(topic, 1);
+                          sliced8 = runtime.Str.drop(topic, 1);
                           return runtime.safeCall(runtime.MatchResult([
                             sliced8
                           ]))
                         } else {
-                          cond9 = globalThis.Predef.stringStartsWith(topic, "/");
+                          cond9 = runtime.Str.startsWith(topic, "/");
                           if (cond9 === true) {
-                            sliced9 = globalThis.Predef.stringDrop(topic, 1);
+                            sliced9 = runtime.Str.drop(topic, 1);
                             return runtime.safeCall(runtime.MatchResult([
                               sliced9
                             ]))
                           } else {
-                            cond10 = globalThis.Predef.stringStartsWith(topic, ":");
+                            cond10 = runtime.Str.startsWith(topic, ":");
                             if (cond10 === true) {
-                              sliced10 = globalThis.Predef.stringDrop(topic, 1);
+                              sliced10 = runtime.Str.drop(topic, 1);
                               return runtime.safeCall(runtime.MatchResult([
                                 sliced10
                               ]))
                             } else {
-                              cond11 = globalThis.Predef.stringStartsWith(topic, "<");
+                              cond11 = runtime.Str.startsWith(topic, "<");
                               if (cond11 === true) {
-                                sliced11 = globalThis.Predef.stringDrop(topic, 1);
+                                sliced11 = runtime.Str.drop(topic, 1);
                                 return runtime.safeCall(runtime.MatchResult([
                                   sliced11
                                 ]))
                               } else {
-                                cond12 = globalThis.Predef.stringStartsWith(topic, "=");
+                                cond12 = runtime.Str.startsWith(topic, "=");
                                 if (cond12 === true) {
-                                  sliced12 = globalThis.Predef.stringDrop(topic, 1);
+                                  sliced12 = runtime.Str.drop(topic, 1);
                                   return runtime.safeCall(runtime.MatchResult([
                                     sliced12
                                   ]))
                                 } else {
-                                  cond13 = globalThis.Predef.stringStartsWith(topic, ">");
+                                  cond13 = runtime.Str.startsWith(topic, ">");
                                   if (cond13 === true) {
-                                    sliced13 = globalThis.Predef.stringDrop(topic, 1);
+                                    sliced13 = runtime.Str.drop(topic, 1);
                                     return runtime.safeCall(runtime.MatchResult([
                                       sliced13
                                     ]))
                                   } else {
-                                    cond14 = globalThis.Predef.stringStartsWith(topic, "?");
+                                    cond14 = runtime.Str.startsWith(topic, "?");
                                     if (cond14 === true) {
-                                      sliced14 = globalThis.Predef.stringDrop(topic, 1);
+                                      sliced14 = runtime.Str.drop(topic, 1);
                                       return runtime.safeCall(runtime.MatchResult([
                                         sliced14
                                       ]))
                                     } else {
-                                      cond15 = globalThis.Predef.stringStartsWith(topic, "@");
+                                      cond15 = runtime.Str.startsWith(topic, "@");
                                       if (cond15 === true) {
-                                        sliced15 = globalThis.Predef.stringDrop(topic, 1);
+                                        sliced15 = runtime.Str.drop(topic, 1);
                                         return runtime.safeCall(runtime.MatchResult([
                                           sliced15
                                         ]))
                                       } else {
-                                        cond16 = globalThis.Predef.stringStartsWith(topic, "\\");
+                                        cond16 = runtime.Str.startsWith(topic, "\\");
                                         if (cond16 === true) {
-                                          sliced16 = globalThis.Predef.stringDrop(topic, 1);
+                                          sliced16 = runtime.Str.drop(topic, 1);
                                           return runtime.safeCall(runtime.MatchResult([
                                             sliced16
                                           ]))
                                         } else {
-                                          cond17 = globalThis.Predef.stringStartsWith(topic, "^");
+                                          cond17 = runtime.Str.startsWith(topic, "^");
                                           if (cond17 === true) {
-                                            sliced17 = globalThis.Predef.stringDrop(topic, 1);
+                                            sliced17 = runtime.Str.drop(topic, 1);
                                             return runtime.safeCall(runtime.MatchResult([
                                               sliced17
                                             ]))
                                           } else {
-                                            cond18 = globalThis.Predef.stringStartsWith(topic, "|");
+                                            cond18 = runtime.Str.startsWith(topic, "|");
                                             if (cond18 === true) {
-                                              sliced18 = globalThis.Predef.stringDrop(topic, 1);
+                                              sliced18 = runtime.Str.drop(topic, 1);
                                               return runtime.safeCall(runtime.MatchResult([
                                                 sliced18
                                               ]))
                                             } else {
-                                              cond19 = globalThis.Predef.stringStartsWith(topic, "~");
+                                              cond19 = runtime.Str.startsWith(topic, "~");
                                               if (cond19 === true) {
-                                                sliced19 = globalThis.Predef.stringDrop(topic, 1);
+                                                sliced19 = runtime.Str.drop(topic, 1);
                                                 return runtime.safeCall(runtime.MatchResult([
                                                   sliced19
                                                 ]))
                                               } else {
-                                                cond20 = globalThis.Predef.stringStartsWith(topic, ".");
+                                                cond20 = runtime.Str.startsWith(topic, ".");
                                                 if (cond20 === true) {
-                                                  sliced20 = globalThis.Predef.stringDrop(topic, 1);
+                                                  sliced20 = runtime.Str.drop(topic, 1);
                                                   return runtime.safeCall(runtime.MatchResult([
                                                     sliced20
                                                   ]))
@@ -398,44 +398,44 @@ let Lexer1;
       } 
       unapplyStringPrefix(topic) {
         let cond, sliced, cond1, sliced1, cond2, sliced2, cond3, sliced3, cond4, sliced4, cond5, sliced5;
-        cond = globalThis.Predef.stringStartsWith(topic, "(");
+        cond = runtime.Str.startsWith(topic, "(");
         if (cond === true) {
-          sliced = globalThis.Predef.stringDrop(topic, 1);
+          sliced = runtime.Str.drop(topic, 1);
           return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, ")");
+          cond1 = runtime.Str.startsWith(topic, ")");
           if (cond1 === true) {
-            sliced1 = globalThis.Predef.stringDrop(topic, 1);
+            sliced1 = runtime.Str.drop(topic, 1);
             return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))
           } else {
-            cond2 = globalThis.Predef.stringStartsWith(topic, "[");
+            cond2 = runtime.Str.startsWith(topic, "[");
             if (cond2 === true) {
-              sliced2 = globalThis.Predef.stringDrop(topic, 1);
+              sliced2 = runtime.Str.drop(topic, 1);
               return runtime.safeCall(runtime.MatchResult([
                 sliced2
               ]))
             } else {
-              cond3 = globalThis.Predef.stringStartsWith(topic, "]");
+              cond3 = runtime.Str.startsWith(topic, "]");
               if (cond3 === true) {
-                sliced3 = globalThis.Predef.stringDrop(topic, 1);
+                sliced3 = runtime.Str.drop(topic, 1);
                 return runtime.safeCall(runtime.MatchResult([
                   sliced3
                 ]))
               } else {
-                cond4 = globalThis.Predef.stringStartsWith(topic, "{");
+                cond4 = runtime.Str.startsWith(topic, "{");
                 if (cond4 === true) {
-                  sliced4 = globalThis.Predef.stringDrop(topic, 1);
+                  sliced4 = runtime.Str.drop(topic, 1);
                   return runtime.safeCall(runtime.MatchResult([
                     sliced4
                   ]))
                 } else {
-                  cond5 = globalThis.Predef.stringStartsWith(topic, "}");
+                  cond5 = runtime.Str.startsWith(topic, "}");
                   if (cond5 === true) {
-                    sliced5 = globalThis.Predef.stringDrop(topic, 1);
+                    sliced5 = runtime.Str.drop(topic, 1);
                     return runtime.safeCall(runtime.MatchResult([
                       sliced5
                     ]))
@@ -465,16 +465,16 @@ let Lexer1;
       } 
       unapplyStringPrefix(topic) {
         let cond, sliced, cond1, sliced1;
-        cond = globalThis.Predef.stringStartsWith(topic, "'");
+        cond = runtime.Str.startsWith(topic, "'");
         if (cond === true) {
-          sliced = globalThis.Predef.stringDrop(topic, 1);
+          sliced = runtime.Str.drop(topic, 1);
           return runtime.safeCall(runtime.MatchResult([
             sliced
           ]))
         } else {
-          cond1 = globalThis.Predef.stringStartsWith(topic, "`");
+          cond1 = runtime.Str.startsWith(topic, "`");
           if (cond1 === true) {
-            sliced1 = globalThis.Predef.stringDrop(topic, 1);
+            sliced1 = runtime.Str.drop(topic, 1);
             return runtime.safeCall(runtime.MatchResult([
               sliced1
             ]))

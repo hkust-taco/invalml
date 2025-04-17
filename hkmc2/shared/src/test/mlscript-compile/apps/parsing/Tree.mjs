@@ -928,7 +928,7 @@ let Tree2;
           } else if (tree1 instanceof Stack.Nil.class) {
             return "Nil"
           } else if (globalThis.Array.isArray(tree1) && tree1.length >= 0) {
-            rest = runtime.safeCall(globalThis.Predef.tupleSlice(tree1, 0, 0));
+            rest = runtime.safeCall(runtime.Tuple.slice(tree1, 0, 0));
             trees = rest;
             lambda10 = (undefined, function (tree5, _, _1) {
               return wrap(tree5)

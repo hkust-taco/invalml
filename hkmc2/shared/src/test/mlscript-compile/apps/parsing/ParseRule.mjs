@@ -867,7 +867,7 @@ let ParseRule2;
           } else if (choices instanceof Choice.Choice) {
             return ParseRule.rule(ruleName, choices)
           } else if (globalThis.Array.isArray(choices) && choices.length >= 0) {
-            rest = runtime.safeCall(globalThis.Predef.tupleSlice(choices, 0, 0));
+            rest = runtime.safeCall(runtime.Tuple.slice(choices, 0, 0));
             tmp9 = runtime.safeCall(Choice.#ensureChoices(choices, "Choice.reference"));
             return ParseRule.rule(ruleName, ...choices)
           } else if (choices === undefined) {
