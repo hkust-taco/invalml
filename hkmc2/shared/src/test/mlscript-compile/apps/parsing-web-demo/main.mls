@@ -1,15 +1,15 @@
-import "./Parser.mls"
-import "./Lexer.mls"
-import "../Iter.mls"
-import "../XML.mls"
-import "../Option.mls"
-import "../Runtime.mls"
-import "../Predef.mls"
-import "./parsing/TreeHelpers.mls"
-import "./parsing/Extension.mls"
-import "./parsing/ParseRuleVisualizer.mls"
-import "./parsing/Rules.mls"
-import "./parsing/vendors/railroad/railroad.mjs"
+import "../parsing/Parser.mls"
+import "../parsing/Lexer.mls"
+import "../../Iter.mls"
+import "../../XML.mls"
+import "../../Option.mls"
+import "../../Runtime.mls"
+import "../../Predef.mls"
+import "../parsing/TreeHelpers.mls"
+import "../parsing/Extension.mls"
+import "../parsing/ParseRuleVisualizer.mls"
+import "../parsing/Rules.mls"
+import "../parsing/vendors/railroad/railroad.mjs"
 
 open XML { elem }
 open Predef
@@ -17,11 +17,12 @@ open Option { Some, None }
 
 declare val document
 declare val customElements
+declare val eval
 declare class HTMLElement
 
 module Main with ...
 
-set globalThis.Predef = Predef
+set globalThis.Predef = eval("Predef")
 
 let query = document.querySelector.bind(document)
 let editor = query("#editor")

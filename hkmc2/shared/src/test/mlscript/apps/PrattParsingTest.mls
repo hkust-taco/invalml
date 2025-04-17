@@ -3,7 +3,7 @@
 import "../../mlscript-compile/apps/parsing/PrattParsing.mls"
 import "../../mlscript-compile/apps/parsing/Expr.mls"
 import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
-import "../../mlscript-compile/apps/Lexer.mls"
+import "../../mlscript-compile/apps/parsing/Lexer.mls"
 
 open Lexer { lex }
 open PrattParsing { parse }

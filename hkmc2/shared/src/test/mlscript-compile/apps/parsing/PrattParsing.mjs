@@ -3,7 +3,7 @@ import Predef from "./../../Predef.mjs";
 import Stack from "./../../Stack.mjs";
 import Option from "./../../Option.mjs";
 import Iter from "./../../Iter.mjs";
-import Lexer from "./../Lexer.mjs";
+import Lexer from "./Lexer.mjs";
 import Token from "./Token.mjs";
 import Expr from "./Expr.mjs";
 let PrattParsing1;

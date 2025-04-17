@@ -1,15 +1,15 @@
 
-import "../Predef.mls"
+import "../../Predef.mls"
 
 open Predef
 
-import "../Char.mls"
-import "../Stack.mls"
-import "../Str.mls"
-import "../Option.mls"
-import "../Iter.mls"
+import "../../Char.mls"
+import "../../Stack.mls"
+import "../../Str.mls"
+import "../../Option.mls"
+import "../../Iter.mls"
 
-import "./parsing/Token.mls"
+import "./Token.mls"
 
 open Stack
 open Str

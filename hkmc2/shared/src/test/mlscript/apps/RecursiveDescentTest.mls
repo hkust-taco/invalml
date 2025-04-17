@@ -3,7 +3,7 @@
 import "../../mlscript-compile/apps/parsing/RecursiveDescent.mls"
 import "../../mlscript-compile/apps/parsing/BasicExpr.mls"
 import "../../mlscript-compile/apps/parsing/TokenHelpers.mls"
-import "../../mlscript-compile/apps/Lexer.mls"
+import "../../mlscript-compile/apps/parsing/Lexer.mls"
 
 open Lexer { lex }
 open RecursiveDescent { parse }

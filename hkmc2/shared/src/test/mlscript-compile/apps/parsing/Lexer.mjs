@@ -1,11 +1,11 @@
-import runtime from "./../Runtime.mjs";
-import Predef from "./../Predef.mjs";
-import Char from "./../Char.mjs";
-import Stack from "./../Stack.mjs";
-import Str from "./../Str.mjs";
-import Option from "./../Option.mjs";
-import Iter from "./../Iter.mjs";
-import Token from "./parsing/Token.mjs";
+import runtime from "./../../Runtime.mjs";
+import Predef from "./../../Predef.mjs";
+import Char from "./../../Char.mjs";
+import Stack from "./../../Stack.mjs";
+import Str from "./../../Str.mjs";
+import Option from "./../../Option.mjs";
+import Iter from "./../../Iter.mjs";
+import Token from "./Token.mjs";
 let Lexer1;
 (class Lexer {
   static {

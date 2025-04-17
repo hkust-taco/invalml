@@ -2,7 +2,7 @@ import "../../Predef.mls"
 import "../../Stack.mls"
 import "../../Option.mls"
 import "../../Iter.mls"
-import "../Lexer.mls"
+import "./Lexer.mls"
 import "./Token.mls"
 import "./Expr.mls"
 

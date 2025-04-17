@@ -1,6 +1,6 @@
 import "./ParseRule.mls"
 import "./Rules.mls"
-import "../Parser.mls"
+import "./Parser.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
 import "../../Iter.mls"

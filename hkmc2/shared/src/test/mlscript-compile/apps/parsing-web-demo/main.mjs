@@ -1,16 +1,16 @@
-import runtime from "./../Runtime.mjs";
-import Parser from "./Parser.mjs";
-import Lexer from "./Lexer.mjs";
-import Iter from "./../Iter.mjs";
-import XML from "./../XML.mjs";
-import Option from "./../Option.mjs";
-import Runtime from "./../Runtime.mjs";
-import Predef from "./../Predef.mjs";
-import TreeHelpers from "./parsing/TreeHelpers.mjs";
-import Extension from "./parsing/Extension.mjs";
-import ParseRuleVisualizer from "./parsing/ParseRuleVisualizer.mjs";
-import Rules from "./parsing/Rules.mjs";
-import railroad from "./parsing/vendors/railroad/railroad.mjs";
+import runtime from "./../../Runtime.mjs";
+import Parser from "./../parsing/Parser.mjs";
+import Lexer from "./../parsing/Lexer.mjs";
+import Iter from "./../../Iter.mjs";
+import XML from "./../../XML.mjs";
+import Option from "./../../Option.mjs";
+import Runtime from "./../../Runtime.mjs";
+import Predef from "./../../Predef.mjs";
+import TreeHelpers from "./../parsing/TreeHelpers.mjs";
+import Extension from "./../parsing/Extension.mjs";
+import ParseRuleVisualizer from "./../parsing/ParseRuleVisualizer.mjs";
+import Rules from "./../parsing/Rules.mjs";
+import railroad from "./../parsing/vendors/railroad/railroad.mjs";
 let Main1;
 (class Main {
   static #query;
@@ -22,41 +22,42 @@ let Main1;
   static #errorDisplayStyle;
   static {
     Main1 = Main;
-    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, lambda, lambda1, lambda2;
-    globalThis.Predef = Predef;
-    tmp = runtime.safeCall(globalThis.document.querySelector.bind(globalThis.document));
-    Main.#query = tmp;
-    tmp1 = runtime.safeCall(Main.#query("#editor"));
-    Main.#editor = tmp1;
-    tmp2 = runtime.safeCall(Main.#query("select#example"));
-    Main.#selector = tmp2;
-    tmp3 = runtime.safeCall(Main.#query("button#parse"));
-    Main.#parseButton = tmp3;
-    tmp4 = runtime.safeCall(Main.#query("#output"));
-    Main.#outputPanel = tmp4;
-    tmp5 = Main.showExample1();
+    let tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, lambda, lambda1, lambda2;
+    tmp = runtime.safeCall(globalThis.eval("Predef"));
+    globalThis.Predef = tmp;
+    tmp1 = runtime.safeCall(globalThis.document.querySelector.bind(globalThis.document));
+    Main.#query = tmp1;
+    tmp2 = runtime.safeCall(Main.#query("#editor"));
+    Main.#editor = tmp2;
+    tmp3 = runtime.safeCall(Main.#query("select#example"));
+    Main.#selector = tmp3;
+    tmp4 = runtime.safeCall(Main.#query("button#parse"));
+    Main.#parseButton = tmp4;
+    tmp5 = runtime.safeCall(Main.#query("#output"));
+    Main.#outputPanel = tmp5;
+    tmp6 = Main.showExample1();
     lambda = (undefined, function (event) {
-      let scrut, start, end, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20;
+      let scrut, start, end, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21;
       scrut = event.key;
       if (scrut === "Tab") {
-        tmp15 = runtime.safeCall(event.preventDefault());
+        tmp16 = runtime.safeCall(event.preventDefault());
         start = Main.#editor.selectionStart;
         end = Main.#editor.selectionEnd;
-        tmp16 = Main.#editor.value.substring(0, start);
-        tmp17 = tmp16 + "  ";
-        tmp18 = runtime.safeCall(Main.#editor.value.substring(end));
-        tmp19 = tmp17 + tmp18;
-        Main.#editor.value = tmp19;
-        tmp20 = start + 2;
-        Main.#editor.selectionEnd = tmp20;
+        tmp17 = Main.#editor.value.substring(0, start);
+        tmp18 = tmp17 + "  ";
+        tmp19 = runtime.safeCall(Main.#editor.value.substring(end));
+        tmp20 = tmp18 + tmp19;
+        Main.#editor.value = tmp20;
+        tmp21 = start + 2;
+        Main.#editor.selectionEnd = tmp21;
         Main.#editor.selectionStart = Main.#editor.selectionEnd;
         return runtime.Unit
       } else {
         return runtime.Unit
       }
     });
-    tmp6 = lambda;
-    tmp7 = Main.#editor.addEventListener("keydown", tmp6);
+    tmp7 = lambda;
+    tmp8 = Main.#editor.addEventListener("keydown", tmp7);
     lambda1 = (undefined, function (event) {
       let scrut;
       scrut = Main.#selector.value;
@@ -68,106 +69,106 @@ let Main1;
         return runtime.Unit
       }
     });
-    tmp8 = lambda1;
-    tmp9 = Main.#selector.addEventListener("change", tmp8);
+    tmp9 = lambda1;
+    tmp10 = Main.#selector.addEventListener("change", tmp9);
     lambda2 = (undefined, function (event) {
-      let tokens, tmp15, tmp16, tmp17, lambda3, lambda4;
-      tmp15 = Lexer.lex(Main.#editor.value, {
+      let tokens, tmp16, tmp17, tmp18, lambda3, lambda4;
+      tmp16 = Lexer.lex(Main.#editor.value, {
       "noWhitespace": true
       });
-      tokens = tmp15;
+      tokens = tmp16;
       Main.#outputPanel.innerHTML = "";
       lambda3 = (undefined, function () {
-        let trees, tmp18, tmp19, tmp20, lambda5;
-        tmp18 = Parser.parse(tokens);
-        trees = tmp18;
-        tmp19 = Iter.fromStack(trees);
+        let trees, tmp19, tmp20, tmp21, lambda5;
+        tmp19 = Parser.parse(tokens);
+        trees = tmp19;
+        tmp20 = Iter.fromStack(trees);
         lambda5 = (undefined, function (tree) {
-          let collapsibleTree, scrut, tmp21, tmp22;
+          let collapsibleTree, scrut, tmp22, tmp23;
           scrut = Extension.isDiagramDirective(tree);
           if (scrut === true) {
             return Main.displayRules()
           } else {
-            tmp21 = runtime.safeCall(globalThis.document.createElement("collapsible-tree"));
-            collapsibleTree = tmp21;
-            tmp22 = TreeHelpers.showAsTree(tree);
-            collapsibleTree.textContent = tmp22;
+            tmp22 = runtime.safeCall(globalThis.document.createElement("collapsible-tree"));
+            collapsibleTree = tmp22;
+            tmp23 = TreeHelpers.showAsTree(tree);
+            collapsibleTree.textContent = tmp23;
             return runtime.safeCall(Main.#outputPanel.appendChild(collapsibleTree))
           }
         });
-        tmp20 = lambda5;
-        return Iter.each(tmp19, tmp20)
+        tmp21 = lambda5;
+        return Iter.each(tmp20, tmp21)
       });
-      tmp16 = lambda3;
+      tmp17 = lambda3;
       lambda4 = (undefined, function (error) {
-        let errorDisplay, tmp18, tmp19;
-        tmp18 = runtime.safeCall(globalThis.document.createElement("error-display"));
-        errorDisplay = tmp18;
-        tmp19 = runtime.safeCall(errorDisplay.setError(error));
+        let errorDisplay, tmp19, tmp20;
+        tmp19 = runtime.safeCall(globalThis.document.createElement("error-display"));
+        errorDisplay = tmp19;
+        tmp20 = runtime.safeCall(errorDisplay.setError(error));
         return runtime.safeCall(Main.#outputPanel.appendChild(errorDisplay))
       });
-      tmp17 = lambda4;
-      return Runtime.try_catch(tmp16, tmp17)
+      tmp18 = lambda4;
+      return Runtime.try_catch(tmp17, tmp18)
     });
-    tmp10 = lambda2;
-    tmp11 = Main.#parseButton.addEventListener("click", tmp10);
-    tmp12 = new globalThis.RegExp("^(\\s*)");
-    Main.#indentRegex = tmp12;
+    tmp11 = lambda2;
+    tmp12 = Main.#parseButton.addEventListener("click", tmp11);
+    tmp13 = new globalThis.RegExp("^(\\s*)");
+    Main.#indentRegex = tmp13;
     Main.#errorDisplayStyle = "\n.error-container {\n  background-color: #fdd;\n  padding: 0.375rem 0.75rem 0.5rem;\n  font-family: var(--monospace);\n  color: #991b1bff;\n  display: flex;\n  flex-direction: column;\n  gap: 0.25rem;\n}\n\n.error-message {\n  margin: 0;\n  font-weight: bold;\n  font-size: 1.125rem;\n}\n\n.stack-trace {\n  font-size: 0.875rem;\n  margin: 0;\n  list-style-type: none;\n  padding-left: 0.5rem;\n}";
     this.CollapsibleTree = class CollapsibleTree extends globalThis.HTMLElement {
       constructor() {
         super();
       }
       connectedCallback() {
-        let rawText, treeData, treeElement, tmp15, tmp16;
+        let rawText, treeData, treeElement, tmp16, tmp17;
         rawText = this.textContent;
         this.textContent = "";
-        tmp15 = Main.parseIndentedText(rawText);
-        treeData = tmp15;
-        tmp16 = this.createDetailsTree(treeData);
-        treeElement = tmp16;
+        tmp16 = Main.parseIndentedText(rawText);
+        treeData = tmp16;
+        tmp17 = this.createDetailsTree(treeData);
+        treeElement = tmp17;
         return runtime.safeCall(this.appendChild(treeElement))
       } 
       createDetailsTree(nodes) {
-        let fragment, tmp15, tmp16, tmp17, lambda3;
-        tmp15 = runtime.safeCall(globalThis.document.createDocumentFragment());
-        fragment = tmp15;
+        let fragment, tmp16, tmp17, tmp18, lambda3;
+        tmp16 = runtime.safeCall(globalThis.document.createDocumentFragment());
+        fragment = tmp16;
         const this$CollapsibleTree = this;
         lambda3 = (undefined, function (node) {
-          let details, summary, scrut, rule, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26;
-          tmp18 = runtime.safeCall(globalThis.document.createElement("details"));
-          details = tmp18;
-          tmp19 = details.setAttribute("open", "");
-          tmp20 = runtime.safeCall(globalThis.document.createElement("summary"));
-          summary = tmp20;
+          let details, summary, scrut, rule, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27;
+          tmp19 = runtime.safeCall(globalThis.document.createElement("details"));
+          details = tmp19;
+          tmp20 = details.setAttribute("open", "");
+          tmp21 = runtime.safeCall(globalThis.document.createElement("summary"));
+          summary = tmp21;
           summary.textContent = node.text;
-          tmp21 = runtime.safeCall(details.appendChild(summary));
+          tmp22 = runtime.safeCall(details.appendChild(summary));
           scrut = node.children.length > 0;
           if (scrut === true) {
-            tmp22 = this$CollapsibleTree.createDetailsTree(node.children);
-            tmp23 = runtime.safeCall(details.appendChild(tmp22));
+            tmp23 = this$CollapsibleTree.createDetailsTree(node.children);
+            tmp24 = runtime.safeCall(details.appendChild(tmp23));
           } else {
-            tmp23 = details.setAttribute("leaf", "");
+            tmp24 = details.setAttribute("leaf", "");
           }
-          tmp24 = runtime.safeCall(fragment.appendChild(details));
-          tmp25 = runtime.safeCall(globalThis.document.createElement("rule"));
-          rule = tmp25;
-          tmp26 = runtime.safeCall(rule.classList.add("rule"));
+          tmp25 = runtime.safeCall(fragment.appendChild(details));
+          tmp26 = runtime.safeCall(globalThis.document.createElement("rule"));
+          rule = tmp26;
+          tmp27 = runtime.safeCall(rule.classList.add("rule"));
           return runtime.safeCall(fragment.appendChild(rule))
         });
-        tmp16 = lambda3;
-        tmp17 = Iter.each(nodes, tmp16);
+        tmp17 = lambda3;
+        tmp18 = Iter.each(nodes, tmp17);
         return fragment
       }
       toString() { return "CollapsibleTree"; }
     };
-    tmp13 = globalThis.customElements.define("collapsible-tree", Main.CollapsibleTree);
+    tmp14 = globalThis.customElements.define("collapsible-tree", Main.CollapsibleTree);
     this.ErrorDisplay = class ErrorDisplay extends globalThis.HTMLElement {
       #_error;
       constructor() {
         super();
-        let tmp15;
-        tmp15 = runtime.safeCall(this.attachShadow({
+        let tmp16;
+        tmp16 = runtime.safeCall(this.attachShadow({
         "mode": "open"
         }));
         this.#_error = Option.None;
@@ -176,51 +177,51 @@ let Main1;
         return runtime.safeCall(this.render())
       } 
       setError(value) {
-        let tmp15;
-        tmp15 = Option.Some(value);
-        this.#_error = tmp15;
+        let tmp16;
+        tmp16 = Option.Some(value);
+        this.#_error = tmp16;
         return runtime.safeCall(this.render())
       } 
       render() {
-        let scrut, param0, error, stackLines, scrut1, tmp15, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, lambda3;
+        let scrut, param0, error, stackLines, scrut1, tmp16, tmp17, tmp18, tmp19, tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp28, tmp29, tmp30, lambda3;
         scrut = this.#_error;
         if (scrut instanceof Option.Some.class) {
           param0 = scrut.value;
           error = param0;
-          tmp15 = runtime.safeCall(error.stack.split("\n"));
-          stackLines = tmp15;
+          tmp16 = runtime.safeCall(error.stack.split("\n"));
+          stackLines = tmp16;
           scrut1 = runtime.safeCall(stackLines[0].startsWith(error.name));
           if (scrut1 === true) {
-            tmp16 = runtime.safeCall(stackLines.shift());
+            tmp17 = runtime.safeCall(stackLines.shift());
           } else {
-            tmp16 = runtime.Unit;
+            tmp17 = runtime.Unit;
           }
-          tmp17 = XML.elem("div", {
+          tmp18 = XML.elem("div", {
           "class": "error-container"
           });
-          tmp18 = XML.elem("h3", {
+          tmp19 = XML.elem("h3", {
           "class": "error-message"
           });
-          tmp19 = error.name + ": ";
-          tmp20 = tmp19 + error.message;
-          tmp21 = runtime.safeCall(tmp18(tmp20));
-          tmp22 = XML.elem("ul", {
+          tmp20 = error.name + ": ";
+          tmp21 = tmp20 + error.message;
+          tmp22 = runtime.safeCall(tmp19(tmp21));
+          tmp23 = XML.elem("ul", {
           "class": "stack-trace"
           });
           lambda3 = (undefined, function (line) {
-            let tmp30, tmp31;
-            tmp30 = XML.elem("li");
-            tmp31 = runtime.safeCall(line.trim());
-            return runtime.safeCall(tmp30(tmp31))
+            let tmp31, tmp32;
+            tmp31 = XML.elem("li");
+            tmp32 = runtime.safeCall(line.trim());
+            return runtime.safeCall(tmp31(tmp32))
           });
-          tmp23 = lambda3;
-          tmp24 = Iter.mapping(stackLines, tmp23);
-          tmp25 = Iter.joined(tmp24, "");
-          tmp26 = runtime.safeCall(tmp22(tmp25));
-          tmp27 = XML.elem("style");
-          tmp28 = runtime.safeCall(tmp27(Main.#errorDisplayStyle));
-          tmp29 = runtime.safeCall(tmp17(tmp21, tmp26, tmp28));
-          this.shadowRoot.innerHTML = tmp29;
+          tmp24 = lambda3;
+          tmp25 = Iter.mapping(stackLines, tmp24);
+          tmp26 = Iter.joined(tmp25, "");
+          tmp27 = runtime.safeCall(tmp23(tmp26));
+          tmp28 = XML.elem("style");
+          tmp29 = runtime.safeCall(tmp28(Main.#errorDisplayStyle));
+          tmp30 = runtime.safeCall(tmp18(tmp22, tmp27, tmp29));
+          this.shadowRoot.innerHTML = tmp30;
           return runtime.Unit
         } else {
           return runtime.Unit
@@ -228,7 +229,7 @@ let Main1;
       }
       toString() { return "ErrorDisplay"; }
     };
-    tmp14 = globalThis.customElements.define("error-display", Main.ErrorDisplay);
+    tmp15 = globalThis.customElements.define("error-display", Main.ErrorDisplay);
     Main.displayRules()
   }
   static showExample1() {
