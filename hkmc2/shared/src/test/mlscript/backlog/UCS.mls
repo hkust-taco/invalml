@@ -111,7 +111,7 @@ if 1 + 1
 
 // ——— ——— ———
 
-class Some(v)
+class Some(val v)
 
 Some(1) is
   Some of [process, rest] do "hi"
@@ -122,6 +122,7 @@ Some(1) is
 
 // ——— ——— ———
 
+class Some(val v)
 object None
 
 // :ucs normalized
@@ -159,6 +160,24 @@ fun parse(text: Str): [Int, Str] =
 
 // ——— ——— ———
 
+data class Tuple(a, b, c)
+
+let foo =
+  case
+    Tuple(...elements) then elements
+//│ ╔══[ERROR] mismatched arity: expect 3, found 1
+//│ ║  l.167: 	    Tuple(...elements) then elements
+//│ ╙──       	    ^^^^^^^^^^^^^^^^^^
+//│ ╔══[ERROR] Unrecognized pattern (spread)
+//│ ║  l.167: 	    Tuple(...elements) then elements
+//│ ╙──       	             ^^^^^^^^
+//│ foo = [function]
+
+foo(Tuple(1, 2, 3))
+//│ ═══[RUNTIME ERROR] Error: match error
+
+// ——— ——— ———
+
 module Foo with
   class
     Bar
@@ -168,28 +187,28 @@ fun foo(x) = if x is Foo.
   Bar then "Bar"
   Foo then "Foo"
 //│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.167: 	fun foo(x) = if x is Foo.
+//│ ║  l.186: 	fun foo(x) = if x is Foo.
 //│ ╙──       	                     ^^^
 //│ ╔══[ERROR] Cannot use this identifier as an extractor
-//│ ║  l.167: 	fun foo(x) = if x is Foo.
+//│ ║  l.186: 	fun foo(x) = if x is Foo.
 //│ ╙──       	                        ^
 //│ ╔══[ERROR] Cannot use this identifier as an extractor
-//│ ║  l.167: 	fun foo(x) = if x is Foo.
+//│ ║  l.186: 	fun foo(x) = if x is Foo.
 //│ ╙──       	                        ^
 
 fun foo(x) = if x is Foo
   .Bar then "Bar"
   .Foo then "Foo"
 //│ ╔══[PARSE ERROR] Expected an expression; found selector instead
-//│ ║  l.181: 	  .Bar then "Bar"
+//│ ║  l.200: 	  .Bar then "Bar"
 //│ ╙──       	  ^^^^
 //│ ╔══[PARSE ERROR] Unexpected selector here
-//│ ║  l.181: 	  .Bar then "Bar"
+//│ ║  l.200: 	  .Bar then "Bar"
 //│ ╙──       	  ^^^^
 //│ ╔══[ERROR] Unrecognized pattern split.
-//│ ║  l.180: 	fun foo(x) = if x is Foo
+//│ ║  l.199: 	fun foo(x) = if x is Foo
 //│ ║         	                     ^^^
-//│ ║  l.181: 	  .Bar then "Bar"
+//│ ║  l.200: 	  .Bar then "Bar"
 //│ ╙──       	^^
 
 // ——— ——— ———
