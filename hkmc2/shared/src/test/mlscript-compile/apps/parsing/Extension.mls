@@ -104,7 +104,7 @@ fun parseChoiceTree(tree: TreeT) =
                 categoryName
                 go(other :: Nil) Choice.map(op)
         else
-          print of "Expect the choiceTree to be a bracketed term but found " + choiceTree Tree.summary()
+          print of "Expect the choiceTree to be a bracketed term but found", choiceTree Tree.summary()
           None
       else
         print of "Expect a the category to be an identifier but found " + categoryIdent Tree.summary()
