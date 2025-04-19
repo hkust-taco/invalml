@@ -1,5 +1,4 @@
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -14,10 +13,10 @@ fun foo: Int -> Int
 fun foo: Int -> Int
 //│ ╔══[ERROR] Multiple declarations of symbol 'foo'
 //│ ╟── declared here
-//│ ║  l.13: 	fun foo: Int -> Int
+//│ ║  l.12: 	fun foo: Int -> Int
 //│ ║        	    ^^^^^^^^^^^^^^^
 //│ ╟── declared here
-//│ ║  l.14: 	fun foo: Int -> Int
+//│ ║  l.13: 	fun foo: Int -> Int
 //│ ╙──      	    ^^^^^^^^^^^^^^^
 //│ Type: ⊤
 
@@ -26,10 +25,10 @@ fun id(x) = x
 fun id(y) = y
 //│ ╔══[ERROR] Multiple definitions of symbol 'id'
 //│ ╟── defined here
-//│ ║  l.25: 	fun id(x) = x
+//│ ║  l.24: 	fun id(x) = x
 //│ ║        	    ^^^^^^^^^
 //│ ╟── defined here
-//│ ║  l.26: 	fun id(y) = y
+//│ ║  l.25: 	fun id(y) = y
 //│ ╙──      	    ^^^^^^^^^
 //│ Type: ⊤
 
@@ -37,7 +36,7 @@ fun id(y) = y
 fun bar: Str -> Str
 fun bar(x) = let t = x + 1 in "aaa"
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.38: 	fun bar(x) = let t = x + 1 in "aaa"
+//│ ║  l.37: 	fun bar(x) = let t = x + 1 in "aaa"
 //│ ║        	                     ^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: ⊤
@@ -46,7 +45,7 @@ fun bar(x) = let t = x + 1 in "aaa"
 fun baz: Int -> Int
 fun baz(x) = "bbb"
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.47: 	fun baz(x) = "bbb"
+//│ ║  l.46: 	fun baz(x) = "bbb"
 //│ ║        	             ^^^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: ⊤
@@ -61,7 +60,7 @@ add(1, 2) as Int
 :e
 add(0, 0) as Str
 //│ ╔══[ERROR] Type error in application with expected type Str
-//│ ║  l.62: 	add(0, 0) as Str
+//│ ║  l.61: 	add(0, 0) as Str
 //│ ║        	^^^^^^^^^
 //│ ╙── because: cannot constrain  Int  <:  Str
 //│ Type: Str
@@ -69,7 +68,7 @@ add(0, 0) as Str
 :e
 fun errAdd(x: Int) = x + "1"
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.70: 	fun errAdd(x: Int) = x + "1"
+//│ ║  l.69: 	fun errAdd(x: Int) = x + "1"
 //│ ║        	                         ^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: ⊤
@@ -91,11 +90,11 @@ high(x => x)
 :e
 high(x => x + 1)
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.92: 	high(x => x + 1)
+//│ ║  l.91: 	high(x => x + 1)
 //│ ║        	          ^
 //│ ╙── because: cannot constrain  A  <:  Int
 //│ ╔══[ERROR] Type error in application with expected type A
-//│ ║  l.92: 	high(x => x + 1)
+//│ ║  l.91: 	high(x => x + 1)
 //│ ║        	          ^^^^^
 //│ ╙── because: cannot constrain  Int  <:  A
 //│ Type: Int
@@ -121,7 +120,7 @@ fun baz(z) =
 :e
 baz as Int -> (([A] -> A -> A), Int) -> Int
 //│ ╔══[ERROR] Cannot type non-function term Ref(member:baz) as (Int) ->{⊥} ([outer, 'A] -> ('A) ->{⊥} 'A, Int) ->{⊥} Int
-//│ ║  l.122: 	baz as Int -> (([A] -> A -> A), Int) -> Int
+//│ ║  l.121: 	baz as Int -> (([A] -> A -> A), Int) -> Int
 //│ ╙──       	^^^
 //│ Type: ⊥
 
@@ -132,7 +131,7 @@ baz(42)
 :e
 baz(42) as (([A] -> A -> A), Int) -> Int
 //│ ╔══[ERROR] Cannot type non-function term App(Ref(member:baz),Tup(List(Fld(‹›,Lit(IntLit(42)),None)))) as ([outer, 'A] -> ('A) ->{⊥} 'A, Int) ->{⊥} Int
-//│ ║  l.133: 	baz(42) as (([A] -> A -> A), Int) -> Int
+//│ ║  l.132: 	baz(42) as (([A] -> A -> A), Int) -> Int
 //│ ╙──       	^^^^^^^
 //│ Type: ⊥
 
@@ -178,7 +177,7 @@ foo
 :e
 foo(42, 1)
 //│ ╔══[ERROR] Type error in integer literal with expected type ¬'A
-//│ ║  l.179: 	foo(42, 1)
+//│ ║  l.178: 	foo(42, 1)
 //│ ║         	        ^
 //│ ╟── because: cannot constrain  Int  <:  ¬'A
 //│ ╟── because: cannot constrain  'A  <:  ¬(Int)

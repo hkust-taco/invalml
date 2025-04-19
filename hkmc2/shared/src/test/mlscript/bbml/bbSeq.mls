@@ -1,5 +1,4 @@
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -37,13 +36,13 @@ fun mapi = s => f =>
       i := !i + 1
       f(!i, x)
 //│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.35: 	    let i = r.ref 0
+//│ ║  l.34: 	    let i = r.ref 0
 //│ ║        	            ^^^^^^^
-//│ ║  l.36: 	    map(s) of x =>
+//│ ║  l.35: 	    map(s) of x =>
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	      i := !i + 1
+//│ ║  l.36: 	      i := !i + 1
 //│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.38: 	      f(!i, x)
+//│ ║  l.37: 	      f(!i, x)
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[out 'B, out 'E1]  <:  Seq[out A, out E]
 //│ ╟── because: cannot constrain  'E1  <:  E
@@ -54,13 +53,13 @@ fun mapi = s => f =>
 //│ ╟── because: cannot constrain  'r  <:  ¬(¬E ∧ ¬outer)
 //│ ╙── because: cannot constrain  ¬outer  <:  ¬(¬E ∧ ¬outer)
 //│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.35: 	    let i = r.ref 0
+//│ ║  l.34: 	    let i = r.ref 0
 //│ ║        	            ^^^^^^^
-//│ ║  l.36: 	    map(s) of x =>
+//│ ║  l.35: 	    map(s) of x =>
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	      i := !i + 1
+//│ ║  l.36: 	      i := !i + 1
 //│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.38: 	      f(!i, x)
+//│ ║  l.37: 	      f(!i, x)
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[out 'B, out 'E1]  <:  Seq[out A, out E]
 //│ ╟── because: cannot constrain  'E1  <:  E
@@ -71,13 +70,13 @@ fun mapi = s => f =>
 //│ ╟── because: cannot constrain  'r  <:  ¬(¬E ∧ ¬outer)
 //│ ╙── because: cannot constrain  ¬outer  <:  ¬(¬E ∧ ¬outer)
 //│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.35: 	    let i = r.ref 0
+//│ ║  l.34: 	    let i = r.ref 0
 //│ ║        	            ^^^^^^^
-//│ ║  l.36: 	    map(s) of x =>
+//│ ║  l.35: 	    map(s) of x =>
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	      i := !i + 1
+//│ ║  l.36: 	      i := !i + 1
 //│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.38: 	      f(!i, x)
+//│ ║  l.37: 	      f(!i, x)
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[out 'B, out 'E1]  <:  Seq[out A, out E]
 //│ ╟── because: cannot constrain  'E1  <:  E

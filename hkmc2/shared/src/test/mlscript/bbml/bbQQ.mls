@@ -1,5 +1,4 @@
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -30,7 +29,7 @@ x `=> `42
 :e
 x `=> 42
 //│ ╔══[ERROR] Type error in unquoted term
-//│ ║  l.31: 	x `=> 42
+//│ ║  l.30: 	x `=> 42
 //│ ║        	      ^^
 //│ ╙── because: cannot constrain  Int  <:  CodeBase[out 'cde, out 'ctx, ?]
 //│ Type: CodeBase[out ⊤ -> ⊥, ⊥, ?]
@@ -62,7 +61,7 @@ f `=> x `=> y `=> f`(x, y)
 :e
 `let x = 42 `in x
 //│ ╔══[ERROR] Type error in unquoted term
-//│ ║  l.63: 	`let x = 42 `in x
+//│ ║  l.62: 	`let x = 42 `in x
 //│ ║        	         ^^
 //│ ╙── because: cannot constrain  Int  <:  CodeBase[out 'cde, out 'ctx, ?]
 //│ Type: CodeBase[⊥, ⊥, ?]
@@ -70,7 +69,7 @@ f `=> x `=> y `=> f`(x, y)
 :e
 `let x = `0 `in 1
 //│ ╔══[ERROR] Type error in unquoted term
-//│ ║  l.71: 	`let x = `0 `in 1
+//│ ║  l.70: 	`let x = `0 `in 1
 //│ ║        	                ^
 //│ ╙── because: cannot constrain  Int  <:  CodeBase[out 'cde, out 'ctx, ?]
 //│ Type: CodeBase[⊥, ⊥, ?]
@@ -92,7 +91,7 @@ run(`1)
 :e
 run(1)
 //│ ╔══[ERROR] Type error in integer literal with expected type CodeBase[out 'T, ⊥, ?]
-//│ ║  l.93: 	run(1)
+//│ ║  l.92: 	run(1)
 //│ ║        	    ^
 //│ ╙── because: cannot constrain  Int  <:  CodeBase[out 'T, ⊥, ?]
 //│ Type: ⊥
@@ -100,7 +99,7 @@ run(1)
 :e
 x `=> run(x)
 //│ ╔══[ERROR] Type error in reference with expected type CodeBase[out 'T, ⊥, ?]
-//│ ║  l.101: 	x `=> run(x)
+//│ ║  l.100: 	x `=> run(x)
 //│ ║         	          ^
 //│ ╟── because: cannot constrain  CodeBase['x, x, ⊥]  <:  CodeBase[out 'T, ⊥, ?]
 //│ ╙── because: cannot constrain  x  <:  ⊥
@@ -109,12 +108,12 @@ x `=> run(x)
 :e
 `let x = `42 `in run(x)
 //│ ╔══[ERROR] Type error in reference with expected type CodeBase[out 'T, ⊥, ?]
-//│ ║  l.110: 	`let x = `42 `in run(x)
+//│ ║  l.109: 	`let x = `42 `in run(x)
 //│ ║         	                     ^
 //│ ╟── because: cannot constrain  CodeBase['cde, x, ⊥]  <:  CodeBase[out 'T, ⊥, ?]
 //│ ╙── because: cannot constrain  x  <:  ⊥
 //│ ╔══[ERROR] Type error in unquoted term
-//│ ║  l.110: 	`let x = `42 `in run(x)
+//│ ║  l.109: 	`let x = `42 `in run(x)
 //│ ║         	                 ^^^^^^
 //│ ╟── because: cannot constrain  'T  <:  CodeBase[out 'cde1, out 'ctx, ?]
 //│ ╟── because: cannot constrain  'T  <:  ¬(¬{CodeBase[out 'cde1, out 'ctx, ?]})

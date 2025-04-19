@@ -1,5 +1,4 @@
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -10,7 +9,7 @@
 :e
 42 as [A] -> Str
 //│ ╔══[ERROR] Type error in integer literal with expected type Str
-//│ ║  l.11: 	42 as [A] -> Str
+//│ ║  l.10: 	42 as [A] -> Str
 //│ ║        	^^
 //│ ╙── because: cannot constrain  Int  <:  Str
 //│ Type: Str
@@ -25,11 +24,11 @@ id
 :e
 (x => x + 1) as [A] -> A -> A
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.26: 	(x => x + 1) as [A] -> A -> A
+//│ ║  l.25: 	(x => x + 1) as [A] -> A -> A
 //│ ║        	      ^
 //│ ╙── because: cannot constrain  A  <:  Int
 //│ ╔══[ERROR] Type error in application with expected type A
-//│ ║  l.26: 	(x => x + 1) as [A] -> A -> A
+//│ ║  l.25: 	(x => x + 1) as [A] -> A -> A
 //│ ║        	      ^^^^^
 //│ ╙── because: cannot constrain  Int  <:  A
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -156,7 +155,7 @@ gen(42)
 fun cnt: Some[out [A] -> A -> A] -> Int
 fun cnt(x) = 42
 //│ ╔══[ERROR] General type is not allowed here.
-//│ ║  l.156: 	fun cnt: Some[out [A] -> A -> A] -> Int
+//│ ║  l.155: 	fun cnt: Some[out [A] -> A -> A] -> Int
 //│ ╙──       	                         ^^^^^^
 //│ Type: ⊤
 

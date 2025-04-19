@@ -1,5 +1,4 @@
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -7,24 +6,24 @@
 :todo
 let id: [A] -> A -> A = x => x
 //│ ╔══[ERROR] Unsupported let binding shape
-//│ ║  l.8: 	let id: [A] -> A -> A = x => x
+//│ ║  l.7: 	let id: [A] -> A -> A = x => x
 //│ ╙──     	    ^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ Type: ⊤
 
 :todo
 fun id[A](x: A) = x
 //│ ╔══[ERROR] Variable not found: A
-//│ ║  l.15: 	fun id[A](x: A) = x
+//│ ║  l.14: 	fun id[A](x: A) = x
 //│ ╙──      	             ^
 //│ Type: ⊤
 
 :fixme
 fun id: [A] -> A -> A => x = x
 //│ ╔══[ERROR] Name not found: x
-//│ ║  l.22: 	fun id: [A] -> A -> A => x = x
+//│ ║  l.21: 	fun id: [A] -> A -> A => x = x
 //│ ╙──      	                         ^
 //│ ╔══[ERROR] Name not found: x
-//│ ║  l.22: 	fun id: [A] -> A -> A => x = x
+//│ ║  l.21: 	fun id: [A] -> A -> A => x = x
 //│ ╙──      	                             ^
 //│ ═══[ERROR] Function definition shape not yet supported for id
 //│ Type: ⊤

@@ -1,5 +1,4 @@
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 //│ Type: ⊤
@@ -37,7 +36,7 @@ g(foo)
 :e
 y `=> (let t = run(x `=> x `+ y) in y)
 //│ ╔══[ERROR] Type error in quoted term with expected type CodeBase[out 'T, ⊥, ?]
-//│ ║  l.38: 	y `=> (let t = run(x `=> x `+ y) in y)
+//│ ║  l.37: 	y `=> (let t = run(x `=> x `+ y) in y)
 //│ ║        	                   ^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  CodeBase[out 'x -> 'cde, out 'ctx, ?]  <:  CodeBase[out 'T, ⊥, ?]
 //│ ╟── because: cannot constrain  'ctx  <:  ⊥
@@ -79,7 +78,7 @@ f(g)(foo)
 :fixme // ???
 f(g)(bar)
 //│ ╔══[ERROR] Type error in reference with expected type 'A
-//│ ║  l.80: 	f(g)(bar)
+//│ ║  l.79: 	f(g)(bar)
 //│ ║        	     ^^^
 //│ ╟── because: cannot constrain  C[Int]  <:  'A
 //│ ╟── because: cannot constrain  C[in Int out Int]  <:  'A

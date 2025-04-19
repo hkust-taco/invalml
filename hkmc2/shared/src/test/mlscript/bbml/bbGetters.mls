@@ -3,7 +3,6 @@
 
 :global
 :bbml
-//│ Error: hkmc2.ErrorReport: Multiple definitions of symbol 'source'
 //│ Type: ⊤
 
 
@@ -12,16 +11,16 @@ fun test1() =
   fun sayHi = print("Hi")
   sayHi, sayHi, sayHi
 //│ ╔══[ERROR] Function definition shape not yet supported for sayHi
-//│ ║  l.12: 	  fun sayHi = print("Hi")
+//│ ║  l.11: 	  fun sayHi = print("Hi")
 //│ ╙──      	              ^^^^^^^^^^^
 //│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.13: 	  sayHi, sayHi, sayHi
+//│ ║  l.12: 	  sayHi, sayHi, sayHi
 //│ ╙──      	  ^^^^^
 //│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.13: 	  sayHi, sayHi, sayHi
+//│ ║  l.12: 	  sayHi, sayHi, sayHi
 //│ ╙──      	         ^^^^^
 //│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.13: 	  sayHi, sayHi, sayHi
+//│ ║  l.12: 	  sayHi, sayHi, sayHi
 //│ ╙──      	                ^^^^^
 //│ Type: ⊤
 
@@ -39,11 +38,11 @@ fun test2() =
     n then funny(n - 1) + 1
   funny
 //│ ╔══[ERROR] Expected a monomorphic type or an instantiable type here, but () ->{⊥} [outer, 'caseScrut, 'eff] -> 'caseScrut ->{'eff} Int found
-//│ ║  l.38: 	    0 then 0
+//│ ║  l.37: 	    0 then 0
 //│ ║        	           ^
-//│ ║  l.39: 	    n then funny(n - 1) + 1
+//│ ║  l.38: 	    n then funny(n - 1) + 1
 //│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.40: 	  funny
+//│ ║  l.39: 	  funny
 //│ ╙──      	^^^^^^^
 //│ Type: ⊤
 
@@ -83,7 +82,7 @@ fun test2() =
     case n then funny(n - 1) + 1
   funny
 //│ ╔══[WARNING] Pure expression in statement position
-//│ ║  l.82: 	    case 0 then 0
+//│ ║  l.81: 	    case 0 then 0
 //│ ╙──      	                ^
 //│ JS (unsanitized):
 //│ let test22;
@@ -105,15 +104,15 @@ fun test2() =
 //│   return tmp1
 //│ };
 //│ ╔══[WARNING] Pure expression in statement position
-//│ ║  l.82: 	    case 0 then 0
+//│ ║  l.81: 	    case 0 then 0
 //│ ╙──      	                ^
 //│ ╔══[ERROR] Function definition shape not yet supported for funny
-//│ ║  l.82: 	    case 0 then 0
+//│ ║  l.81: 	    case 0 then 0
 //│ ║        	                ^
-//│ ║  l.83: 	    case n then funny(n - 1) + 1
+//│ ║  l.82: 	    case n then funny(n - 1) + 1
 //│ ╙──      	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Variable not found: funny
-//│ ║  l.84: 	  funny
+//│ ║  l.83: 	  funny
 //│ ╙──      	  ^^^^^
 //│ Type: ⊤
 
@@ -122,7 +121,7 @@ fun test2() =
 fun test3 =
   print("Hi")
 //│ ╔══[ERROR] Function definition shape not yet supported for test3
-//│ ║  l.123: 	  print("Hi")
+//│ ║  l.122: 	  print("Hi")
 //│ ╙──       	  ^^^^^^^^^^^
 //│ Type: ⊤
 
