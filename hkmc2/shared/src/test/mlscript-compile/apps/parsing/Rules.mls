@@ -93,7 +93,7 @@ define("pattern-list") of term of
 
 define("multiple-matching") of reference("pattern-list") of
   process: Tree.infix of Keywords._thinArrow
-  name: "the list of patterns"
+  name: "list of patterns"
   choices: tuple of keyword(Keywords._thinArrow) of term of
     process: idFirst, name: "the right-hand side of the arrow"
     choices: tuple of
