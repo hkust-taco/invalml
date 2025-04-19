@@ -200,6 +200,7 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
             val name = if sym.nameIsMeaningful then S(sym.nme) else N
             val (params, bodyDoc) = setupFunction(name, ps, result)
             if sym.nameIsMeaningful then
+              // If the name is not valid JavaScript identifiers, do not use it in the generated function.
               val nme = if isValidIdentifier(sym.nme) then sym.nme else ""
               doc"${getVar(sym)} = function $nme($params) ${ braced(bodyDoc) };"
             else

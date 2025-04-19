@@ -696,7 +696,6 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
   
   
   def setupSelection(prefix: Term, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
-  // inline def setupSelection(prefix: Term, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
     subTerm(prefix): p =>
       val selRes = TempSymbol(N, "selRes")
       k(Select(p, nme)(sym))
@@ -723,7 +722,7 @@ trait LoweringSelSanityChecks(using Config, TL, Raise, State)
     extends Lowering:
   
   private val instrument: Bool = config.sanityChecks.isDefined
-  // /* 
+  
   override def setupSelection(prefix: st, nme: Tree.Ident, sym: Opt[FieldSymbol])(k: Result => Block)(using Subst): Block =
     if !instrument then return super.setupSelection(prefix, nme, sym)(k)
     subTerm(prefix): p =>
@@ -743,7 +742,6 @@ trait LoweringSelSanityChecks(using Config, TL, Raise, State)
             Value.Lit(syntax.Tree.StrLit(s"Access to required field '${nme.name}' yielded 'undefined'")) :: Nil))
         )
         .rest(k(selRes.asPath))
-  // */
 
 
 

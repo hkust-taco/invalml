@@ -1,9 +1,9 @@
 :js
 
-import "../../mlscript-compile/apps/parsing/Lexer.mls"
-import "../../mlscript-compile/apps/parsing/Token.mls"
-import "../../mlscript-compile/Stack.mls"
-import "../../mlscript-compile/Iter.mls"
+import "../../../mlscript-compile/apps/parsing/Lexer.mls"
+import "../../../mlscript-compile/apps/parsing/Token.mls"
+import "../../../mlscript-compile/Stack.mls"
+import "../../../mlscript-compile/Iter.mls"
 
 fun lines(...strs) = strs.join("\n")
 

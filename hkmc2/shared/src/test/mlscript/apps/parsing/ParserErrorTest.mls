@@ -1,6 +1,6 @@
 :js
 
-import "../../mlscript-compile/apps/parsing/Test.mls"
+import "../../../mlscript-compile/apps/parsing/Test.mls"
 
 open Test { example }
 

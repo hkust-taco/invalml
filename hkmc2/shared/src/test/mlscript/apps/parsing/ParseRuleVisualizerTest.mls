@@ -1,12 +1,12 @@
 :js
 
 :silent
-import "../../mlscript-compile/apps/parsing/Parser.mls"
-import "../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
-import "../../mlscript-compile/apps/parsing/Rules.mls"
-import "../../mlscript-compile/apps/parsing/vendors/railroad/railroad.mjs"
-import "../../mlscript-compile/Iter.mls"
-import "../../mlscript-compile/XML.mls"
+import "../../../mlscript-compile/apps/parsing/Parser.mls"
+import "../../../mlscript-compile/apps/parsing/ParseRuleVisualizer.mls"
+import "../../../mlscript-compile/apps/parsing/Rules.mls"
+import "../../../mlscript-compile/apps/parsing/vendors/railroad/railroad.mjs"
+import "../../../mlscript-compile/Iter.mls"
+import "../../../mlscript-compile/XML.mls"
 import "path"
 
 open ParseRuleVisualizer { render }
@@ -30,7 +30,7 @@ fun findProjectRoot =
     base + path.sep + "hkmc2" + path.sep + "shared"
 
 fun outputPath = ensurePath of path.resolve of
-  findProjectRoot, "src", "test", "mlscript", "apps", "output"
+  findProjectRoot, "src", "test", "mlscript", "apps", "parsing", "output"
 
 fun filePath(...fragments) = path.join(outputPath, ...fragments)
 
