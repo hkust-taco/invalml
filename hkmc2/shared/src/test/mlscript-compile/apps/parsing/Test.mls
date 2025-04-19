@@ -1,5 +1,5 @@
 import "./Lexer.mls"
-import "./Precedence.mls"
+import "./Keywords.mls"
 import "./Token.mls"
 import "./Tree.mls"
 import "./TokenHelpers.mls"

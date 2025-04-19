@@ -5,7 +5,7 @@ import "../../BetterMap.mls"
 import "../../Iter.mls"
 import "./Token.mls"
 import "./Keyword.mls"
-import "./Precedence.mls"
+import "./Keywords.mls"
 import "./Tree.mls"
 import "./ParseRule.mls"
 
@@ -13,7 +13,6 @@ open Predef
 open Option
 open Stack
 open BetterMap
-open Precedence { Keywords }
 open ParseRule { Choice, rule }
 open Token { Curly, Square, Round }
 

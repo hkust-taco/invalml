@@ -1,4 +1,4 @@
-import "./Precedence.mls"
+import "./Keywords.mls"
 import "./Rules.mls"
 import "./Token.mls"
 import "./ParseRule.mls"
@@ -11,7 +11,6 @@ import "../../Iter.mls"
 open Stack
 open Option { Some, None }
 open Predef { print, tuple }
-open Precedence { Keywords }
 open Token { LiteralKind }
 open ParseRule { Choice }
 

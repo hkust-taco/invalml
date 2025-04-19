@@ -1,11 +1,11 @@
 :js
 
-import "../../../mlscript-compile/apps/parsing/Precedence.mls"
+import "../../../mlscript-compile/apps/parsing/Keywords.mls"
 import "../../../mlscript-compile/apps/parsing/Rules.mls"
 import "../../../mlscript-compile/Iter.mls"
 import "../../../mlscript-compile/apps/parsing/Test.mls"
 
-open Precedence { Keywords, opPrec, opPrecOpt }
+open Keywords { opPrec, opPrecOpt }
 
 Keywords.maxKeywordPrec
 //│ = 11

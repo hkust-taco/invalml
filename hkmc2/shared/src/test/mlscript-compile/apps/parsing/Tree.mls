@@ -4,7 +4,7 @@ import "../../Stack.mls"
 import "../../Option.mls"
 import "../../Str.mls"
 import "./Keyword.mls"
-import "./Precedence.mls"
+import "./Keywords.mls"
 import "./Token.mls"
 
 open Predef { fold, mkStr }
@@ -12,7 +12,7 @@ open Stack
 open Option { Some, None }
 open Token { LiteralKind, BracketKind }
 open Keyword { INT_MAX }
-open Precedence { Keywords, opPrec }
+open Keywords { opPrec }
 
 type StackT[A] = Stack.Cons[A] | Stack.Nil
 

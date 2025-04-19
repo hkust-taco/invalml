@@ -8,7 +8,7 @@ import "./Lexer.mls"
 import "./Extension.mls"
 import "./Token.mls"
 import "./TokenHelpers.mls"
-import "./Precedence.mls"
+import "./Keywords.mls"
 import "./Tree.mls"
 import "./Rules.mls"
 import "./ParseRule.mls"
@@ -19,7 +19,7 @@ open Stack
 open BetterMap
 open ParseRule { Choice }
 open Choice { Ref }
-open Precedence { Keywords, opPrecOpt }
+open Keywords { opPrecOpt }
 open Rules { termRule, typeRule, declRule, syntaxKinds }
 
 type Opt[A] = Some[A] | None

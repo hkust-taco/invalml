@@ -3,9 +3,7 @@
 import "../../../mlscript-compile/Iter.mls"
 import "../../../mlscript-compile/apps/parsing/Test.mls"
 import "../../../mlscript-compile/apps/parsing/Rules.mls"
-import "../../../mlscript-compile/apps/parsing/Precedence.mls"
-
-open Precedence { Keywords }
+import "../../../mlscript-compile/apps/parsing/Keywords.mls"
 
 open Test { example }
 
