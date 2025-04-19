@@ -30,7 +30,7 @@ fun findProjectRoot =
     base + path.sep + "hkmc2" + path.sep + "shared"
 
 fun outputPath = ensurePath of path.resolve of
-  findProjectRoot, "src", "test", "mlscript", "apps", "parsing", "output"
+  findProjectRoot, "src", "test", "mlscript", "apps", "parsing"
 
 fun filePath(...fragments) = path.join(outputPath, ...fragments)
 
