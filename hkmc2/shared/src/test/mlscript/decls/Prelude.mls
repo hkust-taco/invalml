@@ -59,3 +59,8 @@ declare module debug with
   fun getLocals
 
 
+// HTML DOM API definitions.
+// Move them to a separate Prelude file when there are enough of them.
+declare val document
+declare val customElements
+declare class HTMLElement

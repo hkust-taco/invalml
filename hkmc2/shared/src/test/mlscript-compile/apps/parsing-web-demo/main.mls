@@ -15,10 +15,6 @@ open XML { elem }
 open Predef
 open Option { Some, None }
 
-declare val document
-declare val customElements
-declare class HTMLElement
-
 module Main with ...
 
 let query = document.querySelector.bind(document)
