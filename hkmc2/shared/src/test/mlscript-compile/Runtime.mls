@@ -9,6 +9,21 @@ object Unit with
   fun toString() = "()"
 
 
+fun unreachable = throw Error("unreachable")
+
+fun checkArgs(functionName, expected, isUB, got) =
+  if got < expected || isUB && got > expected do
+    let name = if functionName.length > 0 then " '" + functionName + "'" else ""
+    // throw globalThis.Error("Function" + name + " expected "
+    //   + (if isUB then "" else "at least ")
+    //   + expected
+    //   + " argument(s) but got " + got)
+    throw Error of "Function" + name + " expected "
+      + (if isUB then "" else "at least " )
+      + expected + " argument"
+      + (if expected === 1 then "" else "s")
+      + " but got " + got
+
 fun safeCall(x) =
   if x is undefined then Unit else x
 

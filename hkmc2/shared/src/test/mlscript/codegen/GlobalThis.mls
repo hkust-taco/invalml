@@ -44,7 +44,7 @@ foo()
 //│   }
 //│ };
 //│ foo()
-//│ ═══[RUNTIME ERROR] TypeError: Cannot read properties of undefined (reading 'checkArgs')
+//│ ═══[RUNTIME ERROR] TypeError: globalThis.Error is not a constructor
 //│ ═══[RUNTIME ERROR] TypeError: Cannot read properties of undefined (reading 'log')
 
 

@@ -69,21 +69,6 @@ fun mkStr(...xs) =
   fold((acc, x) => assert(x is Str); acc + x) of ...xs
 
 
-fun unreachable = throw Error("unreachable")
-
-fun checkArgs(functionName, expected, isUB, got) =
-  if got < expected || isUB && got > expected do
-    let name = if functionName.length > 0 then " '" + functionName + "'" else ""
-    // throw globalThis.Error("Function" + name + " expected "
-    //   + (if isUB then "" else "at least ")
-    //   + expected
-    //   + " argument(s) but got " + got)
-    throw Error of fold(+) of
-      "Function", name, " expected "
-      if isUB then "" else "at least "
-      expected, " argument"
-      if expected === 1 then "" else "s"
-      " but got ", got
 
 
 module TraceLogger with
@@ -105,9 +90,6 @@ module TraceLogger with
     else ()
 
 
-data class Test with
-  print("Test")
-  val y = 1
 
 // This binds the handler in body, which means body can raise effects in handler
 fun enterHandleBlock(handler, body) =

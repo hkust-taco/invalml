@@ -198,6 +198,48 @@ let Runtime1;
     this.StackDelayHandler = new StackDelayHandler$class;
     this.StackDelayHandler.class = StackDelayHandler$class;
   }
+  static get unreachable() {
+    throw globalThis.Error("unreachable");
+  } 
+  static checkArgs(functionName, expected, isUB, got) {
+    let scrut, name, scrut1, scrut2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14;
+    tmp = got < expected;
+    tmp1 = got > expected;
+    tmp2 = isUB && tmp1;
+    scrut = tmp || tmp2;
+    if (scrut === true) {
+      scrut1 = functionName.length > 0;
+      if (scrut1 === true) {
+        tmp3 = " '" + functionName;
+        tmp4 = tmp3 + "'";
+      } else {
+        tmp4 = "";
+      }
+      name = tmp4;
+      tmp5 = "Function" + name;
+      tmp6 = tmp5 + " expected ";
+      if (isUB === true) {
+        tmp7 = "";
+      } else {
+        tmp7 = "at least ";
+      }
+      tmp8 = tmp6 + tmp7;
+      tmp9 = expected + " argument";
+      tmp10 = tmp8 + tmp9;
+      scrut2 = expected === 1;
+      if (scrut2 === true) {
+        tmp11 = "";
+      } else {
+        tmp11 = "s";
+      }
+      tmp12 = tmp10 + tmp11;
+      tmp13 = " but got " + got;
+      tmp14 = tmp12 + tmp13;
+      throw globalThis.Error(tmp14);
+    } else {
+      return runtime.Unit
+    }
+  } 
   static safeCall(x) {
     if (x === undefined) {
       return Runtime.Unit

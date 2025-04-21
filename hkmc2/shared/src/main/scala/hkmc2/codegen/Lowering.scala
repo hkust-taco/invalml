@@ -58,7 +58,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
   val lift: Bool = config.liftDefns.isDefined
 
   private lazy val unreachableFn =
-    Select(Select(Value.Ref(State.globalThisSymbol), Tree.Ident("Predef"))(N), Tree.Ident("unreachable"))(N)
+    Select(Value.Ref(State.runtimeSymbol), Tree.Ident("unreachable"))(N)
   
   def unit: Path =
     Select(Value.Ref(State.runtimeSymbol), Tree.Ident("Unit"))(S(summon[Ctx].builtins.Unit))

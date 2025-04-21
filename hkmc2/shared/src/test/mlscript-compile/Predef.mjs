@@ -59,14 +59,6 @@ let Predef1;
       }
       static toString() { return "TraceLogger"; }
     });
-    this.Test = class Test {
-      constructor() {
-        let tmp;
-        tmp = Predef.print("Test");
-        this.y = 1;
-      }
-      toString() { return "Test"; }
-    };
   }
   static id(x) {
     return x
@@ -197,45 +189,6 @@ let Predef1;
     tmp = lambda;
     tmp1 = runtime.safeCall(Predef.fold(tmp));
     return runtime.safeCall(tmp1(...xs2))
-  } 
-  static get unreachable() {
-    throw globalThis.Error("unreachable");
-  } 
-  static checkArgs(functionName, expected, isUB, got) {
-    let scrut, name, scrut1, scrut2, tmp, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, lambda;
-    tmp = got < expected;
-    tmp1 = got > expected;
-    tmp2 = isUB && tmp1;
-    scrut = tmp || tmp2;
-    if (scrut === true) {
-      scrut1 = functionName.length > 0;
-      if (scrut1 === true) {
-        tmp3 = " '" + functionName;
-        tmp4 = tmp3 + "'";
-      } else {
-        tmp4 = "";
-      }
-      name = tmp4;
-      lambda = (undefined, function (arg1, arg2) {
-        return arg1 + arg2
-      });
-      tmp5 = runtime.safeCall(Predef.fold(lambda));
-      if (isUB === true) {
-        tmp6 = "";
-      } else {
-        tmp6 = "at least ";
-      }
-      scrut2 = expected === 1;
-      if (scrut2 === true) {
-        tmp7 = "";
-      } else {
-        tmp7 = "s";
-      }
-      tmp8 = runtime.safeCall(tmp5("Function", name, " expected ", tmp6, expected, " argument", tmp7, " but got ", got));
-      throw globalThis.Error(tmp8);
-    } else {
-      return runtime.Unit
-    }
   } 
   static enterHandleBlock(handler, body) {
     return Runtime.enterHandleBlock(handler, body)
