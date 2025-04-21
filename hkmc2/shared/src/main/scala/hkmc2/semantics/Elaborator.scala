@@ -270,6 +270,7 @@ extends Importer:
     case S(cls: ClassSymbol) =>
       trm
     case S(mem: BlockMemberSymbol) =>
+      // FIXME: `defn` is not available before elaboration. See pull/277#discussion_r2051448677
       if !mem.hasLiftedClass || mem.defn.exists(_.isDeclare.isDefined) then trm
       else Term.SynthSel(trm, Ident("class"))(mem.clsTree.orElse(mem.modOrObjTree).map(_.symbol))
     case _ => trm
