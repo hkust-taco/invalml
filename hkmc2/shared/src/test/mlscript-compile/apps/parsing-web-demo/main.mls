@@ -34,8 +34,10 @@ examples Iter.each of case [key, example] then
   if editor.value is "" do
     set editor.value = example.source
 
+// Make pressing <kbd>Tab</kbd> add two spaces at the caret's position.
 editor.addEventListener of "keydown", event =>
   if event.key is "Tab" do
+    // Prevent the default tab behavior (focusing the next element).
     event.preventDefault()
     let start = editor.selectionStart
     let end = editor.selectionEnd
@@ -46,7 +48,7 @@ editor.addEventListener of "keydown", event =>
 selector.addEventListener of "change", event =>
   if examples.get(selector.value) is
     Some(example) do set editor.value = example.source
-    None do print("Example \"" + selector.value + "\" not found")
+    None do throw new Error of "Example \"" + selector.value + "\" not found"
 
 parseButton.addEventListener of "click", event =>
   let tokens = Lexer.lex(editor.value, noWhitespace: true)
@@ -82,6 +84,10 @@ fun parseIndentedText(text) =
       stack.push of node: newNode, indent: indent
   root.children
 
+// * CSS styles for the error display.
+// * The content in custom elements is placed inside the ShadowDOM, which is
+// * scoped. Therefore, styles placed directly in HTML won't be effective on
+// * elements inside custom elements. Placing CSS here is more convenient.
 let errorDisplayStyle = """
 .error-container {
   background-color: #fdd;
@@ -92,13 +98,11 @@ let errorDisplayStyle = """
   flex-direction: column;
   gap: 0.25rem;
 }
-
 .error-message {
   margin: 0;
   font-weight: bold;
   font-size: 1.125rem;
 }
-
 .stack-trace {
   font-size: 0.875rem;
   margin: 0;
