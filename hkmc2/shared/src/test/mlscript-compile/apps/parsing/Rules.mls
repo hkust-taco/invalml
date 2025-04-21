@@ -1,7 +1,7 @@
 import "../../Predef.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
-import "../../BetterMap.mls"
+import "../../WrappedMap.mls"
 import "../../Iter.mls"
 import "./Token.mls"
 import "./Keyword.mls"
@@ -12,7 +12,6 @@ import "./ParseRule.mls"
 open Predef
 open Option
 open Stack
-open BetterMap
 open ParseRule { Choice, rule }
 open Token { Curly, Square, Round }
 
@@ -22,7 +21,7 @@ type Opt[A] = Some[A] | None
 
 module Rules with ...
 
-val syntaxKinds = new Map()
+val syntaxKinds = WrappedMap.empty
 
 val extendedKinds = new Set()
 

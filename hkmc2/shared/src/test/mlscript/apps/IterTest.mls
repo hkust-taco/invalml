@@ -2,11 +2,10 @@
 
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/Stack.mls"
-import "../../mlscript-compile/BetterMap.mls"
+import "../../mlscript-compile/WrappedMap.mls"
 
 open Iter
 open Stack { Cons, Nil }
-open BetterMap
 
 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   filtering of x => x % 2 is 0
@@ -88,9 +87,10 @@ open BetterMap
   toArray()
 //│ = [16, 20]
 
-(toMap of [["foo", 1]])
+[["foo", 1]]
+  WrappedMap.toMap()
   mapping of case [k, v] then [k + "!", v * 2]
-  appended of toMap([["bar", 2]])
+  appended of WrappedMap.toMap([["bar", 2]])
   toArray()
 //│ = [["foo!", 2], ["bar", 2]]
 

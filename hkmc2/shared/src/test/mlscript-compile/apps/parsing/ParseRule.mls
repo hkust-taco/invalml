@@ -1,4 +1,4 @@
-import "../../BetterMap.mls"
+import "../../WrappedMap.mls"
 import "../../Iter.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
@@ -7,7 +7,6 @@ import "./Keyword.mls"
 import "./Token.mls"
 import "./Tree.mls"
 
-open BetterMap { Map, toMap }
 open Option { Some, None }
 open Predef { assert, tuple }
 open Stack
@@ -217,7 +216,7 @@ data class ParseRule[A](name: Str, choices: StackT[ChoiceT[A]]) with
       else []
     Iter.flattening()
     Iter.toArray()
-    toMap()
+    WrappedMap.toMap()
   
   // Collect all keyword choices in this rule.
   fun keywordChoices = _keywordChoices.get()

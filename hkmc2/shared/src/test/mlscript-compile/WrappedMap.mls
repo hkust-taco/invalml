@@ -2,10 +2,10 @@ import "./Option.mls"
 
 open Option { Some, None }
 
-module BetterMap with ...
+module WrappedMap with ...
 
-class Map with
-  let storage = new globalThis.Map()
+class WrappedMap with
+  let storage = new Map()
   
   set this.(Symbol.iterator) =
     () => storage.(Symbol.iterator)()
@@ -28,14 +28,16 @@ class Map with
   
   fun valuesIterator = storage.values()
   
-  fun values = globalThis.Array.from of storage.values()
+  fun values = Array.from of storage.values()
 
 fun toMap(entries) =
   let
-    m = new Map
+    m = empty
     i = 0
     length = entries.length
   while i < length do
     m.insert of ...entries.at(i)
     set i += 1
   m
+
+fun empty = new WrappedMap

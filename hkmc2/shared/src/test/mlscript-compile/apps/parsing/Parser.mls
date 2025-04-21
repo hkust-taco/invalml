@@ -1,7 +1,6 @@
 import "../../Predef.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
-import "../../BetterMap.mls"
 import "../../TreeTracer.mls"
 import "../../Iter.mls"
 import "./Lexer.mls"
@@ -16,7 +15,6 @@ import "./ParseRule.mls"
 open Predef
 open Option
 open Stack
-open BetterMap
 open ParseRule { Choice }
 open Choice { Ref }
 open Keywords { opPrecOpt }

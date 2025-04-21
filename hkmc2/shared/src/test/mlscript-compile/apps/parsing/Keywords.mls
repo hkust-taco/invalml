@@ -1,19 +1,18 @@
 import "../../Option.mls"
 import "../../Iter.mls"
 import "../../Predef.mls"
-import "../../BetterMap.mls"
+import "../../WrappedMap.mls"
 import "./Keyword.mls"
 
 open Option { Some, None }
 open Predef { tuple }
-open BetterMap
 open Keyword { INT_MIN, INT_MAX }
 
 module Keywords with ...
 
 fun makePrecMap(startPrec: Int, ...ops) =
   let
-    m = new Map
+    m = WrappedMap.empty
     i = 0
   while i < ops.length do
     ops.at(i).split(" ").forEach of (op, _, _) =>
@@ -22,7 +21,7 @@ fun makePrecMap(startPrec: Int, ...ops) =
     set i += 1
   m
 
-val all = new Map()
+val all = WrappedMap.empty
 fun keyword(name, leftPrec, rightPrec) =
   let result = Keyword.Keyword(name, leftPrec, rightPrec)
   all.insert(name, result)
@@ -126,7 +125,7 @@ let builtinKeywords = new Set(all.keysIterator)
 fun extended = all
   Iter.filtering of case [k, _] then builtinKeywords.has(k) is false
   Iter.toArray()
-  toMap()
+  WrappedMap.toMap()
 
 pattern Letter = "a" ..= "z" | "A" ..= "Z"
 
