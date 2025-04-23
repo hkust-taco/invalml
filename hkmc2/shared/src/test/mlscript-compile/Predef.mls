@@ -36,7 +36,6 @@ val render = Rendering.render
 fun print(...xs) =
   console.log(...map(renderAsStr)(...xs))
 
-
 fun renderAsStr(arg) =
   if arg is Str then arg else render(arg)
 
@@ -65,10 +64,6 @@ fun foldr(f)(first, ...rest) =
 
 fun mkStr(...xs) =
   fold((acc, x) => assert(x is Str); acc + x) of ...xs
-
-
-
-
 
 
 
