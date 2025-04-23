@@ -29,8 +29,55 @@ declare class Str with
   fun length: Int
   fun concat: Str -> Str
 
-// declare module Math // TODO: list members
-declare val Math // so we can, eg, `open { pow }` in the meantime
+declare module Math with
+  declare
+    val
+      E
+      LN10
+      LN2
+      LOG10E
+      LOG2E
+      PI
+      SQRT1_2
+      SQRT2
+    fun
+      abs
+      acos
+      acosh
+      asin
+      asinh
+      atan
+      atan2
+      atanh
+      cbrt
+      ceil
+      clz32
+      cos
+      cosh
+      exp
+      expm1
+      floor
+      f16round
+      fround
+      hypot
+      imul
+      log
+      log10
+      log1p
+      log2
+      max
+      min
+      pow
+      random
+      round
+      sign
+      sin
+      sinh
+      sqrt
+      sumPrecise
+      tan
+      tanh
+      trunc
 
 declare val Reflect
 declare val console
