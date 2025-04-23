@@ -15,50 +15,6 @@ let Predef1;
     this.render = Rendering.render;
     this.assert = globalThis.console.assert;
     this.foldl = Predef.fold;
-    (class TraceLogger {
-      static {
-        Predef.TraceLogger = TraceLogger;
-        this.enabled = false;
-        this.indentLvl = 0;
-      }
-      static indent() {
-        let scrut, prev, tmp;
-        scrut = TraceLogger.enabled;
-        if (scrut === true) {
-          prev = TraceLogger.indentLvl;
-          tmp = prev + 1;
-          TraceLogger.indentLvl = tmp;
-          return prev
-        } else {
-          return runtime.Unit
-        }
-      } 
-      static resetIndent(n) {
-        let scrut;
-        scrut = TraceLogger.enabled;
-        if (scrut === true) {
-          TraceLogger.indentLvl = n;
-          return runtime.Unit
-        } else {
-          return runtime.Unit
-        }
-      } 
-      static log(msg) {
-        let scrut, tmp, tmp1, tmp2, tmp3, tmp4;
-        scrut = TraceLogger.enabled;
-        if (scrut === true) {
-          tmp = runtime.safeCall("| ".repeat(TraceLogger.indentLvl));
-          tmp1 = runtime.safeCall("  ".repeat(TraceLogger.indentLvl));
-          tmp2 = "\n" + tmp1;
-          tmp3 = msg.replaceAll("\n", tmp2);
-          tmp4 = tmp + tmp3;
-          return runtime.safeCall(globalThis.console.log(tmp4))
-        } else {
-          return runtime.Unit
-        }
-      }
-      static toString() { return "TraceLogger"; }
-    });
   }
   static id(x) {
     return x
@@ -119,11 +75,6 @@ let Predef1;
     tmp1 = runtime.safeCall(tmp(...xs));
     return runtime.safeCall(globalThis.console.log(...tmp1))
   } 
-  static printRaw(x6) {
-    let tmp;
-    tmp = runtime.safeCall(Predef.render(x6));
-    return runtime.safeCall(globalThis.console.log(tmp))
-  } 
   static renderAsStr(arg) {
     if (typeof arg === 'string') {
       return arg
@@ -175,15 +126,15 @@ let Predef1;
   } 
   static mkStr(...xs2) {
     let tmp, tmp1, lambda;
-    lambda = (undefined, function (acc, x7) {
+    lambda = (undefined, function (acc, x6) {
       let tmp2, tmp3, tmp4;
-      if (typeof x7 === 'string') {
+      if (typeof x6 === 'string') {
         tmp2 = true;
       } else {
         tmp2 = false;
       }
       tmp3 = runtime.safeCall(Predef.assert(tmp2));
-      tmp4 = acc + x7;
+      tmp4 = acc + x6;
       return (tmp3 , tmp4)
     });
     tmp = lambda;

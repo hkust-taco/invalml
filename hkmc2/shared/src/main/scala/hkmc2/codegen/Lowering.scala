@@ -762,9 +762,9 @@ trait LoweringTraceLog(instrument: Bool)(using TL, Raise, State)
   extension (k: Block => Block)
     def |>: (b: Block): Block = k(b)
 
-  private val traceLogFn = selFromGlobalThis("Predef", "TraceLogger", "log")
-  private val traceLogIndentFn = selFromGlobalThis("Predef", "TraceLogger", "indent")
-  private val traceLogResetFn = selFromGlobalThis("Predef", "TraceLogger", "resetIndent")
+  private val traceLogFn = Value.Ref(State.runtimeSymbol).selSN("TraceLogger").selSN("log")
+  private val traceLogIndentFn = Value.Ref(State.runtimeSymbol).selSN("TraceLogger").selSN("indent")
+  private val traceLogResetFn = Value.Ref(State.runtimeSymbol).selSN("TraceLogger").selSN("resetIndent")
   private val strConcatFn = selFromGlobalThis("String", "prototype", "concat", "call")
   private val inspectFn = selFromGlobalThis("util", "inspect")
   

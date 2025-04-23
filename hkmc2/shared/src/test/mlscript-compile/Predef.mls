@@ -36,8 +36,6 @@ val render = Rendering.render
 fun print(...xs) =
   console.log(...map(renderAsStr)(...xs))
 
-fun printRaw(x) =
-  console.log(render(x))
 
 fun renderAsStr(arg) =
   if arg is Str then arg else render(arg)
@@ -71,23 +69,6 @@ fun mkStr(...xs) =
 
 
 
-module TraceLogger with
-  mut val enabled = false
-  mut val indentLvl = 0
-  fun indent() =
-    if enabled then
-      let prev = indentLvl
-      set indentLvl = prev + 1
-      prev
-    else ()
-  fun resetIndent(n) =
-    if enabled then
-      set indentLvl = n
-    else ()
-  fun log(msg) =
-    if enabled then
-      console.log("| ".repeat(indentLvl) + msg.replaceAll("\n", "\n" + "  ".repeat(indentLvl)))
-    else ()
 
 
 

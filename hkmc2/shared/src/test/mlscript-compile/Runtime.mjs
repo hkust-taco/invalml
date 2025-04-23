@@ -98,6 +98,50 @@ let Runtime1;
       static toString() { return "Str"; }
     });
     this.render = Rendering.render;
+    (class TraceLogger {
+      static {
+        Runtime.TraceLogger = TraceLogger;
+        this.enabled = false;
+        this.indentLvl = 0;
+      }
+      static indent() {
+        let scrut, prev, tmp;
+        scrut = TraceLogger.enabled;
+        if (scrut === true) {
+          prev = TraceLogger.indentLvl;
+          tmp = prev + 1;
+          TraceLogger.indentLvl = tmp;
+          return prev
+        } else {
+          return runtime.Unit
+        }
+      } 
+      static resetIndent(n) {
+        let scrut;
+        scrut = TraceLogger.enabled;
+        if (scrut === true) {
+          TraceLogger.indentLvl = n;
+          return runtime.Unit
+        } else {
+          return runtime.Unit
+        }
+      } 
+      static log(msg) {
+        let scrut, tmp, tmp1, tmp2, tmp3, tmp4;
+        scrut = TraceLogger.enabled;
+        if (scrut === true) {
+          tmp = runtime.safeCall("| ".repeat(TraceLogger.indentLvl));
+          tmp1 = runtime.safeCall("  ".repeat(TraceLogger.indentLvl));
+          tmp2 = "\n" + tmp1;
+          tmp3 = msg.replaceAll("\n", tmp2);
+          tmp4 = tmp + tmp3;
+          return runtime.safeCall(globalThis.console.log(tmp4))
+        } else {
+          return runtime.Unit
+        }
+      }
+      static toString() { return "TraceLogger"; }
+    });
     const FatalEffect$class = class FatalEffect {
       constructor() {}
       toString() { return "FatalEffect"; }
@@ -271,6 +315,11 @@ let Runtime1;
     } else {
       return res
     }
+  } 
+  static printRaw(x2) {
+    let tmp;
+    tmp = runtime.safeCall(Runtime.render(x2));
+    return runtime.safeCall(globalThis.console.log(tmp))
   } 
   static raisePrintStackEffect(showLocals) {
     return Runtime.mkEffect(Runtime.PrintStackEffect, showLocals)

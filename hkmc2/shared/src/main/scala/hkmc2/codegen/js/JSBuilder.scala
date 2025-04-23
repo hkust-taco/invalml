@@ -468,17 +468,14 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
   
   def worksheet(p: Program)(using Raise, Scope): (Document, Document) =
     reserveNames(p)
-    p.imports.foreach: i =>
-      i._1 -> scope.allocateName(i._1)
-    val imps = p.imports.map: i =>
-      val v = doc"this.${getVar(i._1)}"
-      doc"""$v = await import("${i._2.toString
-        }"); # if ($v.default !== undefined) $v = $v.default;"""
-    blockPreamble(p.main) -> (imps.mkDocument(doc" # ") :/: returningTerm(p.main, endSemi = false).stripBreaks)
+    lazy val imps = p.imports.map: i =>
+      doc"""${getVar(i._1)} = await import("${i._2.toString}").then(m => m.default ?? m);"""
+    blockPreamble(p.imports.map(_._1).toSeq ++ p.main.definedVars.toSeq) ->
+      (imps.mkDocument(doc" # ") :/: returningTerm(p.main, endSemi = false).stripBreaks)
   
-  def blockPreamble(t: Block)(using Raise, Scope): Document =
+  def blockPreamble(ss: Iterable[Symbol])(using Raise, Scope): Document =
     // TODO document: mutable var assnts require the lookup
-    val vars = t.definedVars.toSeq.filter(scope.lookup(_).isEmpty).sortBy(_.uid).iterator.map(l =>
+    val vars = ss.toSeq.filter(scope.lookup(_).isEmpty).sortBy(_.uid).iterator.map(l =>
       l -> scope.allocateName(l))
     if vars.isEmpty then doc"" else
       doc" # let " :: vars.map: (_, nme) =>
@@ -487,7 +484,7 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
       :: doc";"
   
   def block(t: Block, endSemi: Bool)(using Raise, Scope): Document =
-    blockPreamble(t) :: returningTerm(t, endSemi)
+    blockPreamble(t.definedVars) :: returningTerm(t, endSemi)
   
   def body(t: Block, endSemi: Bool)(using Raise, Scope): Document = scope.nest givenIn:
     block(t, endSemi)

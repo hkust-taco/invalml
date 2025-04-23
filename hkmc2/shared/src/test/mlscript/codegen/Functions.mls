@@ -94,7 +94,7 @@ fun test2(y) = y + 1
 //│ >  undefined
 //│ REPL> Parsed:
 //│ >  undefined
-//│ REPL> Sending: try { runtime.checkCall(this.Predef.printRaw(block$res18)) } catch (e) { console.log('\u200B' + e.stack + '\u200B'); }
+//│ REPL> Sending: try { runtime.checkCall(runtime.printRaw(block$res18)) } catch (e) { console.log('\u200B' + e.stack + '\u200B'); }
 //│ REPL> Collected:
 //│ >  undefined
 //│ >  Unit { class: [class Unit] }
