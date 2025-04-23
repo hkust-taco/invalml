@@ -1,0 +1,49 @@
+:llir
+:cpp
+
+:intl
+abstract class Callable
+object FnLike1 extends Callable with
+  fun apply1(x) = x * 2
+fun apply(f, x) = f(x)
+fun main() =
+  let mul2 = FnLike1
+  apply(mul2, 3)
+main()
+//│ 
+//│ Interpreted:
+//│ 6
+
+:intl
+:sllir
+class Base() with
+  fun get() = 1
+class Derived() extends Base with
+  fun get() = 2
+fun main() =
+  let d = Derived()
+  d.Base#get() * d.Derived#get()
+main()
+//│ LLIR:
+//│   class Base() {
+//│     def get$869() =
+//│       1
+//│   }
+//│   class Derived() extends Base {
+//│     def get$870() =
+//│       2
+//│   }
+//│   def main$872() =
+//│     let x$893 = Derived$878() in
+//│     let x$894 = Base.get$869(x$893) in
+//│     let x$895 = Derived.get$870(x$893) in
+//│     let x$896 = *(x$894,x$895) in
+//│     x$896
+//│   def entry$898() =
+//│     let* (x$897) = main() in
+//│     x$897
+//│   entry = entry$898
+//│ 
+//│ Interpreted:
+//│ 4
+
