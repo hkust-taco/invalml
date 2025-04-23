@@ -77,6 +77,8 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
       else summon[Scope].findThis_!(ts)
     case _ => summon[Scope].lookup_!(l)
   
+  def runtimeVar(using Raise, Scope): Document = getVar(State.runtimeSymbol)
+  
   def argument(a: Arg)(using Raise, Scope): Document =
     if a.spread then doc"...${result(a.value)}" else result(a.value)
   
@@ -129,9 +131,9 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
       val argsDoc = args.map(argument).mkDocument(", ")
       if c.isMlsFun
       then if checkMLsCalls
-        then doc"${getVar(State.runtimeSymbol)}.checkCall(${base}(${argsDoc}))"
+        then doc"$runtimeVar.checkCall(${base}(${argsDoc}))"
         else doc"${base}(${argsDoc})"
-      else doc"${getVar(State.runtimeSymbol)}.safeCall(${base}(${argsDoc}))"
+      else doc"$runtimeVar.safeCall(${base}(${argsDoc}))"
     case Value.Lam(ps, bod) => scope.nest givenIn:
       val (params, bodyDoc) = setupFunction(none, ps, bod)
       doc"($params) => ${ braced(bodyDoc) }"
@@ -265,7 +267,7 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
                   .flatMap:
                     case td @ FunDefn(_, _, ps :: pss, bod) => S:
                       doc" # get ${td.sym.nme}$$__checkNotMethod() { ${
-                        getVar(State.runtimeSymbol)
+                        runtimeVar
                       }.deboundMethod(${makeStringLiteral(td.sym.nme)}, ${
                         makeStringLiteral(sym.nme)
                       }); }"
@@ -617,12 +619,12 @@ trait JSBuilderArgNumSanityChecks(using Config, Elaborator.State)
       val paramRest = params.restParam.map(p => Scope.scope.allocateName(p.sym))
       val paramsStr = Scope.scope.allocateName(functionParamVarargSymbol)
       val functionName = JSBuilder.makeStringLiteral(name.fold("")(n => s"${JSBuilder.escapeStringCharacters(n)}"))
-      val checkArgsNum = doc"\nruntime.checkArgs($functionName, ${params.paramCountLB}, ${params.paramCountUB.toString}, $paramsStr.length);"
+      val checkArgsNum = doc"\n$runtimeVar.checkArgs($functionName, ${params.paramCountLB}, ${params.paramCountUB.toString}, $paramsStr.length);"
       val paramsAssign = paramsList.zipWithIndex.map{(nme, i) =>
         doc"\nlet ${nme} = ${paramsStr}[$i];"}.mkDocument("")
       val restAssign = paramRest match
         case N => doc""
-        case S(p) => doc"\nlet $p = runtime.Tuple.slice($paramsStr, ${params.paramCountLB}, 0);"
+        case S(p) => doc"\nlet $p = $runtimeVar.Tuple.slice($paramsStr, ${params.paramCountLB}, 0);"
       (doc"...$paramsStr", doc"$checkArgsNum$paramsAssign$restAssign${this.body(body, endSemi = false)}")
     else
       super.setupFunction(name, params, body)
