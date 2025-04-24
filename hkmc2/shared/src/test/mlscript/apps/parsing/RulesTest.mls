@@ -30,7 +30,7 @@ opPrec of "+"
 opPrecOpt of "=="
 //│ = Some([16, 16])
 
-print of (Keywords.all |> MutMap.values).join("\n")
+print of Keywords.all |> MutMap.valuesIterator |. Iter.joined("\n")
 //│ > Keyword(`;;`, 0, 0)
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`;`, 1, 0)
