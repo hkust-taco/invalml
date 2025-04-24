@@ -1,3 +1,16 @@
+// Note: This file does not have a corresponding test file. It is recommended to
+// test it through the following steps.
+// 
+// 1. Install `serve` globally using `npm install -g serve`.
+// 2. Run `serve hkmc2/shared/src/test/mlscript-compile` in the project's root.
+// 3. Open the URL `http://localhost:3000/apps/parsing-web-demo` in your browser.
+//    If port 3000 is not available, use the URL suggested by the serve command.
+// 4. Try and test it in the browser.
+//
+// Note that after the file is updated, we need to manually refresh the browser.
+// Or we can use Live Server extension (or its alternatives) in VSCode to
+// automatically refresh the browser.
+
 import "../parsing/Parser.mls"
 import "../parsing/Lexer.mls"
 import "../../Iter.mls"
