@@ -477,7 +477,7 @@ class JSBuilder(using TL, State, Ctx) extends CodeBuilder:
   
   def blockPreamble(ss: Iterable[Symbol])(using Raise, Scope): Document =
     // TODO document: mutable var assnts require the lookup
-    val vars = ss.toSeq.filter(scope.lookup(_).isEmpty).sortBy(_.uid).iterator.map(l =>
+    val vars = ss.filter(scope.lookup(_).isEmpty).toArray.sortBy(_.uid).iterator.map(l =>
       l -> scope.allocateName(l))
     if vars.isEmpty then doc"" else
       doc" # let " :: vars.map: (_, nme) =>
