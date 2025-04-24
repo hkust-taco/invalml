@@ -2,13 +2,27 @@ import "../../Option.mls"
 import "../../Iter.mls"
 import "../../Predef.mls"
 import "../../MutMap.mls"
-import "./Keyword.mls"
 
 open Predef
 open Option { Some, None }
-open Keyword { INT_MIN, INT_MAX }
 
 module Keywords with ...
+
+// https://v8.dev/blog/pointer-compression
+// The maximal and minimal values of V8's Smi on 64-bit platforms.
+val INT_MIN = -2147483648
+val INT_MAX = 2147483647
+
+class Keyword(val name: Str, val leftPrec, val rightPrec) with  
+  fun leftPrecOrMin = if leftPrec is Some(prec) then prec else INT_MIN
+  fun rightPrecOrMin = if rightPrec is Some(prec) then prec else INT_MIN
+  fun leftPrecOrMax = if leftPrec is Some(prec) then prec else INT_MAX
+  fun rightPrecOrMax = if rightPrec is Some(prec) then prec else INT_MAX
+  
+  fun toString() = fold(+) of
+    "Keyword(`", name, "`, "
+    (if leftPrec is Some(prec) then prec.toString() else "N/A"), ", ",
+    (if rightPrec is Some(prec) then prec.toString() else "N/A"), ")"
 
 fun makePrecMap(startPrec: Int, ...ops) =
   let
@@ -23,7 +37,7 @@ fun makePrecMap(startPrec: Int, ...ops) =
 
 val all = MutMap.empty
 fun keyword(name, leftPrec, rightPrec) =
-  let result = Keyword.Keyword(name, leftPrec, rightPrec)
+  let result = Keyword(name, leftPrec, rightPrec)
   all |> MutMap.insert(name, result)
   result
 let prec = 0 

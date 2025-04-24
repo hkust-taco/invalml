@@ -3,7 +3,7 @@ import "../../Iter.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
 import "../../Predef.mls"
-import "./Keyword.mls"
+import "./Keywords.mls"
 import "./Token.mls"
 import "./Tree.mls"
 
@@ -19,7 +19,7 @@ module ParseRule with ...
 module Choice with
   abstract class Choice[A]
   
-  data class Keyword[A](keyword: Keyword, rest: ParseRule[A]) extends Choice[A]
+  data class Keyword[A](keyword: Keywords.Keyword, rest: ParseRule[A]) extends Choice[A]
   
   data class Ref[A, B](
       kind: Str,

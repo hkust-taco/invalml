@@ -3,7 +3,6 @@ import "../../Predef.mls"
 import "../../Stack.mls"
 import "../../Option.mls"
 import "../../Str.mls"
-import "./Keyword.mls"
 import "./Keywords.mls"
 import "./Token.mls"
 
@@ -11,8 +10,7 @@ open Predef { fold, mkStr }
 open Stack
 open Option { Some, None }
 open Token { LiteralKind, BracketKind }
-open Keyword { INT_MAX }
-open Keywords { opPrec }
+open Keywords { opPrec, INT_MAX }
 
 type StackT[A] = Stack.Cons[A] | Stack.Nil
 
@@ -51,14 +49,14 @@ module Tree with
       Match(scrutinee: Tree, branches: StackT) extends Tree
       Lambda(params: StackT, body: Tree) extends Tree
       App(callee: Tree, argument: Tree) extends Tree
-      Infix(op: Keyword.Keyword, lhs: Tree, rhs: Tree) extends Tree
+      Infix(op: Keywords.Keyword, lhs: Tree, rhs: Tree) extends Tree
       // `items` is separated by `and`
       Define(kind: DefineKind.DefineKind, items: StackT[[Tree, Tree]]) extends Tree
       LetIn(bindings: StackT, body: Tree) extends Tree
       While(cond: Tree, body: Tree) extends Tree
       For(head: Tree, start: Tree, end: Tree, body: Tree) extends Tree
       // For `if`-`then`-`else`. The last part is optional.
-      Ternary(keyword: Keyword.Keyword, lhs: Tree, rhs: Tree, body) extends Tree
+      Ternary(keyword: Keywords.Keyword, lhs: Tree, rhs: Tree, body) extends Tree
   
   fun empty = Empty()
   fun error(message: Str) = empty Error(message)
@@ -126,7 +124,7 @@ module Tree with
         go(callee)
         " "
         par of go(argument), prec(argument, false) <= Keywords.appPrec
-      Infix(Keyword.Keyword(".", _, _), target, Ident(field, _)) then
+      Infix(Keywords.Keyword(".", _, _), target, Ident(field, _)) then
         if opPrec(".") is [leftPrec, _] then mkStr of
           par of go(target), prec(target, false) < leftPrec
           "."
@@ -173,7 +171,7 @@ module Tree with
         if body is Some(body) then go(body) else go(body)
       Lambda(params, body) then fold(+) of
         "fun ", params Iter.fromStack() Iter.mapping(go) Iter.joined(" "), " -> ", go(body)
-      Keyword.Keyword(name, _, _) then name
+      Keywords.Keyword(name, _, _) then name
       Some(tree) then "Some(" + wrap(tree) + ")"
       None then "None"
       _ :: _ then tree Iter.fromStack() Iter.mapping(wrap) Iter.joined(" :: ") + " :: Nil"
