@@ -173,7 +173,7 @@ fun displayRules() =
   open ParseRuleVisualizer
   open Rules
   reset()
-  set query("#syntax-diagrams>main").innerHTML = Iter.joined(_, "") <| tuple of
+  set query("#syntax-diagrams>main").innerHTML = Str.concat of
     elem("h3") of "Term"
     makeFigures of render(railroad, "term", termRule)
     elem("h3") of "Type"
