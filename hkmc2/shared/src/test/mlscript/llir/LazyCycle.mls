@@ -19,27 +19,27 @@ fun llist(x) =
   f(x)
 llist(1)
 //│ LLIR:
-//│   class Lambda_lambda(lam_arg0$905,lam_arg1$906) extends Callable {
-//│     def apply0$907() =
-//│       let x$908 = +(lam_arg0$905,1) in
-//│       let x$909 = Callable.apply1$902(lam_arg1$906,x$908) in
-//│       let x$911 = LzCons$867(lam_arg0$905,x$909) in
-//│       x$911
+//│   class Lambda_lambda(lam_arg0$921,lam_arg1$922) extends Callable {
+//│     def apply0$923() =
+//│       let x$924 = +(lam_arg0$921,1) in
+//│       let x$925 = Callable.apply1$918(lam_arg1$922,x$924) in
+//│       let x$927 = LzCons$883(lam_arg0$921,x$925) in
+//│       x$927
 //│   }
 //│   class Lambda_f() extends Callable {
-//│     def apply1$902(x$887) =
-//│       let x$912 = Lambda_lambda$903(x$887,<this>$901) in
-//│       let* (x$913) = lazy(x$912) in
-//│       x$913
+//│     def apply1$918(x$903) =
+//│       let x$928 = Lambda_lambda$919(x$903,<this>$917) in
+//│       let* (x$929) = lazy(x$928) in
+//│       x$929
 //│   }
-//│   def llist$883(x$885) =
-//│     let x$914 = Lambda_f$899() in
-//│     let x$915 = Callable.apply1$902(x$914,x$885) in
-//│     x$915
-//│   def entry$917() =
-//│     let* (x$916) = llist(1) in
-//│     x$916
-//│   entry = entry$917
+//│   def llist$899(x$901) =
+//│     let x$930 = Lambda_f$915() in
+//│     let x$931 = Callable.apply1$918(x$930,x$901) in
+//│     x$931
+//│   def entry$933() =
+//│     let* (x$932) = llist(1) in
+//│     x$932
+//│   entry = entry$933
 //│ 
 //│ WholeProgramCpp:
 //│ #include "mlsprelude.h"

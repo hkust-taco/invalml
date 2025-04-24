@@ -35,38 +35,49 @@ let Predef1;
   static pipeFrom(f2, x3) {
     return runtime.safeCall(f2(x3))
   } 
-  static tap(x4, f3) {
-    let tmp;
-    tmp = runtime.safeCall(f3(x4));
-    return (tmp , x4)
+  static pipeIntoHi(x4, f3) {
+    return runtime.safeCall(f3(x4))
   } 
-  static pat(f4, x5) {
-    let tmp;
-    tmp = runtime.safeCall(f4(x5));
-    return (tmp , x5)
+  static pipeFromHi(f4, x5) {
+    return runtime.safeCall(f4(x5))
   } 
-  static andThen(f5, g) {
-    return (x6) => {
+  static tap(x6, f5) {
+    let tmp;
+    tmp = runtime.safeCall(f5(x6));
+    return (tmp , x6)
+  } 
+  static pat(f6, x7) {
+    let tmp;
+    tmp = runtime.safeCall(f6(x7));
+    return (tmp , x7)
+  } 
+  static andThen(f7, g) {
+    return (x8) => {
       let tmp;
-      tmp = runtime.safeCall(f5(x6));
+      tmp = runtime.safeCall(f7(x8));
       return runtime.safeCall(g(tmp))
     }
   } 
-  static compose(f6, g1) {
-    return (x6) => {
+  static compose(f8, g1) {
+    return (x8) => {
       let tmp;
-      tmp = runtime.safeCall(g1(x6));
-      return runtime.safeCall(f6(tmp))
+      tmp = runtime.safeCall(g1(x8));
+      return runtime.safeCall(f8(tmp))
     }
   } 
-  static passTo(receiver, f7) {
+  static passTo(receiver, f9) {
     return (...args1) => {
-      return runtime.safeCall(f7(receiver, ...args1))
+      return runtime.safeCall(f9(receiver, ...args1))
     }
   } 
-  static call(receiver1, f8) {
+  static passToLo(receiver1, f10) {
     return (...args1) => {
-      return f8.call(receiver1, ...args1)
+      return runtime.safeCall(f10(receiver1, ...args1))
+    }
+  } 
+  static call(receiver2, f11) {
+    return (...args1) => {
+      return f11.call(receiver2, ...args1)
     }
   } 
   static print(...xs) {
@@ -93,7 +104,7 @@ let Predef1;
   static tuple(...xs1) {
     return xs1
   } 
-  static foldr(f9) {
+  static foldr(f12) {
     return (first, ...rest) => {
       let len, i, init, scrut, scrut1, tmp, tmp1, tmp2, tmp3, tmp4, tmp5;
       len = rest.length;
@@ -111,7 +122,7 @@ let Predef1;
             tmp2 = i - 1;
             i = tmp2;
             tmp3 = runtime.safeCall(rest.at(i));
-            tmp4 = runtime.safeCall(f9(tmp3, init));
+            tmp4 = runtime.safeCall(f12(tmp3, init));
             init = tmp4;
             tmp5 = runtime.Unit;
             continue tmp6;
@@ -120,21 +131,21 @@ let Predef1;
           }
           break;
         }
-        return runtime.safeCall(f9(first, init))
+        return runtime.safeCall(f12(first, init))
       }
     }
   } 
   static mkStr(...xs2) {
     let tmp, tmp1, lambda;
-    lambda = (undefined, function (acc, x6) {
+    lambda = (undefined, function (acc, x8) {
       let tmp2, tmp3, tmp4;
-      if (typeof x6 === 'string') {
+      if (typeof x8 === 'string') {
         tmp2 = true;
       } else {
         tmp2 = false;
       }
       tmp3 = runtime.safeCall(Predef.assert(tmp2));
-      tmp4 = acc + x6;
+      tmp4 = acc + x8;
       return (tmp3 , tmp4)
     });
     tmp = lambda;

@@ -67,6 +67,20 @@ print <! 2 + 2 |> (_ + 1)
 //│ = 5
 
 
+fun f(x)(a) = x + a
+
+123 |> f of 1
+//│ = 124
+
+123 |> f <| 1
+//│ = 124
+
+fun f(x)(y)(a) = x + y + a
+
+123 |> f(1) of 2
+//│ = 126
+
+
 tuple passing(1, 2, 3) <| 4
 //│ = [1, 2, 3, 4]
 
@@ -162,7 +176,7 @@ foldr(tuple)(0, 1, 2, 3)
 :re
 foldr(+)()
 //│ ╔══[ERROR] Expected at least 1 arguments, got 0
-//│ ║  l.163: 	foldr(+)()
+//│ ║  l.177: 	foldr(+)()
 //│ ╙──       	^^^^^
 
 

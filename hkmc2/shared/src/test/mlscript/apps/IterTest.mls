@@ -2,7 +2,7 @@
 
 import "../../mlscript-compile/Iter.mls"
 import "../../mlscript-compile/Stack.mls"
-import "../../mlscript-compile/WrappedMap.mls"
+import "../../mlscript-compile/MutMap.mls"
 
 open Iter
 open Stack { Cons, Nil }
@@ -88,9 +88,9 @@ open Stack { Cons, Nil }
 //│ = [16, 20]
 
 [["foo", 1]]
-  WrappedMap.toMap()
+  MutMap.toMap()
   mapping of case [k, v] then [k + "!", v * 2]
-  appended of WrappedMap.toMap([["bar", 2]])
+  appended of MutMap.toMap([["bar", 2]])
   toArray()
 //│ = [["foo!", 2], ["bar", 2]]
 

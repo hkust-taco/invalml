@@ -1,10 +1,12 @@
-import "../../WrappedMap.mls"
+import "../../MutMap.mls"
+import "../../Predef.mls"
 
+open Predef
 module Examples with...
 
-val examples = WrappedMap.empty
+val examples = MutMap.empty
 
-examples.insert of
+examples |> MutMap.insert of
   "hanoi"
   name: "Hanoi from Caml Light"
   source: """let spaces n = make_string n " ";;
@@ -33,7 +35,7 @@ let rec join_lines l1 l2 l3 =
   | _ -> failwith "join_lines";;
 """
 
-examples.insert of
+examples |> MutMap.insert of
   "extensible"
   name: "Extensible Syntax"
   source: """#newKeyword ("hello", Some 3, Some 3)

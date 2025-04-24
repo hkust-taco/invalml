@@ -1,4 +1,4 @@
-import "../../WrappedMap.mls"
+import "../../MutMap.mls"
 import "../../Iter.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
@@ -216,7 +216,7 @@ data class ParseRule[A](name: Str, choices: StackT[ChoiceT[A]]) with
       else []
     Iter.flattening()
     Iter.toArray()
-    WrappedMap.toMap()
+    MutMap.toMap()
   
   // Collect all keyword choices in this rule.
   fun keywordChoices = _keywordChoices.get()

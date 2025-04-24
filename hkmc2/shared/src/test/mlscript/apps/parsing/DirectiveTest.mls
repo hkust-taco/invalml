@@ -1,6 +1,8 @@
 :js
 
+import "../../../mlscript-compile/MutMap.mls"
 import "../../../mlscript-compile/Iter.mls"
+
 import "../../../mlscript-compile/apps/parsing/Test.mls"
 import "../../../mlscript-compile/apps/parsing/Rules.mls"
 import "../../../mlscript-compile/apps/parsing/Keywords.mls"
@@ -24,7 +26,7 @@ example of """
 """
 //│ > 
 
-print of Keywords.extended.valuesIterator Iter.joined("\n")
+print of Keywords.extended |> MutMap.valuesIterator |. Iter.joined("\n")
 //│ > Keyword(`hello`, N/A, N/A)
 //│ > Keyword(`world`, 34, N/A)
 

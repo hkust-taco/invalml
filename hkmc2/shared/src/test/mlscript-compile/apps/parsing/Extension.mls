@@ -7,10 +7,11 @@ import "../../Stack.mls"
 import "../../Option.mls"
 import "../../Predef.mls"
 import "../../Iter.mls"
+import "../../MutMap.mls"
 
+open Predef
 open Stack
 open Option { Some, None }
-open Predef { print, tuple }
 open Token { LiteralKind }
 open ParseRule { Choice }
 
@@ -39,10 +40,10 @@ fun extendKeyword(tree: TreeT) =
 // * Add an empty parse rule to the map associated with the given name.
 fun newCategory(tree: TreeT) =
   if tree is Tree.Literal(Token.LiteralKind.String, name) and
-    Rules.syntaxKinds.get(name) is
+    Rules.syntaxKinds |> MutMap.get(name) is
       Some(rule) then print of "Category already exists: " + rule.display
       None then
-        Rules.syntaxKinds.insert(name, ParseRule.ParseRule(name, Nil))
+        Rules.syntaxKinds |> MutMap.insert(name, ParseRule.ParseRule(name, Nil))
         Rules.extendedKinds.add(name)
   else
     print of "expect a string literal but found " + tree
@@ -52,14 +53,14 @@ pattern ClosedCategory = "ident" | "typevar"
 
 fun extendCategory(choiceBodyTree: TreeT) =
   if parseChoiceTree(choiceBodyTree) is
-    Some([kindName, choice]) and Rules.syntaxKinds.get(kindName) is
+    Some([kindName, choice]) and Rules.syntaxKinds |> MutMap.get(kindName) is
       Some(rule) and kindName is
         // If the `kindName` is built-in and extensible, we check if the choice
         // refers to another category in the beginning. If so, we inline the
         // referenced category's choices into the current choice.
         OpenCategory and choice is
           Choice.Ref(refKindName, process, outerPrec, innerPrec, rest) and
-            Rules.syntaxKinds.get(refKindName) is Some(refRule) then
+            Rules.syntaxKinds |> MutMap.get(refKindName) is Some(refRule) then
               // TODO: The `process` function should be applied to the referenced rule.
               // TODO: How to handle `outerPrec` and `innerPrec`?
               rule.extendChoices of refRule.andThen(rest, process).choices
@@ -79,7 +80,7 @@ fun parseChoiceTree(tree: TreeT) =
   fun go(trees: StackT[TreeT]): Choice.Choice = 
     let res = if trees is
       Tree.App(Tree.Ident("keyword", _), Tree.Literal(LiteralKind.String, name)) :: rest and
-        Keywords.all.get(name) is Some(keyword) then
+        Keywords.all |> MutMap.get(name) is Some(keyword) then
           Choice.keyword(keyword)(go(rest))
       Tree.Literal(LiteralKind.String, name) :: rest then
         Choice.reference(name)(process: Cons, name: "unnamed", choices: tuple of go(rest))

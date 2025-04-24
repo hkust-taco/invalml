@@ -1,8 +1,10 @@
 :js
 
+import "../../../mlscript-compile/Iter.mls"
+import "../../../mlscript-compile/MutMap.mls"
+
 import "../../../mlscript-compile/apps/parsing/Keywords.mls"
 import "../../../mlscript-compile/apps/parsing/Rules.mls"
-import "../../../mlscript-compile/Iter.mls"
 import "../../../mlscript-compile/apps/parsing/Test.mls"
 
 open Keywords { opPrec, opPrecOpt }
@@ -28,7 +30,7 @@ opPrec of "+"
 opPrecOpt of "=="
 //│ = Some([16, 16])
 
-print of Keywords.all.values.join("\n")
+print of (Keywords.all |> MutMap.values).join("\n")
 //│ > Keyword(`;;`, 0, 0)
 //│ > Keyword(`class`, N/A, 0)
 //│ > Keyword(`;`, 1, 0)

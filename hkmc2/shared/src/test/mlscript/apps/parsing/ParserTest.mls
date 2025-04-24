@@ -421,3 +421,39 @@ example of """
 let sub = (-);;
 """
 //│ > «let sub = -»
+
+example of """
+:tree
+f -1
+"""
+//│ > App:
+//│ >   callee = Ident of "-"
+//│ >   argument = Stack of 
+//│ >     Ident of "f"
+//│ >     Literal#Integer of "1"
+//│ > «f - 1»
+
+example of """
+:tree
+f :: -1
+"""
+//│ > App:
+//│ >   callee = Ident of "::"
+//│ >   argument = Stack of 
+//│ >     Ident of "f"
+//│ >     App:
+//│ >       callee = Ident of "-"
+//│ >       argument = Literal#Integer of "1"
+//│ > «f :: -1»
+
+
+let x = 1
+//│ x = 1
+
+mkStr of "A", x is Str
+//│ // Standard Error:
+//│ Assertion failed
+//│ 
+//│ = "Afalse"
+
+

@@ -1,30 +1,30 @@
 import "../../Option.mls"
 import "../../Iter.mls"
 import "../../Predef.mls"
-import "../../WrappedMap.mls"
+import "../../MutMap.mls"
 import "./Keyword.mls"
 
+open Predef
 open Option { Some, None }
-open Predef { tuple }
 open Keyword { INT_MIN, INT_MAX }
 
 module Keywords with ...
 
 fun makePrecMap(startPrec: Int, ...ops) =
   let
-    m = WrappedMap.empty
+    m = MutMap.empty
     i = 0
   while i < ops.length do
     ops.at(i).split(" ").forEach of (op, _, _) =>
       if op.length > 0 do
-        m.insert of op, i + startPrec
+        m |> MutMap.insert of op, i + startPrec
     set i += 1
   m
 
-val all = WrappedMap.empty
+val all = MutMap.empty
 fun keyword(name, leftPrec, rightPrec) =
   let result = Keyword.Keyword(name, leftPrec, rightPrec)
-  all.insert(name, result)
+  all |> MutMap.insert(name, result)
   result
 let prec = 0 
 fun currPrec = Some(prec)
@@ -89,12 +89,12 @@ let precMap = makePrecMap of
   "+ -"
   "* %"
   "~"
-  "" // perfix operators
+  "" // prefix operators
   "" // applications
   "."
 
 // The largest precedence value of all operators.
-val periodPrec = precMap.get(".") Option.unsafe.get()
+val periodPrec = precMap |> MutMap.get(".") |> Option.unsafe.get
 
 val _period = keyword of ".", Some(periodPrec), Some(periodPrec)
 
@@ -103,9 +103,9 @@ val appPrec = maxOperatorPrec - 1
 val prefixPrec = appPrec - 1
 
 // Get the precedence of a single character operator.
-fun charPrec(op) = precMap.get(op) Option.unsafe.get()
+fun charPrec(op) = precMap |> MutMap.get(op) |> Option.unsafe.get
 
-fun charPrecOpt(op) = precMap.get(op)
+fun charPrecOpt(op) = precMap |> MutMap.get(op)
 
 val _asterisk = keyword of "*", charPrecOpt("*"), charPrecOpt("*")
 val _equalequal = keyword of "==", charPrecOpt("="), charPrecOpt("=")
@@ -121,11 +121,11 @@ val _rightCurly = keyword of "}", basePrec, None
 val _begin = keyword of "begin", bracketPrec, basePrec
 val _end = keyword of "end", basePrec, None
 
-let builtinKeywords = new Set(all.keysIterator)
+let builtinKeywords = new Set(all |> MutMap.keysIterator)
 fun extended = all
   Iter.filtering of case [k, _] then builtinKeywords.has(k) is false
   Iter.toArray()
-  WrappedMap.toMap()
+  MutMap.toMap()
 
 pattern Letter = "a" ..= "z" | "A" ..= "Z"
 

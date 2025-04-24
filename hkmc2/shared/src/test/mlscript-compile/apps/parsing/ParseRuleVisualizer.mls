@@ -1,12 +1,14 @@
-import "./ParseRule.mls"
-import "./Rules.mls"
-import "./Parser.mls"
 import "../../Predef.mls"
 import "../../Stack.mls"
 import "../../Iter.mls"
 import "../../Option.mls"
 import "../../TreeTracer.mls"
 import "../../XML.mls"
+import "../../MutMap.mls"
+
+import "./ParseRule.mls"
+import "./Rules.mls"
+import "./Parser.mls"
 
 open Predef
 open Stack
@@ -86,7 +88,7 @@ fun render(rr, title: Str, rule: ParseRule.ParseRule) =
     referencedKinds = new Set()
     diagrams.push of ...currentKinds
       Iter.mapping of kind => 
-        let theRule = syntaxKinds.get(kind) Option.unsafe.get()
+        let theRule = syntaxKinds |> MutMap.get(kind) |> Option.unsafe.get
         [kind, diagram of renderRule(theRule)]
       Iter.toArray()
   diagrams

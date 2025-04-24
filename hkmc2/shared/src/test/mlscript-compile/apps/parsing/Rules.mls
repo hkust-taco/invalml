@@ -1,7 +1,7 @@
 import "../../Predef.mls"
 import "../../Option.mls"
 import "../../Stack.mls"
-import "../../WrappedMap.mls"
+import "../../MutMap.mls"
 import "../../Iter.mls"
 import "./Token.mls"
 import "./Keyword.mls"
@@ -21,15 +21,15 @@ type Opt[A] = Some[A] | None
 
 module Rules with ...
 
-val syntaxKinds = WrappedMap.empty
+val syntaxKinds = MutMap.empty
 
 val extendedKinds = new Set()
 
-fun getRuleByKind(kind: Str) = syntaxKinds.get(kind) Option.unsafe.get()
+fun getRuleByKind(kind: Str) = syntaxKinds |> MutMap.get(kind) |> Option.unsafe.get
 
-fun define(name: Str)(...choices) = syntaxKinds.updateWith(name) of case
-    None       then Some(rule(name, ...choices))
-    Some(rule) then Some(rule.extendChoices(choices Iter.toStack()))
+fun define(name: Str)(...choices) = syntaxKinds |> MutMap.updateWith(name) of case
+  None       then Some(rule(name, ...choices))
+  Some(rule) then Some(rule.extendChoices(choices Iter.toStack()))
 
 fun idFirst(value, _) = value
 fun idSecond(_, value) = value
@@ -364,6 +364,6 @@ val declRule = rule of
     name: "directive name"
     choices: tuple of term of process: idFirst, name: "directive body"
 
-syntaxKinds.insert of "term", termRule
-syntaxKinds.insert of "type", typeRule
-syntaxKinds.insert of "decl", declRule
+syntaxKinds |> MutMap.insert of "term", termRule
+syntaxKinds |> MutMap.insert of "type", typeRule
+syntaxKinds |> MutMap.insert of "decl", declRule
