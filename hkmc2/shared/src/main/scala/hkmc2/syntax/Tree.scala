@@ -173,6 +173,7 @@ enum Tree extends AutoLocated:
     case Open(_) => "open"
     case MemberProj(_, _) => "member projection"
     case Keywrd(kw) => s"'${kw.name}' keyword"
+    case Unt() => "unit"
     case Dummy => "‹dummy›"
     
   def deparenthesized: Tree = this match
