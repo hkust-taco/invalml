@@ -11,23 +11,23 @@ mkTup(1, 2)
 //│ = [1, 2]
 //│ LLIR:
 //│   
-//│   def mkTup$856(x$859,y$860) =
-//│     let x$872 = Tuple2$873(x$859,y$860) in
-//│     x$872
-//│   def fst$857(t$863) =
-//│     case t$863 of
-//│       Tuple2$873 =>
-//│         let x$876 = t$863.<Tuple2$873:0> in
-//│         let x$877 = t$863.<Tuple2$873:1> in
-//│         x$876
+//│   def mkTup$853(x$856,y$857) =
+//│     let x$869 = Tuple2$870(x$856,y$857) in
+//│     x$869
+//│   def fst$854(t$860) =
+//│     case t$860 of
+//│       Tuple2$870 =>
+//│         let x$873 = t$860.<Tuple2$870:0> in
+//│         let x$874 = t$860.<Tuple2$870:1> in
+//│         x$873
 //│       _ =>
 //│         panic "match error"
-//│   def j$875() =
+//│   def j$872() =
 //│     undefined
-//│   def entry$879() =
-//│     let* (x$878) = mkTup(1,2) in
-//│     x$878
-//│   entry = entry$879
+//│   def entry$876() =
+//│     let* (x$875) = mkTup(1,2) in
+//│     x$875
+//│   entry = entry$876
 //│ 
 //│ Cpp:
 //│ #include "mlsprelude.h"

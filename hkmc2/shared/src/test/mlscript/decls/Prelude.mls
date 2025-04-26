@@ -19,15 +19,14 @@ declare class Error
 declare class TypeError
 declare class RangeError
 declare class Symbol
+declare class Date
 
 // MLscript-specific types
 declare class Unit
 declare class Bool
 declare class Int
 declare class Num
-declare class Str with
-  fun length: Int
-  fun concat: Str -> Str
+declare class Str
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
 declare module Math with

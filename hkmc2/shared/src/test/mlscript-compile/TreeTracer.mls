@@ -1,4 +1,5 @@
 import "./Predef.mls"
+import "./Str.mls"
 
 open Predef { fold }
 

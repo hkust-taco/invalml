@@ -13,6 +13,7 @@
 
 import "../parsing/Parser.mls"
 import "../parsing/Lexer.mls"
+import "../../Str.mls"
 import "../../Iter.mls"
 import "../../XML.mls"
 import "../../Option.mls"
