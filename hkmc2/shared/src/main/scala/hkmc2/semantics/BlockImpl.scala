@@ -17,9 +17,20 @@ trait BlockImpl(using Elaborator.State):
         stmt.desugared match
         case PossiblyAnnotated(anns, h @ Hndl(body = N)) =>
           PossiblyAnnotated(anns, h.copy(body = S(Block(stmts)))) :: Nil
-        case PossiblyAnnotated(anns, TypeDef(syntax.Cls, Ident(name), rhs, S(Block(Constructor(Block(ctors)) :: rest)))) =>
-          PossiblyAnnotated(anns, TypeDef(syntax.Cls, Ident(name), rhs, if rest.isEmpty then N else S(Block(rest)))) ::
-            (ctors.map(head => PossiblyAnnotated(anns, TypeDef(syntax.Cls, InfixApp(head, syntax.Keyword.`extends`, Ident(name)), N, N))))
+        case PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, S(Block(Constructor(Block(ctors)) :: rest)))) =>
+          val splitHead = head match
+            case _: Ident => head
+            case App(id: Ident, TyTup(tup)) => App(id, TyTup(tup.map(
+              t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
+            )))
+          def genCtorHead(decl: Tree) = head match
+            case _: Ident => decl
+            case App(_: Ident, tup: TyTup) => decl match
+              case App(id: Ident, ps: Tup) => App(App(id, tup), ps)
+              case id: Ident => App(id, tup)
+              case _ => ??? // TODO: GADT
+          PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, if rest.isEmpty then N else S(Block(rest)))) ::
+            (ctors.map(h => PossiblyAnnotated(anns, TypeDef(syntax.Cls, InfixApp(genCtorHead(h), syntax.Keyword.`extends`, splitHead), N, N))))
           ::: desug(stmts)
         case stmt => stmt :: desug(stmts)
       case Nil => Nil

@@ -1,0 +1,80 @@
+:bbml
+//│ Type: ⊤
+
+//│ Type: ⊤
+
+
+class IntList with
+  constructor
+    Nil
+    Cons(x: Int, xs: IntList)
+//│ Type: ⊤
+
+Nil
+//│ Type: IntList
+
+Cons(1, Cons(2, Cons(3, Nil)))
+//│ Type: IntList
+
+
+:e
+class Foo with
+  constructor
+    Bar(x)
+//│ ╔══[ERROR] Invalid ADT parameter.
+//│ ║  l.23: 	    Bar(x)
+//│ ╙──      	        ^
+//│ Type: ⊤
+
+
+:e
+Nil(1)
+//│ ╔══[ERROR] Type error in application
+//│ ║  l.31: 	Nil(1)
+//│ ║        	^^^^^^
+//│ ╙── because: cannot constrain  IntList  <:  (Int) ->{'eff} ('app)
+//│ Type: ⊥
+
+:e
+Nil()
+//│ ╔══[ERROR] Type error in application
+//│ ║  l.39: 	Nil()
+//│ ║        	^^^^^
+//│ ╙── because: cannot constrain  IntList  <:  () ->{'eff} ('app)
+//│ Type: ⊥
+
+
+:e
+Cons("1", Nil)
+//│ ╔══[ERROR] Type error in string literal with expected type Int
+//│ ║  l.48: 	Cons("1", Nil)
+//│ ║        	     ^^^
+//│ ╙── because: cannot constrain  Str  <:  Int
+//│ Type: IntList
+
+
+class Maybe[T] with
+  constructor
+    Nothing
+    Just(x: T)
+//│ Type: ⊤
+
+
+Nothing
+//│ Type: Maybe[in ⊤ out ⊥]
+
+Just(42)
+//│ Type: Maybe[in ⊤ out Int]
+
+Just(false)
+//│ Type: Maybe[in ⊤ out Bool]
+
+
+class Fun[T, S] with
+  constructor
+    Pure(f: T -> S)
+//│ Type: ⊤
+
+
+Pure(x => x + 1)
+//│ Type: Fun[in Int out ⊥, in ⊤ out Int]

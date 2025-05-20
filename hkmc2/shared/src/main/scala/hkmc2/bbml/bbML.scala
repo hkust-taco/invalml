@@ -147,7 +147,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
           val ts = defn.tparams.lazyZip(targs).map: (tp, t) =>
             t match
             case Term.WildcardTy(in, out) => Wildcard(
-                in.map(t => mono(t, pol)).getOrElse(Bot),
+                in.map(t => mono(t, !pol)).getOrElse(Bot),
                 out.map(t => mono(t, pol)).getOrElse(Top)
               )
             case _ =>
@@ -414,6 +414,37 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       ft.monoOr(error(msg"Expected a monomorphic type or an instantiable type here, but ${ty.show} found" -> sc.toLoc :: Nil))
     case ty: Type => ty
   
+  private def createADTCtor(clsDef: ClassDef, resTy: Term)(using ctx: BbCtx, scope: Scope, cctx: CCtx) =
+    val nestCtx = ctx.nextLevel
+    given BbCtx = nestCtx
+    val map = HashMap[Uid[Symbol], TypeArg]()
+    val targs = clsDef.tparams.map {
+      case TyParam(_, _, targ) =>
+        val ty = freshWildcard(targ)
+        map += targ.uid -> ty
+        ty
+    }
+    clsDef match
+      case clsDef: ClassDef.Plain =>
+        ctx += clsDef.bsym -> typeAndSubstType(resTy, true)(using map.toMap)
+      case clsDef: ClassDef.Parameterized =>
+        if clsDef.tparams.isEmpty then
+          ctx += clsDef.bsym -> PolyFunType(clsDef.params.params.map {
+            case Param(_, _, S(ty), _) => typeType(ty)
+            case p =>
+              error(msg"Invalid ADT parameter." -> p.toLoc :: Nil)
+              Bot
+          }, typeAndSubstType(resTy, true)(using map.toMap), Bot)
+        else
+          ctx += clsDef.bsym -> PolyType(targs.flatMap { case Wildcard(in: InfVar, out: InfVar) => in :: out :: Nil }, N,
+            PolyFunType(clsDef.params.params.map {
+              case Param(_, _, S(ty), _) => typeAndSubstType(ty, true)(using map.toMap)
+              case p =>
+                error(msg"Invalid ADT parameter." -> p.toLoc :: Nil)
+                Bot
+            }, typeAndSubstType(resTy, true)(using map.toMap), Bot)
+          )
+
   private def typeCheck(t: Term)(using ctx: BbCtx, scope: Scope): (GeneralType, Type) =
   trace[(GeneralType, Type)](s"${ctx.lvl}. Typing ${t.showDbg}", res => s": (${res._1.showDbg}, ${res._2.showDbg})"):
     given CCtx = CCtx.init(t, N)
@@ -454,6 +485,9 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             ctx += td.sym -> typeType(sig)
             goStats(stats)
           case (clsDef: ClassDef) :: stats =>
+            clsDef.ext match
+              case S(Term.New(ty, _, N)) => createADTCtor(clsDef, ty)
+              case _ => ()
             goStats(stats)
           case (modDef: ModuleDef) :: stats =>
             goStats(stats)
