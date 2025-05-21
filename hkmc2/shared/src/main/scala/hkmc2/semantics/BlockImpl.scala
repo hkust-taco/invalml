@@ -18,19 +18,28 @@ trait BlockImpl(using Elaborator.State):
         case PossiblyAnnotated(anns, h @ Hndl(body = N)) =>
           PossiblyAnnotated(anns, h.copy(body = S(Block(stmts)))) :: Nil
         case PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, S(Block(Constructor(Block(ctors)) :: rest)))) =>
-          val splitHead = head match
-            case _: Ident => head
-            case App(id: Ident, TyTup(tup)) => App(id, TyTup(tup.map(
-              t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
-            )))
-          def genCtorHead(decl: Tree) = head match
-            case _: Ident => decl
-            case App(_: Ident, tup: TyTup) => decl match
-              case App(id: Ident, ps: Tup) => App(App(id, tup), ps)
-              case id: Ident => App(id, tup)
-              case _ => ??? // TODO: GADT
+          val (headId, headPs) = head match
+            case id: Ident => (id, Nil)
+            case App(id: Ident, TyTup(ps)) => (id, ps)
+            case _ => ??? // TODO: report invalid head
+          def genExt(decl: Tree) = decl match
+            case InfixApp(_, syntax.Keyword.`extends`, ext) => ext match
+              case _: Ident if headPs.isEmpty => ext
+              case App(id: Ident, TyTup(ps)) if id.name == headId.name && ps.length == headPs.length => ext
+              case _ => ??? // TODO: report invalid head
+            case _ => headPs match
+              case Nil => headId
+              case ps => App(headId, TyTup(ps.map(
+                t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
+              )))
+          def genCtorHead(decl: Tree): Tree = decl match
+            case InfixApp(decl, syntax.Keyword.`extends`, _) => decl // check will be applied in genExt
+            case App(_: Ident, tup: TyTup) => ??? // TODO: report invalid head
+            case App(id: Ident, ps: Tup) => App(App(id, TyTup(headPs)), ps)
+            case id: Ident => App(id, TyTup(headPs))
+            case _ => ??? // TODO: report invalid head
           PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, if rest.isEmpty then N else S(Block(rest)))) ::
-            (ctors.map(h => PossiblyAnnotated(anns, TypeDef(syntax.Cls, InfixApp(genCtorHead(h), syntax.Keyword.`extends`, splitHead), N, N))))
+            (ctors.map(h => PossiblyAnnotated(anns, TypeDef(syntax.Cls, InfixApp(genCtorHead(h), syntax.Keyword.`extends`, genExt(h)), N, N))))
           ::: desug(stmts)
         case stmt => stmt :: desug(stmts)
       case Nil => Nil

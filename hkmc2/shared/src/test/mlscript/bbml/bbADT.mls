@@ -61,13 +61,17 @@ class Maybe[T] with
 
 
 Nothing
-//│ Type: Maybe[in ⊤ out ⊥]
+//│ Type: Maybe['T]
 
 Just(42)
-//│ Type: Maybe[in ⊤ out Int]
+//│ Type: Maybe['T]
+//│ Where:
+//│   Int <: 'T
 
 Just(false)
-//│ Type: Maybe[in ⊤ out Bool]
+//│ Type: Maybe['T]
+//│ Where:
+//│   Bool <: 'T
 
 
 class Fun[T, S] with
@@ -77,4 +81,77 @@ class Fun[T, S] with
 
 
 Pure(x => x + 1)
-//│ Type: Fun[in Int out ⊥, in ⊤ out Int]
+//│ Type: Fun['T, 'S]
+//│ Where:
+//│   'T <: Int
+//│   Int <: 'S
+
+
+class Value[T] with
+  constructor
+    IntVal(x: Int) extends Value[out Int]
+    BoolVal(x: Bool) extends Value[out Bool]
+//│ Type: ⊤
+
+IntVal(42)
+//│ Type: Value[out Int]
+
+BoolVal(false)
+//│ Type: Value[out Bool]
+
+:e
+IntVal("1")
+//│ ╔══[ERROR] Type error in string literal with expected type Int
+//│ ║  l.103: 	IntVal("1")
+//│ ║         	       ^^^
+//│ ╙── because: cannot constrain  Str  <:  Int
+//│ Type: Value[out Int]
+
+
+class Expr[T] with
+  constructor
+    Lit[S](x: S) extends Expr[out S]
+    Var[S](nme: Str) extends Expr[out S]
+    Add(lhs: Expr[out Int], rhs: Expr[out Int]) extends Expr[out Int]
+    Lam[U, V](f: Expr[out U] -> Expr[out V]) extends Expr[out U -> V]
+    App[U, V](f: Expr[out U -> V], a: Expr[out U]) extends Expr[out V]
+//│ Type: ⊤
+
+let a = Lit(42)
+a
+//│ Type: Expr[out Int]
+
+let f = Lam(x => Add(x, Lit(1)))
+f
+//│ Type: Expr[out Int -> Int]
+
+:e
+Lam(42)
+//│ ╔══[ERROR] Type error in integer literal with expected type (Expr[out 'U]) ->{⊥} Expr[out 'V]
+//│ ║  l.129: 	Lam(42)
+//│ ║         	    ^^
+//│ ╙── because: cannot constrain  Int  <:  (Expr[in ⊥ out 'U]) ->{⊥} (Expr[in ⊥ out 'V])
+//│ Type: Expr[out ⊤ -> ⊥]
+
+App(f, a)
+//│ Type: Expr[out Int]
+
+
+let b = Lit(true)
+b
+//│ Type: Expr[out Bool]
+
+:e
+App(f, b)
+//│ ╔══[ERROR] Type error in reference with expected type Expr[out 'U]
+//│ ║  l.145: 	App(f, b)
+//│ ║         	       ^
+//│ ╟── because: cannot constrain  Expr[in ⊥ out 'S]  <:  Expr[in ⊥ out 'U]
+//│ ╟── because: cannot constrain  'S  <:  'U
+//│ ╟── because: cannot constrain  'S  <:  'U
+//│ ╟── because: cannot constrain  'S  <:  'U1
+//│ ╟── because: cannot constrain  'S  <:  'U1
+//│ ╟── because: cannot constrain  Bool  <:  'U1
+//│ ╟── because: cannot constrain  Bool  <:  'U1
+//│ ╙── because: cannot constrain  Bool  <:  Int
+//│ Type: Expr[out Int]

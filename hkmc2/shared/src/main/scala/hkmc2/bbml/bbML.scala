@@ -420,7 +420,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     val map = HashMap[Uid[Symbol], TypeArg]()
     val targs = clsDef.tparams.map {
       case TyParam(_, _, targ) =>
-        val ty = freshWildcard(targ)
+        val ty = freshVar(targ)
         map += targ.uid -> ty
         ty
     }
@@ -436,14 +436,12 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
               Bot
           }, typeAndSubstType(resTy, true)(using map.toMap), Bot)
         else
-          ctx += clsDef.bsym -> PolyType(targs.flatMap { case Wildcard(in: InfVar, out: InfVar) => in :: out :: Nil }, N,
-            PolyFunType(clsDef.params.params.map {
-              case Param(_, _, S(ty), _) => typeAndSubstType(ty, true)(using map.toMap)
-              case p =>
-                error(msg"Invalid ADT parameter." -> p.toLoc :: Nil)
-                Bot
-            }, typeAndSubstType(resTy, true)(using map.toMap), Bot)
-          )
+          ctx += clsDef.bsym -> PolyType(targs, N, PolyFunType(clsDef.params.params.map {
+            case Param(_, _, S(ty), _) => typeAndSubstType(ty, true)(using map.toMap)
+            case p =>
+              error(msg"Invalid ADT parameter." -> p.toLoc :: Nil)
+              Bot
+          }, typeAndSubstType(resTy, true)(using map.toMap), Bot))
 
   private def typeCheck(t: Term)(using ctx: BbCtx, scope: Scope): (GeneralType, Type) =
   trace[(GeneralType, Type)](s"${ctx.lvl}. Typing ${t.showDbg}", res => s": (${res._1.showDbg}, ${res._2.showDbg})"):
@@ -486,7 +484,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             goStats(stats)
           case (clsDef: ClassDef) :: stats =>
             clsDef.ext match
-              case S(Term.New(ty, _, N)) => createADTCtor(clsDef, ty)
+              case S(Term.New(ty, _, N)) => createADTCtor(clsDef, ty) // TODO
               case _ => ()
             goStats(stats)
           case (modDef: ModuleDef) :: stats =>
