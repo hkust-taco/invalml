@@ -61,17 +61,13 @@ class Maybe[T] with
 
 
 Nothing
-//│ Type: Maybe['T]
+//│ Type: Maybe[in ⊤ out ⊥]
 
 Just(42)
-//│ Type: Maybe['T]
-//│ Where:
-//│   Int <: 'T
+//│ Type: Maybe[in ⊤ out Int]
 
 Just(false)
-//│ Type: Maybe['T]
-//│ Where:
-//│   Bool <: 'T
+//│ Type: Maybe[in ⊤ out Bool]
 
 
 class Fun[T, S] with
@@ -81,10 +77,7 @@ class Fun[T, S] with
 
 
 Pure(x => x + 1)
-//│ Type: Fun['T, 'S]
-//│ Where:
-//│   'T <: Int
-//│   Int <: 'S
+//│ Type: Fun[in Int out ⊥, in ⊤ out Int]
 
 
 class Value[T] with
@@ -102,11 +95,10 @@ BoolVal(false)
 :e
 IntVal("1")
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.103: 	IntVal("1")
-//│ ║         	       ^^^
+//│ ║  l.96: 	IntVal("1")
+//│ ║        	       ^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: Value[out Int]
-
 
 class Expr[T] with
   constructor
@@ -128,7 +120,7 @@ f
 :e
 Lam(42)
 //│ ╔══[ERROR] Type error in integer literal with expected type (Expr[out 'U]) ->{⊥} Expr[out 'V]
-//│ ║  l.129: 	Lam(42)
+//│ ║  l.121: 	Lam(42)
 //│ ║         	    ^^
 //│ ╙── because: cannot constrain  Int  <:  (Expr[in ⊥ out 'U]) ->{⊥} (Expr[in ⊥ out 'V])
 //│ Type: Expr[out ⊤ -> ⊥]
@@ -144,7 +136,7 @@ b
 :e
 App(f, b)
 //│ ╔══[ERROR] Type error in reference with expected type Expr[out 'U]
-//│ ║  l.145: 	App(f, b)
+//│ ║  l.137: 	App(f, b)
 //│ ║         	       ^
 //│ ╟── because: cannot constrain  Expr[in ⊥ out 'S]  <:  Expr[in ⊥ out 'U]
 //│ ╟── because: cannot constrain  'S  <:  'U

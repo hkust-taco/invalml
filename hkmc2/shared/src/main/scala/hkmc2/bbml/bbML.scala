@@ -418,9 +418,13 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     val nestCtx = ctx.nextLevel
     given BbCtx = nestCtx
     val map = HashMap[Uid[Symbol], TypeArg]()
+    val isGeneric = clsDef.annotations.exists {
+      case Annot.Modifier(syntax.Keyword.data) => true
+      case _ => false
+    }
     val targs = clsDef.tparams.map {
       case TyParam(_, _, targ) =>
-        val ty = freshVar(targ)
+        val ty = if isGeneric then freshVar(targ) else freshWildcard(targ)
         map += targ.uid -> ty
         ty
     }
@@ -436,7 +440,10 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
               Bot
           }, typeAndSubstType(resTy, true)(using map.toMap), Bot)
         else
-          ctx += clsDef.bsym -> PolyType(targs, N, PolyFunType(clsDef.params.params.map {
+          ctx += clsDef.bsym -> PolyType(targs.flatMap {
+            case Wildcard(in: InfVar, out: InfVar) => in :: out :: Nil
+            case v: InfVar => v :: Nil
+          }, N, PolyFunType(clsDef.params.params.map {
             case Param(_, _, S(ty), _) => typeAndSubstType(ty, true)(using map.toMap)
             case p =>
               error(msg"Invalid ADT parameter." -> p.toLoc :: Nil)

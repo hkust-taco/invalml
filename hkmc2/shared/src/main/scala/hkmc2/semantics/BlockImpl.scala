@@ -21,12 +21,16 @@ trait BlockImpl(using Elaborator.State):
           val (headId, headPs) = head match
             case id: Ident => (id, Nil)
             case App(id: Ident, TyTup(ps)) => (id, ps)
-            case _ => ??? // TODO: report invalid head
+            case _ => Error() // TODO: report invalid head
+          def wrapGeneric(decl: Tree, res: Tree) = decl match // TODO a temp solution for gadt. remove it later.
+            case InfixApp(App(App(_: Ident, tup: TyTup), _), syntax.Keyword.`extends`, _) =>
+              Annotated(Keywrd(syntax.Keyword.data), res)
+            case _ => res
           def genExt(decl: Tree) = decl match
             case InfixApp(_, syntax.Keyword.`extends`, ext) => ext match
               case _: Ident if headPs.isEmpty => ext
               case App(id: Ident, TyTup(ps)) if id.name == headId.name && ps.length == headPs.length => ext
-              case _ => ??? // TODO: report invalid head
+              case _ => Error() // TODO: report invalid head
             case _ => headPs match
               case Nil => headId
               case ps => App(headId, TyTup(ps.map(
@@ -34,12 +38,12 @@ trait BlockImpl(using Elaborator.State):
               )))
           def genCtorHead(decl: Tree): Tree = decl match
             case InfixApp(decl, syntax.Keyword.`extends`, _) => decl // check will be applied in genExt
-            case App(_: Ident, tup: TyTup) => ??? // TODO: report invalid head
+            case App(_: Ident, tup: TyTup) => Error() // TODO: report invalid head
             case App(id: Ident, ps: Tup) => App(App(id, TyTup(headPs)), ps)
             case id: Ident => App(id, TyTup(headPs))
-            case _ => ??? // TODO: report invalid head
+            case _ => Error() // TODO: report invalid head
           PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, if rest.isEmpty then N else S(Block(rest)))) ::
-            (ctors.map(h => PossiblyAnnotated(anns, TypeDef(syntax.Cls, InfixApp(genCtorHead(h), syntax.Keyword.`extends`, genExt(h)), N, N))))
+            (ctors.map(h => PossiblyAnnotated(anns, wrapGeneric(h, TypeDef(syntax.Cls, InfixApp(genCtorHead(h), syntax.Keyword.`extends`, genExt(h)), N, N)))))
           ::: desug(stmts)
         case stmt => stmt :: desug(stmts)
       case Nil => Nil
