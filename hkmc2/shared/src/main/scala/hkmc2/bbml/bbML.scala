@@ -78,6 +78,9 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
   
   private val infVarState = new InfVarUid.State()
   private val solver = new ConstraintSolver(infVarState, elState, tl)
+   // for adt match exhaustive check
+  private val adtCtors = HashMap.empty[Uid[Symbol], ListBuffer[Uid[Symbol]]]
+  private val adtParent = HashMap.empty[Uid[Symbol], Symbol]
 
   private def freshSkolem(sym: Symbol, hint: Str = "")(using ctx: BbCtx): InfVar =
     InfVar(ctx.lvl, infVarState.nextUid, new VarState(), true)(sym, hint)
@@ -104,6 +107,11 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     raise(ErrorReport(msg))
     Bot // TODO: error type?
 
+  private def addADTCtor(pSym: Symbol, cSym: Symbol) =
+    if !adtCtors.keySet(pSym.uid) then
+      adtCtors += pSym.uid -> ListBuffer(cSym.uid)
+    else adtCtors(pSym.uid) += cSym.uid
+    adtParent += cSym.uid -> pSym
 
   private def typeAndSubstType
       (ty: Term, pol: Bool)(using map: Map[Uid[Symbol], TypeArg])(using ctx: BbCtx, cctx: CCtx)
@@ -286,6 +294,92 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
         ctx += sym -> PolyType.generalize(funTy, S(outer), ctx.lvl + 1)
     case _ => error(msg"Function definition shape not yet supported for ${sym.nme}" -> lam.toLoc :: Nil)
 
+  private def isADTMatch(split: Split) =
+    def rec(split: Split, acc: Either[Opt[Symbol], Unit]): Bool =
+      split match
+        case Split.Cons(Branch(_, pattern, _), alts) =>
+          pattern match
+            case Pattern.ClassLike(sym, _, _, _) if adtParent.keySet(sym.uid) =>
+              acc match
+                case L(N) => rec(alts, L(S(sym)))
+                case L(S(other)) if adtParent.get(other.uid).exists(p => p.uid == adtParent(sym.uid).uid) =>
+                  rec(alts, L(S(sym)))
+                case _ => ??? // error
+            case _ => acc match
+              case L(S(_)) => ??? // error
+              case _ => rec(alts, R(()))
+        case Split.Let(_, _, tail) => rec(tail, acc)
+        case _ => acc match
+          case L(S(sym)) => true
+          case _ => false
+    rec(split, L(N))
+
+  private def typeADTMatch
+    (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
+    : (GeneralType, Type, Ls[Uid[Symbol]]) = split match
+    case Split.Cons(Branch(scrutinee, pattern, cons), alts) =>
+      val (scrutineeTy, scrutineeEff) = typeCheck(scrutinee)
+      val map = HashMap[Uid[Symbol], TypeArg]()
+      pattern match
+        case Pattern.ClassLike(sym, _, paramsOpt, _) =>
+          val clsTy = adtParent.get(sym.uid).flatMap(_.asCls.flatMap(_.defn)) match
+            case S(cls) =>
+              ClassLikeType(cls.sym, cls.tparams.map(_ => freshWildcard(sym)))
+            case _ =>
+              error(msg"Cannot match ${scrutinee.toString} as ${sym.toString}" -> split.toLoc :: Nil)
+              Bot
+          constrain(tryMkMono(scrutineeTy, scrutinee), clsTy)
+          val (paramList, tps, isGeneric, ext) = sym.asCls.flatMap(_.defn) match
+            case S(clsDef) =>
+              val isGeneric = clsDef.annotations.exists {
+                case Annot.Modifier(syntax.Keyword.data) => true
+                case _ => false
+              }
+              val ext = clsDef.ext match
+                case S(Term.New(p: Term, _, _)) => p
+                case _ => Term.Error
+              (clsDef.paramsOpt.map(p => p.params).getOrElse(Nil), clsDef.tparams, isGeneric, ext)
+            case N =>
+              error(msg"${sym.toString} is not a valid constructor." -> split.toLoc :: Nil)
+              (Nil, Nil, false, Term.Error)
+          val params = paramsOpt.getOrElse(Nil)
+          if params.length != paramList.length then
+            error(msg"${sym.toString} is not a valid constructor." -> split.toLoc :: Nil)
+            (Bot, Bot, sym.uid :: Nil)
+          else
+            val nestCtx = if isGeneric then ctx.nextLevel else ctx.nest
+            tps.foreach {
+              case TyParam(_, _, targ) =>
+                val ty = if isGeneric then freshVar(targ)(using nestCtx) else freshWildcard(targ)(using nestCtx)
+                map += targ.uid -> ty
+            }
+            if !isGeneric then // no GADT reasoning so far
+              constrain(clsTy, tryMkMono(typeAndSubstType(ext, true)(using map.toMap), scrutinee))
+            params.iterator.zip(paramList).foreach {
+              case (S(p), Param(_, _, S(ty), _)) =>
+                nestCtx += p -> typeAndSubstType(ty, true)(using map.toMap)
+              case (N, _) => ??? // impossible
+            }
+            val (consTy, consEff, _) = typeADTMatch(cons, sign)(using nestCtx)
+            val (altsTy, altsEff, altCases) = typeADTMatch(alts, sign)
+            val allEff = scrutineeEff | (consEff | altsEff)
+            (sign.getOrElse(tryMkMono(consTy, cons) | tryMkMono(altsTy, alts)), allEff, sym.uid :: altCases)
+    case Split.Let(name, term, tail) =>
+      val nestCtx = ctx.nest
+      given BbCtx = nestCtx
+      val (termTy, termEff) = typeCheck(term)
+      nestCtx += name -> termTy
+      val (tailTy, tailEff, cases) = typeADTMatch(tail, sign)(using nestCtx)
+      (tailTy, termEff | tailEff, cases)
+    case Split.Else(alts) => sign match
+      case S(sign) =>
+        val (ty, res) = ascribe(alts, sign)
+        (ty, res, Nil)
+      case _ =>
+        val (ty, res) = typeCheck(alts)
+        (ty, res, Nil)
+    case Split.End => (Bot, Bot, Nil)
+
   private def typeSplit
       (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
       : (GeneralType, Type) =
@@ -323,7 +417,6 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       val nestCtx = ctx.nest
       given BbCtx = nestCtx
       val (termTy, termEff) = typeCheck(term)
-      val sk = freshSkolem(name)
       nestCtx += name -> termTy
       val (tailTy, tailEff) = typeSplit(tail, sign)(using nestCtx)
       (tailTy, termEff | tailEff)
@@ -331,6 +424,25 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       case S(sign) => ascribe(alts, sign)
       case _ => typeCheck(alts)
     case Split.End => (Bot, Bot)
+
+  private def typeAllSplits
+    (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
+    : (GeneralType, Type) =
+      if isADTMatch(split) then
+        val (res, eff, cases) = typeADTMatch(split, sign)
+        cases match
+          case c :: rest => // previous check already guarantees that all cases belong to the same ADT.
+            adtParent.get(c).flatMap(p => adtCtors.get(p.uid)) match
+              case S(ctors) =>
+                val dist = cases.distinct
+                if dist.length < cases.length then
+                  error(msg"Duplicate match branches." -> split.toLoc :: Nil)
+                if dist.length != ctors.length then
+                  error(msg"Expect ${ctors.length.toString()} cases, but ${dist.length.toString()} got." -> split.toLoc :: Nil)
+              case N => ??? // error?
+          case Nil => ??? // impossible
+        (res, eff)
+      else typeSplit(split, sign)
 
   // * Note: currently, the returned type is not used or useful, but it could be in the future
   private def ascribe(lhs: Term, rhs: GeneralType)(using ctx: BbCtx, scope: Scope): (GeneralType, Type) =
@@ -359,7 +471,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       constrain(ascribe(term, skolemize(pt))._2, Bot) // * never generalize terms with effects
       (pt, Bot)
     case (Term.IfLike(Keyword.`if`, branches), ty) => // * propagate
-      typeSplit(branches, S(ty))
+      typeAllSplits(branches, S(ty))
     case (Term.Asc(term, ty), rhs) =>
       ascribe(term, typeType(ty))
       ascribe(term, rhs)
@@ -428,6 +540,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
         map += targ.uid -> ty
         ty
     }
+    addADTCtor(clsDef.ext.flatMap(n => n.cls.symbol).getOrElse(???), clsDef.sym)
     clsDef match
       case clsDef: ClassDef.Plain =>
         ctx += clsDef.bsym -> typeAndSubstType(resTy, true)(using map.toMap)
@@ -578,7 +691,8 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       case Term.Asc(term, ty) =>
         val res = typeType(ty)(using ctx)
         ascribe(term, res)
-      case Term.IfLike(Keyword.`if`, branches) => typeSplit(branches, N)
+      case Term.IfLike(Keyword.`if`, branches) =>
+        typeAllSplits(branches, N)
       case reg @ Term.Region(sym, body) =>
         val sk = freshReg(sym)(using ctx)
         val nestCtx = ctx.nestReg(sk)

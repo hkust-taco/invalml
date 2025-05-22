@@ -53,21 +53,21 @@ Cons("1", Nil)
 //│ Type: IntList
 
 
-class Maybe[T] with
+class Option[T] with
   constructor
-    Nothing
-    Just(x: T)
+    None
+    Some(x: T)
 //│ Type: ⊤
 
 
-Nothing
-//│ Type: Maybe[in ⊤ out ⊥]
+None
+//│ Type: Option[in ⊤ out ⊥]
 
-Just(42)
-//│ Type: Maybe[in ⊤ out Int]
+Some(42)
+//│ Type: Option[in ⊤ out Int]
 
-Just(false)
-//│ Type: Maybe[in ⊤ out Bool]
+Some(false)
+//│ Type: Option[in ⊤ out Bool]
 
 
 class Fun[T, S] with
@@ -147,3 +147,144 @@ App(f, b)
 //│ ╟── because: cannot constrain  Bool  <:  'U1
 //│ ╙── because: cannot constrain  Bool  <:  Int
 //│ Type: Expr[out Int]
+
+
+fun sum(xs) =
+  if xs is
+    Nil then 0
+    Cons(x, xs) then x + sum(xs)
+sum
+//│ Type: IntList -> Int
+
+
+sum(Cons(1, Cons(2, Cons(3, Cons(4, Nil)))))
+//│ Type: Int
+
+
+:e
+fun badSum(xs) =
+  if xs is
+    Cons(x, xs) then x + badSum(xs)
+//│ ╔══[ERROR] Expect 2 cases, but 1 got.
+//│ ║  l.167: 	    Cons(x, xs) then x + badSum(xs)
+//│ ╙──       	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ Type: ⊤
+
+:e
+fun badSum(xs) =
+  if xs is
+    Cons(x, xs) then x + badSum(xs)
+    Cons(x, xs) then x + badSum(xs)
+//│ ╔══[ERROR] Duplicate match branches.
+//│ ║  l.176: 	    Cons(x, xs) then x + badSum(xs)
+//│ ║         	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.177: 	    Cons(x, xs) then x + badSum(xs)
+//│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╔══[ERROR] Expect 2 cases, but 1 got.
+//│ ║  l.176: 	    Cons(x, xs) then x + badSum(xs)
+//│ ║         	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.177: 	    Cons(x, xs) then x + badSum(xs)
+//│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ Type: ⊤
+
+
+fun getOrElse(m, d) =
+  if m is
+    Some(x) then x
+    None then d
+getOrElse
+//│ Type: ['d, 'Some] -> (Option[?] ∧ Option[out 'Some], 'd) -> ('Some ∨ 'd)
+
+
+getOrElse(Some(42), 0)
+//│ Type: Int
+
+getOrElse(None, false)
+//│ Type: Bool
+
+getOrElse(Some(42), "42")
+//│ Type: Int ∨ Str
+
+
+if IntVal(1) is
+  IntVal(x) then 1
+  BoolVal(x) then 0
+//│ Type: Int
+
+
+fun toBool(v) =
+  if v is
+    IntVal(x) then x > 0
+    BoolVal(x) then x
+toBool
+//│ Type: Value[?] -> Bool
+
+toBool(IntVal(1))
+//│ Type: Bool
+
+
+class MyMap[K, V] with
+  constructor
+    Empty
+    Pair(k: K, v: V, rest: MyMap[out K, out V])
+//│ Type: ⊤
+
+fun newMap(k, v) = Pair(k, v, Empty)
+newMap
+//│ Type: ['k, 'v] -> ('k, 'v) -> MyMap[in ⊤ out 'k, in ⊤ out 'v]
+
+fun insert(m, k, v) = Pair(k, v, m)
+insert
+//│ Type: ['k, 'v, 'K, 'V] -> (MyMap[out 'K, out 'V], 'k, 'v) -> MyMap[in ⊤ out 'K, in ⊤ out 'V]
+//│ Where:
+//│   'k <: 'K
+//│   'v <: 'V
+
+
+fun getOrElse: [K, V] -> (MyMap[out K, out V], K, V) -> V
+fun getOrElse(m, k, d) =
+  if m is
+    Empty then d
+    Pair(k', v, r) then (if k == k' then v else getOrElse(r, k, d))
+//│ Type: ⊤
+
+let incMap1 = newMap(1, 2)
+incMap1
+//│ Type: MyMap[in ⊤ out Int, in ⊤ out Int]
+
+let incMap2 = insert(incMap1, 2, 3)
+incMap2
+//│ Type: MyMap[in ⊤ out Int, in ⊤ out Int]
+
+getOrElse(incMap2, 3, 4)
+//│ Type: Int
+
+
+fun toString: Any -> Str
+//│ Type: ⊤
+
+fun concat: (Str, Str) -> Str
+//│ Type: ⊤
+
+fun print: [T] -> Expr[out T] -> Str
+fun print(e) = 
+  if e is
+    Lit(x) then toString(x)
+    Var(nme) then nme
+    Add(lhs, rhs) then concat(print(lhs), concat(" + ", print(rhs)))
+    Lam(f) then
+      let v = Var("arg") in concat(print(v), concat(" => ", print(f(v))))
+    App(f, a) then concat(print(f), concat(" ", print(a)))
+//│ Type: ⊤
+
+let p = Lam(x => Add(x, Lit(1)))
+p
+//│ Type: Expr[out Int -> Int]
+
+let a = App(p, Lit(2))
+a
+//│ Type: Expr[out Int]
+
+print(p)
+print(a)
+//│ Type: Str

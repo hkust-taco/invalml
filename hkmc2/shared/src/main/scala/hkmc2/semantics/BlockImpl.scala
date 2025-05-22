@@ -23,7 +23,7 @@ trait BlockImpl(using Elaborator.State):
             case App(id: Ident, TyTup(ps)) => (id, ps)
             case _ => Error() // TODO: report invalid head
           def wrapGeneric(decl: Tree, res: Tree) = decl match // TODO a temp solution for gadt. remove it later.
-            case InfixApp(App(App(_: Ident, tup: TyTup), _), syntax.Keyword.`extends`, _) =>
+            case InfixApp(_, syntax.Keyword.`extends`, _) =>
               Annotated(Keywrd(syntax.Keyword.data), res)
             case _ => res
           def genExt(decl: Tree) = decl match
@@ -36,14 +36,19 @@ trait BlockImpl(using Elaborator.State):
               case ps => App(headId, TyTup(ps.map(
                 t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
               )))
-          def genCtorHead(decl: Tree): Tree = decl match
+          def genCtorHead(decl: Tree) = decl match
             case InfixApp(decl, syntax.Keyword.`extends`, _) => decl // check will be applied in genExt
             case App(_: Ident, tup: TyTup) => Error() // TODO: report invalid head
             case App(id: Ident, ps: Tup) => App(App(id, TyTup(headPs)), ps)
             case id: Ident => App(id, TyTup(headPs))
             case _ => Error() // TODO: report invalid head
+          def insertVal(decl: Tree): Tree = decl match
+            case id: Ident => id
+            case App(f, Tup(ps)) => App(f, Tup(ps.map(p => TermDef(syntax.ImmutVal, p, N))))
+            case App(f, tup: TyTup) => App(insertVal(f), tup)
+            case _ => Error() // TODO: report invalid head
           PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, if rest.isEmpty then N else S(Block(rest)))) ::
-            (ctors.map(h => PossiblyAnnotated(anns, wrapGeneric(h, TypeDef(syntax.Cls, InfixApp(genCtorHead(h), syntax.Keyword.`extends`, genExt(h)), N, N)))))
+            (ctors.map(h => PossiblyAnnotated(anns, wrapGeneric(h, TypeDef(syntax.Cls, InfixApp(insertVal(genCtorHead(h)), syntax.Keyword.`extends`, genExt(h)), N, N)))))
           ::: desug(stmts)
         case stmt => stmt :: desug(stmts)
       case Nil => Nil

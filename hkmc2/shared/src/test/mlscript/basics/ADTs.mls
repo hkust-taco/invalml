@@ -33,7 +33,7 @@ enum Expr =
   | Lit(n: Int)
   | Add(lhs: Expr, rhs: Expr)
 //│ ╔══[ERROR] Unrecognized definitional assignment left-hand side: juxtaposition
-//│ ║  l.31: 	enum Expr =
+//│ ║  l.32: 	enum Expr =
 //│ ╙──      	^^^^^^^^^
 
 
