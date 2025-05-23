@@ -18,35 +18,51 @@ trait BlockImpl(using Elaborator.State):
         case PossiblyAnnotated(anns, h @ Hndl(body = N)) =>
           PossiblyAnnotated(anns, h.copy(body = S(Block(stmts)))) :: Nil
         case PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, S(Block(Constructor(Block(ctors)) :: rest)))) =>
+          // A temp solution for ADTs, which desugars ADTs to normal class definitions.
+          // This will be removed after we truly support ADTs correctly.
+          // TODO: No raise contextual variable. Only `Error` nodes are returned if there is an error. 
           val (headId, headPs) = head match
             case id: Ident => (id, Nil)
             case App(id: Ident, TyTup(ps)) => (id, ps)
-            case _ => Error() // TODO: report invalid head
-          def wrapGeneric(decl: Tree, res: Tree) = decl match // TODO a temp solution for gadt. remove it later.
+            case _ => Error()
+          // Temporarily use `data` annotation to distinguish the following ctors:
+          // - Ctor(...)
+          // - Ctor[...](...) extends ADT[...]
+          // since the former will be desugared to `class Ctor[...](...) extends ADT[...]`,
+          // where `Ctor[...]` and `ADT[...]` share the same type parameter list
+          def wrapGeneric(decl: Tree, res: Tree) = decl match
             case InfixApp(_, syntax.Keyword.`extends`, _) =>
               Annotated(Keywrd(syntax.Keyword.data), res)
             case _ => res
+          // Generate `extends` suffix if it is not provided by users
+          // Also check if the number of type parameters is correct
           def genExt(decl: Tree) = decl match
             case InfixApp(_, syntax.Keyword.`extends`, ext) => ext match
               case _: Ident if headPs.isEmpty => ext
               case App(id: Ident, TyTup(ps)) if id.name == headId.name && ps.length == headPs.length => ext
-              case _ => Error() // TODO: report invalid head
+              case _ => Error()
             case _ => headPs match
               case Nil => headId
               case ps => App(headId, TyTup(ps.map(
                 t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
               )))
+          // Insert type parameters for constructors.
+          // e.g. `class Foo[T] with constructor Bar(x: T)` will be desugared to
+          // `class Bar[T](x: T) extends Foo[T]`
+          // Otherwise, the elaborator will complain `T` is not defined.
           def genCtorHead(decl: Tree) = decl match
             case InfixApp(decl, syntax.Keyword.`extends`, _) => decl // check will be applied in genExt
-            case App(_: Ident, tup: TyTup) => Error() // TODO: report invalid head
+            case App(_: Ident, tup: TyTup) => Error()
             case App(id: Ident, ps: Tup) => App(App(id, TyTup(headPs)), ps)
             case id: Ident => App(id, TyTup(headPs))
-            case _ => Error() // TODO: report invalid head
+            case _ => Error()
+          // Only fields modified by `val` can be extracted by pattern matching.
+          // For ADTs, all fields can be extracted, but we don't want to add `val`s manumally.
           def insertVal(decl: Tree): Tree = decl match
             case id: Ident => id
             case App(f, Tup(ps)) => App(f, Tup(ps.map(p => TermDef(syntax.ImmutVal, p, N))))
             case App(f, tup: TyTup) => App(insertVal(f), tup)
-            case _ => Error() // TODO: report invalid head
+            case _ => Error()
           PossiblyAnnotated(anns, TypeDef(syntax.Cls, head, rhs, if rest.isEmpty then N else S(Block(rest)))) ::
             (ctors.map(h => PossiblyAnnotated(anns, wrapGeneric(h, TypeDef(syntax.Cls, InfixApp(insertVal(genCtorHead(h)), syntax.Keyword.`extends`, genExt(h)), N, N)))))
           ::: desug(stmts)

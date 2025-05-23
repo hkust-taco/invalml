@@ -288,3 +288,16 @@ a
 print(p)
 print(a)
 //│ Type: Str
+
+
+:e
+fun foo(x) =
+  if x is
+    Some(x) then 1
+    None then 0
+    42 then 42
+//│ ╔══[ERROR] Mixing ADT pattern matching and general matching is not supported yet.
+//│ ║  l.298: 	    42 then 42
+//│ ╙──       	    ^^^^^^^^^^
+//│ ═══[ERROR] Variable not found: param0
+//│ Type: ⊤

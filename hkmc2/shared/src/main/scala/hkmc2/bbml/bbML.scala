@@ -78,7 +78,10 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
   
   private val infVarState = new InfVarUid.State()
   private val solver = new ConstraintSolver(infVarState, elState, tl)
-   // for adt match exhaustive check
+
+  // A temporary solution for ADT matching exhausive checking
+  // `adtCtors` maps IDs of ADTs to their constructors' IDs
+  // `adtParent` maps constructors' IDs to the ADT class symbol they belong to
   private val adtCtors = HashMap.empty[Uid[Symbol], ListBuffer[Uid[Symbol]]]
   private val adtParent = HashMap.empty[Uid[Symbol], Symbol]
 
@@ -294,7 +297,10 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
         ctx += sym -> PolyType.generalize(funTy, S(outer), ctx.lvl + 1)
     case _ => error(msg"Function definition shape not yet supported for ${sym.nme}" -> lam.toLoc :: Nil)
 
-  private def isADTMatch(split: Split) =
+  // Check if a given matching expression is matching on an ADT.
+  // An `if` expression can only matching on one ADT and patterns can only carry variables so far.
+  // It is a temporary solution to ADTs.
+  private def isADTMatch(split: Split)(using BbCtx) =
     def rec(split: Split, acc: Either[Opt[Symbol], Unit]): Bool =
       split match
         case Split.Cons(Branch(_, pattern, _), alts) =>
@@ -304,9 +310,13 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
                 case L(N) => rec(alts, L(S(sym)))
                 case L(S(other)) if adtParent.get(other.uid).exists(p => p.uid == adtParent(sym.uid).uid) =>
                   rec(alts, L(S(sym)))
-                case _ => ??? // error
+                case R(_) =>
+                  error(msg"Mixing ADT pattern matching and general matching is not supported yet." -> split.toLoc :: Nil)
+                  false
             case _ => acc match
-              case L(S(_)) => ??? // error
+              case L(S(_)) =>
+                error(msg"Mixing ADT pattern matching and general matching is not supported yet." -> split.toLoc :: Nil)
+                false
               case _ => rec(alts, R(()))
         case Split.Let(_, _, tail) => rec(tail, acc)
         case _ => acc match
@@ -314,9 +324,12 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
           case _ => false
     rec(split, L(N))
 
+  // Type check ADT matching, which also returns mentioned constructors for exhaustive checking.
+  // No GADT reasoning.
+  // It is a temporary solution to ADTs.
   private def typeADTMatch
     (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
-    : (GeneralType, Type, Ls[Uid[Symbol]]) = split match
+    : (GeneralType, Type, Ls[Symbol]) = split match
     case Split.Cons(Branch(scrutinee, pattern, cons), alts) =>
       val (scrutineeTy, scrutineeEff) = typeCheck(scrutinee)
       val map = HashMap[Uid[Symbol], TypeArg]()
@@ -345,7 +358,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
           val params = paramsOpt.getOrElse(Nil)
           if params.length != paramList.length then
             error(msg"${sym.toString} is not a valid constructor." -> split.toLoc :: Nil)
-            (Bot, Bot, sym.uid :: Nil)
+            (Bot, Bot, sym :: Nil)
           else
             val nestCtx = if isGeneric then ctx.nextLevel else ctx.nest
             tps.foreach {
@@ -363,7 +376,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             val (consTy, consEff, _) = typeADTMatch(cons, sign)(using nestCtx)
             val (altsTy, altsEff, altCases) = typeADTMatch(alts, sign)
             val allEff = scrutineeEff | (consEff | altsEff)
-            (sign.getOrElse(tryMkMono(consTy, cons) | tryMkMono(altsTy, alts)), allEff, sym.uid :: altCases)
+            (sign.getOrElse(tryMkMono(consTy, cons) | tryMkMono(altsTy, alts)), allEff, sym :: altCases)
     case Split.Let(name, term, tail) =>
       val nestCtx = ctx.nest
       given BbCtx = nestCtx
@@ -430,16 +443,17 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     : (GeneralType, Type) =
       if isADTMatch(split) then
         val (res, eff, cases) = typeADTMatch(split, sign)
-        cases match
+        cases match // A primitive exhaustive check
           case c :: rest => // previous check already guarantees that all cases belong to the same ADT.
-            adtParent.get(c).flatMap(p => adtCtors.get(p.uid)) match
+            adtParent.get(c.uid).flatMap(p => adtCtors.get(p.uid)) match
               case S(ctors) =>
-                val dist = cases.distinct
+                val dist = cases.map(_.uid).distinct
                 if dist.length < cases.length then
                   error(msg"Duplicate match branches." -> split.toLoc :: Nil)
                 if dist.length != ctors.length then
                   error(msg"Expect ${ctors.length.toString()} cases, but ${dist.length.toString()} got." -> split.toLoc :: Nil)
-              case N => ??? // error?
+              case N =>
+                error(msg"Unknown ADT constructor ${c.toString()}" -> split.toLoc :: Nil)
           case Nil => ??? // impossible
         (res, eff)
       else typeSplit(split, sign)
@@ -604,7 +618,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             goStats(stats)
           case (clsDef: ClassDef) :: stats =>
             clsDef.ext match
-              case S(Term.New(ty, _, N)) => createADTCtor(clsDef, ty) // TODO
+              case S(Term.New(ty, _, N)) => createADTCtor(clsDef, ty)
               case _ => ()
             goStats(stats)
           case (modDef: ModuleDef) :: stats =>
