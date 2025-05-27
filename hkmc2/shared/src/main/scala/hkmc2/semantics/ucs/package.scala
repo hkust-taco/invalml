@@ -1,12 +1,12 @@
 package hkmc2
 package semantics
 
-import sourcecode.{Name, Line, FileName}
+import sourcecode.{FileName, Line, Name}
 
 package object ucs:
-  def error(using Raise, Line, Name, FileName)(msgs: (Message, Option[Loc])*): Unit =
+  def error(using Line, FileName, Name, Raise)(msgs: (Message, Option[Loc])*): Unit =
     raise(ErrorReport(msgs.toList))
   
-  def warn(using Raise, Line, Name, FileName)(msgs: (Message, Option[Loc])*): Unit =
+  def warn(using Line, FileName, Name, Raise)(msgs: (Message, Option[Loc])*): Unit =
     raise(WarningReport(msgs.toList))
 end ucs

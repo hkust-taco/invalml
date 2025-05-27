@@ -156,6 +156,8 @@ object Elaborator:
       object debug extends VirtualModule(assumeBuiltinMod("debug")):
         val printStack = assumeObject("printStack")
         val getLocals = assumeObject("getLocals")
+      object annotations extends VirtualModule(assumeBuiltinMod("annotations")):
+        val compile = assumeObject("compile")
       def getBuiltinOp(op: Str): Opt[Str] =
         if getBuiltin(op).isDefined then builtinBinOps.get(op) else N
       /** Classes that do not use `instanceof` in pattern matching. */
@@ -210,10 +212,22 @@ object Elaborator:
       BlockMemberSymbol(id.name, Nil, true)
     val matchResultClsSymbol =
       val id = new Ident("MatchResult")
-      ClassSymbol(TypeDef(syntax.Cls, App(id, Tup(Ident("captures") :: Nil)), N, N), id)
+      val td = TypeDef(syntax.Cls, App(id, Tup(Ident("captures") :: Nil)), N, N)
+      val cs = ClassSymbol(td, id)
+      val flag = FldFlags.empty.copy(value = true)
+      val ps = PlainParamList(Param(flag, VarSymbol(Ident("captures")), N, Modulefulness(N)(false)) :: Nil)
+      cs.defn = S(ClassDef.Parameterized(N, syntax.Cls, cs, BlockMemberSymbol(cs.name, Nil),
+        Nil, ps, N, ObjBody(Blk(Nil, Term.Lit(UnitLit(false)))), N, Nil))
+      cs
     val matchFailureClsSymbol =
       val id = new Ident("MatchFailure")
-      ClassSymbol(TypeDef(syntax.Cls, App(id, Tup(Ident("errors") :: Nil)), N, N), id)
+      val td = TypeDef(syntax.Cls, App(id, Tup(Ident("errors") :: Nil)), N, N)
+      val cs = ClassSymbol(td, id)
+      val flag = FldFlags.empty.copy(value = true)
+      val ps = PlainParamList(Param(flag, VarSymbol(Ident("errors")), N, Modulefulness(N)(false)) :: Nil)
+      cs.defn = S(ClassDef.Parameterized(N, syntax.Cls, cs, BlockMemberSymbol(cs.name, Nil),
+        Nil, ps, N, ObjBody(Blk(Nil, Term.Lit(UnitLit(false)))), N, Nil))
+      cs
     val builtinOpsMap =
       val baseBuiltins = builtins.map: op =>
           op -> BuiltinSymbol(op,
@@ -262,14 +276,6 @@ extends Importer:
       case N =>
         N
     case _ => N
-  
-  /** To perform a reverse lookup for a term that references a symbol in the current context. */
-  def reference(target: ClassSymbol | ModuleSymbol): Ctxl[Opt[Term]] =
-    def go(ctx: Ctx): Opt[Term] =
-      ctx.env.values.collectFirst:
-        case elem if elem.symbol.flatMap(_.asClsLike).contains(target) => elem.ref(target.id)
-      .orElse(ctx.parent.flatMap(go))
-    go(ctx).map(Term.SynthSel(_, Ident("class"))(S(target)))
   
   def cls(trm: Term, inAppPrefix: Bool)
       : Ctxl[Term]
@@ -467,10 +473,7 @@ extends Importer:
       val des = new ucs.Desugarer(this)(tree)
       scoped("ucs:desugared"):
         log(s"Desugared:\n${Split.display(des)}")
-      val nor = new ucs.Normalization(this)(des)
-      scoped("ucs:normalized"):
-        log(s"Normalized:\n${Split.display(nor)}")
-      Term.IfLike(Keyword.`if`, des)(nor)
+      Term.IfLike(Keyword.`if`, des)
     case InfixApp(lhs, Keyword.`then`, rhs) =>
       raise:
         ErrorReport(msg"Unexpected infix use of 'then' keyword here" -> tree.toLoc :: Nil)
@@ -597,10 +600,7 @@ extends Importer:
       val desugared = new ucs.Desugarer(this)(tree)
       scoped("ucs:desugared"):
         log(s"Desugared:\n${Split.display(desugared)}")
-      val normalized = new ucs.Normalization(this)(desugared)
-      scoped("ucs:normalized"):
-        log(s"Normalized:\n${Split.display(normalized)}")
-      Term.IfLike(kw, desugared)(normalized)
+      Term.IfLike(kw, desugared)
     case Tree.Quoted(body) => Term.Quoted(subterm(body))
     case Tree.Unquoted(body) => Term.Unquoted(subterm(body))
     case tree @ Tree.Case(_, branches) =>
@@ -608,12 +608,9 @@ extends Importer:
       val des = new ucs.Desugarer(this)(tree, scrut)
       scoped("ucs:desugared"):
         log(s"Desugared:\n${Split.display(des)}")
-      val nor = new ucs.Normalization(this)(des)
-      scoped("ucs:normalized"):
-        log(s"Normalized:\n${Split.display(nor)}")
       Term.Lam(PlainParamList(
           Param(FldFlags.empty, scrut, N, Modulefulness.none) :: Nil
-        ), Term.IfLike(Keyword.`if`, des)(nor))
+        ), Term.IfLike(Keyword.`if`, des))
     case Modified(Keyword.`return`, kwLoc, body) =>
       ctx.getRetHandler match
       case ReturnHandler.Required(sym) =>

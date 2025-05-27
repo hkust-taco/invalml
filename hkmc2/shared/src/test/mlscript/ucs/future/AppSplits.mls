@@ -1,3 +1,5 @@
+:js
+
 // AppSplits.mls
 // =============
 // Experimenting with conditional splits on function applications.
@@ -10,41 +12,46 @@ if foo of
   0 then "a"
   1 then "b"
 //│ ╔══[ERROR] Unrecognized term split (application).
-//│ ║  l.9: 	if foo of
-//│ ║       	   ^^^^^^
-//│ ║  l.10: 	  0 then "a"
+//│ ║  l.11: 	if foo of
+//│ ║        	   ^^^^^^
+//│ ║  l.12: 	  0 then "a"
 //│ ║        	^^^^^^^^^^^^
-//│ ║  l.11: 	  1 then "b"
+//│ ║  l.13: 	  1 then "b"
 //│ ╙──      	^^^^^^^^^^^^
+//│ ═══[RUNTIME ERROR] Error: match error
 
 :todo
 :pe
 :e
+:re
 if foo of 1,
   0 then "a"
   1 then "b"
 //│ ╔══[PARSE ERROR] Expected an expression; found block instead
-//│ ║  l.24: 	  0 then "a"
+//│ ║  l.28: 	  0 then "a"
 //│ ╙──      	  ^
 //│ ╔══[PARSE ERROR] Unexpected literal here
-//│ ║  l.24: 	  0 then "a"
+//│ ║  l.28: 	  0 then "a"
 //│ ╙──      	  ^
 //│ ╔══[ERROR] Unrecognized term split (application).
-//│ ║  l.23: 	if foo of 1,
+//│ ║  l.27: 	if foo of 1,
 //│ ║        	   ^^^^^^^^^
-//│ ║  l.24: 	  0 then "a"
+//│ ║  l.28: 	  0 then "a"
 //│ ╙──      	^^
+//│ ═══[RUNTIME ERROR] Error: match error
 
 :todo
 :pe
 :e
+:re
 if foo
   (0) then "a"
   (1) then "b"
 //│ ╔══[ERROR] Unrecognized term split (juxtaposition).
-//│ ║  l.41: 	if foo
+//│ ║  l.47: 	if foo
 //│ ║        	   ^^^
-//│ ║  l.42: 	  (0) then "a"
+//│ ║  l.48: 	  (0) then "a"
 //│ ╙──      	^^
+//│ ═══[RUNTIME ERROR] Error: match error
 
 
