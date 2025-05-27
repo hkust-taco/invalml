@@ -305,7 +305,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       split match
         case Split.Cons(Branch(_, pattern, _), alts) =>
           pattern match
-            case Pattern.ClassLike(sym, _, _, _) if adtParent.keySet(sym.uid) =>
+            case Pattern.ResolvedClassOrModule(sym, _) if adtParent.keySet(sym.uid) =>
               acc match
                 case L(N) => rec(alts, L(S(sym)))
                 case L(S(other)) if adtParent.get(other.uid).exists(p => p.uid == adtParent(sym.uid).uid) =>
@@ -334,7 +334,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       val (scrutineeTy, scrutineeEff) = typeCheck(scrutinee)
       val map = HashMap[Uid[Symbol], TypeArg]()
       pattern match
-        case Pattern.ClassLike(sym, _, paramsOpt, _) =>
+        case Pattern.ResolvedClassOrModule(sym, paramsOpt) =>
           val clsTy = adtParent.get(sym.uid).flatMap(_.asCls.flatMap(_.defn)) match
             case S(cls) =>
               ClassLikeType(cls.sym, cls.tparams.map(_ => freshWildcard(sym)))
@@ -368,11 +368,9 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             }
             if !isGeneric then // no GADT reasoning so far
               constrain(clsTy, tryMkMono(typeAndSubstType(ext, true)(using map.toMap), scrutinee))
-            params.iterator.zip(paramList).foreach {
-              case (S(p), Param(_, _, S(ty), _)) =>
-                nestCtx += p -> typeAndSubstType(ty, true)(using map.toMap)
-              case (N, _) => ??? // impossible
-            }
+            params.iterator.zip(paramList).foreach:
+              case (p, Param(_, _, S(ty), _)) =>
+                nestCtx += p.scrutinee -> typeAndSubstType(ty, true)(using map.toMap)
             val (consTy, consEff, _) = typeADTMatch(cons, sign)(using nestCtx)
             val (altsTy, altsEff, altCases) = typeADTMatch(alts, sign)
             val allEff = scrutineeEff | (consEff | altsEff)

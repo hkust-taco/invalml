@@ -68,6 +68,11 @@ object Pattern:
    */
   type Argument = (scrutinee: BlockLocalSymbol, pattern: Tree, split: Opt[DeBrujinSplit])
   
+  /** A class-like pattern whose symbol is resolved to a class or a module. */
+  object ResolvedClassOrModule:
+    def unapply(p: Pattern.ClassLike): Opt[(ClassSymbol | ModuleSymbol, Opt[Ls[Argument]])] =
+      p.constructor.symbol.flatMap(_.asClsOrMod).map(_ -> p.arguments)
+  
   /** A class-like pattern whose symbol is resolved to a class. */
   object Class:
     def unapply(p: Pattern): Opt[ClassSymbol] = p match
