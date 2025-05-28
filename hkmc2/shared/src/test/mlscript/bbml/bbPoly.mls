@@ -1,7 +1,5 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 42 as [A] -> Int
 //│ Type: Int
@@ -9,14 +7,13 @@
 :e
 42 as [A] -> Str
 //│ ╔══[ERROR] Type error in integer literal with expected type Str
-//│ ║  l.10: 	42 as [A] -> Str
-//│ ║        	^^
+//│ ║  l.8: 	42 as [A] -> Str
+//│ ║       	^^
 //│ ╙── because: cannot constrain  Int  <:  Str
 //│ Type: Str
 
 fun id: [A] -> A -> A
 fun id(x) = x
-//│ Type: ⊤
 
 id
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -24,11 +21,11 @@ id
 :e
 (x => x + 1) as [A] -> A -> A
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.25: 	(x => x + 1) as [A] -> A -> A
+//│ ║  l.22: 	(x => x + 1) as [A] -> A -> A
 //│ ║        	      ^
 //│ ╙── because: cannot constrain  A  <:  Int
 //│ ╔══[ERROR] Type error in application with expected type A
-//│ ║  l.25: 	(x => x + 1) as [A] -> A -> A
+//│ ║  l.22: 	(x => x + 1) as [A] -> A -> A
 //│ ║        	      ^^^^^
 //│ ╙── because: cannot constrain  Int  <:  A
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -44,7 +41,6 @@ id as Int -> Int
 //│ Type: (Int) ->{⊥} Int
 
 fun myInc(inc: Int -> Int, x: Int) = inc(x)
-//│ Type: ⊤
 
 myInc(id, 0)
 //│ Type: Int
@@ -61,7 +57,6 @@ id("abc")
 
 
 data class Pair[A, B](a: A, b: B)
-//│ Type: ⊤
 
 new Pair(42, true)
 //│ Type: Pair['A, 'B]
@@ -71,7 +66,6 @@ new Pair(42, true)
 
 fun swap: [A, B] -> Pair[out A, out B] -> Pair[out B, out A]
 fun swap(p) = new Pair(p.Pair#b, p.Pair#a)
-//│ Type: ⊤
 
 
 swap
@@ -91,7 +85,6 @@ let id = ((x => x) as [A] -> A -> A) in new Pair(id(42), id("42"))
 
 fun foo: ([A] -> A -> A) -> Int
 fun foo(x) = 42
-//│ Type: ⊤
 
 foo
 //│ Type: (['A] -> ('A) ->{⊥} 'A) ->{⊥} Int
@@ -103,7 +96,6 @@ foo(x => x)
 //│ Type: Int
 
 data class Foo(foo: [A] -> A -> A)
-//│ Type: ⊤
 
 new Foo(id)
 //│ Type: Foo
@@ -116,7 +108,6 @@ let foo = new Foo(id) in foo.Foo#foo(42)
 //│ Type: Int
 
 data class Bar[A](x: A, f: [B] -> B -> B)
-//│ Type: ⊤
 
 
 new Bar(0, id)
@@ -128,7 +119,6 @@ let bar = new Bar(0, id) in bar.Bar#f(bar.Bar#x)
 //│ Type: Int
 
 data class Some[A](value: A)
-//│ Type: ⊤
 
 new Some((x => x) as [A] -> A -> A)
 //│ Type: Some['A]
@@ -141,7 +131,6 @@ let s = new Some((x => x) as [A] -> A -> A) in let t = s.Some#value(42) in s.Som
 fun gen: Int -> [A] -> A -> A
 fun gen(x) =
   let t = x + 1 in ((y => y) as [A] -> A -> A)
-//│ Type: ⊤
 
 gen
 //│ Type: (Int) ->{⊥} ['A] -> ('A) ->{⊥} 'A
@@ -155,8 +144,7 @@ gen(42)
 fun cnt: Some[out [A] -> A -> A] -> Int
 fun cnt(x) = 42
 //│ ╔══[ERROR] General type is not allowed here.
-//│ ║  l.155: 	fun cnt: Some[out [A] -> A -> A] -> Int
+//│ ║  l.144: 	fun cnt: Some[out [A] -> A -> A] -> Int
 //│ ╙──       	                         ^^^^^^
-//│ Type: ⊤
 
 

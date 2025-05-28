@@ -1,11 +1,8 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 // :d
 let i = 1
-//│ Type: ⊤
 
 let i = 1
 i

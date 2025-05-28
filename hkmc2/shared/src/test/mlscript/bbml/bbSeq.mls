@@ -1,21 +1,16 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 
 data class Seq[A, E](next: () ->{E} A)
-//│ Type: ⊤
 
 fun map: [A, B, E] -> Seq[out A, out E] -> (A ->{E} B) -> Seq[out B, out E]
-//│ Type: ⊤
 
 // * Note: equivalent since Seq is covariant:
 // fun map: [A, B, E, F] -> Seq[out A, out E] -> (A ->{F} B) -> Seq[out B, out E | F]
 
 // * Forces the elements of the sequence to be evaluated and caches them
 fun force_cache: [A, B, E] -> Seq[out A, out E] ->{E} Seq[out B, Nothing]
-//│ Type: ⊤
 
 
 // * Dummy implementation
@@ -23,7 +18,6 @@ fun mapi: [A, E] -> Seq[out A, out E] -> ((Int, A) ->{E} A) ->{Nothing} Seq[out 
 fun mapi = s => f =>
   region r in
     map(s) of x => f(0, x)
-//│ Type: ⊤
 
 // * Should be an error. This definition would not be referentially transparent.
 // * The error message needs improvement, though.
@@ -36,13 +30,13 @@ fun mapi = s => f =>
       i := !i + 1
       f(!i, x)
 //│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.34: 	    let i = r.ref 0
+//│ ║  l.28: 	    let i = r.ref 0
 //│ ║        	            ^^^^^^^
-//│ ║  l.35: 	    map(s) of x =>
+//│ ║  l.29: 	    map(s) of x =>
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.36: 	      i := !i + 1
+//│ ║  l.30: 	      i := !i + 1
 //│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	      f(!i, x)
+//│ ║  l.31: 	      f(!i, x)
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[in ⊥ out 'B, in ⊥ out 'E1]  <:  Seq[in ⊥ out A, in ⊥ out E]
 //│ ╟── because: cannot constrain  'E1  <:  E
@@ -53,13 +47,13 @@ fun mapi = s => f =>
 //│ ╟── because: cannot constrain  'r  <:  E ∨ outer
 //│ ╙── because: cannot constrain  ¬outer  <:  E ∨ outer
 //│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.34: 	    let i = r.ref 0
+//│ ║  l.28: 	    let i = r.ref 0
 //│ ║        	            ^^^^^^^
-//│ ║  l.35: 	    map(s) of x =>
+//│ ║  l.29: 	    map(s) of x =>
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.36: 	      i := !i + 1
+//│ ║  l.30: 	      i := !i + 1
 //│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	      f(!i, x)
+//│ ║  l.31: 	      f(!i, x)
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[in ⊥ out 'B, in ⊥ out 'E1]  <:  Seq[in ⊥ out A, in ⊥ out E]
 //│ ╟── because: cannot constrain  'E1  <:  E
@@ -70,13 +64,13 @@ fun mapi = s => f =>
 //│ ╟── because: cannot constrain  'r  <:  E ∨ outer
 //│ ╙── because: cannot constrain  ¬outer  <:  E ∨ outer
 //│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.34: 	    let i = r.ref 0
+//│ ║  l.28: 	    let i = r.ref 0
 //│ ║        	            ^^^^^^^
-//│ ║  l.35: 	    map(s) of x =>
+//│ ║  l.29: 	    map(s) of x =>
 //│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.36: 	      i := !i + 1
+//│ ║  l.30: 	      i := !i + 1
 //│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	      f(!i, x)
+//│ ║  l.31: 	      f(!i, x)
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[in ⊥ out 'B, in ⊥ out 'E1]  <:  Seq[in ⊥ out A, in ⊥ out E]
 //│ ╟── because: cannot constrain  'E1  <:  E
@@ -86,7 +80,6 @@ fun mapi = s => f =>
 //│ ╟── because: cannot constrain  'r ∧ ¬outer  <:  E
 //│ ╟── because: cannot constrain  'r  <:  E ∨ outer
 //│ ╙── because: cannot constrain  ¬outer  <:  E ∨ outer
-//│ Type: ⊤
 
 // * Notice the inferred type, which produces an unusable Sequence (of effect `?` ie `Any`)
 fun mapi = s => f =>
@@ -106,7 +99,6 @@ fun mapi_force = s => f =>
     force_cache of map(s) of x =>
       i := !i + 1
       f(!i, x)
-//│ Type: ⊤
 
 // * An alternative version that takes an existing region in parameter
 fun mapi: [A, R, E] -> (Seq[out A, out E], Region[R]) -> ((Int, A) ->{E} A) ->{R} Seq[out A, out E | R]
@@ -115,7 +107,6 @@ fun mapi = (s, r) => f =>
   map(s) of x =>
     i := !i + 1
     f(!i, x)
-//│ Type: ⊤
 
 // * Simpler; should be equivalent when Region is covariant
 fun mapi: [A, E] -> (Seq[out A, out E], Region[E]) -> ((Int, A) ->{E} A) ->{E} Seq[out A, out E]
@@ -124,14 +115,12 @@ fun mapi = (s, r) => f =>
   map(s) of x =>
     i := !i + 1
     f(!i, x)
-//│ Type: ⊤
 
 
 // * Example usage
 
 fun mkSeq: [A, E] -> (() ->{E} A) ->{E} Seq[out A, out E]
 fun head: [A, E] -> Seq[out A, out E] ->{E} A
-//│ Type: ⊤
 
 region r in
   let sum = r.ref 0
@@ -144,7 +133,6 @@ region r in
 
 
 fun r: Ref[Int, Nothing]
-//│ Type: ⊤
 
 r := 1
 !r
@@ -154,7 +142,7 @@ r := 1
 r := 1
 ! r // because of the space, this is a NL-op
 //│ ╔══[ERROR] Variable not found: !
-//│ ║  l.155: 	! r // because of the space, this is a NL-op
+//│ ║  l.143: 	! r // because of the space, this is a NL-op
 //│ ╙──       	^
 //│ Type: ⊥
 

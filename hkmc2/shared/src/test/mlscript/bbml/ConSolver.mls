@@ -1,35 +1,35 @@
 :bbml
-//│ Type: ⊤
-
-//│ Type: ⊤
 
 
-fun (~) conc: (Str, Str) -> Str
-//│ Type: ⊤
+fun (~) concat: (Str, Str) -> Str
 
 class PairOf[A, B] with
   constructor
     Pair(fst: A, snd: B)
-//│ Type: ⊤
 
 class Stack[A] with
   constructor
     Nil
     Cons(head: A, tail: Stack[A])
-//│ Type: ⊤
 
 class Seq[A, R]
-//│ Type: ⊤
+
+fun
+  empty: [A, R] -> Region[R] ->{R} Seq[out A, out R]
+  clear: [A, R] -> (Seq[A, R]) ->{R} ()
+  push:  [A, R] -> (Seq[A, R], A) ->{R} ()
+
+push
+//│ Type: ['A, 'R] -> (Seq['A, 'R], 'A) ->{'R} ()
+
 
 class Type[R] with
   constructor
     IntType
     Unif(id: Int, lowerBounds: Seq[Type[R], out R], upperBounds: Seq[Type[R], out R])
     Fun(lhs: Type[R], rhs: Type[R])
-//│ Type: ⊤
 
 let ty = Fun(IntType, IntType)
-//│ Type: ⊤
 
 // fun pp(x) = if x is
 //   Int then "Int"
@@ -40,13 +40,46 @@ fun pp = case
   IntType then "Int"
   Unif(id, lbs, ubs) then "α" ~ String(id)
   Fun(l, r) then pp(l) ~ " -> " ~ pp(r)
-//│ Type: ⊤
 
 pp(ty)
 //│ Type: Str
 
 fun error() = error()
-//│ Type: ⊤
+
+fun solve = case
+  Nil then ()
+  Cons(c, cs) then if c is
+    Pair(lhs, rhs) then
+      if lhs is
+        IntType then if rhs is
+          IntType then ()
+          Fun(_, _) | Unif(_, _, _) then error()
+        Fun(l1, r1) then  if rhs is
+          Fun(l2, r2) then
+            solve(Cons(Pair(l2, l1), cs))
+            solve(Cons(Pair(r1, r2), cs))
+          IntType | Unif(_, _, _) then error()
+        Unif(id, lbs, ubs) then
+          // Handle unification case here
+          error() // Placeholder for unification logic
+
+solve
+//│ Type: (Stack[out PairOf[out Type[?], out Type[?]]] ∧ Stack[?]) -> ()
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ––––––––– TO FIX LATER –––––––––
+
 
 :fixme
 fun solve = case
@@ -66,21 +99,21 @@ fun solve = case
           // Handle unification case here
           error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.58: 	          IntType then ()
+//│ ║  l.91: 	          IntType then ()
 //│ ║        	          ^^^^^^^^^^^^^^^
-//│ ║  l.59: 	          else error()
+//│ ║  l.92: 	          else error()
 //│ ╙──      	^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.61: 	          Fun(l2, r2) then
+//│ ║  l.94: 	          Fun(l2, r2) then
 //│ ║        	          ^^^^^^^^^^^^^^^^
-//│ ║  l.62: 	            solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.95: 	            solve(Cons(Pair(l2, l1), cs))
 //│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.63: 	            solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.96: 	            solve(Cons(Pair(r1, r2), cs))
 //│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.64: 	          else error()
+//│ ║  l.97: 	          else error()
 //│ ╙──      	^^^^^^^^^^^^^^^^^^^^^^
-//│ Type: ⊤
 
+// Q: why is it not complaining, here?
 // :fixme
 fun solve = case
   Nil then ()
@@ -97,9 +130,8 @@ fun solve = case
       Unif(id, lbs, ubs) then
         // Handle unification case here
         error() // Placeholder for unification logic
-//│ Type: ⊤
 
 solve
-//│ Type: (Stack[out PairOf[out Type[?], out Type[?]]] ∧ Stack[?]) -> ⊤
+//│ Type: (Stack[out PairOf[out Type[?], out Type[?]]] ∧ Stack[?]) -> ()
 
 

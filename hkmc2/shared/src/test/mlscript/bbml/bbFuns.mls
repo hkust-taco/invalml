@@ -1,7 +1,5 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 fun f(x, y) = x(y)
 f
@@ -16,7 +14,6 @@ f(x => x, 42)
 
 
 fun id: [A] -> A -> A
-//│ Type: ⊤
 
 id as [A] -> A -> A
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -29,7 +26,6 @@ id(id) as [A] -> A -> A
 data class Nil()
 data class Cons[A, B](val car: A, val cdr: B)
 data class Ls[A](prim: [R] -> (() -> R, (A, Ls[A]) -> R) -> R)
-//│ Type: ⊤
 
 fun nil() = new Ls((n, _) => n())
 fun cons(p, q) = new Ls((n, r) => r(p, q))
@@ -37,7 +33,6 @@ fun from(x) = x.Ls#prim(() => new Nil, (x, y) => new Cons(x, from(y)))
 fun to(x) = if x is
   Nil then nil()
   Cons then cons(x.Cons#car, to(x.Cons#cdr))
-//│ Type: ⊤
 
 let foo = nil() from()
 foo

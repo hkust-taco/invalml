@@ -1,10 +1,7 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 fun id(x) = x
-//│ Type: ⊤
 
 id(1)
 //│ Type: Int
@@ -20,7 +17,6 @@ id
 
 
 fun id(x) = x
-//│ Type: ⊤
 
 id as [A] -> A -> A
 //│ Type: ['A] -> ('A) ->{⊥} 'A

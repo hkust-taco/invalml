@@ -1,10 +1,7 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 fun f(y) =
   let local = ((x => y(x) + 1) as [A] -> A -> Int) in y
-//│ Type: ⊤
 
 // * the parameter type of y is extruded.
 f
@@ -14,7 +11,6 @@ f
 
 fun foo: [A] -> A -> Int
 fun foo(x) = 0
-//│ Type: ⊤
 
 foo
 //│ Type: (⊤) ->{⊥} Int
@@ -25,7 +21,6 @@ f(foo)
 fun g: ([A] -> A -> Int) -> ([A] -> A -> Int)
 fun g(y) =
   let local = ((x => y(x) + 1) as ([A] -> A -> Int)) in y
-//│ Type: ⊤
 
 g
 //│ Type: ((⊤) ->{⊥} Int) ->{⊥} (⊤) ->{⊥} Int
@@ -36,7 +31,7 @@ g(foo)
 :e
 y `=> (let t = run(x `=> x `+ y) in y)
 //│ ╔══[ERROR] Type error in quoted term with expected type CodeBase[out 'T, ⊥, ?]
-//│ ║  l.37: 	y `=> (let t = run(x `=> x `+ y) in y)
+//│ ║  l.32: 	y `=> (let t = run(x `=> x `+ y) in y)
 //│ ║        	                   ^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  CodeBase[in ⊥ out ('x) ->{⊥} ('cde), in ⊥ out 'ctx, in ⊥ out ⊤]  <:  CodeBase[in ⊥ out 'T, ⊥, in ⊥ out ⊤]
 //│ ╟── because: cannot constrain  'ctx  <:  ⊥
@@ -49,7 +44,6 @@ y `=> (let t = run(x `=> x `+ y) in y)
 //│   'y <: Int
 
 data class C[A](m: A, n: A -> Int)
-//│ Type: ⊤
 
 
 fun f: [A] -> ([B] -> (C[out B] & A) -> B) -> A -> Int
@@ -78,7 +72,7 @@ f(g)(foo)
 :fixme // ???
 f(g)(bar)
 //│ ╔══[ERROR] Type error in reference with expected type 'A
-//│ ║  l.79: 	f(g)(bar)
+//│ ║  l.73: 	f(g)(bar)
 //│ ║        	     ^^^
 //│ ╟── because: cannot constrain  C[Int]  <:  'A
 //│ ╟── because: cannot constrain  C[Int]  <:  'A
@@ -101,8 +95,8 @@ k
 :e
 k(_ => "")
 //│ ╔══[ERROR] Type error in function literal with expected type 'x
-//│ ║  l.102: 	k(_ => "")
-//│ ║         	       ^^
+//│ ║  l.96: 	k(_ => "")
+//│ ║        	       ^^
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  (Int) ->{'eff} (Int)
@@ -124,7 +118,7 @@ k
 :e
 k(_ => "")
 //│ ╔══[ERROR] Type error in function literal with expected type 'x
-//│ ║  l.125: 	k(_ => "")
+//│ ║  l.119: 	k(_ => "")
 //│ ║         	       ^^
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
@@ -135,7 +129,7 @@ k(_ => "")
 :e
 k(_ => 42)
 //│ ╔══[ERROR] Type error in function literal with expected type 'x
-//│ ║  l.136: 	k(_ => 42)
+//│ ║  l.130: 	k(_ => 42)
 //│ ║         	       ^^
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Int)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Int)  <:  'x

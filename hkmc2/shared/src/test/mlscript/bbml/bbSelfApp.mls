@@ -1,7 +1,5 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 
 (x => x(x)) (x => x(x))
@@ -9,7 +7,6 @@
 
 
 fun f(x) = x(x)
-//│ Type: ⊤
 
 f
 //│ Type: ['x, 'eff, 'app] -> ('x ->{'eff} 'app) ->{'eff} 'app

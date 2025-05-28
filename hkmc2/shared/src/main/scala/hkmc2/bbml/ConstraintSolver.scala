@@ -14,7 +14,7 @@ type Cache = Set[(Type, Type)]
 type ExtrudeCache = mutable.HashMap[(Uid[InfVar], Bool), InfVar]
 
 case class CCtx(cache: Cache, parents: Ls[(Type, Type)], origin: Term, exp: Opt[GeneralType])(using Scope):
-  def err(using Raise) =
+  def err(using Raise, BbCtx) =
     raise(ErrorReport(
       msg"Type error in ${origin.describe}${exp match
           case S(ty) => msg" with expected type ${ty.show}"

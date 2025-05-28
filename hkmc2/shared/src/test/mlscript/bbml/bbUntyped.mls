@@ -1,8 +1,6 @@
 :bbml
-//│ Type: ⊤
 :js
 
-//│ Type: ⊤
 
 
 @untyped 1
@@ -16,17 +14,13 @@
 
 @untyped
 fun f: Int
-//│ Type: ⊤
 
 @untyped declare fun f: Int
-//│ Type: ⊤
 
 @untyped 
 @untyped 
 declare fun f: Int
-//│ Type: ⊤
 
 @untyped fun f() = 1
-//│ Type: ⊤
 
 

@@ -1,7 +1,5 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 region x in 42
 //│ Type: Int
@@ -21,9 +19,9 @@ r
 let r = region x in x.ref 42
 !r
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.21: 	let r = region x in x.ref 42
+//│ ║  l.19: 	let r = region x in x.ref 42
 //│ ║        	                    ^^^^^^^^
-//│ ║  l.22: 	!r
+//│ ║  l.20: 	!r
 //│ ║        	^^
 //│ ╟── because: cannot constrain  'reg ∨ 'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
@@ -41,7 +39,7 @@ mkRef
 :e
 let t = region x in x in t.ref 42
 //│ ╔══[ERROR] Type error in reference creation
-//│ ║  l.42: 	let t = region x in x in t.ref 42
+//│ ║  l.40: 	let t = region x in x in t.ref 42
 //│ ║        	                         ^^^^^^^^
 //│ ╟── because: cannot constrain  Region[in 'x out 'x1]  <:  Region['reg]
 //│ ╟── because: cannot constrain  'x1  <:  'reg
@@ -52,7 +50,7 @@ let t = region x in x in t.ref 42
 //│ ╟── because: cannot constrain  ⊤  <:  'x
 //│ ╙── because: cannot constrain  ⊤  <:  ⊥
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.42: 	let t = region x in x in t.ref 42
+//│ ║  l.40: 	let t = region x in x in t.ref 42
 //│ ║        	                    ^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'reg ∨ 'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
@@ -71,9 +69,9 @@ let t = region x in
   x.ref 42
 in t := 0
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.71: 	  x.ref 42
+//│ ║  l.69: 	  x.ref 42
 //│ ║        	  ^^^^^^^^
-//│ ║  l.72: 	in t := 0
+//│ ║  l.70: 	in t := 0
 //│ ║        	^^^^^^^^^
 //│ ╟── because: cannot constrain  'reg ∨ 'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
@@ -94,9 +92,9 @@ let t = region x in
   x.ref 42
 in !t
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.94: 	  x.ref 42
+//│ ║  l.92: 	  x.ref 42
 //│ ║        	  ^^^^^^^^
-//│ ║  l.95: 	in !t
+//│ ║  l.93: 	in !t
 //│ ║        	^^^^^
 //│ ╟── because: cannot constrain  'reg ∨ 'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
@@ -114,19 +112,17 @@ region x in
 fun rid: [A] -> A -> A
 fun rid(x) =
   let t = (region y in 42) in x
-//│ Type: ⊤
 
 
 fun rid: [A] -> A -> A
 fun rid(x) =
   let t = (region y in 42) in x
-//│ Type: ⊤
 
 :e
 region x in
   (let dz = x.ref 42 in 42) as [A] -> Int
 //│ ╔══[ERROR] Type error in block with expected type [outer, 'A] -> Int
-//│ ║  l.127: 	  (let dz = x.ref 42 in 42) as [A] -> Int
+//│ ║  l.123: 	  (let dz = x.ref 42 in 42) as [A] -> Int
 //│ ║         	            ^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
@@ -140,9 +136,9 @@ let t =
     y => x.ref y
 in t(42)
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.140: 	    y => x.ref y
+//│ ║  l.136: 	    y => x.ref y
 //│ ║         	    ^^^^^^^^^^^^
-//│ ║  l.141: 	in t(42)
+//│ ║  l.137: 	in t(42)
 //│ ║         	^^^^^^^^
 //│ ╟── because: cannot constrain  'reg ∨ 'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'reg  <:  ⊥
@@ -154,7 +150,6 @@ in t(42)
 fun foo: [A] -> Int ->{A} Int
 fun foo(x) =
   region y in x + 1
-//│ Type: ⊤
 
 
 region x in
@@ -164,7 +159,6 @@ region x in
 
 fun foo: [A extends Int] -> A -> A
 fun foo(x) = x
-//│ Type: ⊤
 
 foo
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -176,7 +170,6 @@ region x in x.ref foo
 
 fun bar: ([A] -> A -> A) -> Int
 fun bar(f) = f(42)
-//│ Type: ⊤
 
 bar
 //│ Type: (['A] -> ('A) ->{⊥} 'A) ->{⊥} Int
@@ -184,6 +177,6 @@ bar
 :e
 region x in x.ref bar
 //│ ╔══[ERROR] Expected a monomorphic type or an instantiable type here, but ([outer, 'A] -> ('A) ->{⊥} 'A) ->{⊥} Int found
-//│ ║  l.185: 	region x in x.ref bar
+//│ ║  l.178: 	region x in x.ref bar
 //│ ╙──       	                  ^^^
 //│ Type: Ref[⊥, ?]

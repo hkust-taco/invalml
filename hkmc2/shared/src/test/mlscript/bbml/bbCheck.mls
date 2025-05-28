@@ -1,11 +1,8 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 fun add: (Int, Int) -> Int
 fun add(x, y) = x + y
-//│ Type: ⊤
 
 // FIXME locations
 :e
@@ -13,42 +10,38 @@ fun foo: Int -> Int
 fun foo: Int -> Int
 //│ ╔══[ERROR] Multiple declarations of symbol 'foo'
 //│ ╟── declared here
-//│ ║  l.12: 	fun foo: Int -> Int
-//│ ║        	    ^^^^^^^^^^^^^^^
+//│ ║  l.9: 	fun foo: Int -> Int
+//│ ║       	    ^^^^^^^^^^^^^^^
 //│ ╟── declared here
-//│ ║  l.13: 	fun foo: Int -> Int
+//│ ║  l.10: 	fun foo: Int -> Int
 //│ ╙──      	    ^^^^^^^^^^^^^^^
-//│ Type: ⊤
 
 :e
 fun id(x) = x
 fun id(y) = y
 //│ ╔══[ERROR] Multiple definitions of symbol 'id'
 //│ ╟── defined here
-//│ ║  l.24: 	fun id(x) = x
+//│ ║  l.20: 	fun id(x) = x
 //│ ║        	    ^^^^^^^^^
 //│ ╟── defined here
-//│ ║  l.25: 	fun id(y) = y
+//│ ║  l.21: 	fun id(y) = y
 //│ ╙──      	    ^^^^^^^^^
-//│ Type: ⊤
 
 :e
 fun bar: Str -> Str
 fun bar(x) = let t = x + 1 in "aaa"
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.37: 	fun bar(x) = let t = x + 1 in "aaa"
+//│ ║  l.32: 	fun bar(x) = let t = x + 1 in "aaa"
 //│ ║        	                     ^
 //│ ╙── because: cannot constrain  Str  <:  Int
-//│ Type: ⊤
 
 :e
 fun baz: Int -> Int
 fun baz(x) = "bbb"
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.46: 	fun baz(x) = "bbb"
+//│ ║  l.40: 	fun baz(x) = "bbb"
 //│ ║        	             ^^^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
-//│ Type: ⊤
 
 add(1, 2)
 //│ Type: Int
@@ -60,7 +53,7 @@ add(1, 2) as Int
 :e
 add(0, 0) as Str
 //│ ╔══[ERROR] Type error in application with expected type Str
-//│ ║  l.61: 	add(0, 0) as Str
+//│ ║  l.54: 	add(0, 0) as Str
 //│ ║        	^^^^^^^^^
 //│ ╙── because: cannot constrain  Int  <:  Str
 //│ Type: Str
@@ -68,14 +61,12 @@ add(0, 0) as Str
 :e
 fun errAdd(x: Int) = x + "1"
 //│ ╔══[ERROR] Type error in string literal with expected type Int
-//│ ║  l.69: 	fun errAdd(x: Int) = x + "1"
+//│ ║  l.62: 	fun errAdd(x: Int) = x + "1"
 //│ ║        	                         ^^^
 //│ ╙── because: cannot constrain  Str  <:  Int
-//│ Type: ⊤
 
 fun high: ([A] -> A -> A) -> Int
 fun high(f) = f(42)
-//│ Type: ⊤
 
 high
 //│ Type: (['A] -> ('A) ->{⊥} 'A) ->{⊥} Int
@@ -90,11 +81,11 @@ high(x => x)
 :e
 high(x => x + 1)
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.91: 	high(x => x + 1)
+//│ ║  l.82: 	high(x => x + 1)
 //│ ║        	          ^
 //│ ╙── because: cannot constrain  A  <:  Int
 //│ ╔══[ERROR] Type error in application with expected type A
-//│ ║  l.91: 	high(x => x + 1)
+//│ ║  l.82: 	high(x => x + 1)
 //│ ║        	          ^^^^^
 //│ ╙── because: cannot constrain  Int  <:  A
 //│ Type: Int
@@ -110,17 +101,15 @@ high(x => x + 1)
 fun baz: Int -> (([A] -> A -> A), Int) -> Int
 fun baz(z) =
   ((f, x) => f(x))
-//│ Type: ⊤
 
 fun baz: Int -> (([A] -> A -> A), Int) -> Int
 fun baz(z) =
   ((f, x) => f(x)) as (([A] -> A -> A), Int) -> Int
-//│ Type: ⊤
 
 :e
 baz as Int -> (([A] -> A -> A), Int) -> Int
 //│ ╔══[ERROR] Cannot type non-function term Ref(member:baz) as (Int) ->{⊥} ([outer, 'A] -> ('A) ->{⊥} 'A, Int) ->{⊥} Int
-//│ ║  l.121: 	baz as Int -> (([A] -> A -> A), Int) -> Int
+//│ ║  l.110: 	baz as Int -> (([A] -> A -> A), Int) -> Int
 //│ ╙──       	^^^
 //│ Type: ⊥
 
@@ -131,7 +120,7 @@ baz(42)
 :e
 baz(42) as (([A] -> A -> A), Int) -> Int
 //│ ╔══[ERROR] Cannot type non-function term App(Ref(member:baz),Tup(List(Fld(‹›,Lit(IntLit(42)),None)))) as ([outer, 'A] -> ('A) ->{⊥} 'A, Int) ->{⊥} Int
-//│ ║  l.132: 	baz(42) as (([A] -> A -> A), Int) -> Int
+//│ ║  l.121: 	baz(42) as (([A] -> A -> A), Int) -> Int
 //│ ╙──       	^^^^^^^
 //│ Type: ⊥
 
@@ -141,7 +130,6 @@ baz(42) as (([A] -> A -> A), Int) -> Int
 
 fun id: [A] -> A -> A
 fun id(x) = x
-//│ Type: ⊤
 
 id as [A] -> A -> A
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -177,7 +165,7 @@ foo
 :e
 foo(42, 1)
 //│ ╔══[ERROR] Type error in integer literal with expected type ¬'A
-//│ ║  l.178: 	foo(42, 1)
+//│ ║  l.166: 	foo(42, 1)
 //│ ║         	        ^
 //│ ╟── because: cannot constrain  Int  <:  ¬'A
 //│ ╟── because: cannot constrain  'A  <:  ¬{Int}

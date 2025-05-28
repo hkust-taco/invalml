@@ -1,19 +1,17 @@
 :bbml
-//│ Type: ⊤
 :e
 
-//│ Type: ⊤
 
 2(2)
 //│ ╔══[ERROR] Type error in application
-//│ ║  l.7: 	2(2)
+//│ ║  l.5: 	2(2)
 //│ ║       	^^^^
 //│ ╙── because: cannot constrain  Int  <:  (Int) ->{'eff} ('app)
 //│ Type: ⊥
 
 (x => x(0))(1)
 //│ ╔══[ERROR] Type error in integer literal with expected type 'x
-//│ ║  l.14: 	(x => x(0))(1)
+//│ ║  l.12: 	(x => x(0))(1)
 //│ ║        	            ^
 //│ ╟── because: cannot constrain  Int  <:  'x
 //│ ╟── because: cannot constrain  Int  <:  'x
@@ -22,10 +20,10 @@
 
 (1).Foo#a()
 //│ ╔══[ERROR] Name not found: Foo
-//│ ║  l.23: 	(1).Foo#a()
+//│ ║  l.21: 	(1).Foo#a()
 //│ ╙──      	   ^^^^
 //│ ╔══[ERROR] Identifier `Foo` does not name a known class symbol.
-//│ ║  l.23: 	(1).Foo#a()
+//│ ║  l.21: 	(1).Foo#a()
 //│ ╙──      	   ^^^^
 //│ ═══[ERROR] Not a valid class: <error>
 //│ Type: ⊥
@@ -34,20 +32,20 @@
 fun Oops() = 1
 Oops().Oops#a()
 //│ ╔══[ERROR] Identifier `Oops` does not name a known class symbol.
-//│ ║  l.35: 	Oops().Oops#a()
+//│ ║  l.33: 	Oops().Oops#a()
 //│ ╙──      	      ^^^^^
 //│ ╔══[ERROR] Not a valid class: selection
-//│ ║  l.35: 	Oops().Oops#a()
+//│ ║  l.33: 	Oops().Oops#a()
 //│ ╙──      	      ^^^^^
 //│ Type: ⊥
 
 data class Oops2()
 (new Oops2()).Oops2#a()
 //│ ╔══[ERROR] Class 'Oops2' does not contain member 'a'.
-//│ ║  l.45: 	(new Oops2()).Oops2#a()
+//│ ║  l.43: 	(new Oops2()).Oops2#a()
 //│ ╙──      	                    ^
 //│ ╔══[ERROR] a is not a valid member in class Oops2
-//│ ║  l.45: 	(new Oops2()).Oops2#a()
+//│ ║  l.43: 	(new Oops2()).Oops2#a()
 //│ ╙──      	     ^^^^^^^^^^^^^^^^
 //│ Type: ⊥
 
@@ -56,7 +54,7 @@ data class Oops2()
 fun inc(x) = x + 1
 inc("oops")
 //│ ╔══[ERROR] Type error in string literal with expected type 'x
-//│ ║  l.57: 	inc("oops")
+//│ ║  l.55: 	inc("oops")
 //│ ║        	    ^^^^^^
 //│ ╟── because: cannot constrain  Str  <:  'x
 //│ ╟── because: cannot constrain  Str  <:  'x
@@ -66,7 +64,7 @@ inc("oops")
 fun inc(x) = x + 1
 inc as Int
 //│ ╔══[ERROR] Type error in reference with expected type Int
-//│ ║  l.67: 	inc as Int
+//│ ║  l.65: 	inc as Int
 //│ ║        	^^^
 //│ ╙── because: cannot constrain  ('x) ->{⊥} (Int)  <:  Int
 //│ Type: Int

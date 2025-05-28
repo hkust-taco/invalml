@@ -3,9 +3,12 @@ package bbml
 import scala.collection.mutable.{Set => MutSet, ListBuffer}
 import utils.Scope
 
-class PrettyPrinter(output: String => Unit)(using Scope):
+class PrettyPrinter(output: String => Unit)(using Scope, BbCtx):
   def print(ty: GeneralType): Unit =
-    output(s"Type: ${ty.show}")
+    ty.show match
+    case "()" =>
+    case tyStr =>
+      output(s"Type: ${tyStr}")
     val bounds = PrettyPrinter.collectBounds(ty).distinct
     if !bounds.isEmpty then
       output("Where:")
@@ -14,7 +17,7 @@ class PrettyPrinter(output: String => Unit)(using Scope):
       }
 
 object PrettyPrinter:
-  def apply(output: String => Unit)(using Scope): PrettyPrinter = new PrettyPrinter(output)
+  def apply(output: String => Unit)(using Scope, BbCtx): PrettyPrinter = new PrettyPrinter(output)
 
   type Bound = (Type, Type) // * Type <: Type
 

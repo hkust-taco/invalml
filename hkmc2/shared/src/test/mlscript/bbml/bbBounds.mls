@@ -1,7 +1,5 @@
 :bbml
-//│ Type: ⊤
 
-//│ Type: ⊤
 
 (x => x + 1) as [A extends Int] -> A -> Int
 //│ Type: (Int) ->{⊥} Int
@@ -21,7 +19,6 @@
 
 fun iid: [A extends Int] -> A -> A
 fun iid(x) = x
-//│ Type: ⊤
 
 iid
 //│ Type: ['A] -> ('A) ->{⊥} 'A
@@ -31,7 +28,7 @@ iid
 :e
 iid("42")
 //│ ╔══[ERROR] Type error in string literal with expected type 'A
-//│ ║  l.32: 	iid("42")
+//│ ║  l.29: 	iid("42")
 //│ ║        	    ^^^^
 //│ ╟── because: cannot constrain  Str  <:  'A
 //│ ╟── because: cannot constrain  Str  <:  'A
@@ -43,7 +40,6 @@ iid(42)
 //│ Type: Int
 
 class Foo[A]
-//│ Type: ⊤
 
 fun foo: [A extends Foo[in Nothing out Any] restricts Foo[in Num]] -> A -> A
 foo
@@ -53,7 +49,6 @@ foo
 //│   'A <: Foo[?]
 
 fun bar: Foo[in Num out Int]
-//│ Type: ⊤
 
 foo(bar)
 //│ Type: Foo[in Num out Int] ∨ Foo[in Num]
@@ -61,10 +56,9 @@ foo(bar)
 :e
 fun badfoo: [A extends Str restricts Int] -> A -> A
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.62: 	fun badfoo: [A extends Str restricts Int] -> A -> A
+//│ ║  l.57: 	fun badfoo: [A extends Str restricts Int] -> A -> A
 //│ ║        	                                             ^^^^^^
 //│ ╙── because: cannot constrain  Int  <:  Str
-//│ Type: ⊤
 
 
 fun baz: [A extends B, B extends A] -> A -> B
@@ -101,18 +95,16 @@ cc
 //│   'A <: 'B -> 'B
 
 fun w: Any -> Nothing
-//│ Type: ⊤
 
 cc(w)(w)
 //│ Type: Bool
 
 fun h: [C] -> ([A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A) -> C -> Int
-//│ Type: ⊤
 
 :e
 bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ ╔══[ERROR] Cannot type non-function term Ref(member:bazbaz) as (A) ->{⊥} ([outer, 'B] -> 'B) ->{⊥} A
-//│ ║  l.113: 	bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
+//│ ║  l.105: 	bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ ╙──       	^^^^^^
 //│ Type: ['A] -> ('A) ->{⊥} ('A -> 'A) ->{⊥} 'A
 //│ Where:

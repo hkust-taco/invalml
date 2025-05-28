@@ -25,16 +25,13 @@ final case class BbCtx(
   lvl: Int,
   env: HashMap[Uid[Symbol], GeneralType],
   outRegAcc: Type,
-  outVar: Option[InfVar]
+  outVar: Option[InfVar],
+  symbolCache: HashMap[Str, TypeSymbol],
 ):
   def +=(p: Symbol -> GeneralType): Unit = env += p._1.uid -> p._2
   def get(sym: Symbol): Option[GeneralType] = env.get(sym.uid) orElse parent.dlof(_.get(sym))(None)
-  def getCls(name: Str): Option[TypeSymbol] =
-    for
-      elem <- ctx.get(name)
-      sym <- elem.symbol
-      cls <- sym.asTpe
-    yield cls
+  def getCls(name: Str): TypeSymbol = symbolCache.getOrElseUpdate(name,
+    ctx.get(name).get.symbol.get.asTpe.get)
   def &=(p: (Symbol, Type, InfVar)): Unit =
     env += p._1.uid -> BbCtx.varTy(p._2, p._3)(using this)
   def nest: BbCtx = copy(parent = Some(this), env = HashMap.empty)
@@ -46,28 +43,31 @@ final case class BbCtx(
   def getRegEnv: Type = outVar match
     case S(v) => v | outRegAcc
     case N => outRegAcc
-  
+
+// object BbCtx:
+def bbctx(using ctx: BbCtx): BbCtx = ctx
 
 given (using ctx: BbCtx): Raise = ctx.raise
 
 object BbCtx:
-  def intTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Int").get, Nil)
-  def numTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Num").get, Nil)
-  def strTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Str").get, Nil)
-  def boolTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Bool").get, Nil)
-  def errTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Error").get, Nil)
+  def unitTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Unit"), Nil)
+  def intTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Int"), Nil)
+  def numTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Num"), Nil)
+  def strTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Str"), Nil)
+  def boolTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Bool"), Nil)
+  def errTy(using ctx: BbCtx): Type = ClassLikeType(ctx.getCls("Error"), Nil)
   private def codeBaseTy(ct: TypeArg, cr: TypeArg, isVar: TypeArg)(using ctx: BbCtx): Type =
-    ClassLikeType(ctx.getCls("CodeBase").get, ct :: cr :: isVar :: Nil)
+    ClassLikeType(ctx.getCls("CodeBase"), ct :: cr :: isVar :: Nil)
   def codeTy(ct: Type, cr: Type)(using ctx: BbCtx): Type =
     codeBaseTy(Wildcard.out(ct), Wildcard.out(cr), Wildcard.out(Top))
   def varTy(ct: Type, cr: Type)(using ctx: BbCtx): Type =
     codeBaseTy(ct, Wildcard(cr, cr), Wildcard.out(Bot))
   def regionTy(sk: Type)(using ctx: BbCtx): Type =
-    ClassLikeType(ctx.getCls("Region").get, Wildcard(sk, sk) :: Nil)
+    ClassLikeType(ctx.getCls("Region"), Wildcard(sk, sk) :: Nil)
   def refTy(ct: Type, sk: Type)(using ctx: BbCtx): Type =
-    ClassLikeType(ctx.getCls("Ref").get, Wildcard(ct, ct) :: Wildcard.out(sk) :: Nil)
+    ClassLikeType(ctx.getCls("Ref"), Wildcard(ct, ct) :: Wildcard.out(sk) :: Nil)
   def init(raise: Raise)(using Elaborator.State, Elaborator.Ctx): BbCtx =
-    new BbCtx(raise, summon, None, 1, HashMap.empty, Bot, N)
+    new BbCtx(raise, summon, None, 1, HashMap.empty, Bot, N, HashMap.empty)
 
   val builtinOps = Elaborator.binaryOps ++ Elaborator.unaryOps ++ Elaborator.aliasOps.keySet
 end BbCtx
@@ -106,8 +106,8 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     state.lowerBounds = ctx.getRegEnv :: Nil
     InfVar(ctx.lvl, infVarState.nextUid, state, false)(sym, "")
 
-  private def error(msg: Ls[Message -> Opt[Loc]])(using BbCtx) =
-    raise(ErrorReport(msg))
+  private def error(msg: Ls[Message -> Opt[Loc]], extraInfo: => Opt[Any] = N)(using BbCtx) =
+    raise(ErrorReport(msg, extraInfo = extraInfo))
     Bot // TODO: error type?
 
   private def addADTCtor(pSym: Symbol, cSym: Symbol) =
@@ -174,11 +174,12 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       mono(rhs, !pol).!
     case CompType(lhs, rhs, pol) =>
       Type.mkComposedType(typeMonoType(lhs), typeMonoType(rhs), pol)
+    case UnitVal() =>
+      BbCtx.unitTy
     case _ =>
       ty.symbol.flatMap(_.asTpe) match
       case S(cls: (ClassSymbol | TypeAliasSymbol)) => typeAndSubstType(Term.TyApp(ty, Nil)(N), pol)
-      case S(_) => error(msg"${ty.symbol.get.getClass.toString()} is not a valid type" -> ty.toLoc :: Nil)
-      case N => error(msg"Invalid type" -> ty.toLoc :: Nil) // TODO
+      case N => error(msg"Invalid type" -> ty.toLoc :: Nil, S(ty)) // TODO
 
   private def genPolyType(tvs: Ls[QuantVar], outer: InfVar, body: => GeneralType)(using ctx: BbCtx, cctx: CCtx) =
     val bds = tvs.map:
@@ -216,11 +217,11 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     given CCtx = CCtx.init(code, N)
     code match
     case UnitVal() => (Top, Bot, Bot)
-    case Lit(lit) => ((lit match
+    case Lit(lit) => ((lit match // TODO dedup with other `case Lit(lit)`
       case _: IntLit => BbCtx.intTy
       case _: DecLit => BbCtx.numTy
       case _: StrLit => BbCtx.strTy
-      case _: UnitLit => Top
+      case _: UnitLit => BbCtx.unitTy
       case _: BoolLit => BbCtx.boolTy), Bot, Bot)
     case Ref(sym: Symbol) if sym.nme === "error" => (Bot, Bot, Bot)
     case Ref(sym: Symbol) if BbCtx.builtinOps(sym.nme) => ctx.get(sym) match
@@ -418,12 +419,12 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
           case N =>
             error(msg"Not a valid class: ${pat.constructor.describe}" -> pat.constructor.toLoc :: Nil)
             Bot
-      case Pattern.Lit(lit) => lit match
+      case Pattern.Lit(lit) => lit match // TODO dedup with `case Lit(lit)`
         case _: Tree.BoolLit => BbCtx.boolTy
         case _: Tree.IntLit => BbCtx.intTy
         case _: Tree.DecLit => BbCtx.numTy
         case _: Tree.StrLit => BbCtx.strTy
-        case _: Tree.UnitLit => Top
+        case _: Tree.UnitLit => BbCtx.unitTy
       constrain(tryMkMono(scrutineeTy, scrutinee), patTy)
       val (consTy, consEff) = typeSplit(cons, sign)(using nestCtx1)
       val (altsTy, altsEff) = typeSplit(alts, sign)(using nestCtx2)
@@ -633,12 +634,12 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
         goStats(stats)
         val (ty, eff) = typeCheck(res)
         (ty, effBuff.foldLeft(eff)((res, e) => res | e))
-      case UnitVal() => (Top, Bot)
+      case UnitVal() => (BbCtx.unitTy, Bot)
       case Lit(lit) => ((lit match
         case _: IntLit => BbCtx.intTy
         case _: DecLit => BbCtx.numTy
         case _: StrLit => BbCtx.strTy
-        case _: UnitLit => Top
+        case _: UnitLit => BbCtx.unitTy
         case _: BoolLit => BbCtx.boolTy), Bot)
       case Lam(PlainParamList(params), body) =>
         val nestCtx = ctx.nest
