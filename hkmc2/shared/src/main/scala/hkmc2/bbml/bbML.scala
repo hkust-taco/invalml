@@ -384,7 +384,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             params.iterator.zip(paramList).foreach:
               case (p, Param(_, _, S(ty), _)) =>
                 nestCtx += p.scrutinee -> typeAndSubstType(ty, true)(using map.toMap)
-            val (consTy, consEff, _) = typeADTMatch(cons, sign)(using nestCtx)
+            val (consTy, consEff) = typeAllSplits(cons, sign)(using nestCtx)
             val (altsTy, altsEff, altCases) = typeADTMatch(alts, sign)
             val allEff = scrutineeEff | (consEff | altsEff)
             (sign.getOrElse(tryMkMono(consTy, cons) | tryMkMono(altsTy, alts)), allEff, sym :: altCases)
