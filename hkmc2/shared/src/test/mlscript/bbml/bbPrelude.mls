@@ -12,6 +12,8 @@ declare class Bool
 declare class Int
 declare class Num
 
+fun String: Any -> Str
+
 data
   class
     CodeBase[T, C, S]

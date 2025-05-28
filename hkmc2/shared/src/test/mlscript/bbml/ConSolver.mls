@@ -1,0 +1,105 @@
+:bbml
+//│ Type: ⊤
+
+//│ Type: ⊤
+
+
+fun (~) conc: (Str, Str) -> Str
+//│ Type: ⊤
+
+class PairOf[A, B] with
+  constructor
+    Pair(fst: A, snd: B)
+//│ Type: ⊤
+
+class Stack[A] with
+  constructor
+    Nil
+    Cons(head: A, tail: Stack[A])
+//│ Type: ⊤
+
+class Seq[A, R]
+//│ Type: ⊤
+
+class Type[R] with
+  constructor
+    IntType
+    Unif(id: Int, lowerBounds: Seq[Type[R], out R], upperBounds: Seq[Type[R], out R])
+    Fun(lhs: Type[R], rhs: Type[R])
+//│ Type: ⊤
+
+let ty = Fun(IntType, IntType)
+//│ Type: ⊤
+
+// fun pp(x) = if x is
+//   Int then "Int"
+//   Fun(l, r) then pp(l) ~ " -> " ~ pp(r)
+
+// :fixme
+fun pp = case
+  IntType then "Int"
+  Unif(id, lbs, ubs) then "α" ~ String(id)
+  Fun(l, r) then pp(l) ~ " -> " ~ pp(r)
+//│ Type: ⊤
+
+pp(ty)
+//│ Type: Str
+
+fun error() = error()
+//│ Type: ⊤
+
+:fixme
+fun solve = case
+  Nil then ()
+  Cons(c, cs) then if c is
+    Pair(lhs, rhs) then
+      if lhs is
+        IntType then if rhs is
+          IntType then ()
+          else error()
+        Fun(l1, r1) then  if rhs is
+          Fun(l2, r2) then
+            solve(Cons(Pair(l2, l1), cs))
+            solve(Cons(Pair(r1, r2), cs))
+          else error()
+        Unif(id, lbs, ubs) then
+          // Handle unification case here
+          error() // Placeholder for unification logic
+//│ ╔══[ERROR] Expect 3 cases, but 1 got.
+//│ ║  l.58: 	          IntType then ()
+//│ ║        	          ^^^^^^^^^^^^^^^
+//│ ║  l.59: 	          else error()
+//│ ╙──      	^^^^^^^^^^^^^^^^^^^^^^
+//│ ╔══[ERROR] Expect 3 cases, but 1 got.
+//│ ║  l.61: 	          Fun(l2, r2) then
+//│ ║        	          ^^^^^^^^^^^^^^^^
+//│ ║  l.62: 	            solve(Cons(Pair(l2, l1), cs))
+//│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.63: 	            solve(Cons(Pair(r1, r2), cs))
+//│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.64: 	          else error()
+//│ ╙──      	^^^^^^^^^^^^^^^^^^^^^^
+//│ Type: ⊤
+
+// :fixme
+fun solve = case
+  Nil then ()
+  Cons(c, cs) and c is
+    Pair(lhs, rhs) and lhs is
+      IntType and rhs is
+        IntType then ()
+        else error()
+      Fun(l1, r1) and rhs is
+        Fun(l2, r2) then
+          solve(Cons(Pair(l2, l1), cs))
+          solve(Cons(Pair(r1, r2), cs))
+        else error()
+      Unif(id, lbs, ubs) then
+        // Handle unification case here
+        error() // Placeholder for unification logic
+//│ Type: ⊤
+
+solve
+//│ Type: (Stack[out PairOf[out Type[?], out Type[?]]] ∧ Stack[?]) -> ⊤
+
+
