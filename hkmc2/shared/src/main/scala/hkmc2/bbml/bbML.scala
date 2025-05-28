@@ -82,8 +82,11 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
   // A temporary solution for ADT matching exhausive checking
   // `adtCtors` maps IDs of ADTs to their constructors' IDs
   // `adtParent` maps constructors' IDs to the ADT class symbol they belong to
+  // `typeNames` maintains all type names 
+  // since we need to reject all non-variable patterns in ADT match for now
   private val adtCtors = HashMap.empty[Uid[Symbol], ListBuffer[Uid[Symbol]]]
   private val adtParent = HashMap.empty[Uid[Symbol], Symbol]
+  private val typeNames = HashSet.empty[Str]
 
   private def freshSkolem(sym: Symbol, hint: Str = "")(using ctx: BbCtx): InfVar =
     InfVar(ctx.lvl, infVarState.nextUid, new VarState(), true)(sym, hint)
@@ -115,6 +118,8 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       adtCtors += pSym.uid -> ListBuffer(cSym.uid)
     else adtCtors(pSym.uid) += cSym.uid
     adtParent += cSym.uid -> pSym
+    typeNames.add(pSym.nme)
+    typeNames.add(cSym.nme)
 
   private def typeAndSubstType
       (ty: Term, pol: Bool)(using map: Map[Uid[Symbol], TypeArg])(using ctx: BbCtx, cctx: CCtx)
@@ -336,6 +341,13 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       val map = HashMap[Uid[Symbol], TypeArg]()
       pattern match
         case Pattern.ResolvedClassOrModule(sym, paramsOpt) =>
+          paramsOpt.foreach: params =>
+            params.foreach:
+              case (_, p, _) => p match
+                case Under() => ()
+                case Ident(nme) if !typeNames(nme) => ()
+                case _ =>
+                  error(msg"Pattern ${p.toString} is not supported yet." -> split.toLoc :: Nil)
           val clsTy = adtParent.get(sym.uid).flatMap(_.asCls.flatMap(_.defn)) match
             case S(cls) =>
               ClassLikeType(cls.sym, cls.tparams.map(_ => freshWildcard(sym)))
@@ -621,11 +633,13 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
             ctx += td.sym -> typeType(sig)
             goStats(stats)
           case (clsDef: ClassDef) :: stats =>
+            typeNames.add(clsDef.sym.nme)
             clsDef.ext match
               case S(Term.New(ty, _, N)) => createADTCtor(clsDef, ty)
               case _ => ()
             goStats(stats)
           case (modDef: ModuleDef) :: stats =>
+            typeNames.add(modDef.sym.nme)
             goStats(stats)
           case Import(sym, pth) :: stats =>
             goStats(stats) // TODO:

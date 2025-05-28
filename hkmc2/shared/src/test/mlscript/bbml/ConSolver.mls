@@ -55,6 +55,18 @@ fun pp = case
 pp(ty)
 //│ Type: Str
 
+
+:e
+fun matchP = case
+  Pair(IntType, IntType) then ()
+//│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
+//│ ║  l.61: 	  Pair(IntType, IntType) then ()
+//│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
+//│ ║  l.61: 	  Pair(IntType, IntType) then ()
+//│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 fun error() = error()
 
 fun solve = case
@@ -135,7 +147,7 @@ region r in // This is used to delimit the scope of mutation
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.136: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ ║  l.148: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S
@@ -190,18 +202,18 @@ fun solve = case
           // Handle unification case here
           error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.182: 	          IntType then ()
+//│ ║  l.194: 	          IntType then ()
 //│ ║         	          ^^^^^^^^^^^^^^^
-//│ ║  l.183: 	          else error()
+//│ ║  l.195: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.185: 	          Fun(l2, r2) then
+//│ ║  l.197: 	          Fun(l2, r2) then
 //│ ║         	          ^^^^^^^^^^^^^^^^
-//│ ║  l.186: 	            solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.198: 	            solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.187: 	            solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.199: 	            solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.188: 	          else error()
+//│ ║  l.200: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 
 // Q: why is it not complaining, here?
