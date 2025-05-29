@@ -117,6 +117,9 @@ solve
 //│   'Unif <: 'eff1
 
 
+
+
+
 solve(Cons(Pair(ty, ty), Nil))
 
 
@@ -146,7 +149,7 @@ region r in // This is used to delimit the scope of mutation
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.163: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ ║  l.150: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S
@@ -199,18 +202,18 @@ fun solve = case
           // Handle unification case here
           error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.207: 	          IntType then ()
+//│ ║  l.194: 	          IntType then ()
 //│ ║         	          ^^^^^^^^^^^^^^^
-//│ ║  l.208: 	          else error()
+//│ ║  l.195: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.210: 	          Fun(l2, r2) then
+//│ ║  l.197: 	          Fun(l2, r2) then
 //│ ║         	          ^^^^^^^^^^^^^^^^
-//│ ║  l.211: 	            solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.198: 	            solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.212: 	            solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.199: 	            solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.213: 	          else error()
+//│ ║  l.200: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 
 :fixme
@@ -230,20 +233,20 @@ fun solve = case
         // Handle unification case here
         error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.238: 	        IntType then ()
+//│ ║  l.225: 	        IntType then ()
 //│ ║         	        ^^^^^^^^^^^^^^^
-//│ ║  l.239: 	        else error()
+//│ ║  l.226: 	        else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.240: 	      Fun(l1, r1) and rhs is
+//│ ║  l.227: 	      Fun(l1, r1) and rhs is
 //│ ║         	          ^^^^^^^^^^^^^^^^^^
-//│ ║  l.241: 	        Fun(l2, r2) then
+//│ ║  l.228: 	        Fun(l2, r2) then
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.242: 	          solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.229: 	          solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.243: 	          solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.230: 	          solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.244: 	        else error()
+//│ ║  l.231: 	        else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 
 solve
