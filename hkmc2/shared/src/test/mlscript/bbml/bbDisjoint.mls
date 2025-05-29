@@ -26,8 +26,6 @@ region x in
 //│ ║  l.24: 	  fork((_ => x.ref 1), (_ => x.ref 2))
 //│ ║        	                             ^^^^^^^
 //│ ╟── because: cannot constrain  'reg  <:  'B
-//│ ╟── because: cannot constrain  'reg  <:  'B
-//│ ╟── because: cannot constrain  x  <:  'B
 //│ ╟── because: cannot constrain  x  <:  'B
 //│ ╟── because: cannot constrain  x  <:  ¬'A
 //│ ╟── because: cannot constrain  'A  <:  ¬x
@@ -56,39 +54,21 @@ naive_helper
 region x in
   naive_helper(x)
 //│ ╔══[ERROR] Type error in reference with expected type 'r1
-//│ ║  l.57: 	  naive_helper(x)
+//│ ║  l.55: 	  naive_helper(x)
 //│ ║        	               ^
 //│ ╟── because: cannot constrain  Region[x]  <:  'r1
 //│ ╟── because: cannot constrain  Region[in 'x1 out 'x2]  <:  'r1
 //│ ╟── because: cannot constrain  Region[in 'x1 out 'x2]  <:  Region[in 'reg out 'reg1]
 //│ ╟── because: cannot constrain  'x2  <:  'reg1
-//│ ╟── because: cannot constrain  'x2  <:  'reg1
 //│ ╟── because: cannot constrain  ⊤  <:  'reg1
-//│ ╟── because: cannot constrain  ⊤  <:  'reg1
-//│ ╙── because: cannot constrain  ⊤  <:  ⊥
-//│ ╔══[ERROR] Type error in reference with expected type 'r1
-//│ ║  l.57: 	  naive_helper(x)
-//│ ║        	               ^
-//│ ╟── because: cannot constrain  Region[x]  <:  'r1
-//│ ╟── because: cannot constrain  Region[in 'x1 out 'x2]  <:  'r1
-//│ ╟── because: cannot constrain  Region[in 'x1 out 'x2]  <:  Region[in 'reg out 'reg1]
-//│ ╟── because: cannot constrain  'x2  <:  'reg1
-//│ ╟── because: cannot constrain  'x2  <:  'reg1
-//│ ╟── because: cannot constrain  ⊤  <:  'reg1
-//│ ╟── because: cannot constrain  ⊤  <:  'reg1
-//│ ╟── because: cannot constrain  ⊤  <:  'reg
-//│ ╟── because: cannot constrain  ⊤  <:  'reg
 //│ ╙── because: cannot constrain  ⊤  <:  ⊥
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.57: 	  naive_helper(x)
+//│ ║  l.55: 	  naive_helper(x)
 //│ ║        	  ^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'eff  <:  ⊥
 //│ ╟── because: cannot constrain  ¬'x3 ∧ 'eff1  <:  ⊥
 //│ ╟── because: cannot constrain  'eff1  <:  'x3
 //│ ╟── because: cannot constrain  'eff1  <:  ⊥
-//│ ╟── because: cannot constrain  'eff1  <:  ⊥
-//│ ╟── because: cannot constrain  'reg1  <:  ⊥
 //│ ╟── because: cannot constrain  'reg1  <:  ⊥
 //│ ╙── because: cannot constrain  ⊤  <:  ⊥
 //│ Type: Pair[out Ref[Int, ?], out Ref[Int, ?]]
@@ -124,20 +104,16 @@ region x in
 region x in
   (region y in let t = helper(x) in 42) as [A] -> Int
 //│ ╔══[ERROR] Type error in reference with expected type 'r1
-//│ ║  l.125: 	  (region y in let t = helper(x) in 42) as [A] -> Int
+//│ ║  l.105: 	  (region y in let t = helper(x) in 42) as [A] -> Int
 //│ ║         	                              ^
-//│ ╟── because: cannot constrain  Region[x]  <:  'r1
 //│ ╟── because: cannot constrain  Region[x]  <:  'r1
 //│ ╟── because: cannot constrain  Region[x]  <:  Region[in 'reg out 'reg1]
 //│ ╟── because: cannot constrain  x  <:  'reg1
-//│ ╟── because: cannot constrain  x  <:  'reg1
-//│ ╟── because: cannot constrain  x  <:  'env
 //│ ╟── because: cannot constrain  x  <:  'env
 //│ ╙── because: cannot constrain  x  <:  outer ∨ y
 //│ ╔══[ERROR] Type error in region expression with expected type [outer, 'A] -> Int
-//│ ║  l.125: 	  (region y in let t = helper(x) in 42) as [A] -> Int
+//│ ║  l.105: 	  (region y in let t = helper(x) in 42) as [A] -> Int
 //│ ║         	                       ^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  'eff  <:  ⊥
 //│ ╟── because: cannot constrain  'eff  <:  ⊥
 //│ ╟── because: cannot constrain  ¬'y1 ∧ x  <:  ⊥
 //│ ╟── because: cannot constrain  x  <:  'y1
@@ -159,10 +135,10 @@ fun badanno: outer
 :e
 fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 //│ ╔══[ERROR] Only one outer variable can be bound.
-//│ ║  l.160: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
+//│ ║  l.136: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 //│ ╙──       	              ^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Illegal forall annotation.
-//│ ║  l.160: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
+//│ ║  l.136: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 //│ ╙──       	              ^^^^^^^^^^^^^^^^^^
 //│ ═══[ERROR] Invalid type
 
@@ -205,47 +181,38 @@ fun foo(r1) =
     fork((_ => r1.ref 1), (_ => r2.ref 2))
     foo(r2)
 //│ ╔══[ERROR] Type error in function literal
-//│ ║  l.203: 	fun foo(r1) =
+//│ ║  l.179: 	fun foo(r1) =
 //│ ║         	        ^^^^^
-//│ ║  l.204: 	  region r2 in
+//│ ║  l.180: 	  region r2 in
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.205: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
+//│ ║  l.181: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.206: 	    foo(r2)
+//│ ║  l.182: 	    foo(r2)
 //│ ║         	^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  (Region[in 'r2 out 'r21]) ->{'eff1} ('app1)
 //│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  'r1
-//│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  'r1
 //│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  Region[in 'reg out 'reg1]
 //│ ╟── because: cannot constrain  'r21  <:  'reg1
-//│ ╟── because: cannot constrain  'r21  <:  'reg1
-//│ ╟── because: cannot constrain  ¬outer  <:  'reg1
 //│ ╟── because: cannot constrain  ¬outer  <:  'reg1
 //│ ╟── because: cannot constrain  ¬outer  <:  ¬'r22 ∨ outer
 //│ ╟── because: cannot constrain  'r22  <:  outer
 //│ ╙── because: cannot constrain  ¬outer  <:  outer
 //│ ╔══[ERROR] Type error in function literal
-//│ ║  l.203: 	fun foo(r1) =
+//│ ║  l.179: 	fun foo(r1) =
 //│ ║         	        ^^^^^
-//│ ║  l.204: 	  region r2 in
+//│ ║  l.180: 	  region r2 in
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.205: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
+//│ ║  l.181: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.206: 	    foo(r2)
+//│ ║  l.182: 	    foo(r2)
 //│ ║         	^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  (Region[in 'r2 out 'r21]) ->{'eff1} ('app1)
 //│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  'r1
-//│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  'r1
 //│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  Region[in 'reg out 'reg1]
 //│ ╟── because: cannot constrain  'r21  <:  'reg1
-//│ ╟── because: cannot constrain  'r21  <:  'reg1
 //│ ╟── because: cannot constrain  ¬outer  <:  'reg1
-//│ ╟── because: cannot constrain  ¬outer  <:  'reg1
-//│ ╟── because: cannot constrain  ¬outer  <:  'reg
 //│ ╟── because: cannot constrain  ¬outer  <:  'reg
 //│ ╙── because: cannot constrain  ¬outer  <:  ⊥
 

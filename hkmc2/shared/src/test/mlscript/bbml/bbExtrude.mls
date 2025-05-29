@@ -35,7 +35,6 @@ y `=> (let t = run(x `=> x `+ y) in y)
 //│ ║        	                   ^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  CodeBase[in ⊥ out ('x) ->{⊥} ('cde), in ⊥ out 'ctx, in ⊥ out ⊤]  <:  CodeBase[in ⊥ out 'T, ⊥, in ⊥ out ⊤]
 //│ ╟── because: cannot constrain  'ctx  <:  ⊥
-//│ ╟── because: cannot constrain  'ctx  <:  ⊥
 //│ ╟── because: cannot constrain  ¬'x1 ∧ y  <:  ⊥
 //│ ╟── because: cannot constrain  y  <:  'x1
 //│ ╙── because: cannot constrain  y  <:  ⊥
@@ -72,14 +71,11 @@ f(g)(foo)
 :fixme // ???
 f(g)(bar)
 //│ ╔══[ERROR] Type error in reference with expected type 'A
-//│ ║  l.73: 	f(g)(bar)
+//│ ║  l.72: 	f(g)(bar)
 //│ ║        	     ^^^
-//│ ╟── because: cannot constrain  C[Int]  <:  'A
 //│ ╟── because: cannot constrain  C[Int]  <:  'A
 //│ ╟── because: cannot constrain  C[Int]  <:  ¬{C[in ⊥ out ¬⊥ ∧ 'B]} ∨ C[in Int out 'D]
 //│ ╟── because: cannot constrain  Int ∧ 'B  <:  'D
-//│ ╟── because: cannot constrain  Int ∧ 'B  <:  'D
-//│ ╟── because: cannot constrain  Int ∧ 'B  <:  'B1
 //│ ╟── because: cannot constrain  Int ∧ 'B  <:  'B1
 //│ ╟── because: cannot constrain  Int ∧ 'B  <:  ⊥
 //│ ╟── because: cannot constrain  'B  <:  ¬{Int}
@@ -95,9 +91,8 @@ k
 :e
 k(_ => "")
 //│ ╔══[ERROR] Type error in function literal with expected type 'x
-//│ ║  l.96: 	k(_ => "")
+//│ ║  l.92: 	k(_ => "")
 //│ ║        	       ^^
-//│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  (Int) ->{'eff} (Int)
 //│ ╙── because: cannot constrain  Str  <:  Int
@@ -118,9 +113,8 @@ k
 :e
 k(_ => "")
 //│ ╔══[ERROR] Type error in function literal with expected type 'x
-//│ ║  l.119: 	k(_ => "")
+//│ ║  l.114: 	k(_ => "")
 //│ ║         	       ^^
-//│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Str)  <:  (⊤) ->{⊥} ⊥
 //│ ╙── because: cannot constrain  Str  <:  ⊥
@@ -129,9 +123,8 @@ k(_ => "")
 :e
 k(_ => 42)
 //│ ╔══[ERROR] Type error in function literal with expected type 'x
-//│ ║  l.130: 	k(_ => 42)
+//│ ║  l.124: 	k(_ => 42)
 //│ ║         	       ^^
-//│ ╟── because: cannot constrain  ('_) ->{⊥} (Int)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Int)  <:  'x
 //│ ╟── because: cannot constrain  ('_) ->{⊥} (Int)  <:  (⊤) ->{⊥} ⊥
 //│ ╙── because: cannot constrain  Int  <:  ⊥

@@ -67,7 +67,6 @@ fun body(x, y) = case
 //│ ╟── because: cannot constrain  'ctx ∨ 'ctx1  <:  G
 //│ ╟── because: cannot constrain  'ctx1  <:  G
 //│ ╟── because: cannot constrain  'ctx2  <:  G
-//│ ╟── because: cannot constrain  'ctx2  <:  G
 //│ ╙── because: cannot constrain  ⊤  <:  G
 
 fun bind: [G] -> (CodeBase[out Int, out G, out Any], [C] -> CodeBase[out Int, out C, out Any] -> CodeBase[out Int, out C | G, out Any]) -> CodeBase[out Int, out G, out Any]

@@ -9,8 +9,7 @@ import mlscript.utils.*, shorthands.*
 import utils.*
 import utils.Scope
 
-// * TODO use mutabnle cache instead for correct asymptotic complexity
-type Cache = Set[(Type, Type)]
+type Cache = mutable.HashSet[(Type, Type)]
 type ExtrudeCache = mutable.HashMap[(Uid[InfVar], Bool), InfVar]
 
 case class CCtx(cache: Cache, parents: Ls[(Type, Type)], origin: Term, exp: Opt[GeneralType])(using Scope):
@@ -25,12 +24,12 @@ case class CCtx(cache: Cache, parents: Ls[(Type, Type)], origin: Term, exp: Opt[
       )
     ))
   def nest(sub: (Type, Type)): CCtx =
-    copy(cache = cache + sub, parents = parents match
+    copy(cache = cache += sub, parents = parents match
       case `sub` :: _ => parents
       case _ =>  sub :: parents
     )
 object CCtx:
-  inline def init(origin: Term, exp: Opt[GeneralType])(using Scope) = CCtx(Set.empty, Nil, origin, exp)
+  inline def init(origin: Term, exp: Opt[GeneralType])(using Scope) = CCtx(mutable.HashSet.empty, Nil, origin, exp)
 def cctx(using CCtx): CCtx = summon
 
 class ConstraintSolver(infVarState: InfVarUid.State, elState: Elaborator.State, tl: TraceLogger):
@@ -89,13 +88,13 @@ class ConstraintSolver(infVarState: InfVarUid.State, elState: Elaborator.State, 
           if pol then
             val nc = Type.mkNegType(bd).toDnf // always cache the normal form to avoid unexpected cache misses
             log(s"New bound: ${v.showDbg} <: ${nc.showDbg}")
-            cctx.nest(v -> nc) givenIn:
+            cctx.nest(v.toDnf -> nc) givenIn:
               v.state.upperBounds ::= nc
               v.state.lowerBounds.foreach(lb => constrainImpl(lb, nc))
           else
             val c = bd.toDnf // always cache the normal form to avoid unexpected cache misses
             log(s"New bound: ${v.showDbg} :> ${c.showDbg}")
-            cctx.nest(c -> v) givenIn:
+            cctx.nest(c -> v.toDnf) givenIn:
               v.state.lowerBounds ::= c
               v.state.upperBounds.foreach(ub => constrainImpl(c, ub))
       case Conj(i, u, Nil) => (conj.i, conj.u) match

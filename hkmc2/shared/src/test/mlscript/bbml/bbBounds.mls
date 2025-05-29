@@ -31,7 +31,6 @@ iid("42")
 //│ ║  l.29: 	iid("42")
 //│ ║        	    ^^^^
 //│ ╟── because: cannot constrain  Str  <:  'A
-//│ ╟── because: cannot constrain  Str  <:  'A
 //│ ╙── because: cannot constrain  Str  <:  Int
 //│ Type: Str
 
@@ -56,7 +55,7 @@ foo(bar)
 :e
 fun badfoo: [A extends Str restricts Int] -> A -> A
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.57: 	fun badfoo: [A extends Str restricts Int] -> A -> A
+//│ ║  l.56: 	fun badfoo: [A extends Str restricts Int] -> A -> A
 //│ ║        	                                             ^^^^^^
 //│ ╙── because: cannot constrain  Int  <:  Str
 
@@ -104,7 +103,7 @@ fun h: [C] -> ([A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B
 :e
 bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ ╔══[ERROR] Cannot type non-function term Ref(member:bazbaz) as (A) ->{⊥} ([outer, 'B] -> 'B) ->{⊥} A
-//│ ║  l.105: 	bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
+//│ ║  l.104: 	bazbaz as [A extends Int] -> A -> ([B extends A -> A restricts A -> A] -> B) -> A
 //│ ╙──       	^^^^^^
 //│ Type: ['A] -> ('A) ->{⊥} ('A -> 'A) ->{⊥} 'A
 //│ Where:

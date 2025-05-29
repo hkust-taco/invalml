@@ -40,42 +40,6 @@ fun mapi = s => f =>
 //│ ║        	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Seq[in ⊥ out 'B, in ⊥ out 'E1]  <:  Seq[in ⊥ out A, in ⊥ out E]
 //│ ╟── because: cannot constrain  'E1  <:  E
-//│ ╟── because: cannot constrain  'E1  <:  E
-//│ ╟── because: cannot constrain  'reg  <:  E
-//│ ╟── because: cannot constrain  'reg  <:  E
-//│ ╟── because: cannot constrain  'r ∧ ¬outer  <:  E
-//│ ╟── because: cannot constrain  'r  <:  E ∨ outer
-//│ ╙── because: cannot constrain  ¬outer  <:  E ∨ outer
-//│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.28: 	    let i = r.ref 0
-//│ ║        	            ^^^^^^^
-//│ ║  l.29: 	    map(s) of x =>
-//│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.30: 	      i := !i + 1
-//│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.31: 	      f(!i, x)
-//│ ║        	^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  Seq[in ⊥ out 'B, in ⊥ out 'E1]  <:  Seq[in ⊥ out A, in ⊥ out E]
-//│ ╟── because: cannot constrain  'E1  <:  E
-//│ ╟── because: cannot constrain  'E1  <:  E
-//│ ╟── because: cannot constrain  'reg  <:  E
-//│ ╟── because: cannot constrain  'reg  <:  E
-//│ ╟── because: cannot constrain  'r ∧ ¬outer  <:  E
-//│ ╟── because: cannot constrain  'r  <:  E ∨ outer
-//│ ╙── because: cannot constrain  ¬outer  <:  E ∨ outer
-//│ ╔══[ERROR] Type error in region expression with expected type Seq[out A, out E]
-//│ ║  l.28: 	    let i = r.ref 0
-//│ ║        	            ^^^^^^^
-//│ ║  l.29: 	    map(s) of x =>
-//│ ║        	^^^^^^^^^^^^^^^^^^
-//│ ║  l.30: 	      i := !i + 1
-//│ ║        	^^^^^^^^^^^^^^^^^
-//│ ║  l.31: 	      f(!i, x)
-//│ ║        	^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  Seq[in ⊥ out 'B, in ⊥ out 'E1]  <:  Seq[in ⊥ out A, in ⊥ out E]
-//│ ╟── because: cannot constrain  'E1  <:  E
-//│ ╟── because: cannot constrain  'E1  <:  E
-//│ ╟── because: cannot constrain  'reg  <:  E
 //│ ╟── because: cannot constrain  'reg  <:  E
 //│ ╟── because: cannot constrain  'r ∧ ¬outer  <:  E
 //│ ╟── because: cannot constrain  'r  <:  E ∨ outer
@@ -142,7 +106,7 @@ r := 1
 r := 1
 ! r // because of the space, this is a NL-op
 //│ ╔══[ERROR] Variable not found: !
-//│ ║  l.143: 	! r // because of the space, this is a NL-op
+//│ ║  l.107: 	! r // because of the space, this is a NL-op
 //│ ╙──       	^
 //│ Type: ⊥
 

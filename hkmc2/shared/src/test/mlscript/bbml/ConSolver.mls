@@ -14,7 +14,7 @@ class PairOf[A, B] with
 class Stack[A] with
   constructor
     Nil
-    Cons(head: A, tail: Stack[A])
+    Cons(head: A, tail: Stack[out A])
 
 class ArrayList[A, R]
 class Iter[T, R]
@@ -29,6 +29,9 @@ fun
   foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()
   iter: [Res, R, E extends ~R, T] ->
     (ArrayList[T, out R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
+  fold: [Res, R, E extends ~R, T] ->
+    (ArrayList[T, out R], Res, [S] -> (Iter[T, S], Res) ->{S | E} Res) ->{E | R} Res
+  read: [T, S] -> Iter[T, S] ->{S} T
 
 push
 //│ Type: ['A, 'R] -> (ArrayList['A, out 'R], 'A) ->{'R} ()
@@ -60,16 +63,16 @@ pp(ty)
 fun matchP = case
   Pair(IntType, IntType) then ()
 //│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
-//│ ║  l.61: 	  Pair(IntType, IntType) then ()
+//│ ║  l.64: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
-//│ ║  l.61: 	  Pair(IntType, IntType) then ()
+//│ ║  l.64: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.61: 	  Pair(IntType, IntType) then ()
+//│ ║  l.64: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	                ^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.61: 	  Pair(IntType, IntType) then ()
+//│ ║  l.64: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	       ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -93,6 +96,8 @@ fun solve = case
           // iter(ubs, TODO())
           // Handle unification case here
           error() // Placeholder for unification logic
+
+
 
 solve
 //│ Type: ['Fun, 'Fun, 'eff, 'eff1, 'Unif] -> (Stack[out PairOf[out (Type[out 'Unif] ∧ Type[out 'Fun]) ∧ Type[?], out (((Type[?] ∧ Type[out 'Fun]) ∧ Type[?]) ∧ Type[?]) ∧ Type[?]]] ∧ Stack[?]) ->{('eff1 ∨ 'eff) ∨ 'Unif} ()
@@ -120,8 +125,180 @@ solve
 
 
 
+fun solve: [R] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
+fun solve = case
+  Nil then ()
+  Cons(c, cs) then if c is
+    Pair(lhs, rhs) then
+      if lhs is
+        IntType then if rhs is
+          IntType then ()
+          Fun(_, _) then error()
+          Unif(id, lbs, ubs) then
+            push(lbs, lhs)
+            let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
+            solve(ncs)
+        Fun(l1, r1) then  if rhs is
+          Fun(l2, r2) then
+            solve(Cons(Pair(l2, l1), Cons(Pair(r1, r2), cs)))
+          IntType then error()
+          Unif(id, lbs, ubs) then
+            push(lbs, lhs)
+            let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
+            solve(ncs)
+        Unif(id, lbs, ubs) then
+          push(ubs, rhs)
+          let ncs = fold(lbs, cs, (it, lst) => Cons(Pair(read(it), rhs), lst))
+          solve(ncs)
+
+
 solve(Cons(Pair(ty, ty), Nil))
 
+
+:e
+fun solve: [R] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
+fun solve = case
+  Nil then ()
+  Cons(c, cs) then if c is
+    Pair(lhs, rhs) then
+      if lhs is
+        IntType then if rhs is
+          IntType then ()
+          Fun(_, _) | Unif(_, _, _) then error()
+        Fun(l1, r1) then  if rhs is
+          Fun(l2, r2) then
+            solve(Cons(Pair(l2, l1), cs))
+            solve(Cons(Pair(r1, r2), cs))
+          IntType | Unif(_, _, _) then error()
+        Unif(id, lbs, ubs) then
+          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
+//│ ║  l.174: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//│ ║         	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  'R ∨ 'S1  <:  S ∨ 'E
+//│ ╟── because: cannot constrain  'R  <:  'E ∨ S
+//│ ╟── because: cannot constrain  'R1  <:  'E ∨ S
+//│ ╟── because: cannot constrain  'R1  <:  'E ∨ 'S2
+//│ ╟── because: cannot constrain  R2  <:  'E ∨ 'S2
+//│ ╟── because: cannot constrain  ¬'E ∧ R2  <:  'S2
+//│ ╟── because: cannot constrain  ¬'E ∧ R2  <:  ⊥
+//│ ╟── because: cannot constrain  R2  <:  'E
+//│ ╟── because: cannot constrain  R2  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬R2
+//│ ╟── because: cannot constrain  'R4  <:  ¬R2
+//│ ╙── because: cannot constrain  R2  <:  ¬R2
+//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
+//│ ║  l.174: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//│ ║         	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  'R ∨ 'S1  <:  S ∨ 'E
+//│ ╟── because: cannot constrain  'R  <:  'E ∨ S
+//│ ╟── because: cannot constrain  'R5  <:  'E ∨ S
+//│ ╟── because: cannot constrain  'R5  <:  'E ∨ 'S3
+//│ ╟── because: cannot constrain  'R4  <:  'E ∨ 'S3
+//│ ╟── because: cannot constrain  ¬'E ∧ 'R4  <:  'S3
+//│ ╟── because: cannot constrain  ¬'E ∧ 'R4  <:  ⊥
+//│ ╟── because: cannot constrain  'R4  <:  'E
+//│ ╟── because: cannot constrain  'R4  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R4
+//│ ╟── because: cannot constrain  'R4  <:  ¬'R4
+//│ ╟── because: cannot constrain  'R4  <:  ⊥
+//│ ╙── because: cannot constrain  R2  <:  ⊥
+
+
+fun solve = case
+  Nil then ()
+  Cons(c, cs) then if c is
+    Pair(lhs, rhs) then
+      if lhs is
+        IntType then if rhs is
+          IntType then ()
+          Fun(_, _) | Unif(_, _, _) then error()
+        Fun(l1, r1) then  if rhs is
+          Fun(l2, r2) then
+            solve(Cons(Pair(l2, l1), cs))
+            solve(Cons(Pair(r1, r2), cs))
+          IntType | Unif(_, _, _) then error()
+        Unif(id, lbs, ubs) then
+          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+
+
+solve
+//│ Type: ['Fun, 'Fun, 'eff, 'eff1, 'Unif] -> (Stack[out PairOf[out (Type[out 'Unif] ∧ Type[out 'Fun]) ∧ Type[?], out (((Type[?] ∧ Type[out 'Fun]) ∧ Type[?]) ∧ Type[?]) ∧ Type[?]]] ∧ Stack[?]) ->{(((('eff1 ∨ 'eff) ∨ 'Unif) ∨ 'eff) ∨ 'eff1) ∨ 'Unif} ()
+//│ Where:
+//│   ⊥ <: 'Fun
+//│   'Fun <: ⊤
+//│   'Fun <: ⊥
+//│   'Fun <: 'Fun
+//│   ⊥ <: 'Fun
+//│   'Fun <: 'Fun
+//│   'Fun <: ⊤
+//│   'Fun <: ⊥
+//│   'Fun <: ¬'Fun
+//│   'Fun <: 'Unif
+//│   'Fun <: 'Unif
+//│   ⊥ <: 'Unif
+//│   ⊥ <: 'eff
+//│   'Fun <: 'eff
+//│   'Fun <: 'eff
+//│   'eff <: ¬'Fun
+//│   'eff <: ¬'Fun
+//│   'eff <: ⊤
+//│   'Fun <: 'eff1
+//│   'Fun <: 'eff1
+//│   ⊥ <: 'eff1
+//│   'eff <: 'eff1
+//│   'eff1 <: 'eff
+//│   'eff1 <: ¬'Fun
+//│   'eff1 <: ¬'Fun
+//│   'eff1 <: ⊤
+//│   'Unif <: 'eff
+//│   'Unif <: 'eff1
+//│   'Unif <: ⊥
+//│   'Unif <: ⊤
+//│   'Unif <: ¬'eff
+//│   'Unif <: ¬'eff1
+//│   'Unif <: 'Fun
+
+solve(Cons(Pair(ty, ty), Nil))
+
+
+region r in
+  solve(Cons(Pair(ty, ty), Nil))
+
+
+:e
+region r in
+  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
+//│ ╔══[ERROR] Type error in application with expected type 'caseScrut
+//│ ║  l.271: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
+//│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
+//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in ⊥ out PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]]
+//│ ╟── because: cannot constrain  'A1  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
+//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
+//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)]
+//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
+//│ ╟── because: cannot constrain  Type[in 'R out 'R1]  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
+//│ ╟── because: cannot constrain  'R1  <:  'Unif ∧ 'Fun
+//│ ╟── because: cannot constrain  'R1  <:  'Unif
+//│ ╟── because: cannot constrain  r  <:  'Unif
+//│ ╙── because: cannot constrain  r  <:  ⊥
+//│ ╔══[ERROR] Type error in application with expected type 'caseScrut
+//│ ║  l.271: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
+//│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
+//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in ⊥ out PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]]
+//│ ╟── because: cannot constrain  'A1  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
+//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
+//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)]
+//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
+//│ ╟── because: cannot constrain  Type[in 'R out 'R1]  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
+//│ ╟── because: cannot constrain  'R1  <:  'Unif ∧ 'Fun
+//│ ╟── because: cannot constrain  'R1  <:  'Unif
+//│ ╟── because: cannot constrain  r  <:  'Unif
+//│ ╟── because: cannot constrain  r  <:  ¬'eff
+//│ ╟── because: cannot constrain  'eff  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
 
 // * Paper example
 
@@ -149,7 +326,7 @@ region r in // This is used to delimit the scope of mutation
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.150: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ ║  l.327: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S
@@ -202,18 +379,18 @@ fun solve = case
           // Handle unification case here
           error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.194: 	          IntType then ()
+//│ ║  l.371: 	          IntType then ()
 //│ ║         	          ^^^^^^^^^^^^^^^
-//│ ║  l.195: 	          else error()
+//│ ║  l.372: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.197: 	          Fun(l2, r2) then
+//│ ║  l.374: 	          Fun(l2, r2) then
 //│ ║         	          ^^^^^^^^^^^^^^^^
-//│ ║  l.198: 	            solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.375: 	            solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.199: 	            solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.376: 	            solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.200: 	          else error()
+//│ ║  l.377: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 
 :fixme
@@ -233,20 +410,20 @@ fun solve = case
         // Handle unification case here
         error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.225: 	        IntType then ()
+//│ ║  l.402: 	        IntType then ()
 //│ ║         	        ^^^^^^^^^^^^^^^
-//│ ║  l.226: 	        else error()
+//│ ║  l.403: 	        else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.227: 	      Fun(l1, r1) and rhs is
+//│ ║  l.404: 	      Fun(l1, r1) and rhs is
 //│ ║         	          ^^^^^^^^^^^^^^^^^^
-//│ ║  l.228: 	        Fun(l2, r2) then
+//│ ║  l.405: 	        Fun(l2, r2) then
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.229: 	          solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.406: 	          solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.230: 	          solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.407: 	          solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.231: 	        else error()
+//│ ║  l.408: 	        else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 
 solve
