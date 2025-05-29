@@ -300,6 +300,12 @@ region r in
 //│ ╟── because: cannot constrain  'eff  <:  ¬r
 //│ ╙── because: cannot constrain  r  <:  ¬r
 
+
+
+
+
+
+
 // * Paper example
 
 
@@ -326,7 +332,7 @@ region r in // This is used to delimit the scope of mutation
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.327: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ ║  l.333: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S
@@ -379,18 +385,18 @@ fun solve = case
           // Handle unification case here
           error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.371: 	          IntType then ()
+//│ ║  l.377: 	          IntType then ()
 //│ ║         	          ^^^^^^^^^^^^^^^
-//│ ║  l.372: 	          else error()
+//│ ║  l.378: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.374: 	          Fun(l2, r2) then
+//│ ║  l.380: 	          Fun(l2, r2) then
 //│ ║         	          ^^^^^^^^^^^^^^^^
-//│ ║  l.375: 	            solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.381: 	            solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.376: 	            solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.382: 	            solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.377: 	          else error()
+//│ ║  l.383: 	          else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 
 :fixme
@@ -410,20 +416,20 @@ fun solve = case
         // Handle unification case here
         error() // Placeholder for unification logic
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.402: 	        IntType then ()
+//│ ║  l.408: 	        IntType then ()
 //│ ║         	        ^^^^^^^^^^^^^^^
-//│ ║  l.403: 	        else error()
+//│ ║  l.409: 	        else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.404: 	      Fun(l1, r1) and rhs is
+//│ ║  l.410: 	      Fun(l1, r1) and rhs is
 //│ ║         	          ^^^^^^^^^^^^^^^^^^
-//│ ║  l.405: 	        Fun(l2, r2) then
+//│ ║  l.411: 	        Fun(l2, r2) then
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.406: 	          solve(Cons(Pair(l2, l1), cs))
+//│ ║  l.412: 	          solve(Cons(Pair(l2, l1), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.407: 	          solve(Cons(Pair(r1, r2), cs))
+//│ ║  l.413: 	          solve(Cons(Pair(r1, r2), cs))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.408: 	        else error()
+//│ ║  l.414: 	        else error()
 //│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 
 solve
