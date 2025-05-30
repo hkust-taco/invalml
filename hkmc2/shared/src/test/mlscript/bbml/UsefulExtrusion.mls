@@ -176,7 +176,7 @@ fun foo[outer, R <: outer](r1: Region[R]) =
 :fixme
 fun foo: [outer, R <: outer] -> Region[R] -> ()
 //│ ╔══[ERROR] Illegal forall annotation.
-//│ ║  l.170: 	fun foo: [outer, R <: outer] -> Region[R] -> ()
+//│ ║  l.177: 	fun foo: [outer, R <: outer] -> Region[R] -> ()
 //│ ╙──       	         ^^^^^^^^^^^^^^^^^^^
 //│ ═══[ERROR] Invalid type
 

@@ -247,8 +247,10 @@ region r in
 
 
 // region r in
-//   let arr = randArr(r, 5)
-//   smsort(arr, r)
+//   let arr = randArr(r, 10)
+//   pmsort(arr, r)
+// //│ = [148, 320, 365, 376, 648, 658, 684, 834, 878, 994]
+// //│ Type: Array[Int, ?]
 
 
 
