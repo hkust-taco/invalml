@@ -52,3 +52,25 @@ foo to()
 //│   ⊥ <: 'A1
 //│   'A1 <: 'A
 
+
+fun (;) seq(_, res) = res
+
+fun foo: [R1, R2] -> (Region[R1], Region[R2], Int ->{R1 & ~R2} (), Int ->{R2 & ~R1} ()) ->{R1 | R2} () 
+fun foo(r1, r2, f, g) =
+  f(123); g(456)
+
+foo
+//│ Type: ['R1, 'R2] -> (Region['R1], Region['R2], (Int) ->{'R1 ∧ ¬'R2} (), (Int) ->{'R2 ∧ ¬'R1} ()) ->{'R1 ∨ 'R2} ()
+
+
+:e
+fun foo[outer, R <: outer](r1: Region[R]) =
+  region r2 in 42
+//│ ═══[ERROR] Unsupported type parameter outer binding
+//│ ╔══[ERROR] Unsupported type parameter operator application
+//│ ║  l.67: 	fun foo[outer, R <: outer](r1: Region[R]) =
+//│ ╙──      	               ^^^^
+//│ ╔══[ERROR] Name not found: R
+//│ ║  l.67: 	fun foo[outer, R <: outer](r1: Region[R]) =
+//│ ╙──      	                                      ^
+//│ ═══[ERROR] Invalid type

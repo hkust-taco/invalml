@@ -164,7 +164,14 @@ fun foo[outer, R <: outer](r1: Region[R]) =
     freeze(r2, () =>
       wield(r1)
     )
-//│ /!!!\ Uncaught error: scala.MatchError: Outer(None) (of class hkmc2.syntax.Tree$Outer)
+//│ ═══[ERROR] Unsupported type parameter outer binding
+//│ ╔══[ERROR] Unsupported type parameter operator application
+//│ ║  l.162: 	fun foo[outer, R <: outer](r1: Region[R]) =
+//│ ╙──       	               ^^^^
+//│ ╔══[ERROR] Name not found: R
+//│ ║  l.162: 	fun foo[outer, R <: outer](r1: Region[R]) =
+//│ ╙──       	                                      ^
+//│ ═══[ERROR] Invalid type
 
 :fixme
 fun foo: [outer, R <: outer] -> Region[R] -> ()

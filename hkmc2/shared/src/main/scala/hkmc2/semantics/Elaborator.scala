@@ -1263,6 +1263,9 @@ extends Importer:
           val sym = VarSymbol(id)
           sym.decl = S(TyParam(FldFlags.empty, N, sym))
           Param(FldFlags.empty, sym, N, Modulefulness.none)
+        case t =>
+          raise(ErrorReport(msg"Unsupported type parameter ${t.describe}" -> t.toLoc :: Nil))
+          Param(FldFlags.empty, VarSymbol(Ident("error")), N, Modulefulness.none) // FIXME: VarSymbol(Ident("error"))?
       (vs, ctx ++ vs.map(p => p.sym.name -> p.sym))
   
   def importFrom(sts: Tree.Block)(using c: Ctx): (Blk, Ctx) =
