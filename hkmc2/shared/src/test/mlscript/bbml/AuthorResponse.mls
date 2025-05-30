@@ -4,7 +4,7 @@
 
 
 fun wield: [R] -> (Region[R]) ->{R} ()
-fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R | E} T) ->{E} T
+fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R | E} T) ->{R | E} T
 
 fun (;) seq(_, res) = res
 fun rand: () -> Bool
