@@ -1,25 +1,8 @@
 :js
 :bbml
 
-
-fun (;) seq(_, res) = res
-
-fun (~) concat: (Str, Str) -> Str
-fun concat(a, b) = @untyped a + b
-
-// fun (???) TODO() = TODO()
-
-
-fun println: Any -> ()
-fun println(x) = @untyped globalThis.console.log(x)
-
-
-println(1)
-//│ > 1
-
-"a" ~ "b"
-//│ = "ab"
-//│ Type: Str
+:...
+//│ ————————————————————————————————————————————————————————————————————————————————
 
 
 // *** infrastructures
@@ -91,8 +74,10 @@ fun rand: () -> Int
 fun rand() = @untyped globalThis.Math.floor(globalThis.Math.random() * 1000)
 
 
-fun toString: Any -> Str
-fun toString(x) = @untyped globalThis.String(x)
+fun (;) seq(_, res) = res
+
+fun println: Any -> ()
+fun println(x) = @untyped globalThis.console.log(x)
 
 
 // it is not really executed in parallel
@@ -103,6 +88,7 @@ fun forkJoin(f, g, h) =
   let x = f()
   let y = g()
   h(x, y)
+
 
 // *** pmsort implementation
 
@@ -129,60 +115,13 @@ fun smsort(xs, r) =
       if p is Pr(fst, snd) then merge(smsort(fst, r), smsort(snd, r), r)
 
 
-:e // wrong version!
+// wrong version!
 // fun pmsort: [R1, R2] -> (Array[out Int, out R1], Region[R2]) ->{R1 | R2} Array[Int, out R2]
-fun pmsort(xs, r) =
-  matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
-    let p = split(xs, r, r) in
-      if p is Pr(fst, snd) then
-        forkJoin(_ => pmsort(fst, r), pmsort(snd, r), (r1, r2) => merge(r1, r2, r))
-//│ ╔══[ERROR] Cannot type this function literal as () ->{'E1} 'T
-//│ ║  l.138: 	        forkJoin(_ => pmsort(fst, r), pmsort(snd, r), (r1, r2) => merge(r1, r2, r))
-//│ ╙──       	                      ^^^^^^^^^^^^^^
-//│ ╔══[ERROR] Type error in function literal
-//│ ║  l.134: 	fun pmsort(xs, r) =
-//│ ║         	           ^^^^^^^^
-//│ ║  l.135: 	  matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  'pmsort
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  ('S, 'r) ->{'eff3} ('app3)
-//│ ╟── because: cannot constrain  'app ∨ 'app1 ∨ 'app2  <:  'app3
-//│ ╟── because: cannot constrain  'app  <:  'app3
-//│ ╟── because: cannot constrain  'app  <:  () ->{'E2} ('S1)
-//│ ╙── because: cannot constrain  Array['T1, in ⊥ out 'R6]  <:  () ->{'E2} ('S1)
-//│ ╔══[ERROR] Type error in function literal
-//│ ║  l.134: 	fun pmsort(xs, r) =
-//│ ║         	           ^^^^^^^^
-//│ ║  l.135: 	  matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  'pmsort
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  ('S, 'r) ->{'eff3} ('app3)
-//│ ╟── because: cannot constrain  'app ∨ 'app1 ∨ 'app2  <:  'app3
-//│ ╟── because: cannot constrain  'app1  <:  'app3
-//│ ╟── because: cannot constrain  'app1  <:  () ->{'E2} ('S1)
-//│ ╙── because: cannot constrain  Array['T2, in ⊥ out 'R7]  <:  () ->{'E2} ('S1)
-//│ ╔══[ERROR] Type error in function literal
-//│ ║  l.134: 	fun pmsort(xs, r) =
-//│ ║         	           ^^^^^^^^
-//│ ║  l.135: 	  matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  'pmsort
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  ('S, 'r) ->{'eff3} ('app3)
-//│ ╟── because: cannot constrain  'app ∨ 'app1 ∨ 'app2  <:  'app3
-//│ ╟── because: cannot constrain  'app2  <:  'app3
-//│ ╟── because: cannot constrain  'app2  <:  () ->{'E2} ('S1)
-//│ ╙── because: cannot constrain  Array['T3, in ⊥ out 'R31]  <:  () ->{'E2} ('S1)
-//│ ╔══[ERROR] Type error in function literal
-//│ ║  l.134: 	fun pmsort(xs, r) =
-//│ ║         	           ^^^^^^^^
-//│ ║  l.135: 	  matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  'pmsort
-//│ ╟── because: cannot constrain  ('xs, 'r) ->{'R ∨ 'eff ∨ 'R1 ∨ 'eff1 ∨ 'R2 ∨ 'eff2 ∨ 'R3 ∨ 'R4 ∨ 'R5} ('app ∨ 'app1 ∨ 'app2)  <:  ('S, 'r) ->{'eff3} ('app3)
-//│ ╟── because: cannot constrain  'app ∨ 'app1 ∨ 'app2  <:  'app3
-//│ ╟── because: cannot constrain  'app2  <:  'app3
-//│ ╟── because: cannot constrain  'app2  <:  () ->{'E2} ('S1)
-//│ ╙── because: cannot constrain  Array['T4, in ⊥ out 'R32]  <:  () ->{'E2} ('S1)
+// fun pmsort(xs, r) =
+//   matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
+//     let p = split(xs, r, r) in
+//       if p is Pr(fst, snd) then
+//         forkJoin(_ => pmsort(fst, r), pmsort(snd, r), (r1, r2) => merge(r1, r2, r))
 
 
 fun pmsort: [R1, R2] -> (Array[out Int, out R1], Region[R2]) ->{R1 | R2} Array[Int, out R2]
@@ -207,55 +146,8 @@ fun randArr(r, n) =
     xs
 
 
-fun printArr(xs) =
-  foreach(xs, x => println(x))
-
-
 region r in
-  let arr = mkArray(r)
-  push(arr, 1)
-  push(arr, 2)
-  push(arr, 3)
-  push(arr, 4)
-  let p = split(arr, r, r)
-  if p is
-    Pr(fst, snd) then
-      merge(fst, snd, r)
-//│ = [1, 2, 3, 4]
-//│ Type: Array[in 'T out 'T ∨ Int, ?] ∨ Array[in 'T1 out ('T1 ∨ Int) ∨ Int, ?]
-
-
-region r in
-  let arr = mkArray(r)
-  push(arr, 10)
-  push(arr, 23)
-  push(arr, 13)
-  push(arr, 4)
-  smsort(arr, r)
-//│ = [4, 10, 13, 23]
-//│ Type: ((Array['T, ?] ∨ Array[in 'T1 out 'T1 ∨ Int, ?]) ∨ Array[in 'T2 out (((((((((((((('T2 ∨ 'T3) ∨ 'T4) ∨ 'T1) ∨ Int) ∨ 'T) ∨ 'T1) ∨ Int) ∨ 'T) ∨ 'T1) ∨ Int) ∨ 'T) ∨ 'T4) ∨ 'T1) ∨ Int) ∨ 'T, ?]) ∨ Array[in 'T3 out (((((('T3 ∨ 'T4) ∨ 'T1) ∨ Int) ∨ 'T) ∨ 'T1) ∨ Int) ∨ 'T, ?]
-//│ Where:
-//│   'T <: Int
-//│   'T1 <: Int
-//│   'T4 <: Int
-//│   'T3 <: Int
-//│   'T3 <: 'T4
-//│   'T2 <: Int
-//│   'T2 <: 'T4
-//│   'T2 <: 'T3 ∧ Int
-//│   'T2 <: 'T3
-
-
-// region r in
-//   let arr = randArr(r, 10)
-//   pmsort(arr, r)
-// //│ = [148, 320, 365, 376, 648, 658, 684, 834, 878, 994]
-// //│ Type: Array[Int, ?]
-
-
-
-region r in
-  let arr = mkArray(r)
+  let arr = mkArray(r) // you can try: let arr = randArr(r, 10)
   push(arr, 10)
   push(arr, 23)
   push(arr, 13)
@@ -263,3 +155,4 @@ region r in
   pmsort(arr, r)
 //│ = [4, 10, 13, 23]
 //│ Type: Array[Int, ?]
+//│ ————————————————————————————————————————————————————————————————————————————————

@@ -1,5 +1,7 @@
 :bbml
 
+:...
+//│ ————————————————————————————————————————————————————————————————————————————————
 
 // *** infrastructures
 
@@ -40,7 +42,7 @@ class Type[R] with
     Fun(lhs: Type[R], rhs: Type[R])
 
 
-fun solve = case
+fun solve(lst) = if lst is
   Nil then ()
   Cons(c, cs) then if c is
     Pair(lhs, rhs) then
@@ -86,78 +88,37 @@ region r in
 
 // *** error example
 
-
 // if we call the `solve` function during the iteration, the `solve` function
 // can only handle the cases where no allocation is required (i.e., no type variables)
-fun solve = case
-  Nil then ()
-  Cons(c, cs) then if c is
-    Pair(lhs, rhs) then
-      if lhs is
-        IntType then if rhs is
-          IntType then ()
-          Fun(_, _) then error()
-          Unif(id, lbs, ubs) then
-            push(lbs, lhs)
-            iter(lbs, it => solve(Cons(Pair(lhs, read(it)), Nil)))
-            solve(cs)
-        Fun(l1, r1) then  if rhs is
-          Fun(l2, r2) then
-            solve(Cons(Pair(l2, l1), Cons(Pair(r1, r2), cs)))
-          IntType then error()
-          Unif(id, lbs, ubs) then
-            push(lbs, lhs)
-            iter(lbs, it => solve(Cons(Pair(lhs, read(it)), Nil)))
-            solve(cs)
-        Unif(id, lbs, ubs) then
-          push(ubs, rhs)
-          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
-          solve(cs)
+// fun solve(lst) = if lst is
+//   Nil then ()
+//   Cons(c, cs) then if c is
+//     Pair(lhs, rhs) then
+//       if lhs is
+//         IntType then if rhs is
+//           IntType then ()
+//           Fun(_, _) then error()
+//           Unif(id, lbs, ubs) then
+//             push(lbs, lhs)
+//             iter(lbs, it => solve(Cons(Pair(lhs, read(it)), Nil)))
+//             solve(cs)
+//         Fun(l1, r1) then  if rhs is
+//           Fun(l2, r2) then
+//             solve(Cons(Pair(l2, l1), Cons(Pair(r1, r2), cs)))
+//           IntType then error()
+//           Unif(id, lbs, ubs) then
+//             push(lbs, lhs)
+//             iter(lbs, it => solve(Cons(Pair(lhs, read(it)), Nil)))
+//             solve(cs)
+//         Unif(id, lbs, ubs) then
+//           push(ubs, rhs)
+//           iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//           solve(cs)
 
+// solve(Cons(Pair(IntType, IntType), Nil))
 
-solve(Cons(Pair(IntType, IntType), Nil))
-
-
-:e
-region r in
-  let v1 = Unif(1, empty(r), empty(r))
-  let v2 = Unif(2, empty(r), empty(r))
-  solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
-//│ ╔══[ERROR] Type error in application with expected type 'caseScrut
-//│ ║  l.125: 	  solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
-//│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in 'Cons out 'Cons1]
-//│ ╟── because: cannot constrain  'A1  <:  'Cons1
-//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  'Cons1
-//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  PairOf[in 'Pair out 'Pair1, in 'Pair2 out 'Pair3]
-//│ ╟── because: cannot constrain  'A3  <:  'Pair1
-//│ ╟── because: cannot constrain  Type[in 'R out 'R1]  <:  'Pair1
-//│ ╟── because: cannot constrain  Type[in 'R out 'R1]  <:  Type[in 'Unif out 'Unif1]
-//│ ╟── because: cannot constrain  'R1  <:  'Unif1
-//│ ╟── because: cannot constrain  'R1  <:  'R2
-//│ ╟── because: cannot constrain  'R1  <:  ¬'R1
-//│ ╟── because: cannot constrain  'R1  <:  ⊥
-//│ ╙── because: cannot constrain  r  <:  ⊥
-//│ ╔══[ERROR] Type error in application with expected type 'caseScrut
-//│ ║  l.125: 	  solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
-//│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in 'Cons out 'Cons1]
-//│ ╟── because: cannot constrain  'A1  <:  'Cons1
-//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  'Cons1
-//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  PairOf[in 'Pair out 'Pair1, in 'Pair2 out 'Pair3]
-//│ ╟── because: cannot constrain  'B1  <:  'Pair3
-//│ ╟── because: cannot constrain  Type[in 'R3 out 'R4]  <:  'Pair3
-//│ ╟── because: cannot constrain  Type[in 'R3 out 'R4]  <:  Type['R5]
-//│ ╟── because: cannot constrain  'R4  <:  'R5
-//│ ╟── because: cannot constrain  'R6  <:  'R5
-//│ ╟── because: cannot constrain  'R6  <:  'eff
-//│ ╟── because: cannot constrain  'R6  <:  'E ∨ 'S
-//│ ╟── because: cannot constrain  ¬'E ∧ 'R6  <:  'S
-//│ ╟── because: cannot constrain  ¬'E ∧ 'R6  <:  ⊥
-//│ ╟── because: cannot constrain  'R6  <:  'E
-//│ ╟── because: cannot constrain  'R6  <:  ¬'R1
-//│ ╟── because: cannot constrain  r  <:  ¬'R1
-//│ ╟── because: cannot constrain  'R1  <:  ¬r
-//│ ╙── because: cannot constrain  r  <:  ¬r
+// region r in
+//   let v1 = Unif(1, empty(r), empty(r))
+//   let v2 = Unif(2, empty(r), empty(r))
+//   solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
+//│ ————————————————————————————————————————————————————————————————————————————————
