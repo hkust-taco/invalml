@@ -1,0 +1,89 @@
+:bbml
+
+
+:...
+//│ ————————————————————————————————————————————————————————————————————————————————
+
+
+// * This file contains examples in the auther response
+
+fun wield: [R] -> (Region[R]) ->{R} ()
+fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R | E} T) ->{R | E} T
+
+fun (;) seq(_, res) = res
+fun rand: () -> Bool
+fun print: Any -> ()
+
+// ### Example 1
+
+
+fun foo1(r1, r2) =
+  freeze(r1, () => print("ok"))
+  wield(r2)
+
+region r in
+  foo1(r, r)
+
+region r in
+  region s in
+    foo1(r, s)
+
+
+region r0 in
+  
+  fun foo1(r1, r2) =
+    freeze(r1, () => wield(r0))
+    wield(r2)
+  
+  region r in
+    foo1(r, r)
+  
+  region r in
+    region s in
+      foo1(r, s)
+
+
+
+fun foo2(r1, r2) =
+  freeze(r1, () => wield(r2))
+  wield(r2)
+
+// we rightfully reject
+// region r in
+//   foo2(r, r)
+
+
+// ### Example 3
+
+
+fun foo3(r1, r2, f) =
+  let exec = freeze(r1, () => freeze(r2, () => f(r1, r2)))
+  let r = exec()
+  !r + 1
+
+region r in
+  region s in
+    foo3(r, s, (x, y) =>
+      if rand() then print("Chose x"); () => x.ref 0
+                else print("Chose y"); () => y.ref 1)
+
+// ### Example 4
+fun foo4(f) =
+  region r in
+    freeze(r, () => f(32))
+
+
+foo4
+
+
+fun freeze2: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+
+
+fun foo5(f) =
+  region r in
+    freeze(r, () => f(32))
+
+foo5
+
+//│ Type: [outer, 'app] -> (Int ->{outer} 'app) -> 'app
+//│ ————————————————————————————————————————————————————————————————————————————————

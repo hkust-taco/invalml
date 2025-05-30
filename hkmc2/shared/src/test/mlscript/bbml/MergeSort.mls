@@ -1,8 +1,11 @@
-:js
 :bbml
 
 :...
 //│ ————————————————————————————————————————————————————————————————————————————————
+
+// * This file includes the implementation for merge sorting,
+// * executed sequentially or in parallel.
+// * Adapted from https://doi.org/10.5281/zenodo.8425443
 
 
 // *** infrastructures
@@ -16,45 +19,16 @@ class Pair[T, S] with
     Pr(fst: T, snd: S)
 
 
-fun mkArray: [T, R] -> Region[R] ->{R} Array[T, out R]
-fun mkArray(r) = @untyped globalThis.Array()
-
-
-fun push: [T, R] -> (Array[in T, out R], T) ->{R} ()
-fun push(xs, x) = @untyped xs.push(x); ()
-
-
-// push an element to front
-fun unshift: [T, R] -> (Array[in T, out R], T) ->{R} ()
-fun unshift(xs, x) = @untyped xs.unshift(x); ()
-
-
-fun map: [T, S, R, E extends ~R] -> (Array[out T, out R], T ->{E} S) ->{E | R} Array[S, out R]
-fun map(xs, f) = @untyped xs.map(f)
-
-
-fun foreach: [T, R, E extends ~R] -> (Array[out T, out R], T ->{E} ()) ->{E | R} ()
-fun foreach(xs, f) = @untyped xs.forEach(f)
-
-
-fun len: [R] -> Array[in Nothing out Any, out R] ->{R} Int
-fun len(xs) = @untyped xs.length
-
-
-fun at: [T, R] -> (Array[out T, out R], Int) ->{R} T
-fun at(xs, i) = @untyped xs.at(i)
-
-
-fun slice: [T, R] -> (Array[out T, out R], Int) ->{R} Array[out T, out R]
-fun slice(xs, i) = @untyped xs.slice(i)
-
-
-fun concat: [T, R1, R2, R3] -> (Region[R3], Array[in T, out R1], Array[out T, out R2]) ->{R1 | R2 | R3} Array[T, out R3]
-fun concat(r, xs, ys) = @untyped xs.concat(ys)
-
-
-fun freezeArr: [T, R, E extends ~R] -> (Array[in Nothing, out Any], () ->{E} T) ->{E} T
-fun freezeArr(xs, f) = f()
+fun
+  mkArray: [T, R] -> Region[R] ->{R} Array[T, out R]
+  push: [T, R] -> (Array[in T, out R], T) ->{R} ()
+  unshift: [T, R] -> (Array[in T, out R], T) ->{R} ()
+  map: [T, S, R, E extends ~R] -> (Array[out T, out R], T ->{E} S) ->{E | R} Array[S, out R]
+  foreach: [T, R, E extends ~R] -> (Array[out T, out R], T ->{E} ()) ->{E | R} ()
+  len: [R] -> Array[in Nothing out Any, out R] ->{R} Int
+  at: [T, R] -> (Array[out T, out R], Int) ->{R} T
+  slice: [T, R] -> (Array[out T, out R], Int) ->{R} Array[out T, out R]
+  concat: [T, R1, R2, R3] -> (Region[R3], Array[in T, out R1], Array[out T, out R2]) ->{R1 | R2 | R3} Array[T, out R3]
 
 
 // matching on js array is not supported yet.
@@ -68,26 +42,11 @@ fun matchTwo(xs, fn, f1, f2) =
   else if len(xs) is 1 then f1(at(xs, 0))
   else f2(at(xs, 0), at(xs, 1), slice(xs, 2))
 
-// it should have some primitive effects
-// but we don't support for now
-fun rand: () -> Int
-fun rand() = @untyped globalThis.Math.floor(globalThis.Math.random() * 1000)
-
-
 fun (;) seq(_, res) = res
 
 fun println: Any -> ()
-fun println(x) = @untyped globalThis.console.log(x)
-
-
-// it is not really executed in parallel
-// but it is enough to display the ability of our type system
 fun forkJoin: [T, S, P, E1, E2 extends ~E1, E3] ->
   (() ->{E1} T, () ->{E2} S, (T, S) ->{E3} P) ->{E1 | E2 | E3} P
-fun forkJoin(f, g, h) =
-  let x = f()
-  let y = g()
-  h(x, y)
 
 
 // *** pmsort implementation
@@ -136,23 +95,20 @@ fun pmsort(xs, r) =
 
 // *** simple tests
 
-
-fun randArr(r, n) =
-  if n is 0 then mkArray(r)
-  else
-    let x = rand()
-    let xs = randArr(r, n - 1)
-    push(xs, x)
-    xs
-
+region r in
+  let arr = mkArray(r)
+  push(arr, 10)
+  push(arr, 23)
+  push(arr, 13)
+  push(arr, 4)
+  smsort(arr, r)
 
 region r in
-  let arr = mkArray(r) // you can try: let arr = randArr(r, 10)
+  let arr = mkArray(r)
   push(arr, 10)
   push(arr, 23)
   push(arr, 13)
   push(arr, 4)
   pmsort(arr, r)
-//│ = [4, 10, 13, 23]
 //│ Type: Array[Int, ?]
 //│ ————————————————————————————————————————————————————————————————————————————————

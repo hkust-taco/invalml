@@ -3,6 +3,9 @@
 :...
 //│ ————————————————————————————————————————————————————————————————————————————————
 
+// * In this file, we implement a simple constraint solver, originally presented in https://doi.org/10.1145/3410225
+// * We only implement int type, function types, and type variables for simplicity
+
 // *** infrastructures
 
 class PairOf[A, B] with
@@ -67,25 +70,6 @@ fun solve(lst) = if lst is
           let ncs = fold(lbs, cs, (it, lst) => Cons(Pair(read(it), rhs), lst))
           solve(ncs)
 
-
-
-// *** examples
-
-region r in
-  solve(Cons(Pair(IntType, IntType), Nil))
-
-
-
-region r in
-  solve(Cons(Pair(IntType, Fun(IntType, IntType)), Nil))
-
-
-region r in
-  let v1 = Unif(1, empty(r), empty(r))
-  let v2 = Unif(2, empty(r), empty(r))
-  solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
-
-
 // *** error example
 
 // if we call the `solve` function during the iteration, the `solve` function
@@ -121,4 +105,21 @@ region r in
 //   let v1 = Unif(1, empty(r), empty(r))
 //   let v2 = Unif(2, empty(r), empty(r))
 //   solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
+
+// *** examples
+
+region r in
+  solve(Cons(Pair(IntType, IntType), Nil))
+
+
+
+region r in
+  solve(Cons(Pair(IntType, Fun(IntType, IntType)), Nil))
+
+
+region r in
+  let v1 = Unif(1, empty(r), empty(r))
+  let v2 = Unif(2, empty(r), empty(r))
+  solve(Cons(Pair(v1, Fun(IntType, v2)), Nil))
+
 //│ ————————————————————————————————————————————————————————————————————————————————
