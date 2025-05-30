@@ -1,0 +1,24 @@
+:js
+:bbml
+
+
+fun (;) seq(_, res) = res
+
+fun (~) concat: (Str, Str) -> Str
+fun concat(a, b) = @untyped a + b
+
+// fun (???) TODO() = TODO()
+
+
+fun println: Any -> ()
+fun println(x) = @untyped globalThis.console.log(x)
+
+
+println(1)
+//│ > 1
+
+"a" ~ "b"
+//│ = "ab"
+//│ Type: Str
+
+
