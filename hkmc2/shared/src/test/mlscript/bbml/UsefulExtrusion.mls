@@ -1,0 +1,59 @@
+:bbml
+
+
+fun (;) seq(_, res) = res
+
+
+
+
+fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R | E} T) ->{E} T
+
+freeze
+//│ Type: ['R, 'E, 'T] -> (Region['R], () ->{¬'R ∨ 'E} 'T) ->{'E} 'T
+//│ Where:
+//│   'E <: ¬'R
+
+
+fun foo(f) =
+  region r in
+    freeze(r, () => f(32))
+
+foo
+//│ Type: [outer, 'app] -> (Int ->{outer} 'app) -> 'app
+
+fun foo(f) =
+  region r in
+    freeze(r, f)
+    123
+
+foo
+//│ Type: [outer, 'E] -> (() ->{outer ∨ 'E} ⊤) ->{'E} Int
+//│ Where:
+//│   'E <: outer
+
+
+fun freeze: [E, R, S, T] -> (Region[R], () ->{~R & E} T) ->{E} T
+
+freeze
+//│ Type: ['E, 'R, 'T] -> (Region['R], () ->{¬'R ∧ 'E} 'T) ->{'E} 'T
+
+
+fun foo(f) =
+  region r in
+    freeze(r, () => f(32))
+
+foo
+//│ Type: [outer, 'app, 'eff] -> (Int ->{'eff} 'app) ->{'eff} 'app
+//│ Where:
+//│   'eff <: outer
+
+fun foo(f) =
+  region r in
+    freeze(r, f)
+    123
+
+foo
+//│ Type: [outer, 'E] -> (() ->{'E ∧ outer} ⊤) ->{'E} Int
+
+
+

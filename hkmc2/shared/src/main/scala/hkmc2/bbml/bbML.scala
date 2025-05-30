@@ -469,7 +469,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
                 if dist.length != ctors.length then
                   error(msg"Expect ${ctors.length.toString()} cases, but ${dist.length.toString()} got." -> split.toLoc :: Nil)
               case N =>
-                error(msg"Unknown ADT constructor ${c.toString()}" -> split.toLoc :: Nil)
+                error(msg"Unknown ADT constructor ${c.nme}" -> split.toLoc :: Nil)
           case Nil => ??? // impossible
         (res, eff)
       else typeSplit(split, sign)
@@ -481,7 +481,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     (lhs, rhs) match
     case (Term.Lam(PlainParamList(params), body), ft @ PolyFunType(args, ret, eff)) => // * annoted functions
       if params.length != args.length then
-        (error(msg"Cannot type function ${lhs.toString} as ${rhs.show}" -> lhs.toLoc :: Nil), Bot)
+        (error(msg"Cannot type this ${lhs.describe} as ${rhs.show}" -> lhs.toLoc :: Nil), Bot)
       else
         val nestCtx = ctx.nest
         val argsTy = params.zip(args).map:
