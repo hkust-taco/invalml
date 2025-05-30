@@ -22,3 +22,44 @@ println(1)
 //│ Type: Str
 
 
+// *** infrastructures
+
+declare class Array[T, R]
+
+fun mkArray: [T, R] -> Region[R] ->{R} Array[T, out R]
+fun mkArray(r) = @untyped globalThis.Array()
+
+
+fun push: [T, R] -> (Array[in T, out R], T) ->{R} ()
+fun push(xs, x) = @untyped xs.push(x)
+
+fun map: [T, S, R, E extends ~R] -> (Array[out T, out R], T ->{E} S) ->{E | R} Array[S, out R]
+fun map(xs, f) = @untyped xs.map(f)
+
+// it should have some primitive effects
+// but we don't support for now
+fun rand: () -> Int
+fun rand() = @untyped globalThis.Math.floor(globalThis.Math.random() * 1000)
+
+
+fun toString: Any -> Str
+fun toString(x) = @untyped globalThis.String(x)
+
+
+// fun map(xs, f) = if xs is
+//   Nil then Nil
+
+
+// *** pmsort implementation
+
+
+// *** simple tests
+
+
+fun randList(r, n) =
+  if n is 0 then mkArray(r)
+  else
+    let x = rand()
+    let xs = randList(r, n - 1)
+    push(xs, x)
+    xs
