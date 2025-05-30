@@ -6,6 +6,7 @@ fun (;) seq(_, res) = res
 
 
 
+fun wield: [R] -> (Region[R]) ->{R} ()
 fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R | E} T) ->{E} T
 
 freeze
@@ -32,6 +33,17 @@ foo
 //│   'E <: outer
 
 
+fun foo(r1, r2, f, g) =
+  freeze(r1, () => f(123)); freeze(r2, () => g(456))
+
+foo
+//│ Type: ['res, 'R, 'E, 'R1, 'E1] -> (Region['R], Region['R1], Int ->{'E ∨ ¬'R} ⊤, Int ->{'E1 ∨ ¬'R1} 'res) ->{'E ∨ 'E1} 'res
+//│ Where:
+//│   'E <: ¬'R
+//│   'E1 <: ¬'R1
+
+
+
 fun freeze: [E, R, S, T] -> (Region[R], () ->{~R & E} T) ->{E} T
 
 freeze
@@ -54,6 +66,100 @@ fun foo(f) =
 
 foo
 //│ Type: [outer, 'E] -> (() ->{'E ∧ outer} ⊤) ->{'E} Int
+
+
+
+fun foo: [R1, R2] -> (Region[R1], Region[R2], Int ->{R1 & ~R2} (), Int ->{R2 & ~R1} ()) ->{R1 | R2} () 
+fun foo(r1, r2, f, g) =
+  f(123); g(456)
+
+fun foo(r1, r2, f, g) =
+  freeze(r1, () => f(123)); freeze(r2, () => g(456))
+
+foo
+//│ Type: ['res, 'E, 'R, 'E1, 'R1] -> (Region['R], Region['R1], Int ->{'E ∧ ¬'R} ⊤, Int ->{'E1 ∧ ¬'R1} 'res) ->{'E ∨ 'E1} 'res
+
+
+fun foo(r1, r2, f, g) =
+  freeze(r1, () => freeze(r2, () => f(r2); g(r1)))
+
+foo
+//│ Type: ['r1, 'r2, 'E, 'R, 'T, 'R1] -> ('r1, 'r2, 'r2 ->{('E ∧ ¬'R) ∧ ¬'R1} ⊤, 'r1 ->{('E ∧ ¬'R) ∧ ¬'R1} 'T) ->{'E} 'T
+//│ Where:
+//│   'r1 <: Region['R]
+//│   'r2 <: Region['R1]
+
+:e
+region r in
+  foo(r, r, wield, wield)
+//│ ╔══[ERROR] Type error in reference with expected type 'f
+//│ ║  l.94: 	  foo(r, r, wield, wield)
+//│ ║        	            ^^^^^
+//│ ╟── because: cannot constrain  (Region['R]) ->{'R} (())  <:  'f
+//│ ╟── because: cannot constrain  (Region['R]) ->{'R} (())  <:  ('r2) ->{¬'R1 ∧ ¬'R2 ∧ 'E} (⊤)
+//│ ╟── because: cannot constrain  'R  <:  ¬'R1 ∧ ¬'R2 ∧ 'E
+//│ ╟── because: cannot constrain  'R  <:  ¬'R2
+//│ ╟── because: cannot constrain  r  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R2  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+//│ ╔══[ERROR] Type error in reference with expected type 'g
+//│ ║  l.94: 	  foo(r, r, wield, wield)
+//│ ║        	                   ^^^^^
+//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  'g
+//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  ('r1) ->{¬'R1 ∧ ¬'R2 ∧ 'E} ('T)
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R1 ∧ ¬'R2 ∧ 'E
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R2
+//│ ╟── because: cannot constrain  r  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R2  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+
+:e
+region r in
+  region s in
+    foo(r, s, wield, wield)
+//│ ╔══[ERROR] Type error in reference with expected type 'f
+//│ ║  l.119: 	    foo(r, s, wield, wield)
+//│ ║         	              ^^^^^
+//│ ╟── because: cannot constrain  (Region['R]) ->{'R} (())  <:  'f
+//│ ╟── because: cannot constrain  (Region['R]) ->{'R} (())  <:  ('r2) ->{¬'R1 ∧ ¬'R2 ∧ 'E} (⊤)
+//│ ╟── because: cannot constrain  'R  <:  ¬'R1 ∧ ¬'R2 ∧ 'E
+//│ ╟── because: cannot constrain  'R  <:  ¬'R1
+//│ ╟── because: cannot constrain  s ∧ ¬r  <:  ¬'R1
+//│ ╟── because: cannot constrain  'R1  <:  ¬s ∨ r
+//│ ╙── because: cannot constrain  s ∧ ¬r  <:  ¬s ∨ r
+//│ ╔══[ERROR] Type error in reference with expected type 'g
+//│ ║  l.119: 	    foo(r, s, wield, wield)
+//│ ║         	                     ^^^^^
+//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  'g
+//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  ('r1) ->{¬'R1 ∧ ¬'R2 ∧ 'E} ('T)
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R1 ∧ ¬'R2 ∧ 'E
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R2
+//│ ╟── because: cannot constrain  r  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R2  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+
+region r in
+  region s in
+    foo(r, s, x => x, y => y)
+//│ Type: Region[?]
+
+
+
+:fixme
+fun foo[outer, R <: outer](r1: Region[R]) =
+  region r2 in
+    freeze(r2, () =>
+      wield(r1)
+    )
+//│ /!!!\ Uncaught error: scala.MatchError: Outer(None) (of class hkmc2.syntax.Tree$Outer)
+
+:fixme
+fun foo: [outer, R <: outer] -> Region[R] -> ()
+//│ ╔══[ERROR] Illegal forall annotation.
+//│ ║  l.157: 	fun foo: [outer, R <: outer] -> Region[R] -> ()
+//│ ╙──       	         ^^^^^^^^^^^^^^^^^^^
+//│ ═══[ERROR] Invalid type
+
 
 
 
