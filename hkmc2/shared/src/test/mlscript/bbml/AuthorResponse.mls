@@ -75,7 +75,25 @@ fun foo(r1) =
     freeze(r2, () =>
       wield(r1)
     )
+foo
+//│ Type: [outer, 'R] -> (Region['R]) ->{outer} ()
+//│ Where:
+//│   'R <: outer
 
+fun foo': [outer] -> Region[outer] ->{outer} ()
+fun foo'(r) = foo(r)
+
+fun foo: [outer] -> Region[outer] ->{outer} ()
+fun foo(r1) =
+  region r2 in
+    freeze(r2, () =>
+      wield(r1)
+    )
+foo
+//│ Type: [outer] -> (Region[outer]) ->{outer} ()
+
+fun foo: [outer, R extends outer] -> Region[R] ->{outer} ()
+fun foo'(r) = foo(r)
 
 
 // ### Example 3
@@ -141,7 +159,7 @@ region r in
   region s in
     foo(r, s, (x, y) => (if rand() then x.ref 0 else y.ref 0))
 //│ ╔══[ERROR] Type error in function literal with expected type 'f
-//│ ║  l.142: 	    foo(r, s, (x, y) => (if rand() then x.ref 0 else y.ref 0))
+//│ ║  l.160: 	    foo(r, s, (x, y) => (if rand() then x.ref 0 else y.ref 0))
 //│ ║         	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ('x, 'y) ->{'reg ∨ 'reg1} (Ref[Int, in ⊥ out 'reg] ∨ Ref[Int, in ⊥ out 'reg1])  <:  'f
 //│ ╟── because: cannot constrain  ('x, 'y) ->{'reg ∨ 'reg1} (Ref[Int, in ⊥ out 'reg] ∨ Ref[Int, in ⊥ out 'reg1])  <:  ('r1, 'r2) ->{'eff} ('app)

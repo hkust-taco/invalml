@@ -79,6 +79,10 @@ fun foo3(r1) =
     )
 // ^ Fixed typos in the author response (it used the paper's syntax instead of the implementation's syntax)
 
+// In fact, this formally equivalent signature also works:
+fun foo3': [outer] -> Region[outer] ->{outer} ()
+fun foo3'(r1) = foo3(r1)
+
 
 // ### Example 3
 
