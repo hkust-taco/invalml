@@ -1,0 +1,57 @@
+:bbml
+
+:...
+//│ ————————————————————————————————————————————————————————————————————————————————
+
+// * This file includes the type checking implementation for the GUI example
+// * adapted from https://doi.org/10.5281/zenodo.7990289
+
+class Block
+class IO
+class Label
+class Button
+
+// * So far, our system does not support impure programs.
+// * We explicitly insert this handle function at **the top level** to allow primitive effects like IO and Block
+fun doPrimitiveEffects: [Res, E] -> (() ->{E | IO | Block} Res) ->{E} Res
+
+fun sleep: (Int) ->{Block} ()
+
+fun mkLabel: (Str) ->{IO} Label
+fun mkButton: (Str) ->{IO} Button
+
+fun setText: (Str, Label) ->{IO} ()
+
+fun addActionListener: [T, E extends ~Block] -> (() ->{E} (), Button) ->{E | T} ()
+
+
+doPrimitiveEffects of () =>
+  sleep(42)
+
+
+
+doPrimitiveEffects of () =>
+  mkLabel("Hello, World!")
+
+
+doPrimitiveEffects of () =>
+  let label = mkLabel("Hello, World!")
+  sleep(42)
+  setText("Goodbye, World!", label)
+
+
+doPrimitiveEffects of () =>
+  let label = mkLabel("label")
+  let button = mkButton("button")
+  addActionListener(() => setText("clicked!", label), button)
+
+
+// error!
+// doPrimitiveEffects of () =>
+//   let label = mkLabel("label")
+//   let button = mkButton("button")
+//   addActionListener(() => sleep(1), button)
+
+
+//│ ————————————————————————————————————————————————————————————————————————————————
+
