@@ -18,6 +18,7 @@ fun (;) seq(_, res) = res
 fun error: Nothing
 
 
+// * Arithmetical Expression
 class AExp with
   constructor
     Cst(v: Int)
@@ -27,6 +28,7 @@ class AExp with
     IfThenElse(cond: BExp, cons: AExp, alts: AExp)
 
 
+// * Boolean Expression
 class BExp with
   constructor
     True
@@ -37,6 +39,8 @@ class BExp with
     Eq(lhs: AExp, rhs: AExp)
     Neq(lhs: AExp, rhs: AExp)
 
+
+// * Evaliation functions
 
 fun evalBExp: BExp -> Bool
 
@@ -59,6 +63,7 @@ fun evalBExp(e) = if e is
   Neq(e1, e2) then evalAExp(e1) != evalAExp(e2)
 
 
+// * Examples
 
 evalAExp(Cst(42))
 evalAExp(Plus(Cst(42), Cst(21)))
@@ -73,6 +78,7 @@ evalBExp(Disj(True, False))
 evalBExp(Neq(Cst(1), Cst(2)))
 
 
+// * Instruction
 class Inst with
   constructor
     Push(v: Int)
@@ -85,6 +91,8 @@ class Inst with
     Cmp
     Branch(cons: List[out Inst], alts: List[out Inst])
 
+
+// * Compilation functions
 
 fun compileBExp: BExp -> List[out Inst]
 
@@ -131,6 +139,8 @@ fun compileBExp(e) = if e is
         concat(concat(is2, is1), Cons(Neg, Cons(Cmp, Nil)))
 
 
+// * Examples
+
 compileAExp(Cst(42))
 compileAExp(Plus(Cst(42), Cst(21)))
 compileAExp(Minus(Cst(42), Cst(21)))
@@ -143,6 +153,9 @@ compileBExp(Disj(True, False))
 compileBExp(Neq(Cst(1), Cst(2)))
 
 
+// So far, we have not supported nested patterns.
+// This helper function is for the following pattern matching:
+// `if lst is Cons(x, Cons(y, ys)) then f(x, y, ys) else g()`
 fun matchTwo(lst, f, g) = if lst is
   Nil then g()
   Cons(x, xs) then
@@ -150,6 +163,8 @@ fun matchTwo(lst, f, g) = if lst is
       Nil then g()
       Cons(y, ys) then f(x, y, ys)
 
+
+// * Instruction evaluation
 
 fun evalInst(insts, stack) = if insts is
   Nil then
@@ -179,6 +194,8 @@ fun evalInst(insts, stack) = if insts is
         if x != 0 then evalInst(is1, xs)
         else evalInst(is2, xs)
 
+
+// * Examples
 
 evalInst(compileAExp(Cst(42)), Nil)
 evalInst(compileAExp(Plus(Cst(42), Cst(21))), Nil)

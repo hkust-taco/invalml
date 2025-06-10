@@ -22,31 +22,34 @@ fun mkButton: (Str) ->{IO} Button
 
 fun setText: (Str, Label) ->{IO} ()
 
+// The callback function should not block the execution
+// so `E` has an upper bound `~Block`
 fun addActionListener: [T, E extends ~Block] -> (() ->{E} (), Button) ->{E | T} ()
 
+
+
+// examples
 
 doPrimitiveEffects of () =>
   sleep(42)
 
-
-
 doPrimitiveEffects of () =>
   mkLabel("Hello, World!")
-
 
 doPrimitiveEffects of () =>
   let label = mkLabel("Hello, World!")
   sleep(42)
   setText("Goodbye, World!", label)
 
-
+// ok! `setText` will not block the execution
 doPrimitiveEffects of () =>
   let label = mkLabel("label")
   let button = mkButton("button")
   addActionListener(() => setText("clicked!", label), button)
 
 
-// error!
+
+// error! `sleep` will block the execution and the compiler reject the following program
 // doPrimitiveEffects of () =>
 //   let label = mkLabel("label")
 //   let button = mkButton("button")

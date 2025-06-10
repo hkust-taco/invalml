@@ -3,6 +3,8 @@
 :...
 //│ ————————————————————————————————————————————————————————————————————————————————
 
+// * This files includes the stack-based memory management extension of InvalML.
+
 class Stack[R]
 class StackRef[T, R]
 
@@ -32,7 +34,7 @@ region r in
   push(s1, s2 => let r3 = alloc(s2, 0) in read(r3))
 
 
-// error!
+// Error! After pusing `s1`, one can not access `s1`.
 // region r in
 //   let s1 = allocStack(r)
 //   let r1 = alloc(s1, 42)

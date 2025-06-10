@@ -38,6 +38,7 @@ fun error() = error()
 // *** simple constraint solver
 
 
+// Unif contains a type variable's id, lower bounds, and upper bounds.
 class Type[R] with
   constructor
     IntType
@@ -99,8 +100,11 @@ fun solve(lst) = if lst is
 //           iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
 //           solve(cs)
 
+
+// The error' version of `solve` function can only be used for constraints without type variables
 // solve(Cons(Pair(IntType, IntType), Nil))
 
+// Calling the `solve` function to solve constraints involving type variables will lead to type errors
 // region r in
 //   let v1 = Unif(1, empty(r), empty(r))
 //   let v2 = Unif(2, empty(r), empty(r))
@@ -111,11 +115,8 @@ fun solve(lst) = if lst is
 region r in
   solve(Cons(Pair(IntType, IntType), Nil))
 
-
-
 region r in
   solve(Cons(Pair(IntType, Fun(IntType, IntType)), Nil))
-
 
 region r in
   let v1 = Unif(1, empty(r), empty(r))

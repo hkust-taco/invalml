@@ -31,11 +31,15 @@ fun
   concat: [T, R1, R2, R3] -> (Region[R3], Array[in T, out R1], Array[out T, out R2]) ->{R1 | R2 | R3} Array[T, out R3]
 
 
-// matching on js array is not supported yet.
+// Matching on js array is not supported yet.
+// This helper function is equivalent to `if xs is Cons(x, xs) then fh(x, xs) else fn(xs)`
 fun matchOne(xs, fn, fh) =
   if len(xs) is 0 then fn(xs)
   else fh(at(xs, 0), slice(xs, 1))
 
+// Matching on js array is not supported yet.
+// This helper function is equivalent to
+// `if xs is Cons(x, Cons(y, ys)) then f2(x, y, ys) else if xs is Cons(x, xs) then f1(x, xs) else fn(xs)`
 // fun matchTwo: [T, R, E1, E2, E3, S] -> (Array[out T, out R], Array[out T, out R] ->{E1} S, T ->{E2} S, (T, T, Array[out T, out R]) ->{E3} S) ->{E1 | E2 | E3 | R} S
 fun matchTwo(xs, fn, f1, f2) =
   if len(xs) is 0 then fn(xs)
@@ -51,13 +55,15 @@ fun forkJoin: [T, S, P, E1, E2 extends ~E1, E3] ->
 
 // *** pmsort implementation
 
-
+// Split the given array into two sub-arrays.
+// Region r1 and r2 indicate where the two sub-arrays should be stored.
 fun split(xs, r1, r2) =
   fun rs(xs, ys, zs) =
     matchTwo of xs, _ => Pr(ys, zs), x => push(ys, x); Pr(ys, zs), (x1, x2, r) => push(ys, x1); push(zs, x2); rs(r, ys, zs)
   rs(xs, mkArray(r1), mkArray(r2))
 
 
+// Merge arr1 and arr2. The result is stored in region r.
 // fun merge: [T, R1, R2, R] -> (Array[out T, out R1], Array[out T, out R2], Region[R]) ->{R1 | R2 | R} Array[T, out R]
 fun merge(arr1, arr2, r) =
   fun recm(xs, ys, acc) =
@@ -68,13 +74,14 @@ fun merge(arr1, arr2, r) =
   recm(arr1, arr2, mkArray(r))
 
 
+// Merge sort in single thread.
 fun smsort(xs, r) =
   matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
     let p = split(xs, r, r) in
       if p is Pr(fst, snd) then merge(smsort(fst, r), smsort(snd, r), r)
 
 
-// wrong version!
+// Wrong version! Sub-arrays cannot be stored in the same region!
 // fun pmsort: [R1, R2] -> (Array[out Int, out R1], Region[R2]) ->{R1 | R2} Array[Int, out R2]
 // fun pmsort(xs, r) =
 //   matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
@@ -83,6 +90,7 @@ fun smsort(xs, r) =
 //         forkJoin(_ => pmsort(fst, r), pmsort(snd, r), (r1, r2) => merge(r1, r2, r))
 
 
+// Merge sort in parallel.
 fun pmsort: [R1, R2] -> (Array[out Int, out R1], Region[R2]) ->{R1 | R2} Array[Int, out R2]
 fun pmsort(xs, r) =
   matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>

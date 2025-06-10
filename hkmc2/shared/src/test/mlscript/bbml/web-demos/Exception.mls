@@ -3,6 +3,8 @@
 :...
 //│ ————————————————————————————————————————————————————————————————————————————————
 
+// * This files includes the exception handling extension of InvalML.
+
 class Exc[T]
 
 fun (;) seq(_, res) = res
@@ -15,7 +17,7 @@ fun noExc: [E extends ~Exc[in Nothing out Any], Res] -> (() ->{E} Res) ->{E} Res
 
 hdle(e => raise(e, "oops!"), msg => print(msg))
 
-// error!
+// Error! The payload type is incorrect.
 // hdle(e => raise(e, 42), msg => print(msg))
 
 
@@ -31,7 +33,7 @@ hdle(e1 => hdle(e2 => raise(e1, "oops!"), msg => raise(e1, msg)), msg => print(m
 noExc(() => 42)
 noExc(() => hdle(e => raise(e, "oops!"), msg => print(msg)))
 
-// error!
+// Error! No exception is allowed.
 // hdle(e => noExc(() => raise(e, "oops!")), msg => print(msg))
 
 //│ ————————————————————————————————————————————————————————————————————————————————
