@@ -245,8 +245,10 @@ enum Tree extends AutoLocated:
    */
   def asParam(inUsing: Bool): Opt[(Opt[Bool], Ident, Opt[Tree])] = this match
     case und: Under => S(N, new Ident("_").withLocOf(und), N)
-    // * In `using` clauses, identifiers are understood as type names for unnamed contextual parameters:
-    case id: Ident if inUsing => S(N, Ident(""), S(id))
+    // * In `using` clauses, identifiers and type applications are
+    // * understood as type names for unnamed contextual parameters:
+    case ty: Ident if inUsing => S(N, Ident(""), S(ty))
+    case ty @ TyApp(_, _) if inUsing => S(N, Ident(""), S(ty))
     case id: Ident => S(N, id, N)
     case Spread(Keyword.`..`, _, S(id: Ident)) => S(S(false), id, N)
     case Spread(Keyword.`...`, _, S(id: Ident)) => S(S(true), id, N)
@@ -254,11 +256,7 @@ enum Tree extends AutoLocated:
     case Spread(Keyword.`...`, _, S(und: Under)) => S(S(true), new Ident("_").withLocOf(und), N)
     case InfixApp(lhs: Ident, Keyword.`:`, rhs) => S(N, lhs, S(rhs))
     case TermDef(ImmutVal, inner, _) => inner.asParam(inUsing)
-    case TermDef(Ins, inner, N) => inner match
-      // Param of form (using name: Type). Parse it as usual.
-      case inner: InfixApp => inner.asParam(inUsing)
-      // Param of form (using Type). Synthesize an identifier for it.
-      case _ => S(N, Ident(""), S(inner))
+    case TermDef(Ins, inner, N) => inner.asParam(inUsing)
   
   def isModuleModifier: Bool = this match
     case td @ Tree.TypeDef(Mod, _, rhs) => rhs.isEmpty && td.extension.isEmpty && td.withPart.isEmpty
@@ -290,7 +288,7 @@ object PlainTup:
 object Apps:
   def apply(t: Tree, as: Ls[Tup]): Tree = as match
     case Nil => t
-    case arg :: args => App(Apps(t, args), arg)
+    case arg :: args => Apps(App(t, arg), args)
   def unapply(t: Tree): S[(Tree, Ls[Tup])] = t match
     case App(Apps(base, args), arg: Tup) => S(base, args :+ arg)
     case t => S(t, Nil)
