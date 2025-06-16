@@ -335,7 +335,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
   // It is a temporary solution to ADTs.
   private def typeADTMatch
     (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
-    : (GeneralType, Type, Ls[Symbol]) = split match
+    : (GeneralType, Type, Ls[Symbol], Bool) = split match
     case Split.Cons(Branch(scrutinee, pattern, cons), alts) =>
       val (scrutineeTy, scrutineeEff) = typeCheck(scrutinee)
       val map = HashMap[Uid[Symbol], TypeArg]()
@@ -371,7 +371,7 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
           val params = paramsOpt.getOrElse(Nil)
           if params.length != paramList.length then
             error(msg"${sym.toString} is not a valid constructor." -> split.toLoc :: Nil)
-            (Bot, Bot, sym :: Nil)
+            (Bot, Bot, sym :: Nil, false)
           else
             val nestCtx = if isGeneric then ctx.nextLevel else ctx.nest
             tps.foreach {
@@ -385,24 +385,24 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
               case (p, Param(_, _, S(ty), _)) =>
                 nestCtx += p.scrutinee -> typeAndSubstType(ty, true)(using map.toMap)
             val (consTy, consEff) = typeAllSplits(cons, sign)(using nestCtx)
-            val (altsTy, altsEff, altCases) = typeADTMatch(alts, sign)
+            val (altsTy, altsEff, altCases, fallback) = typeADTMatch(alts, sign)
             val allEff = scrutineeEff | (consEff | altsEff)
-            (sign.getOrElse(tryMkMono(consTy, cons) | tryMkMono(altsTy, alts)), allEff, sym :: altCases)
+            (sign.getOrElse(tryMkMono(consTy, cons) | tryMkMono(altsTy, alts)), allEff, sym :: altCases, fallback)
     case Split.Let(name, term, tail) =>
       val nestCtx = ctx.nest
       given BbCtx = nestCtx
       val (termTy, termEff) = typeCheck(term)
       nestCtx += name -> termTy
-      val (tailTy, tailEff, cases) = typeADTMatch(tail, sign)(using nestCtx)
-      (tailTy, termEff | tailEff, cases)
+      val (tailTy, tailEff, cases, fallback) = typeADTMatch(tail, sign)(using nestCtx)
+      (tailTy, termEff | tailEff, cases, fallback)
     case Split.Else(alts) => sign match
       case S(sign) =>
         val (ty, res) = ascribe(alts, sign)
-        (ty, res, Nil)
+        (ty, res, Nil, true)
       case _ =>
         val (ty, res) = typeCheck(alts)
-        (ty, res, Nil)
-    case Split.End => (Bot, Bot, Nil)
+        (ty, res, Nil, true)
+    case Split.End => (Bot, Bot, Nil, false)
 
   private def typeSplit
       (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
@@ -458,19 +458,20 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
     (split: Split, sign: Opt[GeneralType])(using ctx: BbCtx)(using CCtx, Scope)
     : (GeneralType, Type) =
       if isADTMatch(split) then
-        val (res, eff, cases) = typeADTMatch(split, sign)
-        cases match // A primitive exhaustive check
-          case c :: rest => // previous check already guarantees that all cases belong to the same ADT.
-            adtParent.get(c.uid).flatMap(p => adtCtors.get(p.uid)) match
-              case S(ctors) =>
-                val dist = cases.map(_.uid).distinct
-                if dist.length < cases.length then
-                  error(msg"Duplicate match branches." -> split.toLoc :: Nil)
-                if dist.length != ctors.length then
-                  error(msg"Expect ${ctors.length.toString()} cases, but ${dist.length.toString()} got." -> split.toLoc :: Nil)
-              case N =>
-                error(msg"Unknown ADT constructor ${c.nme}" -> split.toLoc :: Nil)
-          case Nil => ??? // impossible
+        val (res, eff, cases, fallback) = typeADTMatch(split, sign)
+        if !fallback then
+          cases match // A primitive exhaustive check
+            case c :: rest => // previous check already guarantees that all cases belong to the same ADT.
+              adtParent.get(c.uid).flatMap(p => adtCtors.get(p.uid)) match
+                case S(ctors) =>
+                  val dist = cases.map(_.uid).distinct
+                  if dist.length < cases.length then
+                    error(msg"Duplicate match branches." -> split.toLoc :: Nil)
+                  if dist.length != ctors.length then
+                    error(msg"Expect ${ctors.length.toString()} cases, but ${dist.length.toString()} got." -> split.toLoc :: Nil)
+                case N =>
+                  error(msg"Unknown ADT constructor ${c.nme}" -> split.toLoc :: Nil)
+            case Nil => ??? // impossible
         (res, eff)
       else typeSplit(split, sign)
 

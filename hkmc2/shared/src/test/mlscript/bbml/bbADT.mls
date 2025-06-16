@@ -282,3 +282,9 @@ fun foo(x) =
 //│ ║  l.280: 	    42 then 42
 //│ ╙──       	    ^^^^^^^^^^
 //│ ═══[ERROR] Variable not found: param0
+
+
+fun foo(x) =
+  if x is
+    Some(x) then x
+    else 0

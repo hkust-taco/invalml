@@ -364,10 +364,7 @@ test
 
 
 
-// ––––––––– TO FIX LATER –––––––––
 
-
-:fixme
 fun solve = case
   Nil then ()
   Cons(c, cs) then if c is
@@ -384,22 +381,8 @@ fun solve = case
         Unif(id, lbs, ubs) then
           // Handle unification case here
           error() // Placeholder for unification logic
-//│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.377: 	          IntType then ()
-//│ ║         	          ^^^^^^^^^^^^^^^
-//│ ║  l.378: 	          else error()
-//│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
-//│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.380: 	          Fun(l2, r2) then
-//│ ║         	          ^^^^^^^^^^^^^^^^
-//│ ║  l.381: 	            solve(Cons(Pair(l2, l1), cs))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.382: 	            solve(Cons(Pair(r1, r2), cs))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.383: 	          else error()
-//│ ╙──       	^^^^^^^^^^^^^^^^^^^^^^
 
-:fixme
+
 fun solve = case
   Nil then ()
   Cons(c, cs) and c is
@@ -415,22 +398,6 @@ fun solve = case
       Unif(id, lbs, ubs) then
         // Handle unification case here
         error() // Placeholder for unification logic
-//│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.408: 	        IntType then ()
-//│ ║         	        ^^^^^^^^^^^^^^^
-//│ ║  l.409: 	        else error()
-//│ ╙──       	^^^^^^^^^^^^^^^^^^^^
-//│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.410: 	      Fun(l1, r1) and rhs is
-//│ ║         	          ^^^^^^^^^^^^^^^^^^
-//│ ║  l.411: 	        Fun(l2, r2) then
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.412: 	          solve(Cons(Pair(l2, l1), cs))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.413: 	          solve(Cons(Pair(r1, r2), cs))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.414: 	        else error()
-//│ ╙──       	^^^^^^^^^^^^^^^^^^^^
 
 solve
 //│ Type: (Stack[out PairOf[out Type[?], out Type[?]]] ∧ Stack[?]) -> ()
