@@ -69,6 +69,16 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
   
   def returnedTerm(t: st)(using Subst): Block = term(t)(Ret)
   
+  def parentConstructor(cls: Term, argss: Ls[Ls[Term]])(using Subst) = 
+    if argss.length > 1 then 
+      raise:
+        ErrorReport(
+          msg"Extending a class with multiple parameter lists is not supported" -> Loc(cls :: argss.flatten) :: Nil,
+          source = Diagnostic.Source.Compilation
+        )
+    plainArgs(argss.headOr(Nil)): args =>
+      Return(Call(Value.Ref(State.builtinOpsMap("super")), args)(true, true), implct = true)
+  
   // * Used to work around Scala's @tailrec annotation for those few calls that are not in tail position.
   final def term_nonTail(t: st, inStmtPos: Bool = false)(k: Result => Block)(using Subst): Block =
     term(t: st, inStmtPos: Bool)(k)
@@ -166,7 +176,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
         val (mtds, publicFlds, privateFlds, ctor) = gatherMembers(cls.body)
         cls.ext match
         case N =>
-          Define(ClsLikeDefn(cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, Nil, N,
+          Define(ClsLikeDefn(cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, cls.auxParams, N,
                 mtds,
                 privateFlds,
                 publicFlds,
@@ -177,12 +187,10 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
         case S(ext) =>
           assert(k isnt syntax.Mod) // modules can't extend things and can't have super calls
           subTerm(ext.cls): clsp =>
-            val pctor = // TODO dedup with New case
-              plainArgs(ext.args): args =>
-                Return(Call(Value.Ref(State.builtinOpsMap("super")), args)(true, true), implct = true)
+            val pctor = parentConstructor(ext.cls, ext.argss)
             Define(
               ClsLikeDefn(
-                cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, Nil, S(clsp),
+                cls.owner, cls.sym, cls.bsym, cls.kind, cls.paramsOpt, cls.auxParams, S(clsp),
                 mtds, privateFlds, publicFlds, pctor, ctor
               ),
               blockImpl(stats, res)(k)
@@ -472,7 +480,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
                   val args = argsOpt.map(_.map(_.scrutinee)).getOrElse(Nil)
                   // Normalization should reject cases where the user provides
                   // more sub-patterns than there are actual class parameters.
-                  assert(argsOpt.isEmpty || args.length <= clsParams.length)
+                  assert(argsOpt.isEmpty || args.length <= clsParams.length, (argsOpt, clsParams))
                   def mkArgs(args: Ls[TermSymbol -> BlockLocalSymbol])(using Subst): Case -> Block = args match
                     case Nil =>
                       Case.Cls(ctorSym, st) -> go(tail, topLevel = false)
@@ -551,18 +559,27 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
           k(DynSelect(p, f, ai))
       
       
-    case New(cls, as, N) =>
+    case New(cls, ass, N) =>
       subTerm(cls): sr =>
-        subTerms(as): asr =>
+        val head = ass.headOr(Nil)
+        val tail = ass.tailOr(Nil)
+        tail match
+        case Nil => subTerms(head): asr =>
           k(Instantiate(sr, asr))
+        case tail => subTerms(head): asr =>
+          val z = tail.foldLeft[Path => Block](k): (acc, args) => 
+            inner =>
+              plainArgs(args): args =>
+                val ts = TempSymbol(N)
+                Assign(ts, Call(inner, args)(true, true), acc(Value.Ref(ts)))
+          val ts = TempSymbol(N)
+          Assign(ts, Instantiate(sr, asr), z(Value.Ref(ts)))
       
-    case New(cls, as, S((isym, rft))) =>
+    case New(cls, ass, S((isym, rft))) =>
       subTerm(cls): clsp =>
         val sym = new BlockMemberSymbol(isym.name, Nil)
         val (mtds, publicFlds, privateFlds, ctor) = gatherMembers(rft)
-        val pctor =
-          plainArgs(as): args =>
-            Return(Call(Value.Ref(State.builtinOpsMap("super")), args)(true, true), implct = true)
+        val pctor = parentConstructor(cls, ass)
         val clsDef = ClsLikeDefn(N, isym, sym, syntax.Cls, N, Nil, S(clsp),
           mtds, privateFlds, publicFlds, pctor, ctor)
         Define(clsDef, term_nonTail(New(sym.ref().noIArgs, Nil, N))(k))
@@ -610,6 +627,12 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
         msg"This annotation has no effect." -> ann.toLoc ::
         msg"Such annotations are not supported on ${receiver.describe} terms." -> receiver.toLoc :: Nil))
       term(receiver)(k)
+    case use: Summon =>
+      warnStmt
+      use.sym match
+        case S(_: ErrorSymbol) => End("missing instance")
+        case S(sym) => k(subst(Value.Ref(sym)))
+        case N => lastWords(s"unresolved summon: ${use}")
     case Error => End("error")
     
     // case _ =>

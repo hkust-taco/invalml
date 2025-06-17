@@ -43,6 +43,7 @@ sealed trait ResolvableImpl:
     case t: Term.TyApp => t.copy()(t.sym).noIArgs
     case t: Term.Sel => t.copy()(t.sym).noIArgs
     case t: Term.SynthSel => t.copy()(t.sym).noIArgs
+    case t: Term.Summon => t.copy()(t.tree, t.sym).noIArgs
   
   def instantiate(using State): Term = iargsLs match
     case N => lastWords(s"missing implicit arguments for term ${t}")
@@ -98,7 +99,7 @@ enum Term extends Statement:
   case Rcd(stats: Ls[Statement])
   case Quoted(body: Term)
   case Unquoted(body: Term)
-  case New(cls: Term, args: Ls[Term], rft: Opt[ClassSymbol -> ObjBody])
+  case New(cls: Term, argss: Ls[Ls[Term]], rft: Opt[ClassSymbol -> ObjBody])
   case SelProj(prefix: Term, cls: Term, proj: Tree.Ident)(val sym: Opt[FieldSymbol])
   case Asc(term: Term, ty: Term)
   case CompType(lhs: Term, rhs: Term, pol: Bool)
@@ -114,6 +115,7 @@ enum Term extends Statement:
   case Annotated(annot: Annot, target: Term)
   case Handle(lhs: LocalSymbol, rhs: Term, args: List[Term],
     derivedClsSym: ClassSymbol, defs: Ls[HandlerTermDefinition], body: Term)
+  case Summon(ty: Term)(val tree: Tree, var sym: Opt[Symbol]) extends Term with ResolvableImpl
   
   /**
    * The prelinminary symbol for the term that is resolved during
@@ -138,6 +140,7 @@ enum Term extends Statement:
     case sel: SelProj => sel.sym
     case app: App => app.sym
     case tyApp: TyApp => tyApp.sym
+    case summon: Summon => summon.sym
     case _ => N
   
   def sel(id: Tree.Ident, sym: Opt[FieldSymbol]): Sel =
@@ -221,7 +224,7 @@ sealed trait Statement extends AutoLocated with ProductWithExtraInfo:
     case Rcd(stats) => stats.flatMap(_.subTerms)
     case Quoted(term) => term :: Nil
     case Unquoted(term) => term :: Nil
-    case New(cls, args, rft) => cls :: args ::: rft.toList.flatMap(_._2.blk.subTerms)
+    case New(cls, argss, rft) => cls :: argss.flatten ::: rft.toList.flatMap(_._2.blk.subTerms)
     case SelProj(pre, cls, _) => pre :: cls :: Nil
     case Asc(term, ty) => term :: ty :: Nil
     case Ret(res) => res :: Nil
@@ -251,6 +254,7 @@ sealed trait Statement extends AutoLocated with ProductWithExtraInfo:
     case Handle(lhs, rhs, args, derivedClsSym, defs, bod) => rhs :: args ::: defs.flatMap(_.td.subTerms) ::: bod :: Nil
     case Neg(e) => e :: Nil
     case Annotated(ann, target) => ann.subTerms ::: target :: Nil
+    case Summon(ty) => ty :: Nil
   
   // private def treeOrSubterms(t: Tree, t: Term): Ls[Located] = t match
   private def treeOrSubterms(t: Tree): Ls[Located] = t match
@@ -347,6 +351,7 @@ sealed trait Statement extends AutoLocated with ProductWithExtraInfo:
     case TypeDef(sym, tparams, rhs, _, _) =>
       s"type ${sym}${tparams.mkStringOr(", ", "[", "]")} = ${rhs.fold("")(x => x.showDbg)}"
     case Missing => "missing"
+    case Summon(ty) => s"use[${ty.showDbg}]"
 
 final case class LetDecl(sym: LocalSymbol, annotations: Ls[Annot]) extends Statement
 
@@ -467,6 +472,7 @@ sealed abstract class ClassLikeDef extends TypeLikeDef:
   val bsym: BlockMemberSymbol
   val tparams: Ls[TyParam]
   val paramsOpt: Opt[ParamList]
+  val auxParams: Ls[ParamList]
   val ext: Opt[New]
   val body: ObjBody
   val annotations: Ls[Annot]
@@ -481,6 +487,7 @@ case class ModuleDef(
   bsym: BlockMemberSymbol,
   tparams: Ls[TyParam], 
   paramsOpt: Opt[ParamList], 
+  auxParams: Ls[ParamList], 
   ext: Opt[New],
   kind: ClsLikeKind,
   body: ObjBody,
@@ -493,6 +500,7 @@ case class PatternDef(
     bsym: BlockMemberSymbol,
     tparams: Ls[TyParam],
     paramsOpt: Opt[ParamList],
+    auxParams: Ls[ParamList],
     body: ObjBody,
     annotations: Ls[Annot],
 ) extends ClassLikeDef:
@@ -506,6 +514,7 @@ sealed abstract class ClassDef extends ClassLikeDef:
   val sym: ClassSymbol
   val tparams: Ls[TyParam]
   val paramsOpt: Opt[ParamList]
+  val auxParams: Ls[ParamList]
   val body: ObjBody
   val companion: Opt[CompanionValue]
   val annotations: Ls[Annot]
@@ -522,16 +531,16 @@ object ClassDef:
       sym: InnerSymbol,
       bsym: BlockMemberSymbol,
       tparams: Ls[TyParam],
-      paramsOpt: Opt[ParamList],
+      params: Ls[ParamList],
       ext: Opt[New],
       body: ObjBody,
       annotations: Ls[Annot],
   ): ClassDef =
-    paramsOpt match
-      case S(params) => Parameterized(owner, kind, sym.asInstanceOf// TODO: improve
+    params match
+      case ps :: pss => Parameterized(owner, kind, sym.asInstanceOf// TODO: improve
         , bsym
-        , tparams, params, ext, body, N, annotations)
-      case N => Plain(owner, kind, sym.asInstanceOf// TODO: improve
+        , tparams, ps, pss, ext, body, N, annotations)
+      case Nil => Plain(owner, kind, sym.asInstanceOf// TODO: improve
         , bsym
         , tparams, ext, body, N, annotations)
   
@@ -545,6 +554,7 @@ object ClassDef:
       bsym: BlockMemberSymbol,
       tparams: Ls[TyParam],
       params: ParamList,
+      auxParams: Ls[ParamList],
       ext: Opt[New],
       body: ObjBody,
       companion: Opt[ModuleDef],
@@ -562,6 +572,7 @@ object ClassDef:
       annotations: Ls[Annot]
   ) extends ClassDef:
     val paramsOpt: Opt[ParamList] = N
+    val auxParams: List[ParamList] = Nil
   
 end ClassDef
 
@@ -626,6 +637,7 @@ final case class TyParam(flags: FldFlags, vce: Opt[Bool], sym: VarSymbol) extend
 
 final case class Param(flags: FldFlags, sym: VarSymbol, sign: Opt[Term], modulefulness: Modulefulness) 
 extends Declaration with AutoLocated:
+  var fldSym: Opt[FieldSymbol] = N
   def subTerms: Ls[Term] = sign.toList
   override protected def children: List[Located] = sym :: sign.toList
   def showDbg: Str = flags.toString + sym + sign.fold("")(": " + _.showDbg)

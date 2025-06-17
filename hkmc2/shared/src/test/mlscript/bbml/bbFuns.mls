@@ -73,4 +73,5 @@ fun foo[outer, R <: outer](r1: Region[R]) =
 //│ ╔══[ERROR] Name not found: R
 //│ ║  l.67: 	fun foo[outer, R <: outer](r1: Region[R]) =
 //│ ╙──      	                                      ^
+//│ ═══[ERROR] Expected a type symbol, got <error>
 //│ ═══[ERROR] Invalid type
