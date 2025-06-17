@@ -566,8 +566,12 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
       case _ => false
     }
     val targs = clsDef.tparams.map {
-      case TyParam(_, _, targ) =>
-        val ty = if isGeneric then freshVar(targ) else freshWildcard(targ)
+      case TyParam(_, vce, targ) =>
+        val ty = vce match
+          case S(v) =>
+            val tv = freshVar(targ)
+            if v then Wildcard.out(tv) else Wildcard.in(tv)
+          case _ => if isGeneric then freshVar(targ) else freshWildcard(targ)
         map += targ.uid -> ty
         ty
     }
@@ -586,6 +590,8 @@ class BBTyper(using elState: Elaborator.State, tl: TL):
         else
           ctx += clsDef.bsym -> PolyType(targs.flatMap {
             case Wildcard(in: InfVar, out: InfVar) => in :: out :: Nil
+            case Wildcard(in: InfVar, _) => in :: Nil
+            case Wildcard(_, out: InfVar) => out :: Nil
             case v: InfVar => v :: Nil
           }, N, PolyFunType(clsDef.params.params.map {
             case Param(_, _, S(ty), _) => typeAndSubstType(ty, true)(using map.toMap)

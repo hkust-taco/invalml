@@ -43,9 +43,11 @@ trait BlockImpl(using Elaborator.State):
             case _ => Error()
           case _ => headPs match
             case Nil => headId
-            case ps => App(headId, TyTup(ps.map(
-              t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
-            )))
+            case ps =>
+              App(headId, TyTup(ps.map {
+                case m @ Modified(syntax.Keyword.`in` | syntax.Keyword.`out`, _, _) => m
+                case t => Tup(Tree.Modified(syntax.Keyword.`in`, N, t) :: Tree.Modified(syntax.Keyword.`out`, N, t) :: Nil)
+              }))
         // Insert type parameters for constructors.
         // e.g. `class Foo[T] with constructor Bar(x: T)` will be desugared to
         // `class Bar[T](x: T) extends Foo[T]`

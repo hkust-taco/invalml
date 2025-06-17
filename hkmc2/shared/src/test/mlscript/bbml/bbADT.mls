@@ -288,3 +288,32 @@ fun foo(x) =
   if x is
     Some(x) then x
     else 0
+
+
+class List[out T] with
+  constructor
+    Nil
+    Cons(x: T, xs: List[T])
+
+
+Cons(42, Nil)
+//│ Type: List[out Int]
+
+
+fun foo: [T] -> T -> List[T]
+foo
+//│ Type: ['T] -> ('T) ->{⊥} List[out 'T]
+
+
+class Bar[in T] with
+  constructor
+    B(f: T -> Int)
+
+
+B(x => x + 1)
+//│ Type: Bar[in Int]
+
+
+fun bar: [T] -> (T, Bar[T]) -> Int
+bar
+//│ Type: ['T] -> ('T, Bar[in 'T]) ->{⊥} Int
