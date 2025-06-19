@@ -317,3 +317,37 @@ B(x => x + 1)
 fun bar: [T] -> (T, Bar[T]) -> Int
 bar
 //│ Type: ['T] -> ('T, Bar[in 'T]) ->{⊥} Int
+
+
+class Option[out T] with
+  constructor
+    None
+    Some(x: T)
+
+
+fun headOpt(xs) = if xs is
+  Nil then None
+  Cons(x, xs) then Some(x)
+headOpt
+//│ Type: ['Cons] -> (List[out 'Cons] ∧ List[?]) -> (Option[⊥] ∨ Option[out 'Cons])
+
+
+headOpt(Nil)
+//│ Type: Option[⊥]
+
+headOpt(Cons(42, Nil))
+//│ Type: Option[⊥] ∨ Option[out Int]
+
+
+fun getOrElse(v, d) = if v is
+   Some(x) then x
+   else d
+getOrElse
+//│ Type: ['d, 'Some] -> (Option[out 'Some], 'd) -> ('Some ∨ 'd)
+
+
+getOrElse(headOpt(Nil), "foo")
+//│ Type: Str
+
+getOrElse(headOpt(Cons(42, Nil)), 1)
+//│ Type: Int
