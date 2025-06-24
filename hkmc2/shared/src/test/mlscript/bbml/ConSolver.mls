@@ -16,6 +16,11 @@ class Stack[A] with
     Nil
     Cons(head: A, tail: Stack[out A])
 
+class Option[A] with
+  constructor
+    None
+    Some(value: A)
+
 class ArrayList[A, R]
 class Iter[T, R]
 
@@ -27,11 +32,14 @@ fun
   clear:   [A, R] -> (ArrayList[A, out R]) ->{R} ()
   push:    [A, R] -> (ArrayList[A, out R], A) ->{R} ()
   foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()
-  iter: [Res, R, E extends ~R, T] ->
-    (ArrayList[T, out R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
-  fold: [Res, R, E extends ~R, T] ->
-    (ArrayList[T, out R], Res, [S] -> (Iter[T, S], Res) ->{S | E} Res) ->{E | R} Res
   read: [T, S] -> Iter[T, S] ->{S} T
+  iter: [outer, Res, R, E extends ~R, T] ->
+    (ArrayList[T, out R], [S extends ~outer] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
+  next: [T, S] -> Iter[T, S] ->{S} Option[T]
+  whileDo: [R] -> (() ->{R} Bool) ->{R} ()
+
+fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+
 
 push
 //│ Type: ['A, 'R] -> (ArrayList['A, out 'R], 'A) ->{'R} ()
@@ -63,16 +71,16 @@ pp(ty)
 fun matchP = case
   Pair(IntType, IntType) then ()
 //│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
-//│ ║  l.64: 	  Pair(IntType, IntType) then ()
+//│ ║  l.72: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
-//│ ║  l.64: 	  Pair(IntType, IntType) then ()
+//│ ║  l.72: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.64: 	  Pair(IntType, IntType) then ()
+//│ ║  l.72: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	                ^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.64: 	  Pair(IntType, IntType) then ()
+//│ ║  l.72: 	  Pair(IntType, IntType) then ()
 //│ ╙──      	       ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -122,10 +130,55 @@ solve
 //│   'Unif <: 'eff1
 
 
+fun test: [R] -> (ArrayList[Int, R]) ->{R} Int
+fun test(xs) =
+  region r in
+    iter of xs, it =>
+      1
+
+fun test: [outer, R extends outer] -> (Region[R]) ->{R} Int
+fun test(xs) =
+  region r in
+    let ncs = r.ref 0
+    freeze of xs, () =>
+      ncs := 1
+
+fun test: [outer, R extends outer] -> (ArrayList[Int, R]) ->{R} Int
+fun test(xs) =
+  region r in
+    let ncs = r.ref 0
+    iter of xs, it =>
+      ncs := 1
+
+// * Note the missing `outer` bound
+// TODO: assume that bound implicitly?
+:e
+fun test: [R] -> (ArrayList[Int, R]) ->{R} Int
+fun test(xs) =
+  region r in
+    let ncs = r.ref 0
+    iter of xs, it =>
+      ncs := 1
+//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
+//│ ║  l.160: 	    iter of xs, it =>
+//│ ║         	                ^^^^^
+//│ ║  l.161: 	      ncs := 1
+//│ ║         	^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  'reg  <:  S ∨ 'E
+//│ ╟── because: cannot constrain  'reg  <:  'E ∨ S
+//│ ╟── because: cannot constrain  'reg1  <:  'E ∨ S
+//│ ╟── because: cannot constrain  ¬'S1 ∧ 'reg1  <:  'E
+//│ ╟── because: cannot constrain  ¬'S1 ∧ 'reg1  <:  ¬'R
+//│ ╟── because: cannot constrain  'R ∧ 'reg1  <:  'S1
+//│ ╟── because: cannot constrain  'R ∧ 'reg1  <:  ⊥
+//│ ╟── because: cannot constrain  'R  <:  ¬'reg1
+//│ ╟── because: cannot constrain  R1  <:  ¬'reg1
+//│ ╟── because: cannot constrain  'reg1  <:  ¬R1
+//│ ╙── because: cannot constrain  r ∧ ¬outer  <:  ¬R1
 
 
-
-fun solve: [R] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
+// fun solve: [R] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
+fun solve: [outer, R extends outer] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
 fun solve = case
   Nil then ()
   Cons(c, cs) then if c is
@@ -135,21 +188,32 @@ fun solve = case
           IntType then ()
           Fun(_, _) then error()
           Unif(id, lbs, ubs) then
-            push(lbs, lhs)
-            let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
-            solve(ncs)
+            // push(lbs, lhs)
+            // let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
+            // solve(ncs)
+            error() // TODO
         Fun(l1, r1) then  if rhs is
           Fun(l2, r2) then
             solve(Cons(Pair(l2, l1), Cons(Pair(r1, r2), cs)))
           IntType then error()
           Unif(id, lbs, ubs) then
             push(lbs, lhs)
-            let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
-            solve(ncs)
+            region r in
+              let ncs = r.ref cs
+              iter of lbs, it =>
+                whileDo of () =>
+                  if next(it) is
+                    Some(x) then
+                      // set ncs = Cons(Pair(lhs, x), ncs)
+                      ncs := Cons(Pair(lhs, x), !ncs)
+                      true
+                    None then false
+              solve(!ncs)
         Unif(id, lbs, ubs) then
-          push(ubs, rhs)
-          let ncs = fold(lbs, cs, (it, lst) => Cons(Pair(read(it), rhs), lst))
-          solve(ncs)
+          // push(ubs, rhs)
+          // let ncs = fold(lbs, cs, (it, lst) => Cons(Pair(read(it), rhs), lst))
+          // solve(ncs)
+          error() // TODO
 
 
 solve(Cons(Pair(ty, ty), Nil))
@@ -173,7 +237,7 @@ fun solve = case
         Unif(id, lbs, ubs) then
           iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.174: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//│ ║  l.238: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
 //│ ║         	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'S1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'R  <:  'E ∨ S
@@ -188,7 +252,7 @@ fun solve = case
 //│ ╟── because: cannot constrain  'R4  <:  ¬R2
 //│ ╙── because: cannot constrain  R2  <:  ¬R2
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.174: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//│ ║  l.238: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
 //│ ║         	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'S1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'R  <:  'E ∨ S
@@ -270,7 +334,7 @@ region r in
 region r in
   solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
 //│ ╔══[ERROR] Type error in application with expected type 'caseScrut
-//│ ║  l.271: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
+//│ ║  l.335: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
 //│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
 //│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in ⊥ out PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]]
@@ -284,7 +348,7 @@ region r in
 //│ ╟── because: cannot constrain  r  <:  'Unif
 //│ ╙── because: cannot constrain  r  <:  ⊥
 //│ ╔══[ERROR] Type error in application with expected type 'caseScrut
-//│ ║  l.271: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
+//│ ║  l.335: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
 //│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
 //│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in ⊥ out PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]]
@@ -332,7 +396,7 @@ region r in // This is used to delimit the scope of mutation
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.333: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ ║  l.397: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S

@@ -183,4 +183,46 @@ fun foo: [outer, R <: outer] -> Region[R] -> ()
 
 
 
+// * A function that executes its argument `f` in a frozen local region;
+// * we show that this `f` can itself in turn freeze its own region from the call site
+
+fun foo(f) =
+  region r in
+    freeze of r, () =>
+      f()
+
+foo
+//│ Type: [outer, 'app, 'eff] -> (() ->{'eff} 'app) ->{'eff} 'app
+//│ Where:
+//│   'eff <: outer
+
+region s in
+  foo(() => wield(s))
+
+region s in
+  foo of () =>
+    wield(s)
+    freeze(s, () => 42)
+//│ Type: Int
+
+:e
+region s in
+  foo of () =>
+    freeze(s, () => wield(s))
+//│ ╔══[ERROR] Type error in function literal with expected type () ->{¬'R ∧ 'E} 'T
+//│ ║  l.211: 	    freeze(s, () => wield(s))
+//│ ║         	                    ^^^^^^^^
+//│ ╟── because: cannot constrain  'R1  <:  ¬'R ∧ 'E
+//│ ╟── because: cannot constrain  'R1  <:  ¬'R
+//│ ╟── because: cannot constrain  s  <:  ¬'R
+//│ ╟── because: cannot constrain  'R  <:  ¬s
+//│ ╙── because: cannot constrain  s  <:  ¬s
+
+region s in
+    foo of () =>
+      region t in
+        wield(s)
+        freeze(s, () => wield(t))
+
+
 
