@@ -594,7 +594,7 @@ class Lowering()(using Config, TL, Raise, State, Ctx):
     
     case Quoted(body) => quote(body)(k)
     
-    // * BbML-specific cases: t.Cls#field and mutable operations
+    // * InvalML-specific cases: t.Cls#field and mutable operations
     case sp @ SelProj(prefix, _, proj) =>
       setupSelection(prefix, proj, sp.sym)(k)
     case Region(reg, body) =>
