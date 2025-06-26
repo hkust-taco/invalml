@@ -68,7 +68,7 @@ bar
 f(g)(foo)
 //│ Type: Int
 
-:fixme // ???
+:e
 f(g)(bar)
 //│ ╔══[ERROR] Type error in reference with expected type 'A
 //│ ║  l.72: 	f(g)(bar)

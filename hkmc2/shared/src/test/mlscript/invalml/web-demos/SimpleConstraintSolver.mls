@@ -20,17 +20,21 @@ class Stack[A] with
 class ArrayList[A, R]
 class Iter[T, R]
 
+class Option[A] with
+  constructor
+    None
+    Some(value: A)
+
 
 fun
   empty:   [A, R] -> Region[R] ->{R} ArrayList[A, out R]
   clear:   [A, R] -> (ArrayList[A, out R]) ->{R} ()
   push:    [A, R] -> (ArrayList[A, out R], A) ->{R} ()
   foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()
-  iter: [Res, R, E extends ~R, T] ->
-    (ArrayList[T, out R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
-  fold: [Res, R, E extends ~R, T] ->
-    (ArrayList[T, out R], Res, [S] -> (Iter[T, S], Res) ->{S | E} Res) ->{E | R} Res
-  read: [T, S] -> Iter[T, S] ->{S} T
+  iter: [outer, Res, R, E extends ~R, T] ->
+    (ArrayList[T, out R], [S extends ~outer] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
+  next: [T, S] -> Iter[T, S] ->{S} Option[T]
+  whileDo: [R] -> (() ->{R} Bool) ->{R} ()
 
 fun error() = error()
 
@@ -56,20 +60,44 @@ fun solve(lst) = if lst is
           Fun(_, _) then error()
           Unif(id, lbs, ubs) then
             push(lbs, lhs)
-            let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
-            solve(ncs)
+            region r in
+              let ncs = r.ref cs
+              iter of ubs, it =>
+                whileDo of () =>
+                  if next(it) is
+                    Some(x) then
+                      ncs := Cons(Pair(lhs, x), !ncs)
+                      true
+                    None then false
+              solve(!ncs)
         Fun(l1, r1) then if rhs is
           Fun(l2, r2) then
             solve(Cons(Pair(l2, l1), Cons(Pair(r1, r2), cs)))
           IntType then error()
           Unif(id, lbs, ubs) then
             push(lbs, lhs)
-            let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
-            solve(ncs)
+            region r in
+              let ncs = r.ref cs
+              iter of ubs, it =>
+                whileDo of () =>
+                  if next(it) is
+                    Some(x) then
+                      ncs := Cons(Pair(lhs, x), !ncs)
+                      true
+                    None then false
+              solve(!ncs)
         Unif(id, lbs, ubs) then
           push(ubs, rhs)
-          let ncs = fold(lbs, cs, (it, lst) => Cons(Pair(read(it), rhs), lst))
-          solve(ncs)
+          region r in
+            let ncs = r.ref cs
+            iter of lbs, it =>
+              whileDo of () =>
+                if next(it) is
+                  Some(x) then
+                    ncs := Cons(Pair(x, rhs), !ncs)
+                    true
+                  None then false
+            solve(!ncs)
 
 // *** error example
 
@@ -85,7 +113,13 @@ fun solve(lst) = if lst is
 //           Fun(_, _) then error()
 //           Unif(id, lbs, ubs) then
 //             push(lbs, lhs)
-//             iter(lbs, it => solve(Cons(Pair(lhs, read(it)), Nil)))
+//             iter of lbs, it =>
+//               whileDo of () =>
+//                 if next(it) is
+//                   Some(x) then
+//                     solve(Cons(Pair(lhs, x), Nil))
+//                     true
+//                   None then false
 //             solve(cs)
 //         Fun(l1, r1) then  if rhs is
 //           Fun(l2, r2) then
@@ -93,11 +127,23 @@ fun solve(lst) = if lst is
 //           IntType then error()
 //           Unif(id, lbs, ubs) then
 //             push(lbs, lhs)
-//             iter(lbs, it => solve(Cons(Pair(lhs, read(it)), Nil)))
+//             iter of lbs, it =>
+//               whileDo of () =>
+//                 if next(it) is
+//                   Some(x) then
+//                     solve(Cons(Pair(lhs, x), Nil))
+//                     true
+//                   None then false
 //             solve(cs)
 //         Unif(id, lbs, ubs) then
 //           push(ubs, rhs)
-//           iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
+//           iter of lbs, it =>
+//             whileDo of () =>
+//               if next(it) is
+//                 Some(x) then
+//                   solve(Cons(Pair(x, rhs), Nil))
+//                   true
+//                 None then false
 //           solve(cs)
 
 
