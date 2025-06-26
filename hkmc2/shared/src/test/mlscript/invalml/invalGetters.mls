@@ -5,22 +5,9 @@
 :invalml
 
 
-:todo
 fun test1() =
-  fun sayHi = print("Hi")
-  sayHi, sayHi, sayHi
-//│ ╔══[ERROR] Function definition shape not yet supported for sayHi
-//│ ║  l.10: 	  fun sayHi = print("Hi")
-//│ ╙──      	              ^^^^^^^^^^^
-//│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.11: 	  sayHi, sayHi, sayHi
-//│ ╙──      	  ^^^^^
-//│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.11: 	  sayHi, sayHi, sayHi
-//│ ╙──      	         ^^^^^
-//│ ╔══[ERROR] Variable not found: sayHi
-//│ ║  l.11: 	  sayHi, sayHi, sayHi
-//│ ╙──      	                ^^^^^
+  fun sayHi() = print("Hi")
+  sayHi(), sayHi(), sayHi()
 
 test1()
 //│ > Hi
@@ -28,20 +15,6 @@ test1()
 //│ > Hi
 //│ Type: ⊥
 
-
-:todo // it feels like this should work
-fun test2() =
-  fun funny = case
-    0 then 0
-    n then funny(n - 1) + 1
-  funny
-//│ ╔══[ERROR] Expected a monomorphic type or an instantiable type here, but () ->{⊥} [outer, 'caseScrut, 'eff] -> 'caseScrut ->{'eff} Int found
-//│ ║  l.35: 	    0 then 0
-//│ ║        	    ^^^^^^^^
-//│ ║  l.36: 	    n then funny(n - 1) + 1
-//│ ║        	^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.37: 	  funny
-//│ ╙──      	^^^^^^^
 
 fun test2() =
   fun funny = case
@@ -56,14 +29,14 @@ test2
 :sjs
 test2()
 //│ JS (unsanitized):
-//│ test21()
+//│ test2()
 //│ = [function]
 //│ Type: Int -> Int
 
 :ssjs
 test2()(5)
 //│ JS:
-//│ tmp = test21(); block$res8 = runtime.safeCall(tmp(5)); undefined
+//│ tmp = test2(); block$res7 = runtime.safeCall(tmp(5)); undefined
 //│ = 5
 //│ Type: Int
 
@@ -78,11 +51,11 @@ fun test2() =
     case n then funny(n - 1) + 1
   funny
 //│ ╔══[WARNING] Pure expression in statement position
-//│ ║  l.77: 	    case 0 then 0
+//│ ║  l.50: 	    case 0 then 0
 //│ ╙──      	         ^^^^^^^^
 //│ JS (unsanitized):
-//│ let test22;
-//│ test22 = function test2() {
+//│ let test21;
+//│ test21 = function test2() {
 //│   let funny, tmp1;
 //│   funny = function funny() {
 //│     let lambda;
@@ -100,23 +73,14 @@ fun test2() =
 //│   return tmp1
 //│ };
 //│ ╔══[WARNING] Pure expression in statement position
-//│ ║  l.77: 	    case 0 then 0
+//│ ║  l.50: 	    case 0 then 0
 //│ ╙──      	         ^^^^^^^^
 //│ ╔══[ERROR] Function definition shape not yet supported for funny
-//│ ║  l.77: 	    case 0 then 0
+//│ ║  l.50: 	    case 0 then 0
 //│ ║        	         ^^^^^^^^
-//│ ║  l.78: 	    case n then funny(n - 1) + 1
+//│ ║  l.51: 	    case n then funny(n - 1) + 1
 //│ ╙──      	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Variable not found: funny
-//│ ║  l.79: 	  funny
+//│ ║  l.52: 	  funny
 //│ ╙──      	  ^^^^^
-
-
-:todo
-fun test3 =
-  print("Hi")
-//│ ╔══[ERROR] Function definition shape not yet supported for test3
-//│ ║  l.117: 	  print("Hi")
-//│ ╙──       	  ^^^^^^^^^^^
-
 

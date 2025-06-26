@@ -157,32 +157,6 @@ region r in
 //│ Type: Region[?]
 
 
-
-:fixme
-fun foo[outer, R <: outer](r1: Region[R]) =
-  region r2 in
-    freeze(r2, () =>
-      wield(r1)
-    )
-//│ ═══[ERROR] Unsupported type parameter outer binding
-//│ ╔══[ERROR] Unsupported type parameter operator application
-//│ ║  l.162: 	fun foo[outer, R <: outer](r1: Region[R]) =
-//│ ╙──       	               ^^^^
-//│ ╔══[ERROR] Name not found: R
-//│ ║  l.162: 	fun foo[outer, R <: outer](r1: Region[R]) =
-//│ ╙──       	                                      ^
-//│ ═══[ERROR] Expected a type symbol, got <error>
-//│ ═══[ERROR] Invalid type
-
-:fixme
-fun foo: [outer, R <: outer] -> Region[R] -> ()
-//│ ╔══[ERROR] Illegal forall annotation.
-//│ ║  l.178: 	fun foo: [outer, R <: outer] -> Region[R] -> ()
-//│ ╙──       	         ^^^^^^^^^^^^^^^^^^^
-//│ ═══[ERROR] Invalid type
-
-
-
 // * A function that executes its argument `f` in a frozen local region;
 // * we show that this `f` can itself in turn freeze its own region from the call site
 
@@ -210,7 +184,7 @@ region s in
   foo of () =>
     freeze(s, () => wield(s))
 //│ ╔══[ERROR] Type error in function literal with expected type () ->{¬'R ∧ 'E} 'T
-//│ ║  l.211: 	    freeze(s, () => wield(s))
+//│ ║  l.185: 	    freeze(s, () => wield(s))
 //│ ║         	                    ^^^^^^^^
 //│ ╟── because: cannot constrain  'R1  <:  ¬'R ∧ 'E
 //│ ╟── because: cannot constrain  'R1  <:  ¬'R

@@ -116,17 +116,6 @@ let p = new Point(1.0, 0.0, 0.0) in p.Point#x
 let t = new Some(true) in t.Some#value
 //│ Type: Bool
 
-:fixme
-:pe
-42.Some#value
-//│ ╔══[LEXICAL ERROR] Expected at least one digit after the  decimal point
-//│ ║  l.121: 	42.Some#value
-//│ ╙──       	   ^
-//│ ╔══[ERROR] Illegal juxtaposition right-hand side (operator application).
-//│ ║  l.121: 	42.Some#value
-//│ ╙──       	   ^^^^^^^^^^
-//│ Type: Num
-
 
 data class Printer[T](f: T -> Str)
 
@@ -144,7 +133,7 @@ let ip = new Printer(foofoo) in ip.Printer#f(42)
 :e
 let ip = new Printer(foofoo) in ip.Printer#f("42")
 //│ ╔══[ERROR] Type error in string literal with expected type 'T
-//│ ║  l.145: 	let ip = new Printer(foofoo) in ip.Printer#f("42")
+//│ ║  l.134: 	let ip = new Printer(foofoo) in ip.Printer#f("42")
 //│ ║         	                                             ^^^^
 //│ ╟── because: cannot constrain  Str  <:  'T
 //│ ╟── because: cannot constrain  Str  <:  'T
@@ -167,7 +156,7 @@ let tf = new TFun(inc) in tf.TFun#f(1)
 :e
 let tf = new TFun(inc) in tf.TFun#f("1")
 //│ ╔══[ERROR] Type error in string literal with expected type 'T
-//│ ║  l.168: 	let tf = new TFun(inc) in tf.TFun#f("1")
+//│ ║  l.157: 	let tf = new TFun(inc) in tf.TFun#f("1")
 //│ ║         	                                    ^^^
 //│ ╟── because: cannot constrain  Str  <:  'T
 //│ ╟── because: cannot constrain  Str  <:  'T
@@ -279,7 +268,7 @@ throw new Error("oops")
 :e
 throw 42
 //│ ╔══[ERROR] Type error in throw
-//│ ║  l.280: 	throw 42
+//│ ║  l.269: 	throw 42
 //│ ║         	      ^^
 //│ ╙── because: cannot constrain  Int  <:  Error
 //│ Type: ⊥

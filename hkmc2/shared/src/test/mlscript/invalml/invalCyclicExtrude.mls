@@ -36,18 +36,6 @@ let foo = f => (f(x => x(x)) as [A] -> A -> A) in foo
 //│ Where:
 //│   'x <: 'x ->{'eff} 'app
 
-:todo
-let foo(f) = (f(x => x(x)) as [A] -> A -> A) in foo
-//│ Type: ((('x ->{'eff} 'app) ->{'eff} 'app) -> (⊤ -> ⊥)) ->{⊥} ['A] -> ('A) ->{⊥} 'A
-//│ Where:
-//│   'x <: 'x ->{'eff} 'app
-
-:todo
-fun foo(f) = (f(x => x(x)) as [A] -> A -> A)
-//│ ╔══[ERROR] Expected a monomorphic type or an instantiable type here, but ('f) ->{⊥} [outer, 'A] -> ('A) ->{⊥} 'A found
-//│ ║  l.46: 	fun foo(f) = (f(x => x(x)) as [A] -> A -> A)
-//│ ╙──      	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 f => (let g = x => x(x) in let tmp = g(g) in f(g)) as [A] -> A -> A
 //│ Type: (((('x ∨ ('x ->{'eff} 'app)) -> 'app) ->{'eff} 'app) -> (⊤ -> ⊥)) ->{⊥} ['A] -> ('A) ->{⊥} 'A

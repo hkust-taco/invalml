@@ -111,7 +111,6 @@ region r in
                 else print("Chose y"); () => y.ref 1)
 //│ Type: Int
 
-// TODO: simplify this type more!
 foo
 //│ Type: ['r1, 'r2, 'R, 'E, 'R1, 'eff, 'reg, 'ref] -> ('r1, 'r2, ('r1, 'r2) ->{(('E ∧ ¬'R) ∧ ¬'R1) ∧ ¬'R1} (() ->{'eff} Ref['ref, out 'reg])) ->{(('reg ∨ 'R) ∨ 'E) ∨ 'eff} Int
 //│ Where:
@@ -159,7 +158,7 @@ region r in
   region s in
     foo(r, s, (x, y) => (if rand() then x.ref 0 else y.ref 0))
 //│ ╔══[ERROR] Type error in function literal with expected type 'f
-//│ ║  l.160: 	    foo(r, s, (x, y) => (if rand() then x.ref 0 else y.ref 0))
+//│ ║  l.159: 	    foo(r, s, (x, y) => (if rand() then x.ref 0 else y.ref 0))
 //│ ║         	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ('x, 'y) ->{'reg ∨ 'reg1} (Ref[Int, in ⊥ out 'reg] ∨ Ref[Int, in ⊥ out 'reg1])  <:  'f
 //│ ╟── because: cannot constrain  ('x, 'y) ->{'reg ∨ 'reg1} (Ref[Int, in ⊥ out 'reg] ∨ Ref[Int, in ⊥ out 'reg1])  <:  ('r1, 'r2) ->{'eff} ('app)

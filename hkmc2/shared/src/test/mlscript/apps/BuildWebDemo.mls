@@ -191,8 +191,8 @@ build of
   // Be careful with the output path! Everything in it will be purged.
   // The path here is just an example. Do not output to the test folder because
   // it will trigger the test.
-  // Some of path.resolve of projectRoot, "..", "..", "..", "..", "780"
-  None
+  Some of path.resolve of projectRoot, "..", "..", "..", "780"
+  // None
   // - - - - -
   // Some of tuple of
   //   "" // Remote URL
@@ -214,3 +214,19 @@ build of
 //│ > Processing src/test/mlscript-compile/Str.mjs
 //│ > Processing src/test/mlscript-compile/Runtime.mjs
 //│ > Collected 13 files
+//│ > There are 16 files in the output folder.
+//│ > Removing Examples.mjs
+//│ > Removing Iter.mjs
+//│ > Removing MLscript.mjs
+//│ > Removing MutMap.mjs
+//│ > Removing Option.mjs
+//│ > Removing Predef.mjs
+//│ > Removing Rendering.mjs
+//│ > Removing Runtime.mjs
+//│ > Removing RuntimeJS.mjs
+//│ > Removing Stack.mjs
+//│ > Removing Str.mjs
+//│ > Removing XML.mjs
+//│ > Removing index.html
+//│ > Removing main.css
+//│ > Removing main.mjs
