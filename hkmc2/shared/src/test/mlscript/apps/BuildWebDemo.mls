@@ -185,10 +185,17 @@ fun build(htmlPath, outputPath, git) =
   
   ()
 
+
+// * Before running this code, first create a folder named `780` in the parent directory of this git project.
+// * Also, build the JS artifact with `hkmc2JS/fullLinkJS`.
+// * You can try the web demo by opening the `780` folder in VSCode and using extension `tht13.html-preview-vscode`
+// * Pro-tip: use incantation `~; hkmc2JS/fullLinkJS; hkmc2JVM/test; hkmc2DiffTests/testOnly -- -z BuildWebDemo`
+// * to automatically rebuild and update everything.
+
 build of
   path.join of projectRoot, "src", "test", "mlscript-compile", "apps", "invalml-web-demo", "index.html"
   // - - - - -
-  // Be careful with the output path! Everything in it will be purged.
+  // Be careful with the output path! Every file in it will be deleted.
   // The path here is just an example. Do not output to the test folder because
   // it will trigger the test.
   Some of path.resolve of projectRoot, "..", "..", "..", "780"
@@ -214,7 +221,7 @@ build of
 //│ > Processing src/test/mlscript-compile/Str.mjs
 //│ > Processing src/test/mlscript-compile/Runtime.mjs
 //│ > Collected 13 files
-//│ > There are 16 files in the output folder.
+//│ > There are 15 files in the output folder.
 //│ > Removing Examples.mjs
 //│ > Removing Iter.mjs
 //│ > Removing MLscript.mjs
@@ -230,3 +237,4 @@ build of
 //│ > Removing index.html
 //│ > Removing main.css
 //│ > Removing main.mjs
+
