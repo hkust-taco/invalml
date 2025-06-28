@@ -4,15 +4,15 @@
 
 data class Pair[P, Q](fst: P, snd: Q)
 
-fun fork: [A, B extends ~A, T1, T2] -> (Any ->{A} T1, Any ->{B} T2) ->{A | B} Pair[out T1, out T2]
+fun fork: [A, B extends ~A, T1, T2] -> (() ->{A} T1, () ->{B} T2) ->{A | B} Pair[out T1, out T2]
 fork
-//│ Type: ['A, 'B, 'T1, 'T2] -> ((⊤) ->{'A} 'T1, (⊤) ->{'B} 'T2) ->{'A ∨ 'B} Pair[out 'T1, out 'T2]
+//│ Type: ['A, 'B, 'T1, 'T2] -> (() ->{'A} 'T1, () ->{'B} 'T2) ->{'A ∨ 'B} Pair[out 'T1, out 'T2]
 //│ Where:
 //│   'B <: ¬'A
 
 
-fun foo: Any -> Int
-fun bar: Any -> Str
+fun foo: () -> Int
+fun bar: () -> Str
 
 
 fork(foo, bar)
@@ -21,10 +21,10 @@ fork(foo, bar)
 
 :e
 region x in
-  fork((_ => x.ref 1), (_ => x.ref 2))
-//│ ╔══[ERROR] Type error in function literal with expected type (⊤) ->{'B} 'T2
-//│ ║  l.24: 	  fork((_ => x.ref 1), (_ => x.ref 2))
-//│ ║        	                             ^^^^^^^
+  fork((() => x.ref 1), (() => x.ref 2))
+//│ ╔══[ERROR] Type error in function literal with expected type () ->{'B} 'T2
+//│ ║  l.24: 	  fork((() => x.ref 1), (() => x.ref 2))
+//│ ║        	                               ^^^^^^^
 //│ ╟── because: cannot constrain  'reg  <:  'B
 //│ ╟── because: cannot constrain  x  <:  'B
 //│ ╟── because: cannot constrain  x  <:  ¬'A
@@ -36,13 +36,13 @@ region x in
 
 region x in
   region y in
-    fork((_ => x.ref 1), (_ => y.ref 2))
+    fork((() => x.ref 1), (() => y.ref 2))
 //│ Type: Pair[out Ref[Int, ?], out Ref[Int, ?]]
 
 
 let naive_helper = r1 => // cannot infer the outer variable!
   region r2 in
-    fork((_ => r1.ref 1), (_ => r2.ref 2))
+    fork((() => r1.ref 1), (() => r2.ref 2))
 naive_helper
 //│ Type: (Region[in 'reg out 'reg1]) ->{'reg1} Pair[out Ref[Int, out 'reg1], out Ref[Int, ?]]
 //│ Where:
@@ -76,7 +76,7 @@ region x in
 
 fun helper(r1) =
   region r2 in
-    fork((_ => r1.ref 1), (_ => r2.ref 2))
+    fork((() => r1.ref 1), (() => r2.ref 2))
 helper
 //│ Type: [outer, 'reg, 'reg1] -> Region[in 'reg out 'reg1] ->{'reg1} Pair[out Ref[Int, out 'reg1], out Ref[Int, out ¬outer]]
 //│ Where:
@@ -146,7 +146,7 @@ fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 fun annohelper: [outer, T extends outer] -> Region[T] ->{T} Pair[out Ref[Int, out T], out Ref[Int, out ~outer]]
 fun annohelper(r1) =
   region r2 in
-    fork((_ => r1.ref 1), (_ => r2.ref 2))
+    fork((() => r1.ref 1), (() => r2.ref 2))
 annohelper
 //│ Type: [outer, 'T] -> (Region['T]) ->{'T} Pair[out Ref[Int, out 'T], out Ref[Int, out ¬outer]]
 //│ Where:
@@ -161,7 +161,7 @@ region x in
 fun annohelper: [outer, T] -> Region[T & outer] ->{T & outer} Pair[out Ref[Int, out T & outer], out Ref[Int, out ~outer]]
 fun annohelper(r1) =
   region r2 in
-    fork((_ => r1.ref 1), (_ => r2.ref 2))
+    fork((() => r1.ref 1), (() => r2.ref 2))
 annohelper
 //│ Type: [outer, 'T] -> (Region['T ∧ outer]) ->{'T ∧ outer} Pair[out Ref[Int, out 'T ∧ outer], out Ref[Int, out ¬outer]]
 
@@ -178,15 +178,15 @@ region x in
 :e
 fun foo(r1) =
   region r2 in
-    fork((_ => r1.ref 1), (_ => r2.ref 2))
+    fork((() => r1.ref 1), (() => r2.ref 2))
     foo(r2)
 //│ ╔══[ERROR] Type error in function literal
 //│ ║  l.179: 	fun foo(r1) =
 //│ ║         	        ^^^^^
 //│ ║  l.180: 	  region r2 in
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.181: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.181: 	    fork((() => r1.ref 1), (() => r2.ref 2))
+//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ║  l.182: 	    foo(r2)
 //│ ║         	^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
@@ -203,8 +203,8 @@ fun foo(r1) =
 //│ ║         	        ^^^^^
 //│ ║  l.180: 	  region r2 in
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.181: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.181: 	    fork((() => r1.ref 1), (() => r2.ref 2))
+//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ║  l.182: 	    foo(r2)
 //│ ║         	^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
@@ -231,7 +231,7 @@ fun foo: [outer To, T extends To] -> Region[T] ->{T} ([outer So, S extends So] -
 fun foo(r1) =
   r3 =>
     region r4 in
-      fork((_ => r3.ref 3), (_ => r4.ref 4))
+      fork((() => r3.ref 3), (() => r4.ref 4))
 
 
 fun bar: [outer S, T extends S] -> Region[T] ->{T} Int

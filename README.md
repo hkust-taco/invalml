@@ -2,29 +2,30 @@
 
 ## 1. Overview of the Artifact
 
-Our paper introduces a new type system: InvalML, for permanent and temporary invalidation. In the paper, we propose a type inference algorithm for InvalML and prove the soundness and completeness.
+Our paper introduces a new type system, InvalML, for permanent and temporary invalidation. In the paper, we propose a type inference algorithm for InvalML and prove its soundness and completeness.
 
-This artifact implements InvalML and the type inference algorithm based on the MLscript language. We reuse the infrastructure of the MLscript language, augmenting it with our type inference algorithm and necessary syntax and code generation. Our artifact consists of two parts:
+This artifact implements InvalML and the type inference algorithm based on the MLscript language. We reuse the infrastructure of the MLscript language, providing InvalML as an alternative type system and type inference algorithm, along with some necessary syntax and code generation extensions. Our artifact consists of two parts:
 
-1. The main type checker is implemented as a part of the MLscript compiler, written in Scala. It also includes test cases for InvalML and the inference algorithm.
-2. The [web demo](https://anonymous8538.github.io/780/) offers a convenient way to compile and run InvalML programs directly in the browser, eliminating the need for the toolchain dependencies. The results of compilation, such as type checking, can be viewed in the web demo.
+1. The type checker, written in Scala, can be found in an `invalml` folder in the MLscript compiler source.
+2. The test cases for InvalML and the inference algorithm can be found in an `invalml` folder in the MLscript tests.
+3. The [web demo](https://anonymous8538.github.io/780/) offers a convenient way to compile and run InvalML programs directly in the browser, eliminating the need for the toolchain dependencies. The results of compilation, such as type checking, can be viewed in the web demo.
 
-The main type checker is our main contribution, while the web demo illustrates the reusability of our main project. We do not provide a command-line tool specifically for compiling an MLscript file.
+The type checker is our main contribution, while the web demo illustrates the reusability of our main project. We do not provide a command-line tool specifically for compiling an MLscript file.
 
 This documentation contains the evaluation instructions for the main type checker and the web demo. We also introduce the implementation of our algorithm and provide a user guide for the web demo.
 
 ### 1.1 List of Claims
 
-Most claims in the paper can be verified in the test suite. One can modify the examples in the test cases or try them out in the web demo.
+Most claims in the paper can be verified in the test suite. One can modify the examples in the test cases or try them out in the web demo. The lines of code for the implementation we claimed in the submitted paper are not accurate now. We will put the real number in the paper’s revision.
 
-1. The implementation can handle examples in the paper. Such examples can be found in both `hkmc2/shared/src/test/mlscript/invalml/web-demos/ExamplesInThePaper.mls` and the web demo.
-2. The extensions to InvalML can be type-checked by the implementation. One can check the following test files or find them in the web demo:
+1. The implementation can handle the examples in the paper, which can be found in both `hkmc2/shared/src/test/mlscript/invalml/web-demos/ExamplesInThePaper.mls` and the web demo.
+2. The paper proposes some extensions to InvalML. These are supported by the implementation. One can check the following test files or find them in the web demo:
     - Scope-safe metaprogramming: `hkmc2/shared/src/test/mlscript/invalml/web-demos/Staging.mls`
     - Exceptions: `hkmc2/shared/src/test/mlscript/invalml/web-demos/Exception.mls`
     - Stack-based memory management: `hkmc2/shared/src/test/mlscript/invalml/web-demos/StackMM.mls`
 3. We also include several case studies that have not been mentioned in the paper. One can check the following test files or find them in the web demo: 
     - A simple constraint solver: `hkmc2/shared/src/test/mlscript/invalml/web-demos/SimpleConstraintSolver.mls`
-    - Merge sort algorithm in parallel: `hkmc2/shared/src/test/mlscript/invalml/web-demos/reml/MergeSort.mls`
+    - Parallel merge sort algorithm: `hkmc2/shared/src/test/mlscript/invalml/web-demos/reml/MergeSort.mls`
     - An interpreter for arithmetic and boolean expressions: `hkmc2/shared/src/test/mlscript/invalml/web-demos/flix/Interpreter.mls`
     - A simple GUI example that requires an event listener not blocking the thread: `hkmc2/shared/src/test/mlscript/invalml/web-demos/flix/GUI.mls`
 
@@ -55,14 +56,14 @@ There are some minor differences in the syntax of the artifact, as compared to t
 
 ### 1.3 Hardware Requirements
 
-This artifact does not require any specific hardware to run. A general computer with Java 11 and Node.js 24 can compile the main project from scratch, and a computer with Docker can complete the artifact evaluation by using the Docker image. Devices connected to the Internet with modern browsers can access the web demo.
+This artifact does not require any specific hardware to run. A normal computer with Java 11 and Node.js 24 can handle the project from scratch, and a computer with Docker can complete the artifact evaluation by using the Docker image. Devices connected to the Internet with modern browsers can access the web demo.
 
 ### 1.4 Reusability Guide
 
-The main project can be reused as follows:
+The project can be reused as follows:
 
 1. The main project can be extended directly. One can modify the corresponding parts to extend the system and the whole compiler, as we will explain in Section 3.
-2. The web demo shows the other approach to reusing the main project. The main project can be compiled to JavaScript via [Scala.js](https://www.scala-js.org/). The web demo uses the generated code. It reflects that the main project can be invoked by other programs to output both intermediate and final results of the compilation.
+2. The web demo shows the other approach to reusing the project. The main project can be compiled to JavaScript via [Scala.js](https://www.scala-js.org/), which produces an artifact that the web demo uses. This demonstrates that the project can be invoked by other programs to output both intermediate and final results of the compilation.
 
 ## 2. Getting Started
 
@@ -81,9 +82,9 @@ Docker images are prepared with all necessary dependencies to compile the main p
     sbt hkmc2AllTests/test
     ```
     
-    All tests should be passed. The generated web demo can be found at `/home/ubuntu/web-demo`. To use the web demo locally, please refer to Section 2.3.
+    All tests should pass. The generated web demo can be found at `/home/ubuntu/web-demo`. To use the web demo locally, please refer to Section 2.3.
     
-4. After executing the tests, you can run `exit` to exit the interactive shell and turn off the container. The container will be destroyed automatically.
+4. After executing the tests, you can exit the container. The container will be destroyed automatically.
 
 ### 2.2 Running the Main Project (From Scratch)
 
@@ -122,9 +123,9 @@ Our artifact is based on MLscript. The structure of the main project is shown as
         - `mlscript/invalml`: InvalML type checking test files.
         - Other subdirectories: test files for other implementations of MLscript.
 - `hkmc2DiffTests/src/test/scala/hkmc2`: test framework for the current version of MLscript.
-- Other directories: other subprojects and legacy MLScript components.
+- Other directories: other subprojects and legacy MLscript components.
 
-The files in `hkmc2/invalml` are the implementation of our type inference algorithm, and `mlscript/invalml` contains the corresponding test files. In the following subsections, we will introduce how these files are related to the system in the paper. For the remaining files, we only introduce the parts that we’ve modified and how we extended the existing MLscript compiler to support our system. The introduction to other parts is omitted for simplicity.
+The files in `hkmc2/invalml` are the implementation of our type inference algorithm, and `mlscript/invalml` contains the corresponding test files. In the following subsections, we introduce how these files are related to the system in the paper. For the remaining files, we only introduce the parts that we’ve modified and how we extended the existing MLscript compiler to support our system. The introduction to other parts is omitted for simplicity.
 
 ### 3.2 Correspondence between Paper and Implementation
 
@@ -154,21 +155,23 @@ Besides, we also changed several files originally belonging to the MLscript comp
 
 ### 3.3 Running Tests
 
+The InvalML tests specifically can be run by first running the SBT command `hkmc2JVM/test` once (to compile MLscript’s standard library), and then running the SBT command `hkmc2DiffTests/testOnly -- -z invalml` as many times as desired. (The command `hkmc2AllTests/test` is for all tests of the current MLscript implementation, including the standard library and InvalML tests.)
+
 The suffix of test files is `.mls`. Test cases are separated from each other by empty lines. For instance, the following code has three blocks of test cases:
 
 ```fsharp
-fun fork: [A, B extends ~A, T1, T2] -> (Any ->{A} T1, Any ->{B} T2) ->{A | B} Pair[out T1, out T2]
+fun fork: [A, B extends ~A, T1, T2] -> (() ->{A} T1, () ->{B} T2) ->{A | B} Pair[out T1, out T2]
 fork
-//│ Type: ['A, 'B, 'T1, 'T2] -> ((⊤) ->{'A} 'T1, (⊤) ->{'B} 'T2) ->{'A ∨ 'B} Pair[out 'T1, out 'T2]
+//│//│ Type: ['A, 'B, 'T1, 'T2] -> (() ->{'A} 'T1, () ->{'B} 'T2) ->{'A ∨ 'B} Pair[out 'T1, out 'T2] Type: ['A, 'B, 'T1, 'T2] -> ((⊤) ->{'A} 'T1, (⊤) ->{'B} 'T2) ->{'A ∨ 'B} Pair[out 'T1, out 'T2]
 //│ Where:
 //│   'B <: ¬'A
 
 :e
 region x in
-  fork((_ => x.ref 1), (_ => x.ref 2))
-//│ ╔══[ERROR] Type error in function literal with expected type (⊤) ->{'B} 'T2
-//│ ║  l.24: 	  fork((_ => x.ref 1), (_ => x.ref 2))
-//│ ║        	                             ^^^^^^^
+  fork((() => x.ref 1), (() => x.ref 2))
+//│ ╔══[ERROR] Type error in function literal with expected type () ->{'B} 'T2
+//│ ║  l.24: 	  fork((() => x.ref 1), (() => x.ref 2))
+//│ ║        	                               ^^^^^^^
 //│ ╟── because: cannot constrain  'reg  <:  'B
 //│ ╟── because: cannot constrain  x  <:  'B
 //│ ╟── because: cannot constrain  x  <:  ¬'A
@@ -178,13 +181,13 @@ region x in
 
 region x in
   region y in
-    fork((_ => x.ref 1), (_ => y.ref 2))
+    fork((() => x.ref 1), (() => y.ref 2))
 //│ Type: Pair[out Ref[Int, ?], out Ref[Int, ?]]
 ```
 
 The test output of each test block, starting with `//|`, is appended to the test code. Modern code editors like VSCode can automatically reload the changes from the disk. The test output shows the inferred type of the given program and type errors (if any). The test flag`:e` indicates that the type errors that occurred are expected. In the second example above, one cannot modify the same region in parallel. Therefore, our system rejects the program by raising a type error saying that `cannot constrain x <: ¬x`.
 
-You can use the watch mode by running the command `~hkmc2DiffTests/Test/run` in the `sbt` interactive shell instead. In watch mode, you can modify the test files, and the compiler will detect the modification automatically, recompiling the modified files for you. You can also use incantation `~; hkmc2JS/fullLinkJS; hkmc2JVM/test; hkmc2DiffTests/testOnly -- -z BuildWebDemo` to automatically rebuild and update the web demo.
+You can use the watch mode by running the command `~hkmc2DiffTests/Test/run` in the `sbt` interactive shell instead. In watch mode, you can modify the test files, and the compiler will detect the modification automatically, recompiling the modified files for you. You can also use incantation `~; hkmc2JS/fullLinkJS; hkmc2JVM/test; hkmc2DiffTests/testOnly -- -z BuildWebDemo` to automatically rebuild all relevant source code and regenerate the web demo on change.
 
 ### 3.4 Other Components of The Main Project
 
