@@ -22,7 +22,11 @@ Most claims in the paper can be verified in the test suite. One can modify the e
     - Scope-safe metaprogramming: `hkmc2/shared/src/test/mlscript/invalml/web-demos/Staging.mls`
     - Exceptions: `hkmc2/shared/src/test/mlscript/invalml/web-demos/Exception.mls`
     - Stack-based memory management: `hkmc2/shared/src/test/mlscript/invalml/web-demos/StackMM.mls`
-3. We also include a case study that has not been mentioned in the paper. This case study implements a simple constraint solver. It is available in the web demo and test file `hkmc2/shared/src/test/mlscript/invalml/web-demos/SimpleConstraintSolver.mls`.
+3. We also include several case studies that have not been mentioned in the paper. One can check the following test files or find them in the web demo: 
+    - A simple constraint solver: `hkmc2/shared/src/test/mlscript/invalml/web-demos/SimpleConstraintSolver.mls`
+    - Merge sort algorithm in parallel: `hkmc2/shared/src/test/mlscript/invalml/web-demos/reml/MergeSort.mls`
+    - An interpreter for arithmetic and boolean expressions: `hkmc2/shared/src/test/mlscript/invalml/web-demos/flix/Interpreter.mls`
+    - A simple GUI example that requires an event listener not blocking the thread: `hkmc2/shared/src/test/mlscript/invalml/web-demos/flix/GUI.mls`
 
 ### 1.2 Syntax Differences
 
@@ -66,38 +70,43 @@ This section displays the instructions for setup. There are three ways of evalua
 
 ### 2.1 Running the Main Project (Using Docker)
 
-A Docker image is prepared with all necessary dependencies to compile the main project.
+Docker images are prepared with all necessary dependencies to compile the main project. The following instructions are for `amd64`. If you are using `arm64`, you need to substitute `invalml` in the following commands with `invalml-arm64`.
 
 1. Run the command `docker load < invalml.tar.gz` to load the Docker image.
-2. Run the command `docker run -it --rm mlscript/invalml` to launch a temporary container.
-3. Run the following commands to run all the tests:
+2. Run the command `docker run -it -p 8080:8080 --rm mlscript/invalml` to launch a temporary container. You can substitute the second `8080` with another port number that is available on your device (e.g., you can run `docker run -it -p 8080:3154 --rm mlscript/invalml`) if the 8080 port is occupied.
+3. Run the following commands to execute all tests:
     
     ```bash
     cd /home/ubuntu/mlscript
     sbt hkmc2AllTests/test
     ```
     
-    All tests should be passed.
+    All tests should be passed. The generated web demo can be found at `/home/ubuntu/web-demo`. To use the web demo locally, please refer to Section 2.3.
     
-4. After executing the tests, you may exit the container, and it will be destroyed automatically.
+4. After executing the tests, you can run `exit` to exit the interactive shell and turn off the container. The container will be destroyed automatically.
 
 ### 2.2 Running the Main Project (From Scratch)
 
 To build the main project from scratch, please follow the steps below to ensure that all dependencies are installed correctly.
 
 1. We recommend that you use [Coursier](https://get-coursier.io/) to set up the Scala development environment. You can follow [these instructions](https://get-coursier.io/docs/cli-installation) to install Coursier on your device. You may need to install Java manually on some platforms. After the installation of Coursier, you can run the command `cs install sbt scala` to install **sbt** and **Scala**. Other approaches to installing **Java**, **sbt**, and **Scala** should also work. Please ensure you have Java 11 or above.
-2. Please install [Node.js 24](https://nodejs.org/en) and **npm** (Node Package Manager). If there are already other versions of **Node.js** on your device, you can consider using a version manager like [nvm](https://github.com/nvm-sh/nvm). Please ensure the node executable is in the `PATH` such that the tests can be executed correctly.
+2. Please install [Node.js 24](https://nodejs.org/en) and **npm** (Node Package Manager). If there are already other versions of **Node.js** on your device, you can consider using a version manager like [nvm](https://github.com/nvm-sh/nvm). Please ensure the node executable is in the `PATH` so that the tests can be executed correctly.
 
-Then, you can download and unpack the artifact. Suppose that the artifact is unpacked at `mlscript/`.  Tests can be executed as follows:
+Then, you can download and unpack the artifact. Suppose that the artifact is unpacked at `mlscript/`. Please create a folder called `web-demo` at the same location as where the `mlscript` folder is. Tests can be executed as follows:
 
 1. Run `sbt` at `mlscript/`. An interactive shell of **sbt** will be started.
-2. Run the command `hkmc2AllTests/test` in the sbt shell. It will execute all the tests.
-3. All tests should be passed.
-4. After executing the tests, you can run `exit` to exit the interactive shell.
+2. Run the command `hkmc2JS/fullLinkJS` in the sbt shell. It will compile the MLscript compiler and generate the corresponding JavaScript files.
+3. Run the command `hkmc2AllTests/test` in the sbt shell. It will execute all the tests and generate the web demo. To use the web demo locally, please refer to Section 2.3.
+4. All tests should be passed, and the web demo files should be available at `web-demo`.
+5. After executing the tests, you can run `exit` to exit the interactive shell.
 
 ### 2.3 Running the Web Demo
 
 The web demo can be accessed via the link https://anonymous8538.github.io/780/. It is designed to work on desktop computers and laptops. Please ensure that JavaScript is enabled.
+
+If you have already compiled and executed the test from scratch/in Docker, you can also access the web demo locally. For example, if you are using VSCode, you can install the extension [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) to start a server on your device, or use [http-server](https://www.npmjs.com/package/http-server) if you are using another editor. In the Docker image, the http-server is already installed. You can run the command `cd /home/ubuntu/web-demo && http-server .` to start the server. If you create the container by using the command `docker run -it -p 8080:x --rm mlscript/invalml`, you should be able to access the web demo via the link `http://127.0.0.1:x/`, where x is the port number you pick.
+
+You may refer to Section 4 for more details about the web demo.
 
 ## 3. Introduction to the Main Project
 
@@ -175,7 +184,7 @@ region x in
 
 The test output of each test block, starting with `//|`, is appended to the test code. Modern code editors like VSCode can automatically reload the changes from the disk. The test output shows the inferred type of the given program and type errors (if any). The test flag`:e` indicates that the type errors that occurred are expected. In the second example above, one cannot modify the same region in parallel. Therefore, our system rejects the program by raising a type error saying that `cannot constrain x <: ¬x`.
 
-You can also use the watch mode by running the command `~hkmc2DiffTests/Test/run` in the `sbt` interactive shell instead. In watch mode, you can modify the test files, and the compiler will detect the modification automatically, recompiling the modified files for you.
+You can use the watch mode by running the command `~hkmc2DiffTests/Test/run` in the `sbt` interactive shell instead. In watch mode, you can modify the test files, and the compiler will detect the modification automatically, recompiling the modified files for you. You can also use incantation `~; hkmc2JS/fullLinkJS; hkmc2JVM/test; hkmc2DiffTests/testOnly -- -z BuildWebDemo` to automatically rebuild and update the web demo.
 
 ### 3.4 Other Components of The Main Project
 
@@ -191,8 +200,8 @@ We have tested two methods on the following operating systems and Docker version
 
 |  | Using Docker | Starting from scratch |
 | --- | --- | --- |
-| macOS | TODO | Test passed |
-| Windows 11 | Test passed with Docker v20.10.8 | Test passed |
+| macOS | Test passed with Docker v28.2.2 | Test passed |
+| Arch Linux | Test passed with Docker v28.3.0 | Test passed |
 
 ## 4. Guide to the Web Demo
 
@@ -204,15 +213,16 @@ The user interface of the web demo, as shown in the above screenshot, consists o
 
 - The typer tab shows the type of the whole program inferred by our algorithm. If there is any type error, it will be displayed in the diagnostics area. The unit type will be omitted for simplicity.
 - The parser tab shows the parsed tree of the given program. You can click on nodes to fold/unfold them.
-- The elaborator and resolver tabs show the result of elaboration. The former prints the elaborated terms with the original names used in the parsed trees. The latter substitutes those names with resolved symbol references.
-- The lowering tab shows the lowered blocks, and the code generation tab shows the generated JavaScript code.
+- The elaborator and resolver tabs display the result of elaboration. The former prints the elaborated terms with the original names used in the parsed trees. The latter substitutes those names with resolved symbol references.
+- The lowering tab shows the lowered blocks, and the code generation tab displays the generated JavaScript code. Some test cases might raise errors in the code generation tab. This is because we do not provide implementations for some functions, and they are mainly used for type-checking tests. You may ignore these errors if you see them.
 
 ### 4.2 Compatibility Check
 
-We have tested the web demo on the following operating systems and browsers.
+We have tested the web demo on the following operating systems and browsers. The table shows the version of the browsers on different operating systems.
 
-|  | macOS | Windows 11 |
+|  | macOS | Arch Linux |
 | --- | --- | --- |
-| Apple Safari | TODO | N/A |
-| Google Chrome | TODO | 137.0.7151.120 |
-| Microsoft Edge | TODO | 137.0.3296.93 |
+| Apple Safari | 18.5 (20621.2.5.11.8) | N/A |
+| Google Chrome | 138.0.7204.49 | 138.0.7204.49 |
+| Microsoft Edge | 137.0.3296.83 | Did Not Test |
+| Firefox | Did Not Test | 140.0.1 |
