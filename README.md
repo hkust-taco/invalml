@@ -10,9 +10,9 @@ This artifact implements InvalML and the type inference algorithm based on the M
 2. The test cases for InvalML and the inference algorithm can be found in an `invalml` folder in the MLscript tests.
 3. The [web demo](https://anonymous8538.github.io/780/) offers a convenient way to compile and run InvalML programs directly in the browser, eliminating the need for the toolchain dependencies. The results of compilation, such as type checking, can be viewed in the web demo.
 
-The type checker is our main contribution, while the web demo illustrates the reusability of our main project. We do not provide a command-line tool specifically for compiling an MLscript file.
+The type checker is our main contribution, while the web demo illustrates the reusability of our project. We do not provide a command-line tool specifically for compiling an MLscript file.
 
-This documentation contains the evaluation instructions for the main type checker and the web demo. We also introduce the implementation of our algorithm and provide a user guide for the web demo.
+This documentation contains the evaluation instructions for the type checker and the web demo. We also introduce the implementation of our algorithm and provide a user guide for the web demo.
 
 ### 1.1 List of Claims
 
@@ -62,16 +62,16 @@ This artifact does not require any specific hardware to run. A normal computer w
 
 The project can be reused as follows:
 
-1. The main project can be extended directly. One can modify the corresponding parts to extend the system and the whole compiler, as we will explain in Section 3.
-2. The web demo shows the other approach to reusing the project. The main project can be compiled to JavaScript via [Scala.js](https://www.scala-js.org/), which produces an artifact that the web demo uses. This demonstrates that the project can be invoked by other programs to output both intermediate and final results of the compilation.
+1. The project can be extended directly. One can modify the corresponding parts to extend the system and the whole compiler, as we will explain in Section 3.
+2. The web demo shows the other approach to reusing the project. The project can be compiled to JavaScript via [Scala.js](https://www.scala-js.org/), which produces an artifact that the web demo uses. This demonstrates that the project can be invoked by other programs to output both intermediate and final results of the compilation.
 
 ## 2. Getting Started
 
 This section displays the instructions for setup. There are three ways of evaluating the artifact, and we provide a detailed guide for each of them.
 
-### 2.1 Running the Main Project (Using Docker)
+### 2.1 Running the Project (Using Docker)
 
-Docker images are prepared with all necessary dependencies to compile the main project. The following instructions are for `amd64`. If you are using `arm64`, you need to substitute `invalml` in the following commands with `invalml-arm64`.
+Docker images are prepared with all necessary dependencies to compile the project. The following instructions are for `amd64`. If you are using `arm64`, you need to substitute `invalml` in the following commands with `invalml-arm64`.
 
 1. Run the command `docker load < invalml.tar.gz` to load the Docker image.
 2. Run the command `docker run -it -p 8080:8080 --rm mlscript/invalml` to launch a temporary container. You can substitute the second `8080` with another port number that is available on your device (e.g., you can run `docker run -it -p 8080:3154 --rm mlscript/invalml`) if the 8080 port is occupied.
@@ -86,9 +86,9 @@ Docker images are prepared with all necessary dependencies to compile the main p
     
 4. After executing the tests, you can exit the container. The container will be destroyed automatically.
 
-### 2.2 Running the Main Project (From Scratch)
+### 2.2 Running the Project (From Scratch)
 
-To build the main project from scratch, please follow the steps below to ensure that all dependencies are installed correctly.
+To build the project from scratch, please follow the steps below to ensure that all dependencies are installed correctly.
 
 1. We recommend that you use [Coursier](https://get-coursier.io/) to set up the Scala development environment. You can follow [these instructions](https://get-coursier.io/docs/cli-installation) to install Coursier on your device. You may need to install Java manually on some platforms. After the installation of Coursier, you can run the command `cs install sbt scala` to install **sbt** and **Scala**. Other approaches to installing **Java**, **sbt**, and **Scala** should also work. Please ensure you have Java 11 or above.
 2. Please install [Node.js 24](https://nodejs.org/en) and **npm** (Node Package Manager). If there are already other versions of **Node.js** on your device, you can consider using a version manager like [nvm](https://github.com/nvm-sh/nvm). Please ensure the node executable is in the `PATH` so that the tests can be executed correctly.
@@ -109,11 +109,11 @@ If you have already compiled and executed the test from scratch/in Docker, you c
 
 You may refer to Section 4 for more details about the web demo.
 
-## 3. Introduction to the Main Project
+## 3. Introduction to the Project
 
 ### 3.1 Project Structure
 
-Our artifact is based on MLscript. The structure of the main project is shown as follows:
+Our artifact is based on MLscript. The structure of the project is shown as follows:
 
 - `hkmc2/shared/src`
     - `main/scala`
@@ -189,9 +189,9 @@ The test output of each test block, starting with `//|`, is appended to the test
 
 You can use the watch mode by running the command `~hkmc2DiffTests/Test/run` in the `sbt` interactive shell instead. In watch mode, you can modify the test files, and the compiler will detect the modification automatically, recompiling the modified files for you. You can also use incantation `~; hkmc2JS/fullLinkJS; hkmc2JVM/test; hkmc2DiffTests/testOnly -- -z BuildWebDemo` to automatically rebuild all relevant source code and regenerate the web demo on change.
 
-### 3.4 Other Components of The Main Project
+### 3.4 Other Components of The Project
 
-This subsection briefly introduces the other important components in the main project. For simplicity, we omit the introduction to legacy compiler code and subprojects, focusing on the main infrastructure that our implementation depends on. All the paths mentioned below are relative to `hkmc2/shared/src/main/scala/hkmc2`.
+This subsection briefly introduces the other important components in the project. For simplicity, we omit the introduction to legacy compiler code and subprojects, focusing on the main infrastructure that our implementation depends on. All the paths mentioned below are relative to `hkmc2/shared/src/main/scala/hkmc2`.
 
 - Lexing and parsing: The lexer (`syntax/Token.scala`) consumes the input string and generates tokens, defined in `syntax/Token.scala`. The parser (`syntax/Parser.scala`) handles the tokens according to the parse rules defined in `syntax/ParseRule.scala` and generates a parsed tree. The structure of parsed trees is given in `syntax/Tree.scala`.
 - Elaboration: The elaborator (`semantics/Elaborator.scala`) accepts a parsed tree, generating symbols (`semantics/Symbol.scala`) and handling the symbol references. It elaborates the given parsed tree into terms (`semantics/Term.scala`) that can be type-checked or lowered later. The pattern-matching syntax of MLscript, called [ultimate conditional syntax](https://dl.acm.org/doi/abs/10.1145/3689746), is also desugarred in this stage. The process is defined in files `semantics/ucs/*.scala`.
