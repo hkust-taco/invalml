@@ -65,7 +65,7 @@ fun mapi_force = s => f =>
       f(!i, x)
 
 // * An alternative version that takes an existing region in parameter
-fun mapi: [A, R, E] -> (Seq[out A, out E], Region[R]) -> ((Int, A) ->{E} A) ->{R} Seq[out A, out E | R]
+fun mapi: [A, R, E] -> (Seq[out A, out E], Region[out R]) -> ((Int, A) ->{E} A) ->{R} Seq[out A, out E | R]
 fun mapi = (s, r) => f =>
   let i = r.ref 0
   map(s) of x =>
@@ -73,7 +73,7 @@ fun mapi = (s, r) => f =>
     f(!i, x)
 
 // * Simpler; should be equivalent when Region is covariant
-fun mapi: [A, E] -> (Seq[out A, out E], Region[E]) -> ((Int, A) ->{E} A) ->{E} Seq[out A, out E]
+fun mapi: [A, E] -> (Seq[out A, out E], Region[out E]) -> ((Int, A) ->{E} A) ->{E} Seq[out A, out E]
 fun mapi = (s, r) => f =>
   let i = r.ref 0
   map(s) of x =>

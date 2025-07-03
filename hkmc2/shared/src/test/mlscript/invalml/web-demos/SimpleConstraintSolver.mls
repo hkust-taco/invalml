@@ -22,7 +22,7 @@ class Iter[T, R]
 
 
 fun
-  empty:   [A, R] -> Region[R] ->{R} ArrayList[A, out R]
+  empty:   [A, R] -> Region[out R] ->{R} ArrayList[A, out R]
   clear:   [A, R] -> (ArrayList[A, out R]) ->{R} ()
   push:    [A, R] -> (ArrayList[A, out R], A) ->{R} ()
   foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()

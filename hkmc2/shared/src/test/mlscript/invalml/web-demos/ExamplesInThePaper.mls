@@ -10,7 +10,7 @@ class ArrayList[A, R]
 class List[A]
 class Iter[T, R]
 
-fun mkArrayList : [R, T] -> (Region[R]) ->{R} ArrayList[T, R]
+fun mkArrayList : [R, T] -> (Region[out R]) ->{R} ArrayList[T, R]
 fun add : [R, T] -> (ArrayList[T, R], T) ->{R} ()
 fun clear : [R, T] -> ArrayList[T, R] ->{R} ()
 fun foreach : [E, R, T] -> (Iter[T, R], T ->{E} ()) -> {R | E} ()
@@ -36,7 +36,7 @@ fun mapi(xs, f) =
     let index = r.ref 0 in map(xs, x => let res = f(!index, x) in index := !index + 1; res)
 
 
-fun f: [R1, R2 extends ~R1] -> (Region[R1], Region[R2]) ->{R1 | R2} Int
+fun f: [R1, R2 extends ~R1] -> (Region[out R1], Region[out R2]) ->{R1 | R2} Int
 
 
 // region r1 in
@@ -44,7 +44,7 @@ fun f: [R1, R2 extends ~R1] -> (Region[R1], Region[R2]) ->{R1 | R2} Int
 
 
 region r1 in
-  fun g: [outer, R extends outer] -> Region[R] ->{R} Int
+  fun g: [outer, R extends outer] -> Region[out R] ->{R} Int
   fun g(r) = region r2 in f(r, r2)
   region r3 in g(r3)
 

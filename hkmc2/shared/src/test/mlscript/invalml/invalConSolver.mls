@@ -27,7 +27,7 @@ class Iter[T, R]
 fun
   
   // empty:   [A, R] -> Region[R] ->{R} ArrayList[out A, out R]  // TODO investigate: why does this break things?
-  empty:   [A, R] -> Region[R] ->{R} ArrayList[A, out R]
+  empty:   [A, R] -> Region[out R] ->{R} ArrayList[A, out R]
   
   clear:   [A, R] -> (ArrayList[A, out R]) ->{R} ()
   push:    [A, R] -> (ArrayList[A, out R], A) ->{R} ()
@@ -38,7 +38,7 @@ fun
   next: [T, S] -> Iter[T, S] ->{S} Option[T]
   whileDo: [R] -> (() ->{R} Bool) ->{R} ()
 
-fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+fun freeze: [R, E extends ~R, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
 
 
 push

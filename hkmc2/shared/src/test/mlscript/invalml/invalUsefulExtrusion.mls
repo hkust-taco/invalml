@@ -6,11 +6,11 @@ fun (;) seq(_, res) = res
 
 
 
-fun wield: [R] -> (Region[R]) ->{R} ()
-fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+fun wield: [R] -> (Region[out R]) ->{R} ()
+fun freeze: [R, E extends ~R, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
 
 freeze
-//│ Type: ['R, 'E, 'T] -> (Region['R], () ->{¬'R ∧ 'E} 'T) ->{'R ∨ 'E} 'T
+//│ Type: ['R, 'E, 'T] -> (Region[out 'R], () ->{¬'R ∧ 'E} 'T) ->{'R ∨ 'E} 'T
 //│ Where:
 //│   'E <: ¬'R
 
@@ -39,17 +39,17 @@ fun foo(r1, r2, f, g) =
   freeze(r1, () => f(123)); freeze(r2, () => g(456))
 
 foo
-//│ Type: ['res, 'R, 'E, 'R1, 'E1] -> (Region['R], Region['R1], Int ->{'E ∧ ¬'R} ⊤, Int ->{'E1 ∧ ¬'R1} 'res) ->{(('R ∨ 'E) ∨ 'R1) ∨ 'E1} 'res
+//│ Type: ['res, 'R, 'E, 'R1, 'E1] -> (Region[out 'R], Region[out 'R1], Int ->{'E ∧ ¬'R} ⊤, Int ->{'E1 ∧ ¬'R1} 'res) ->{(('R ∨ 'E) ∨ 'R1) ∨ 'E1} 'res
 //│ Where:
 //│   'E <: ¬'R
 //│   'E1 <: ¬'R1
 
 
 
-fun freeze: [E, R, S, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+fun freeze: [E, R, S, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
 
 freeze
-//│ Type: ['E, 'R, 'T] -> (Region['R], () ->{¬'R ∧ 'E} 'T) ->{'R ∨ 'E} 'T
+//│ Type: ['E, 'R, 'T] -> (Region[out 'R], () ->{¬'R ∧ 'E} 'T) ->{'R ∨ 'E} 'T
 
 
 fun foo(f) =
@@ -71,7 +71,7 @@ foo
 
 
 
-fun foo: [R1, R2] -> (Region[R1], Region[R2], Int ->{R1 & ~R2} (), Int ->{R2 & ~R1} ()) ->{R1 | R2} () 
+fun foo: [R1, R2] -> (Region[out R1], Region[out R2], Int ->{R1 & ~R2} (), Int ->{R2 & ~R1} ()) ->{R1 | R2} () 
 fun foo(r1, r2, f, g) =
   f(123); g(456)
 
@@ -79,7 +79,7 @@ fun foo(r1, r2, f, g) =
   freeze(r1, () => f(123)); freeze(r2, () => g(456))
 
 foo
-//│ Type: ['res, 'E, 'R, 'E1, 'R1] -> (Region['R], Region['R1], Int ->{'E ∧ ¬'R} ⊤, Int ->{'E1 ∧ ¬'R1} 'res) ->{(('R ∨ 'E) ∨ 'R1) ∨ 'E1} 'res
+//│ Type: ['res, 'E, 'R, 'E1, 'R1] -> (Region[out 'R], Region[out 'R1], Int ->{'E ∧ ¬'R} ⊤, Int ->{'E1 ∧ ¬'R1} 'res) ->{(('R ∨ 'E) ∨ 'R1) ∨ 'E1} 'res
 
 
 fun foo(r1, r2, f, g) =
@@ -88,10 +88,10 @@ fun foo(r1, r2, f, g) =
 foo
 //│ Type: ['r1, 'r2, 'E, 'R, 'T, 'R1] -> ('r1, 'r2, 'r2 ->{('E ∧ ¬'R) ∧ ¬'R1} ⊤, 'r1 ->{('E ∧ ¬'R) ∧ ¬'R1} 'T) ->{'R ∨ 'E} 'T
 //│ Where:
-//│   'r1 <: Region['R]
+//│   'r1 <: Region[out 'R]
 //│   'R1 <: 'E
 //│   'R1 <: ¬'R
-//│   'r2 <: Region['R1]
+//│   'r2 <: Region[out 'R1]
 
 :e
 region r in
@@ -99,8 +99,8 @@ region r in
 //│ ╔══[ERROR] Type error in reference with expected type 'r2
 //│ ║  l.98: 	  foo(r, r, wield, wield)
 //│ ║        	         ^
-//│ ╟── because: cannot constrain  Region[r]  <:  'r2
-//│ ╟── because: cannot constrain  Region[r]  <:  Region['R]
+//│ ╟── because: cannot constrain  Region[in ⊥ out r]  <:  'r2
+//│ ╟── because: cannot constrain  Region[in ⊥ out r]  <:  Region[in ⊥ out 'R]
 //│ ╟── because: cannot constrain  r  <:  'R
 //│ ╟── because: cannot constrain  r  <:  ¬'R1
 //│ ╟── because: cannot constrain  'R1  <:  ¬r
@@ -108,8 +108,8 @@ region r in
 //│ ╔══[ERROR] Type error in reference with expected type 'f
 //│ ║  l.98: 	  foo(r, r, wield, wield)
 //│ ║        	            ^^^^^
-//│ ╟── because: cannot constrain  (Region['R2]) ->{'R2} (())  <:  'f
-//│ ╟── because: cannot constrain  (Region['R2]) ->{'R2} (())  <:  ('r2) ->{¬'R ∧ ¬'R1 ∧ 'E} (⊤)
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R2]) ->{'R2} (())  <:  'f
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R2]) ->{'R2} (())  <:  ('r2) ->{¬'R ∧ ¬'R1 ∧ 'E} (⊤)
 //│ ╟── because: cannot constrain  'R2  <:  ¬'R ∧ ¬'R1 ∧ 'E
 //│ ╟── because: cannot constrain  'R2  <:  ¬'R1
 //│ ╟── because: cannot constrain  r  <:  ¬'R1
@@ -118,8 +118,8 @@ region r in
 //│ ╔══[ERROR] Type error in reference with expected type 'g
 //│ ║  l.98: 	  foo(r, r, wield, wield)
 //│ ║        	                   ^^^^^
-//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  'g
-//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  ('r1) ->{¬'R ∧ ¬'R1 ∧ 'E} ('T)
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R3]) ->{'R3} (())  <:  'g
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R3]) ->{'R3} (())  <:  ('r1) ->{¬'R ∧ ¬'R1 ∧ 'E} ('T)
 //│ ╟── because: cannot constrain  'R3  <:  ¬'R ∧ ¬'R1 ∧ 'E
 //│ ╟── because: cannot constrain  'R3  <:  ¬'R1
 //│ ╟── because: cannot constrain  r  <:  ¬'R1
@@ -133,8 +133,8 @@ region r in
 //│ ╔══[ERROR] Type error in reference with expected type 'f
 //│ ║  l.132: 	    foo(r, s, wield, wield)
 //│ ║         	              ^^^^^
-//│ ╟── because: cannot constrain  (Region['R]) ->{'R} (())  <:  'f
-//│ ╟── because: cannot constrain  (Region['R]) ->{'R} (())  <:  ('r2) ->{¬'R1 ∧ ¬'R2 ∧ 'E} (⊤)
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R]) ->{'R} (())  <:  'f
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R]) ->{'R} (())  <:  ('r2) ->{¬'R1 ∧ ¬'R2 ∧ 'E} (⊤)
 //│ ╟── because: cannot constrain  'R  <:  ¬'R1 ∧ ¬'R2 ∧ 'E
 //│ ╟── because: cannot constrain  'R  <:  ¬'R1
 //│ ╟── because: cannot constrain  s ∧ ¬r  <:  ¬'R1
@@ -143,8 +143,8 @@ region r in
 //│ ╔══[ERROR] Type error in reference with expected type 'g
 //│ ║  l.132: 	    foo(r, s, wield, wield)
 //│ ║         	                     ^^^^^
-//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  'g
-//│ ╟── because: cannot constrain  (Region['R3]) ->{'R3} (())  <:  ('r1) ->{¬'R1 ∧ ¬'R2 ∧ 'E} ('T)
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R3]) ->{'R3} (())  <:  'g
+//│ ╟── because: cannot constrain  (Region[in ⊥ out 'R3]) ->{'R3} (())  <:  ('r1) ->{¬'R1 ∧ ¬'R2 ∧ 'E} ('T)
 //│ ╟── because: cannot constrain  'R3  <:  ¬'R1 ∧ ¬'R2 ∧ 'E
 //│ ╟── because: cannot constrain  'R3  <:  ¬'R2
 //│ ╟── because: cannot constrain  r  <:  ¬'R2

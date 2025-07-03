@@ -63,7 +63,7 @@ object InvalCtx:
   def varTy(ct: Type, cr: Type)(using ctx: InvalCtx): Type =
     codeBaseTy(ct, Wildcard(cr, cr), Wildcard.out(Bot))
   def regionTy(sk: Type)(using ctx: InvalCtx): Type =
-    ClassLikeType(ctx.getCls("Region"), Wildcard(sk, sk) :: Nil)
+    ClassLikeType(ctx.getCls("Region"), Wildcard.out(sk) :: Nil)
   def refTy(ct: Type, sk: Type)(using ctx: InvalCtx): Type =
     ClassLikeType(ctx.getCls("Ref"), Wildcard(ct, ct) :: Wildcard.out(sk) :: Nil)
   def init(raise: Raise)(using Elaborator.State, Elaborator.Ctx): InvalCtx =
