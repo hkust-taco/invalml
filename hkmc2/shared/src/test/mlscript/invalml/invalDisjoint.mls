@@ -49,11 +49,47 @@ naive_helper
 //│   'reg <: ⊥
 
 
+fun f: [S, R, R extends ~S] -> (Region[out S], Region[out R]) ->{S | R} Int
+
+:e
+region r1 in
+  let g = (r => region r2 in f(r, r2)) in
+    region r3 in g(r3)
+//│ ╔══[ERROR] Type error in reference with expected type 'r
+//│ ║  l.57: 	    region r3 in g(r3)
+//│ ║        	                   ^^
+//│ ╟── because: cannot constrain  Region[in ⊥ out r3]  <:  'r
+//│ ╟── because: cannot constrain  Region[in ⊥ out 'r31]  <:  'r
+//│ ╟── because: cannot constrain  Region[in ⊥ out 'r31]  <:  Region[in ⊥ out 'S]
+//│ ╟── because: cannot constrain  'r31  <:  'S
+//│ ╟── because: cannot constrain  ¬r1  <:  'S
+//│ ╟── because: cannot constrain  ¬r1  <:  ¬'r2 ∨ r1
+//│ ╟── because: cannot constrain  'r2  <:  r1
+//│ ╙── because: cannot constrain  ¬r1  <:  r1
+//│ ╔══[ERROR] Type error in block
+//│ ║  l.56: 	  let g = (r => region r2 in f(r, r2)) in
+//│ ║        	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.57: 	    region r3 in g(r3)
+//│ ║        	^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  'eff  <:  ⊥
+//│ ╟── because: cannot constrain  ¬'r11  <:  ⊥
+//│ ╟── because: cannot constrain  ⊤  <:  'r11
+//│ ╙── because: cannot constrain  ⊤  <:  ⊥
+//│ Type: Int
+
+fun g(r) =
+  region r2 in f(r, r2)
+
+region r1 in
+  region r3 in g(r3)
+//│ Type: Int
+
+
 :e
 region x in
   naive_helper(x)
 //│ ╔══[ERROR] Type error in reference with expected type 'r1
-//│ ║  l.54: 	  naive_helper(x)
+//│ ║  l.90: 	  naive_helper(x)
 //│ ║        	               ^
 //│ ╟── because: cannot constrain  Region[in ⊥ out x]  <:  'r1
 //│ ╟── because: cannot constrain  Region[in ⊥ out 'x1]  <:  'r1
@@ -62,7 +98,7 @@ region x in
 //│ ╟── because: cannot constrain  ⊤  <:  'reg
 //│ ╙── because: cannot constrain  ⊤  <:  ⊥
 //│ ╔══[ERROR] Type error in block
-//│ ║  l.54: 	  naive_helper(x)
+//│ ║  l.90: 	  naive_helper(x)
 //│ ║        	  ^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'eff  <:  ⊥
 //│ ╟── because: cannot constrain  ¬'x2 ∧ 'eff1  <:  ⊥
@@ -102,7 +138,7 @@ region x in
 region x in
   (region y in let t = helper(x) in 42) as [A] -> Int
 //│ ╔══[ERROR] Type error in reference with expected type 'r1
-//│ ║  l.103: 	  (region y in let t = helper(x) in 42) as [A] -> Int
+//│ ║  l.139: 	  (region y in let t = helper(x) in 42) as [A] -> Int
 //│ ║         	                              ^
 //│ ╟── because: cannot constrain  Region[in ⊥ out x]  <:  'r1
 //│ ╟── because: cannot constrain  Region[in ⊥ out x]  <:  Region[in ⊥ out 'reg]
@@ -110,7 +146,7 @@ region x in
 //│ ╟── because: cannot constrain  x  <:  'env
 //│ ╙── because: cannot constrain  x  <:  outer ∨ y
 //│ ╔══[ERROR] Type error in region expression with expected type [outer, 'A] -> Int
-//│ ║  l.103: 	  (region y in let t = helper(x) in 42) as [A] -> Int
+//│ ║  l.139: 	  (region y in let t = helper(x) in 42) as [A] -> Int
 //│ ║         	                       ^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'eff  <:  ⊥
 //│ ╟── because: cannot constrain  ¬'y1 ∧ x  <:  ⊥
@@ -133,10 +169,10 @@ fun badanno: outer
 :e
 fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 //│ ╔══[ERROR] Only one outer variable can be bound.
-//│ ║  l.134: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
+//│ ║  l.170: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 //│ ╙──       	              ^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Illegal forall annotation.
-//│ ║  l.134: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
+//│ ║  l.170: 	fun badanno2: [outer A, outer B] -> Int ->{A | B} Int
 //│ ╙──       	              ^^^^^^^^^^^^^^^^^^
 //│ ═══[ERROR] Invalid type
 
@@ -179,13 +215,13 @@ fun foo(r1) =
     fork((_ => r1.ref 1), (_ => r2.ref 2))
     foo(r2)
 //│ ╔══[ERROR] Type error in function literal
-//│ ║  l.177: 	fun foo(r1) =
+//│ ║  l.213: 	fun foo(r1) =
 //│ ║         	        ^^^^^
-//│ ║  l.178: 	  region r2 in
+//│ ║  l.214: 	  region r2 in
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.179: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
+//│ ║  l.215: 	    fork((_ => r1.ref 1), (_ => r2.ref 2))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.180: 	    foo(r2)
+//│ ║  l.216: 	    foo(r2)
 //│ ║         	^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  (Region[in ⊥ out 'r2]) ->{'eff1} ('app1)
