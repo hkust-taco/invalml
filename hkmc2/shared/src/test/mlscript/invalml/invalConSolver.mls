@@ -1,133 +1,192 @@
+:js
+
+:global
 :invalml
 
 
+declare class Array[T]
+declare class Map[K, V]
+
+fun mkArray: [T] -> () -> Array[T]
+fun mkArray() = @untyped globalThis.Array()
+
+fun at: [T] -> (Array[T], Int) -> T
+fun at(xs, i) = @untyped xs.at(i)
+
+fun not(b) = if b then false else true
 fun (;) seq(_, res) = res
+fun id(x) = x
+
 fun println: Any -> ()
+fun println(s) = @untyped print(s)
+
 fun (~) concat: (Str, Str) -> Str
+fun concat(x, y) = @untyped x + y
+
+fun toString: Any -> Str
+fun toString(x) = @untyped x.toString()
+
+fun (===) seq: (Str, Str) -> Bool
+fun seq(x, y) = @untyped x == y
+
+fun mkMap: [K, V] -> () -> Map[K, V]
+fun mkMap() = @untyped id(new globalThis.Map())
+
+fun has: [K, V] -> (Map[K, V], K) -> Bool
+fun has(m, k) = @untyped m.has(k)
+
+fun getFromMap: [K, V] -> (Map[K, V], K) -> V
+fun getFromMap(m, k) = @untyped m.get(k)
+
+fun setToMap: [K, V] -> (Map[K, V], K, V) -> ()
+fun setToMap(m, k, v) = @untyped m.set(k, v)
+
+
+fun error() = error()
 fun (???) TODO() = TODO()
 
 
-class PairOf[A, B] with
+
+
+class PairOf[out A, out B] with
   constructor
     Pair(fst: A, snd: B)
 
-class Stack[A] with
+class Option[out A] with
   constructor
-    Nil
-    Cons(head: A, tail: Stack[out A])
-
-class Option[A] with
-  constructor
-    None
+    None()
     Some(value: A)
 
-class ArrayList[A, R]
-class Iter[T, R]
+class List[out A] with
+  constructor
+    Nil()
+    Cons(head: A, tail: List[A])
 
-fun
-  
-  // empty:   [A, R] -> Region[R] ->{R} ArrayList[out A, out R]  // TODO investigate: why does this break things?
-  empty:   [A, R] -> Region[out R] ->{R} ArrayList[A, out R]
-  
-  clear:   [A, R] -> (ArrayList[A, out R]) ->{R} ()
-  push:    [A, R] -> (ArrayList[A, out R], A) ->{R} ()
-  foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()
-  read: [T, S] -> Iter[T, S] ->{S} T
-  iter: [outer, Res, R, E extends ~R, T] ->
-    (ArrayList[T, out R], [S extends ~outer] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
-  next: [T, S] -> Iter[T, S] ->{S} Option[T]
-  whileDo: [R] -> (() ->{R} Bool) ->{R} ()
+fun fold(x, xs, f) = if xs is
+  Nil() then x
+  Cons(y, ys) then fold(f(x, y), ys, f)
+
+fun map(xs, f) = if xs is
+  Nil() then Nil()
+  Cons(x, xs) then Cons(f(x), map(xs, f))
+
+fun each(xs, f) = if xs is
+  Nil() then ()
+  Cons(x, xs) then f(x); each(xs, f)
+
+fun find(xs, f) = if xs is
+  Nil() then None()
+  Cons(x, xs) then
+    if f(x) then Some(x)
+    else find(xs, f)
+
+class ArrayList[T, out R](val d: Array[T])
+class Iter[T, out R](val arr: Array[T], val i: Ref[Int, out R], val step: Int, val end: Int)
+class HashMap[K, V, out R](val d: Map[Str, V], val f: K -> Str)
+
+// fun empty:   [A, R] -> Region[R] ->{R} ArrayList[out A, out R]  // TODO investigate: why does this break things?
+fun empty: [A, R] -> Region[out R] ->{R} ArrayList[A, out R]
+fun empty(r) = new ArrayList(mkArray())
+
+fun clear: [A, R] -> (ArrayList[A, out R]) ->{R} ()
+fun clear(arr) = @untyped arr.ArrayList#d.splice(0, arr.length); ()
+
+fun push: [A, R] -> (ArrayList[A, R], A) ->{R} ()
+fun push(arr, e) = @untyped arr.ArrayList#d.push(e); ()
+
+fun len: [A, R] -> (ArrayList[A, R]) ->{R} Int
+fun len(arr) = @untyped arr.ArrayList#d.length
+
+fun iter: [Res, R, E extends ~R, T] -> (ArrayList[T, R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
+fun iter(arr, f) =
+  region r in f(new Iter(arr.ArrayList#d, (r.ref 0), 1, len(arr)))
+
+fun next: [T, S] -> Iter[T, S] ->{S} Option[T]
+fun next(it) =
+  let i = !it.Iter#i
+  if i == it.Iter#end then None()
+  else
+    let res = Some(at of it.Iter#arr, i)
+    it.Iter#i := i + it.Iter#step
+    res
+
+fun whileDo: [R] -> (() ->{R} Bool) ->{R} ()
+fun whileDo(f) =
+  if f() then whileDo(f) else ()
+
+fun foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()
+fun foreach(it, f) =
+  whileDo of () =>
+    if next(it) is
+      Some(x) then f(x); true
+      None then false
 
 fun freeze: [R, E extends ~R, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
+fun freeze(r, f) = f()
+
+fun max(x, y) = if x < y then y else x
 
 
-push
-//│ Type: ['A, 'R] -> (ArrayList['A, out 'R], 'A) ->{'R} ()
+fun mkHashMap: [R, K, V] -> (Region[out R], K -> Str) ->{R} HashMap[K, V, R]
+fun mkHashMap(r, f) = new HashMap(mkMap(), f)
+
+fun getOrUpdate: [R, K, V, E] -> (HashMap[K, V, R], K, () ->{E} V) ->{E | R} V
+fun getOrUpdate(m, k, fv) =
+  let sk = m.HashMap#f(k)
+  if has(m.HashMap#d, sk) then getFromMap(m.HashMap#d, sk)
+  else
+    let res = fv()
+    setToMap(m.HashMap#d, sk, res)
+    res
+
+fun hasOrUpdate: [R, K, V, E] -> (HashMap[K, V, R], K, () ->{E} V) ->{E | R} ()
+fun hasOrUpdate(m, k, fv) = getOrUpdate(m, k, fv); ()
 
 
-class Type[R] with
+class Type[out R] with
   constructor
-    IntType
-    Unif(id: Int, lowerBounds: ArrayList[Type[R], out R], upperBounds: ArrayList[Type[R], out R])
-    Fun(lhs: Type[R], rhs: Type[R])
+    IntType()
+    FunctionType(lhs: Type[R], rhs: Type[R])
+    RecordType(fields: List[PairOf[Str, Type[R]]])
+    TypeVariable(name: Str, level: Int, lowerBounds: ArrayList[Type[R], R], upperBounds: ArrayList[Type[R], R])
+    
 
-let ty = Fun(IntType, IntType)
+fun isSimpl(ty) = if ty is
+  FunctionType(_, _) then false
+  else true
 
-// fun pp(x) = if x is
-//   Int then "Int"
-//   Fun(l, r) then pp(l) ~ " -> " ~ pp(r)
 
-// :fixme
-fun pp = case
-  IntType then "Int"
-  Unif(id, lbs, ubs) then "α" ~ String(id)
-  Fun(l, r) then pp(l) ~ " -> " ~ pp(r)
+fun ty2Str(ty) = if ty is
+  IntType() then "Int"
+  FunctionType(lhs, rhs) then
+    let ls = if isSimpl(lhs) then ty2Str(lhs) else "(" ~ ty2Str(lhs) ~ ")"
+    ls ~ " -> " ~ ty2Str(rhs)
+  RecordType(fields) then "{ " ~ fold("", fields, (s, p) => if p is Pair(n, t) then n ~ ": " ~ ty2Str(t) ~ ", ") ~ "}"
+  TypeVariable(name, level, _, _) then name ~ toString(level)
 
-pp(ty)
-//│ Type: Str
+// fun levelOf: [R] -> Type[R] -> Int
+fun levelOf(ty) = if ty is
+  IntType() then 0
+  FunctionType(lhs, rhs) then max(levelOf(lhs), levelOf(rhs))
+  RecordType(fields) then fold(0, fields, (r, p) => if p is Pair(_, t) then max(r, levelOf(t)))
+  TypeVariable(_, level, _, _) then level
 
 
 :e
 fun matchP = case
   Pair(IntType, IntType) then ()
 //│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
-//│ ║  l.72: 	  Pair(IntType, IntType) then ()
-//│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ║  l.177: 	  Pair(IntType, IntType) then ()
+//│ ╙──       	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╔══[ERROR] Pattern Ident(IntType) is not supported yet.
-//│ ║  l.72: 	  Pair(IntType, IntType) then ()
-//│ ╙──      	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.72: 	  Pair(IntType, IntType) then ()
-//│ ╙──      	                ^^^^^^^^^^^^^^^^
-//│ ╔══[ERROR] Expect 3 cases, but 1 got.
-//│ ║  l.72: 	  Pair(IntType, IntType) then ()
-//│ ╙──      	       ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-fun error() = error()
-
-fun solve = case
-  Nil then ()
-  Cons(c, cs) then if c is
-    Pair(lhs, rhs) then
-      if lhs is
-        IntType then if rhs is
-          IntType then ()
-          Fun(_, _) | Unif(_, _, _) then error()
-        Fun(l1, r1) then  if rhs is
-          Fun(l2, r2) then
-            solve(Cons(Pair(l2, l1), cs))
-            solve(Cons(Pair(r1, r2), cs))
-          IntType | Unif(_, _, _) then error()
-        Unif(id, lbs, ubs) then
-          clear(ubs)
-          // iter(ubs, TODO())
-          // Handle unification case here
-          error() // Placeholder for unification logic
-
-
-
-solve
-//│ Type: ['Fun, 'Fun, 'eff, 'eff1, 'Unif] -> (Stack[out PairOf[out (Type[out 'Unif] ∧ Type[out 'Fun]) ∧ Type[?], out (((Type[?] ∧ Type[out 'Fun]) ∧ Type[?]) ∧ Type[?]) ∧ Type[?]]] ∧ Stack[?]) ->{('eff1 ∨ 'eff) ∨ 'Unif} ()
-//│ Where:
-//│   ⊥ <: 'Fun
-//│   'Fun <: ⊤
-//│   'Fun <: 'Fun
-//│   ⊥ <: 'Fun
-//│   'Fun <: ⊤
-//│   'Fun <: 'Fun
-//│   'Fun <: 'Unif
-//│   'Fun <: 'Unif
-//│   'Fun <: 'eff
-//│   'Fun <: 'eff
-//│   ⊥ <: 'eff
-//│   'Fun <: 'eff1
-//│   'Fun <: 'eff1
-//│   'eff <: 'eff1
-//│   ⊥ <: 'eff1
-//│   'eff1 <: 'eff
-//│   'Unif <: 'eff
-//│   'Unif <: 'eff1
+//│ ║  l.177: 	  Pair(IntType, IntType) then ()
+//│ ╙──       	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╔══[ERROR] Expect 4 cases, but 1 got.
+//│ ║  l.177: 	  Pair(IntType, IntType) then ()
+//│ ╙──       	                ^^^^^^^^^^^^^^^^
+//│ ╔══[ERROR] Expect 4 cases, but 1 got.
+//│ ║  l.177: 	  Pair(IntType, IntType) then ()
+//│ ╙──       	       ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 fun test: [R] -> (ArrayList[Int, R]) ->{R} Int
@@ -159,10 +218,10 @@ fun test(xs) =
     let ncs = r.ref 0
     iter of xs, it =>
       ncs := 1
-//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.160: 	    iter of xs, it =>
+//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, out S]) ->{S ∨ 'E} 'Res
+//│ ║  l.219: 	    iter of xs, it =>
 //│ ║         	                ^^^^^
-//│ ║  l.161: 	      ncs := 1
+//│ ║  l.220: 	      ncs := 1
 //│ ║         	^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'reg  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'reg  <:  'E ∨ S
@@ -177,195 +236,100 @@ fun test(xs) =
 //│ ╙── because: cannot constrain  r ∧ ¬outer  <:  ¬R1
 
 
-// fun solve: [R] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
-fun solve: [outer, R extends outer] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
-fun solve = case
-  Nil then ()
+
+
+fun report(lhs, rhs) =
+  println("Cannot constrain " ~ ty2Str(lhs) ~ " <: " ~ ty2Str(rhs) ~ "!")
+
+
+// fun extrude: [outer, R extends outer] -> (Type[R], Bool, Int, (Str, Int) ->{R} Type[R], HashMap[Type[R], Type[R], R]) ->{R} Type[R]
+fun extrude(ty, pol, lvl, freshVar, cache) = getOrUpdate of cache, ty, () =>
+  if levelOf(ty) <= lvl then ty
+  else if ty is
+    IntType() then ty
+    FunctionType(lhs, rhs) then
+      FunctionType(extrude(lhs, not(pol), lvl, freshVar, cache), extrude(rhs, pol, lvl, freshVar, cache))
+    RecordType(fields) then
+      RecordType(map(fields, p => if p is Pair(name, ty) then Pair(name, extrude(ty, pol, lvl, freshVar, cache))))
+    TypeVariable(name, level, lb, ub) then
+      let nc = freshVar(name ~ "'", lvl)
+      if pol then
+        push(ub, nc)
+        let nlb = if nc is
+          TypeVariable(_, _, lb, _) then lb
+          else error() // impossible
+        region r in
+          let nbd = empty(r)
+          iter of lb, it => foreach(it, b => push(nbd, b))
+          iter of nbd, it => foreach(it, b => push(nlb, extrude(b, pol, lvl, freshVar, cache)))
+      else
+        push(lb, nc)
+        let nub = if nc is
+          TypeVariable(_, _, _, ub) then ub
+          else error() // impossible
+        region r in
+          let nbd = empty(r)
+          iter of ub, it => foreach(it, b => push(nbd, b))
+          iter of nbd, it => foreach(it, b => push(nub, extrude(b, pol, lvl, freshVar, cache)))
+      nc
+
+// fun solve: [outer, R extends outer] -> (List[PairOf[Type[R], Type[R]]], (Str, Int) ->{R} Type[R], HashMap[PairOf[Type[R], Type[R]], Any, R], () ->{R} HashMap[Type[R], Type[R], R]) ->{R} ()
+fun solve(constraints, freshVar, cache, genExtrCache) = if constraints is
+  Nil() then ()
   Cons(c, cs) then if c is
-    Pair(lhs, rhs) then
+    Pair(lhs, rhs) then hasOrUpdate of cache, c, () =>
       if lhs is
-        IntType then if rhs is
-          IntType then ()
-          Fun(_, _) then error()
-          Unif(id, lbs, ubs) then
-            // push(lbs, lhs)
-            // let ncs = fold(ubs, cs, (it, lst) => Cons(Pair(lhs, read(it)), lst))
-            // solve(ncs)
-            error() // TODO
-        Fun(l1, r1) then  if rhs is
-          Fun(l2, r2) then
-            solve(Cons(Pair(l2, l1), Cons(Pair(r1, r2), cs)))
-          IntType then error()
-          Unif(id, lbs, ubs) then
-            push(lbs, lhs)
+        IntType() then if rhs is
+          IntType() then ()
+          TypeVariable(name, level, lb, ub) then
+            push(lb, lhs)
             region r in
               let ncs = r.ref cs
-              iter of lbs, it =>
-                whileDo of () =>
-                  if next(it) is
-                    Some(x) then
-                      // set ncs = Cons(Pair(lhs, x), ncs)
-                      ncs := Cons(Pair(lhs, x), !ncs)
-                      true
-                    None then false
-              solve(!ncs)
-        Unif(id, lbs, ubs) then
-          // push(ubs, rhs)
-          // let ncs = fold(lbs, cs, (it, lst) => Cons(Pair(read(it), rhs), lst))
-          // solve(ncs)
-          error() // TODO
-
-
-solve(Cons(Pair(ty, ty), Nil))
-
-
-:e
-fun solve: [R] -> Stack[out PairOf[out Type[R], out Type[R]]] ->{R} ()
-fun solve = case
-  Nil then ()
-  Cons(c, cs) then if c is
-    Pair(lhs, rhs) then
-      if lhs is
-        IntType then if rhs is
-          IntType then ()
-          Fun(_, _) | Unif(_, _, _) then error()
-        Fun(l1, r1) then  if rhs is
-          Fun(l2, r2) then
-            solve(Cons(Pair(l2, l1), cs))
-            solve(Cons(Pair(r1, r2), cs))
-          IntType | Unif(_, _, _) then error()
-        Unif(id, lbs, ubs) then
-          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
-//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.238: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
-//│ ║         	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  'R ∨ 'S1  <:  S ∨ 'E
-//│ ╟── because: cannot constrain  'R  <:  'E ∨ S
-//│ ╟── because: cannot constrain  'R1  <:  'E ∨ S
-//│ ╟── because: cannot constrain  'R1  <:  'E ∨ 'S2
-//│ ╟── because: cannot constrain  R2  <:  'E ∨ 'S2
-//│ ╟── because: cannot constrain  ¬'E ∧ R2  <:  'S2
-//│ ╟── because: cannot constrain  ¬'E ∧ R2  <:  ⊥
-//│ ╟── because: cannot constrain  R2  <:  'E
-//│ ╟── because: cannot constrain  R2  <:  ¬'R3
-//│ ╟── because: cannot constrain  'R3  <:  ¬R2
-//│ ╟── because: cannot constrain  'R4  <:  ¬R2
-//│ ╙── because: cannot constrain  R2  <:  ¬R2
-//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.238: 	          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
-//│ ║         	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  'R ∨ 'S1  <:  S ∨ 'E
-//│ ╟── because: cannot constrain  'R  <:  'E ∨ S
-//│ ╟── because: cannot constrain  'R5  <:  'E ∨ S
-//│ ╟── because: cannot constrain  'R5  <:  'E ∨ 'S3
-//│ ╟── because: cannot constrain  'R4  <:  'E ∨ 'S3
-//│ ╟── because: cannot constrain  ¬'E ∧ 'R4  <:  'S3
-//│ ╟── because: cannot constrain  ¬'E ∧ 'R4  <:  ⊥
-//│ ╟── because: cannot constrain  'R4  <:  'E
-//│ ╟── because: cannot constrain  'R4  <:  ¬'R3
-//│ ╟── because: cannot constrain  'R3  <:  ¬'R4
-//│ ╟── because: cannot constrain  'R4  <:  ¬'R4
-//│ ╟── because: cannot constrain  'R4  <:  ⊥
-//│ ╙── because: cannot constrain  R2  <:  ⊥
-
-
-fun solve = case
-  Nil then ()
-  Cons(c, cs) then if c is
-    Pair(lhs, rhs) then
-      if lhs is
-        IntType then if rhs is
-          IntType then ()
-          Fun(_, _) | Unif(_, _, _) then error()
-        Fun(l1, r1) then  if rhs is
-          Fun(l2, r2) then
-            solve(Cons(Pair(l2, l1), cs))
-            solve(Cons(Pair(r1, r2), cs))
-          IntType | Unif(_, _, _) then error()
-        Unif(id, lbs, ubs) then
-          iter(lbs, it => solve(Cons(Pair(read(it), rhs), Nil)))
-
-
-solve
-//│ Type: ['Fun, 'Fun, 'eff, 'eff1, 'Unif] -> (Stack[out PairOf[out (Type[out 'Unif] ∧ Type[out 'Fun]) ∧ Type[?], out (((Type[?] ∧ Type[out 'Fun]) ∧ Type[?]) ∧ Type[?]) ∧ Type[?]]] ∧ Stack[?]) ->{(((('eff1 ∨ 'eff) ∨ 'Unif) ∨ 'eff) ∨ 'eff1) ∨ 'Unif} ()
-//│ Where:
-//│   ⊥ <: 'Fun
-//│   'Fun <: ⊤
-//│   'Fun <: ⊥
-//│   'Fun <: 'Fun
-//│   ⊥ <: 'Fun
-//│   'Fun <: 'Fun
-//│   'Fun <: ⊤
-//│   'Fun <: ⊥
-//│   'Fun <: ¬'Fun
-//│   'Fun <: 'Unif
-//│   'Fun <: 'Unif
-//│   ⊥ <: 'Unif
-//│   ⊥ <: 'eff
-//│   'Fun <: 'eff
-//│   'Fun <: 'eff
-//│   'eff <: ¬'Fun
-//│   'eff <: ¬'Fun
-//│   'eff <: ⊤
-//│   'Fun <: 'eff1
-//│   'Fun <: 'eff1
-//│   ⊥ <: 'eff1
-//│   'eff <: 'eff1
-//│   'eff1 <: 'eff
-//│   'eff1 <: ¬'Fun
-//│   'eff1 <: ¬'Fun
-//│   'eff1 <: ⊤
-//│   'Unif <: 'eff
-//│   'Unif <: 'eff1
-//│   'Unif <: ⊥
-//│   'Unif <: ⊤
-//│   'Unif <: ¬'eff
-//│   'Unif <: ¬'eff1
-//│   'Unif <: 'Fun
-
-solve(Cons(Pair(ty, ty), Nil))
-
-
-region r in
-  solve(Cons(Pair(ty, ty), Nil))
-
-
-:e
-region r in
-  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
-//│ ╔══[ERROR] Type error in application with expected type 'caseScrut
-//│ ║  l.335: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
-//│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in ⊥ out PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]]
-//│ ╟── because: cannot constrain  'A1  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
-//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
-//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)]
-//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
-//│ ╟── because: cannot constrain  Type[in 'R out 'R1]  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
-//│ ╟── because: cannot constrain  'R1  <:  'Unif ∧ 'Fun
-//│ ╟── because: cannot constrain  'R1  <:  'Unif
-//│ ╟── because: cannot constrain  r  <:  'Unif
-//│ ╙── because: cannot constrain  r  <:  ⊥
-//│ ╔══[ERROR] Type error in application with expected type 'caseScrut
-//│ ║  l.335: 	  solve(Cons(Pair(Unif(1, empty(r), empty(r)), Unif(2, empty(r), empty(r))), Nil))
-//│ ║         	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  'caseScrut
-//│ ╟── because: cannot constrain  Stack[in 'A out 'A1]  <:  Stack[in ⊥ out PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]]
-//│ ╟── because: cannot constrain  'A1  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
-//│ ╟── because: cannot constrain  PairOf[in 'A2 out 'A3, in 'B out 'B1]  <:  PairOf[in ⊥ out Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)], in ⊥ out Type[in ⊥ out ((((⊤) ∧ ('Fun1)) ∧ (⊤)) ∧ (⊤)) ∧ (⊤)]]
-//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out (('Unif) ∧ ('Fun)) ∧ (⊤)]
-//│ ╟── because: cannot constrain  'A3  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
-//│ ╟── because: cannot constrain  Type[in 'R out 'R1]  <:  Type[in ⊥ out 'Unif ∧ 'Fun]
-//│ ╟── because: cannot constrain  'R1  <:  'Unif ∧ 'Fun
-//│ ╟── because: cannot constrain  'R1  <:  'Unif
-//│ ╟── because: cannot constrain  r  <:  'Unif
-//│ ╟── because: cannot constrain  r  <:  ¬'eff
-//│ ╟── because: cannot constrain  'eff  <:  ¬r
-//│ ╙── because: cannot constrain  r  <:  ¬r
-
-
-
+              iter(ub, it => foreach(it, b => ncs := Cons(Pair(lhs, b), !ncs); ()))
+              solve(!ncs, freshVar, cache, genExtrCache)
+          else report(lhs, rhs)
+        FunctionType(arg, res) then if rhs is
+          FunctionType(arg', res') then
+            solve(Cons(Pair(arg', arg), Cons(Pair(res, res'), cs)), freshVar, cache, genExtrCache)
+          TypeVariable(name, level, lb, ub) then
+            if levelOf(lhs) <= level then
+              push(lb, lhs)
+              region r in
+                let ncs = r.ref cs
+                iter(ub, it => foreach(it, b => ncs := Cons(Pair(lhs, b), !ncs); ()))
+                solve(!ncs, freshVar, cache, genExtrCache)
+            else
+              let lhs' = extrude(lhs, true, level, freshVar, genExtrCache())
+              solve(Cons(Pair(lhs', rhs), cs), freshVar, cache, genExtrCache)
+          else report(lhs, rhs)
+        RecordType(flds) then if rhs is
+          RecordType(flds') then each(flds', p' =>
+            if p' is Pair(n', t') then
+              if find(flds, p => if p is Pair(n, t) then n === n') is
+                Some(p) then if p is Pair(n, t) then solve(Cons(Pair(t, t'), cs), freshVar, cache, genExtrCache)
+                None() then println("Missing field " ~ n' ~ " in " ~ ty2Str(lhs))
+            )
+          TypeVariable(name, level, lb, ub) then
+            if levelOf(lhs) <= level then
+              push(lb, lhs)
+              region r in
+                let ncs = r.ref cs
+                iter(ub, it => foreach(it, b => ncs := Cons(Pair(lhs, b), !ncs); ()))
+                solve(!ncs, freshVar, cache, genExtrCache)
+            else
+              let lhs' = extrude(lhs, true, level, freshVar, genExtrCache())
+              solve(Cons(Pair(lhs', rhs), cs), freshVar, cache, genExtrCache)
+          else report(lhs, rhs)
+        TypeVariable(name, level, lb, ub) then
+          if levelOf(rhs) <= level then
+            push(ub, rhs)
+            region r in
+              let ncs = r.ref cs
+              iter(lb, it => foreach(it, b => ncs := Cons(Pair(b, rhs), !ncs); ()))
+              solve(!ncs, freshVar, cache, genExtrCache)
+          else
+            let rhs' = extrude(rhs, false, level, freshVar, genExtrCache())
+            solve(Cons(Pair(lhs, rhs'), cs), freshVar, cache, genExtrCache)
 
 
 
@@ -376,6 +340,7 @@ region r in
 region r in
   let xs = empty(r)
   xs
+//│ = ArrayList([])
 //│ Type: ArrayList['A, ?]
 
 region r in
@@ -389,14 +354,20 @@ region r in // This is used to delimit the scope of mutation
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e)))
   clear(xs)
+//│ > 1
+//│ > 2
+//│ > 3
 
 :e
 region r in // This is used to delimit the scope of mutation
   let xs = empty(r)  // Creates a new mutable list in region r
   push(xs, "1"); push(xs, "2"); push(xs, "3")
   iter(xs, it => foreach(it, e => println(e); clear(xs)))
-//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, S]) ->{S ∨ 'E} 'Res
-//│ ║  l.397: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ > 1
+//│ > 2
+//│ > 3
+//│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, out S]) ->{S ∨ 'E} 'Res
+//│ ║  l.365: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S
@@ -414,16 +385,17 @@ region r in // This is used to delimit the scope of mutation
 
 // ––––––––– TO IMPROVE LATER –––––––––
 
-
 // TODO: simplify
 
 fun test(x) = case
-  IntType then TODO()
-  Fun(l1, r1) then TODO()
-  Unif(id, lbs, ubs) then clear(ubs)
+  IntType() then TODO()
+  FunctionType(l1, r1) then TODO()
+  RecordType(f) then TODO()
+  TypeVariable(id, lvl, lbs, ubs) then clear(ubs)
 
 test
-//│ Type: ['Unif] -> ⊤ -> (((Type[out 'Unif] ∧ Type[?]) ∧ Type[?]) ->{'Unif} ())
+//│ = [function test]
+//│ Type: ['TypeVariable] -> ⊤ -> ((((Type[out 'TypeVariable] ∧ Type[?]) ∧ Type[?]) ∧ Type[?]) ->{'TypeVariable} ())
 
 
 
@@ -434,15 +406,16 @@ fun solve = case
   Cons(c, cs) then if c is
     Pair(lhs, rhs) then
       if lhs is
-        IntType then if rhs is
-          IntType then ()
+        IntType() then if rhs is
+          IntType() then ()
           else error()
-        Fun(l1, r1) then  if rhs is
-          Fun(l2, r2) then
+        FunctionType(l1, r1) then  if rhs is
+          FunctionType(l2, r2) then
             solve(Cons(Pair(l2, l1), cs))
             solve(Cons(Pair(r1, r2), cs))
           else error()
-        Unif(id, lbs, ubs) then
+        RecordType(f) then TODO()
+        TypeVariable(id, lvl, lbs, ubs) then
           // Handle unification case here
           error() // Placeholder for unification logic
 
@@ -451,19 +424,21 @@ fun solve = case
   Nil then ()
   Cons(c, cs) and c is
     Pair(lhs, rhs) and lhs is
-      IntType and rhs is
-        IntType then ()
+      IntType() and rhs is
+        IntType() then ()
         else error()
-      Fun(l1, r1) and rhs is
-        Fun(l2, r2) then
+      FunctionType(l1, r1) and rhs is
+        FunctionType(l2, r2) then
           solve(Cons(Pair(l2, l1), cs))
           solve(Cons(Pair(r1, r2), cs))
         else error()
-      Unif(id, lbs, ubs) then
+      RecordType(f) then TODO()
+      TypeVariable(id, lvl, lbs, ubs) then
         // Handle unification case here
         error() // Placeholder for unification logic
 
 solve
-//│ Type: (Stack[out PairOf[out Type[?], out Type[?]]] ∧ Stack[?]) -> ()
+//│ = [function]
+//│ Type: (List[out PairOf[out Type[?], out Type[?]]] ∧ List[?]) -> ()
 
 

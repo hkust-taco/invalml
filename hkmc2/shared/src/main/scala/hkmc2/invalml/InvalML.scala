@@ -25,7 +25,7 @@ final case class InvalCtx(
   lvl: Int,
   env: HashMap[Uid[Symbol], GeneralType],
   outRegAcc: Type,
-  outVar: Option[InfVar],
+  // outVar: Option[InfVar],
   symbolCache: HashMap[Str, TypeSymbol],
 ):
   def +=(p: Symbol -> GeneralType): Unit = env += p._1.uid -> p._2
@@ -39,10 +39,11 @@ final case class InvalCtx(
   def nestReg(reg: InfVar): InvalCtx =
     copy(parent = Some(this), lvl = lvl + 1, env = HashMap.empty, outRegAcc = outRegAcc | reg)
   def nestWithOuter(outer: InfVar): InvalCtx =
-    copy(parent = Some(this), lvl = lvl + 1, env = HashMap.empty, outRegAcc = Bot, outVar = S(outer))
-  def getRegEnv: Type = outVar match
-    case S(v) => v | outRegAcc
-    case N => outRegAcc
+    copy(parent = Some(this), lvl = lvl + 1, env = HashMap.empty, outRegAcc = outRegAcc | outer)
+  // def getRegEnv: Type = outVar match
+  //   case S(v) => v | outRegAcc
+  //   case N => outRegAcc
+  def getRegEnv: Type = outRegAcc
 
 // object InvalCtx:
 def invalctx(using ctx: InvalCtx): InvalCtx = ctx
@@ -67,7 +68,7 @@ object InvalCtx:
   def refTy(ct: Type, sk: Type)(using ctx: InvalCtx): Type =
     ClassLikeType(ctx.getCls("Ref"), Wildcard(ct, ct) :: Wildcard.out(sk) :: Nil)
   def init(raise: Raise)(using Elaborator.State, Elaborator.Ctx): InvalCtx =
-    new InvalCtx(raise, summon, None, 1, HashMap.empty, Bot, N, HashMap.empty)
+    new InvalCtx(raise, summon, None, 1, HashMap.empty, Bot, HashMap.empty)
 
   val builtinOps = Elaborator.binaryOps ++ Elaborator.unaryOps ++ Elaborator.aliasOps.keySet
 end InvalCtx

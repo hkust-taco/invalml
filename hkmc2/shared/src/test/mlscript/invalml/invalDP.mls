@@ -48,20 +48,20 @@ fun concat(x, y) = @untyped x + y
 fun println: Str -> ()
 fun println(s) = @untyped print(s)
 
-fun empty: [A, R] -> Region[out R] ->{R} ArrayList[A, out R]
+fun empty: [A, R] -> Region[out R] ->{R} ArrayList[A, R]
 fun empty(r) = new ArrayList(mkArray())
 
-fun push: [A, R] -> (ArrayList[A, out R], A) ->{R} ()
+fun push: [A, R] -> (ArrayList[A, R], A) ->{R} ()
 fun push(arr, e) = @untyped arr.ArrayList#d.push(e); ()
 
-fun len: [A, R] -> (ArrayList[A, out R]) ->{R} Int
+fun len: [A, R] -> (ArrayList[A, R]) ->{R} Int
 fun len(arr) = @untyped arr.ArrayList#d.length
 
-fun iter: [Res, R, E extends ~R, T] -> (ArrayList[T, out R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
+fun iter: [Res, R, E extends ~R, T] -> (ArrayList[T, R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
 fun iter(arr, f) =
   region r in f(new Iter(arr.ArrayList#d, (r.ref 0), 1, len(arr)))
 
-fun revIter: [Res, R, E extends ~R, T] -> (ArrayList[T, out R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
+fun revIter: [Res, R, E extends ~R, T] -> (ArrayList[T, R], [S] -> Iter[T, S] ->{S | E} Res) ->{E | R} Res
 fun revIter(arr, f) =
   region r in f(new Iter(arr.ArrayList#d, (r.ref (len(arr) - 1)), 0 - 1, 0 - 1))
 
@@ -91,10 +91,10 @@ fun init(r, d1, d2, iv) =
         true
   res
     
-fun update: [A, R] -> (Array2D[A, out R], Int, Int, A) ->{R} ()
+fun update: [A, R] -> (Array2D[A, R], Int, Int, A) ->{R} ()
 fun update(arr, d1, d2, v) = splice(at(arr.Array2D#d, d1), d2, v)
 
-fun get: [A, R] -> (Array2D[A, out R], Int, Int) ->{R} A
+fun get: [A, R] -> (Array2D[A, R], Int, Int) ->{R} A
 fun get(arr, d1, d2) = at(at(arr.Array2D#d, d1), d2)
 
 fun max: (Int, Int) -> Int
