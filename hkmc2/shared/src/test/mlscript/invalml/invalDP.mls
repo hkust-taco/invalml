@@ -114,7 +114,7 @@ fun printAll(arr) =
         None then false
 
 
-fun select: [outer, R1 extends outer, R2 extends ~R1] -> (ArrayList[Interviewee, R1], Int, ArrayList[Interviewee, R2]) ->{R1 | R2} Int
+// fun select: [outer, R1 extends outer, R2 extends ~R1] -> (ArrayList[Interviewee, R1], Int, ArrayList[Interviewee, R2]) ->{R1 | R2} Int
 fun select(interviewees, budget, results) =
   region r in
     let size = len(interviewees), let i = r.ref 1
@@ -146,19 +146,15 @@ fun select(interviewees, budget, results) =
     get(dp, size, budget)
 
 select
-// //│ Type: [outer, 'A, 'R, 'T, 'R1, 'T1, 'T2, 'R2, 'A1, 'R3] -> ((ArrayList[in 'T1 out 'T2, out 'R2] ∧ ArrayList[in 'T out Interviewee ∧ 'T, out 'R1]) ∧ ArrayList['A, out 'R], Int, ArrayList['A1, out 'R3]) ->{(('R2 ∨ 'R3) ∨ 'R1) ∨ 'R} Int
-// //│ Where:
-// //│   'T <: Interviewee
-// //│   'T <: 'T1
-// //│   'R <: outer
-// //│   'R1 <: outer
-// //│   'T <: 'A
-// //│   'R2 <: ¬'R
 //│ = [function select]
-//│ Type: [outer, 'R1, 'R2] -> (ArrayList[Interviewee, out 'R1], Int, ArrayList[Interviewee, out 'R2]) ->{'R1 ∨ 'R2} Int
+//│ Type: [outer, 'A, 'R, 'T, 'R1, 'T1, 'T2, 'R2, 'A1, 'R3] -> ((ArrayList[in 'T1 out 'T2, out 'R2] ∧ ArrayList[in 'T out Interviewee ∧ 'T, out 'R1]) ∧ ArrayList['A, out 'R], Int, ArrayList['A1, out 'R3]) ->{(('R2 ∨ 'R3) ∨ 'R1) ∨ 'R} Int
 //│ Where:
+//│   'T <: Interviewee
+//│   'T <: 'T1
+//│   'R <: outer
 //│   'R1 <: outer
-//│   'R2 <: ¬'R1
+//│   'T <: 'A
+//│   'R2 <: ¬'R
 
 region r in
   let interviewees = empty(r)
@@ -264,13 +260,14 @@ region r in
 //│ > interviewee score: 30, salary: 1
 //│ > interviewee score: 50, salary: 1
 //│ = 80
-//│ ╔══[ERROR] Type error in reference with expected type ArrayList[Interviewee, out 'R2]
-//│ ║  l.245: 	  let m = select(interviewees, 4, results)
+//│ ╔══[ERROR] Type error in reference with expected type 'results
+//│ ║  l.241: 	  let m = select(interviewees, 4, results)
 //│ ║         	                                  ^^^^^^^
-//│ ╟── because: cannot constrain  ArrayList['A, in ⊥ out 'R]  <:  ArrayList[Interviewee, in ⊥ out 'R2]
-//│ ╟── because: cannot constrain  'R  <:  'R2
-//│ ╟── because: cannot constrain  'R  <:  ¬'R1
-//│ ╟── because: cannot constrain  'R1  <:  ¬'R
+//│ ╟── because: cannot constrain  ArrayList['A, in ⊥ out 'R]  <:  'results
+//│ ╟── because: cannot constrain  ArrayList['A, in ⊥ out 'R]  <:  ArrayList['A1, in ⊥ out 'R1]
+//│ ╟── because: cannot constrain  'R  <:  'R1
+//│ ╟── because: cannot constrain  'R  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R2  <:  ¬'R
 //│ ╟── because: cannot constrain  'R3  <:  ¬'R
 //│ ╟── because: cannot constrain  'R  <:  ¬'R3
 //│ ╟── because: cannot constrain  r  <:  ¬'R3
@@ -325,7 +322,7 @@ region r in
 //│ > candidates:
 //│ = 80
 //│ ╔══[ERROR] Type error in reference with expected type 'interviewees
-//│ ║  l.321: 	    let m = wrongSelect(interviewees, 4000, results)
+//│ ║  l.318: 	    let m = wrongSelect(interviewees, 4000, results)
 //│ ║         	                        ^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ArrayList['A, in ⊥ out 'R]  <:  'interviewees
 //│ ╟── because: cannot constrain  ArrayList['A, in ⊥ out 'R]  <:  ArrayList[in 'T out 'T1, in ⊥ out 'R1]
