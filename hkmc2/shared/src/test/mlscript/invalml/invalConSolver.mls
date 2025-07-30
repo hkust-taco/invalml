@@ -557,6 +557,173 @@ region r in
 //│ >   b'-_1 <: b_2
 //│ >   b_2 <: b'+_1
 
+
+fun wrongSolve(constraints, freshVar, cache, genExtrCache) = if constraints is
+  Nil() then ()
+  Cons(c, cs) then if c is
+    Pair(lhs, rhs) then hasOrUpdate of cache, c, () =>
+      if lhs is
+        IntType() then TODO()
+        FunctionType(arg, res) then TODO()
+        RecordType(flds) then TODO()
+        TypeVariable(name, level, lb, ub) then
+          if levelOf(rhs) <= level then
+            push(ub, rhs)
+            iter(lb, it => foreach(it, b => solve(Cons(Pair(b, rhs), Nil()), freshVar, cache, genExtrCache)))
+            solve(cs, freshVar, cache, genExtrCache)
+          else
+            let rhs' = extrude(rhs, false, level, freshVar, genExtrCache())
+            solve(Cons(Pair(lhs, rhs'), cs), freshVar, cache, genExtrCache)
+
+
+:e
+region r in
+  let ctx = mkHashMap(r, s => s)
+  let a = freshVar(r, ctx, "a", 1)
+  let b = freshVar(r, ctx, "a", 1)
+  let lhs = a
+  let rhs = b
+  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+  printRes(lhs, rhs)
+//│ > a_1 <: a0_1
+//│ > where: 
+//│ >   a_1 <: a0_1
+//│ ╔══[ERROR] Type error in application with expected type 'constraints
+//│ ║  l.586: 	  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+//│ ║         	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  List[in ⊥ out 'A]  <:  'constraints
+//│ ╟── because: cannot constrain  List[in ⊥ out 'A]  <:  List[in 'Cons out 'Cons1]
+//│ ╟── because: cannot constrain  'A  <:  'Cons1
+//│ ╟── because: cannot constrain  PairOf[in ⊥ out 'A1, in ⊥ out 'B]  <:  'Cons1
+//│ ╟── because: cannot constrain  PairOf[in ⊥ out 'A1, in ⊥ out 'B]  <:  PairOf[in 'Pair out 'Pair1, in 'Pair2 out 'Pair3]
+//│ ╟── because: cannot constrain  'A1  <:  'Pair1
+//│ ╟── because: cannot constrain  'A2  <:  'Pair1
+//│ ╟── because: cannot constrain  'A2  <:  Type[in 'TypeVariable out 'TypeVariable1]
+//│ ╟── because: cannot constrain  'Some  <:  Type[in 'TypeVariable out 'TypeVariable1]
+//│ ╟── because: cannot constrain  'A3  <:  Type[in 'TypeVariable out 'TypeVariable1]
+//│ ╟── because: cannot constrain  Type[in ⊥ out 'R]  <:  Type[in 'TypeVariable out 'TypeVariable1]
+//│ ╟── because: cannot constrain  'R  <:  'TypeVariable1
+//│ ╟── because: cannot constrain  'R  <:  ⊥
+//│ ╟── because: cannot constrain  'R1  <:  ⊥
+//│ ╙── because: cannot constrain  r  <:  ⊥
+//│ ╔══[ERROR] Type error in application with expected type 'constraints
+//│ ║  l.586: 	  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+//│ ║         	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  List[in ⊥ out 'A]  <:  'constraints
+//│ ╟── because: cannot constrain  List[in ⊥ out 'A]  <:  List[in 'Cons out 'Cons1]
+//│ ╟── because: cannot constrain  'A  <:  'Cons1
+//│ ╟── because: cannot constrain  PairOf[in ⊥ out 'A1, in ⊥ out 'B]  <:  'Cons1
+//│ ╟── because: cannot constrain  PairOf[in ⊥ out 'A1, in ⊥ out 'B]  <:  PairOf[in 'Pair out 'Pair1, in 'Pair2 out 'Pair3]
+//│ ╟── because: cannot constrain  'B  <:  'Pair3
+//│ ╟── because: cannot constrain  'A4  <:  'Pair3
+//│ ╟── because: cannot constrain  'A4  <:  Type[in 'TypeVariable2 out 'TypeVariable3]
+//│ ╟── because: cannot constrain  'Some1  <:  Type[in 'TypeVariable2 out 'TypeVariable3]
+//│ ╟── because: cannot constrain  'A5  <:  Type[in 'TypeVariable2 out 'TypeVariable3]
+//│ ╟── because: cannot constrain  Type[in ⊥ out 'R2]  <:  Type[in 'TypeVariable2 out 'TypeVariable3]
+//│ ╟── because: cannot constrain  'R2  <:  'TypeVariable3
+//│ ╟── because: cannot constrain  'R2  <:  'E
+//│ ╟── because: cannot constrain  'R2  <:  'E1 ∨ 'S
+//│ ╟── because: cannot constrain  ¬'E1 ∧ 'R2  <:  'S
+//│ ╟── because: cannot constrain  ¬'E1 ∧ 'R2  <:  ⊥
+//│ ╟── because: cannot constrain  'R2  <:  'E1
+//│ ╟── because: cannot constrain  'R2  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R4  <:  ¬'R2
+//│ ╟── because: cannot constrain  'TypeVariable1  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R5  <:  ¬'R2
+//│ ╟── because: cannot constrain  'R2  <:  ¬'R5
+//│ ╟── because: cannot constrain  'R6  <:  ¬'R5
+//│ ╟── because: cannot constrain  r  <:  ¬'R5
+//│ ╟── because: cannot constrain  'R5  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+//│ ╔══[ERROR] Type error in function literal with expected type 'freshVar
+//│ ║  l.586: 	  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+//│ ║         	                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  ('n, 'l) ->{'R7 ∨ 'R8 ∨ 'R9 ∨ 'R10 ∨ 'eff} (Type[in ⊥ out 'R11] ∨ 'A6 ∨ 'app)  <:  'freshVar
+//│ ╟── because: cannot constrain  ('n, 'l) ->{'R7 ∨ 'R8 ∨ 'R9 ∨ 'R10 ∨ 'eff} (Type[in ⊥ out 'R11] ∨ 'A6 ∨ 'app)  <:  (Str, Int) ->{'R12} (Type[in ⊥ out 'R12])
+//│ ╟── because: cannot constrain  Type[in ⊥ out 'R11] ∨ 'A6 ∨ 'app  <:  Type[in ⊥ out 'R12]
+//│ ╟── because: cannot constrain  'R11  <:  'R12
+//│ ╟── because: cannot constrain  r  <:  'R12
+//│ ╟── because: cannot constrain  r  <:  'TypeVariable4
+//│ ╟── because: cannot constrain  r  <:  'E2
+//│ ╟── because: cannot constrain  r  <:  'E1 ∨ 'S1
+//│ ╟── because: cannot constrain  ¬'E1 ∧ r  <:  'S1
+//│ ╟── because: cannot constrain  ¬'E1 ∧ r  <:  ⊥
+//│ ╟── because: cannot constrain  r  <:  'E1
+//│ ╟── because: cannot constrain  r  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬r
+//│ ╟── because: cannot constrain  'R4  <:  ¬r
+//│ ╟── because: cannot constrain  'R13  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+//│ ╔══[ERROR] Type error in application with expected type 'cache
+//│ ║  l.586: 	  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+//│ ║         	                                                                            ^^^^^^^^^^
+//│ ╟── because: cannot constrain  HashMap['K, 'V, in ⊥ out 'R14]  <:  'cache
+//│ ╟── because: cannot constrain  HashMap['K, 'V, in ⊥ out 'R14]  <:  HashMap[in 'K1 out 'K2, in 'V1 out 'V2, in ⊥ out 'R15]
+//│ ╟── because: cannot constrain  'R14  <:  'R15
+//│ ╟── because: cannot constrain  r  <:  'R15
+//│ ╟── because: cannot constrain  r  <:  'E1 ∨ 'S2
+//│ ╟── because: cannot constrain  ¬'E1 ∧ r  <:  'S2
+//│ ╟── because: cannot constrain  ¬'E1 ∧ r  <:  ⊥
+//│ ╟── because: cannot constrain  r  <:  'E1
+//│ ╟── because: cannot constrain  r  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬r
+//│ ╟── because: cannot constrain  'R4  <:  ¬r
+//│ ╟── because: cannot constrain  'R13  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+//│ ╔══[ERROR] Type error in application with expected type 'genExtrCache
+//│ ║  l.586: 	  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+//│ ║         	                                                                                        ^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  () ->{'R16} (HashMap['K3, 'V3, in ⊥ out 'R16])  <:  'genExtrCache
+//│ ╟── because: cannot constrain  () ->{'R16} (HashMap['K3, 'V3, in ⊥ out 'R16])  <:  () ->{'eff1} ('app1)
+//│ ╟── because: cannot constrain  HashMap['K3, 'V3, in ⊥ out 'R16]  <:  'app1
+//│ ╟── because: cannot constrain  HashMap['K3, 'V3, in ⊥ out 'R16]  <:  HashMap[in PairOf[in ⊥ out Type[in ⊥ out 'R17], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]] out PairOf[in ⊥ out Type[in ⊥ out 'R18], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]], in Type[in ⊥ out 'R17] out Type[in ⊥ out 'R18], in ⊥ out 'R18]
+//│ ╟── because: cannot constrain  'K3  <:  PairOf[in ⊥ out Type[in ⊥ out 'R18], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]]
+//│ ╟── because: cannot constrain  PairOf[in ⊥ out Type[in ⊥ out 'R17], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]]  <:  PairOf[in ⊥ out Type[in ⊥ out 'R18], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]]
+//│ ╟── because: cannot constrain  Type[in ⊥ out 'R17]  <:  Type[in ⊥ out 'R18]
+//│ ╟── because: cannot constrain  'R17  <:  'R18
+//│ ╟── because: cannot constrain  'R17  <:  'TypeVariable5
+//│ ╟── because: cannot constrain  'R17  <:  'E3
+//│ ╟── because: cannot constrain  'R17  <:  'E1 ∨ 'S3
+//│ ╟── because: cannot constrain  'R17 ∧ ¬'E1  <:  'S3
+//│ ╟── because: cannot constrain  'R17 ∧ ¬'E1  <:  ⊥
+//│ ╟── because: cannot constrain  'R17  <:  'E1
+//│ ╟── because: cannot constrain  'R12  <:  'E1
+//│ ╟── because: cannot constrain  'R19  <:  'E1
+//│ ╟── because: cannot constrain  'R19  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R19
+//│ ╟── because: cannot constrain  'R4  <:  ¬'R19
+//│ ╟── because: cannot constrain  'R13  <:  ¬'R19
+//│ ╟── because: cannot constrain  r  <:  ¬'R19
+//│ ╟── because: cannot constrain  'R19  <:  ¬r
+//│ ╙── because: cannot constrain  r  <:  ¬r
+//│ ╔══[ERROR] Type error in application with expected type 'genExtrCache
+//│ ║  l.586: 	  wrongSolve(Cons(Pair(lhs, rhs), Nil()), (n, l) => freshVar(r, ctx, n, l), genHash(r), genExtrHash(r))
+//│ ║         	                                                                                        ^^^^^^^^^^^^^^
+//│ ╟── because: cannot constrain  () ->{'R16} (HashMap['K3, 'V3, in ⊥ out 'R16])  <:  'genExtrCache
+//│ ╟── because: cannot constrain  () ->{'R16} (HashMap['K3, 'V3, in ⊥ out 'R16])  <:  () ->{'eff1} ('app1)
+//│ ╟── because: cannot constrain  HashMap['K3, 'V3, in ⊥ out 'R16]  <:  'app1
+//│ ╟── because: cannot constrain  HashMap['K3, 'V3, in ⊥ out 'R16]  <:  HashMap[in PairOf[in ⊥ out Type[in ⊥ out 'R17], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]] out PairOf[in ⊥ out Type[in ⊥ out 'R18], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]], in Type[in ⊥ out 'R17] out Type[in ⊥ out 'R18], in ⊥ out 'R18]
+//│ ╟── because: cannot constrain  'K3  <:  PairOf[in ⊥ out Type[in ⊥ out 'R18], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]]
+//│ ╟── because: cannot constrain  PairOf[in ⊥ out Type[in ⊥ out 'R17], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]]  <:  PairOf[in ⊥ out Type[in ⊥ out 'R18], in ⊥ out PairOf[in ⊥ out Int, in ⊥ out Bool]]
+//│ ╟── because: cannot constrain  Type[in ⊥ out 'R17]  <:  Type[in ⊥ out 'R18]
+//│ ╟── because: cannot constrain  'R17  <:  'R18
+//│ ╟── because: cannot constrain  'R17  <:  'TypeVariable5
+//│ ╟── because: cannot constrain  'R17  <:  'E3
+//│ ╟── because: cannot constrain  'R17  <:  'E1 ∨ 'S3
+//│ ╟── because: cannot constrain  'R17 ∧ ¬'E1  <:  'S3
+//│ ╟── because: cannot constrain  'R17 ∧ ¬'E1  <:  ⊥
+//│ ╟── because: cannot constrain  'R17  <:  'E1
+//│ ╟── because: cannot constrain  'R20  <:  'E1
+//│ ╟── because: cannot constrain  'R13  <:  'E1
+//│ ╟── because: cannot constrain  'R13  <:  ¬'R3
+//│ ╟── because: cannot constrain  'R3  <:  ¬'R13
+//│ ╟── because: cannot constrain  'R4  <:  ¬'R13
+//│ ╟── because: cannot constrain  'R13  <:  ¬'R13
+//│ ╟── because: cannot constrain  'R13  <:  ⊥
+//│ ╙── because: cannot constrain  r  <:  ⊥
+
+
 // * Paper example
 
 
@@ -590,7 +757,7 @@ region r in // This is used to delimit the scope of mutation
 //│ > 2
 //│ > 3
 //│ ╔══[ERROR] Type error in function literal with expected type (Iter['T, out S]) ->{S ∨ 'E} 'Res
-//│ ║  l.588: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
+//│ ║  l.755: 	  iter(xs, it => foreach(it, e => println(e); clear(xs)))
 //│ ║         	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //│ ╟── because: cannot constrain  'R ∨ 'E1  <:  S ∨ 'E
 //│ ╟── because: cannot constrain  'E1  <:  'E ∨ S
