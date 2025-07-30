@@ -10,7 +10,7 @@ class StackRef[T, R]
 
 fun (;) seq(_, res) = res
 
-fun allocStack: [R] -> Region[R] ->{R} Stack[R]
+fun allocStack: [R] -> Region[out R] ->{R} Stack[R]
 fun alloc: [T, R] -> (Stack[R], T) ->{R} StackRef[T, R]
 fun read: [T, R] -> StackRef[T, R] ->{R} T
 fun write: [T, R] -> (StackRef[T, R], T) ->{R} ()

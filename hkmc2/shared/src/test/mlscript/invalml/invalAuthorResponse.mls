@@ -3,8 +3,8 @@
 
 
 
-fun wield: [R] -> (Region[R]) ->{R} ()
-fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+fun wield: [R] -> (Region[out R]) ->{R} ()
+fun freeze: [R, E extends ~R, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
 
 fun (;) seq(_, res) = res
 fun rand: () -> Bool
@@ -52,8 +52,8 @@ region r in
 //│ ╔══[ERROR] Type error in reference with expected type 'r2
 //│ ║  l.51: 	  foo2(r, r)
 //│ ║        	          ^
-//│ ╟── because: cannot constrain  Region[r]  <:  'r2
-//│ ╟── because: cannot constrain  Region[r]  <:  Region['R]
+//│ ╟── because: cannot constrain  Region[in ⊥ out r]  <:  'r2
+//│ ╟── because: cannot constrain  Region[in ⊥ out r]  <:  Region[in ⊥ out 'R]
 //│ ╟── because: cannot constrain  r  <:  'R
 //│ ╟── because: cannot constrain  r  <:  'E
 //│ ╟── because: cannot constrain  r  <:  ¬'R1
@@ -114,11 +114,11 @@ region r in
 foo
 //│ Type: ['r1, 'r2, 'R, 'E, 'R1, 'eff, 'reg, 'ref] -> ('r1, 'r2, ('r1, 'r2) ->{(('E ∧ ¬'R) ∧ ¬'R1) ∧ ¬'R1} (() ->{'eff} Ref['ref, out 'reg])) ->{(('reg ∨ 'R) ∨ 'E) ∨ 'eff} Int
 //│ Where:
-//│   'r1 <: Region['R]
+//│   'r1 <: Region[out 'R]
 //│   'E <: ¬'R
 //│   'R1 <: 'E
 //│   'R1 <: ¬'R
-//│   'r2 <: Region['R1]
+//│   'r2 <: Region[out 'R1]
 //│   'ref <: Int
 
 

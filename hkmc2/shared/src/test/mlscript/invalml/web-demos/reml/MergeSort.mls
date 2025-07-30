@@ -20,7 +20,7 @@ class Pair[T, S] with
 
 
 fun
-  mkArray: [T, R] -> Region[R] ->{R} Array[T, out R]
+  mkArray: [T, R] -> Region[out R] ->{R} Array[T, out R]
   push: [T, R] -> (Array[in T, out R], T) ->{R} ()
   unshift: [T, R] -> (Array[in T, out R], T) ->{R} ()
   map: [T, S, R, E extends ~R] -> (Array[out T, out R], T ->{E} S) ->{E | R} Array[S, out R]
@@ -28,7 +28,7 @@ fun
   len: [R] -> Array[in Nothing out Any, out R] ->{R} Int
   at: [T, R] -> (Array[out T, out R], Int) ->{R} T
   slice: [T, R] -> (Array[out T, out R], Int) ->{R} Array[out T, out R]
-  concat: [T, R1, R2, R3] -> (Region[R3], Array[in T, out R1], Array[out T, out R2]) ->{R1 | R2 | R3} Array[T, out R3]
+  concat: [T, R1, R2, R3] -> (Region[out R3], Array[in T, out R1], Array[out T, out R2]) ->{R1 | R2 | R3} Array[T, out R3]
 
 
 // Matching on js array is not supported yet.
@@ -91,7 +91,7 @@ fun smsort(xs, r) =
 
 
 // Merge sort in parallel.
-fun pmsort: [R1, R2] -> (Array[out Int, out R1], Region[R2]) ->{R1 | R2} Array[Int, out R2]
+fun pmsort: [R1, R2] -> (Array[out Int, out R1], Region[out R2]) ->{R1 | R2} Array[Int, out R2]
 fun pmsort(xs, r) =
   matchTwo of xs, _ => mkArray(r), x => let res = mkArray(r) in push(res, x); res, (_, _, _) =>
     region r1 in

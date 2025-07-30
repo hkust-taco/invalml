@@ -10,8 +10,8 @@
 
 // Some utility functions:
 
-fun wield: [R] -> (Region[R]) ->{R} ()
-fun freeze: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+fun wield: [R] -> (Region[out R]) ->{R} ()
+fun freeze: [R, E extends ~R, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
 // ^ Fixed a typo in the author response (`{~R | E}` should have been `{~R & E}`)
 
 fun (;) seq(_, res) = res
@@ -71,7 +71,7 @@ region r in
 // ### Example 2
 
 
-fun foo3: [outer, R extends outer] -> Region[R] ->{outer} ()
+fun foo3: [outer, R extends outer] -> Region[out R] ->{outer} ()
 fun foo3(r1) =
   region r2 in
     freeze(r2, () =>
@@ -80,7 +80,7 @@ fun foo3(r1) =
 // ^ Fixed typos in the author response (it used the paper's syntax instead of the implementation's syntax)
 
 // In fact, this formally equivalent signature also works:
-fun foo3': [outer] -> Region[outer] ->{outer} ()
+fun foo3': [outer] -> Region[out outer] ->{outer} ()
 fun foo3'(r1) = foo3(r1)
 
 
@@ -107,7 +107,7 @@ fun foo5(f) =
     freeze(r, () => f(32))
 
 
-fun freeze2: [R, E extends ~R, T] -> (Region[R], () ->{~R & E} T) ->{R | E} T
+fun freeze2: [R, E extends ~R, T] -> (Region[out R], () ->{~R & E} T) ->{R | E} T
 
 fun foo6(f) =
   region r in
