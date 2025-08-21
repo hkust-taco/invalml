@@ -211,34 +211,15 @@ fun foo(r1) =
 //│ ║         	        ^^^^^
 //│ ║  l.206: 	  region r2 in
 //│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.181: 	    fork((() => r1.ref 1), (() => r2.ref 2))
+//│ ║  l.207: 	    fork((() => r1.ref 1), (() => r2.ref 2))
 //│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.182: 	    foo(r2)
+//│ ║  l.208: 	    foo(r2)
 //│ ║         	^^^^^^^^^^^
 //│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
-//│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  (Region[in 'r2 out 'r21]) ->{'eff1} ('app1)
-//│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  'r1
-//│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  Region[in 'reg out 'reg1]
-//│ ╟── because: cannot constrain  'r21  <:  'reg1
-//│ ╟── because: cannot constrain  ¬outer  <:  'reg1
-//│ ╟── because: cannot constrain  ¬outer  <:  ¬'r22 ∨ outer
-//│ ╟── because: cannot constrain  'r22  <:  outer
-//│ ╙── because: cannot constrain  ¬outer  <:  outer
-//│ ╔══[ERROR] Type error in function literal
-//│ ║  l.179: 	fun foo(r1) =
-//│ ║         	        ^^^^^
-//│ ║  l.180: 	  region r2 in
-//│ ║         	^^^^^^^^^^^^^^
-//│ ║  l.181: 	    fork((() => r1.ref 1), (() => r2.ref 2))
-//│ ║         	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//│ ║  l.182: 	    foo(r2)
-//│ ║         	^^^^^^^^^^^
-//│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  'foo
-//│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  (Region[in 'r2 out 'r21]) ->{'eff1} ('app1)
-//│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  'r1
-//│ ╟── because: cannot constrain  Region[in 'r2 out 'r21]  <:  Region[in 'reg out 'reg1]
-//│ ╟── because: cannot constrain  'r21  <:  'reg1
-//│ ╟── because: cannot constrain  ¬outer  <:  'reg1
+//│ ╟── because: cannot constrain  ('r1) ->{'eff} ('app)  <:  (Region[in ⊥ out 'r2]) ->{'eff1} ('app1)
+//│ ╟── because: cannot constrain  Region[in ⊥ out 'r2]  <:  'r1
+//│ ╟── because: cannot constrain  Region[in ⊥ out 'r2]  <:  Region[in ⊥ out 'reg]
+//│ ╟── because: cannot constrain  'r2  <:  'reg
 //│ ╟── because: cannot constrain  ¬outer  <:  'reg
 //│ ╟── because: cannot constrain  ¬outer  <:  ¬'r21 ∨ outer
 //│ ╟── because: cannot constrain  'r21  <:  outer

@@ -66,11 +66,6 @@ fun whileDo: [R] -> (() ->{R} Bool) ->{R} ()
 fun foreach: [E, R, T] -> (Iter[T, R], T ->{E} ()) ->{R | E} ()
 fun max(x, y) = if x < y then y else x
 
-class Option[A] with
-  constructor
-    None
-    Some(value: A)
-
 
 fun mkHashMap: [R, K, V] -> (Region[out R], K -> Str) ->{R} HashMap[K, V, R]
 fun getOrUpdate: [R, K, V, E] -> (HashMap[K, V, R], K, () ->{E} V) ->{E | R} V
