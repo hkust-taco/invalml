@@ -4,7 +4,6 @@
 //│ ————————————————————————————————————————————————————————————————————————————————
 
 // * In this file, we implement a simple constraint solver, originally presented in https://doi.org/10.1145/3410225
-// * We only implement int type, function types, and type variables for simplicity
 
 // *** infrastructures
 
@@ -55,7 +54,6 @@ class Iter[T, out R]
 class HashMap[K, V, out R]
 class MapIter[T, out R]
 
-// fun empty:   [A, R] -> Region[R] ->{R} ArrayList[out A, out R]  // TODO investigate: why does this break things?
 fun empty: [A, R] -> Region[out R] ->{R} ArrayList[A, out R]
 fun clear: [A, R] -> (ArrayList[A, out R]) ->{R} ()
 fun push: [A, R] -> (ArrayList[A, R], A) ->{R} ()

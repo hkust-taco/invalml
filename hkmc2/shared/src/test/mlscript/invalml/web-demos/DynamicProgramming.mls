@@ -3,6 +3,13 @@
 :...
 //│ ————————————————————————————————————————————————————————————————————————————————
 
+
+// * In this file, we implement a select function to select some interviewees from the candidate list within a limited budget,
+// * such that the sum of the selected interviewees' estimation scores is highest,
+// * which is a classical Knapsack problem.
+
+// *** infrastructures
+
 class Option[A] with
   constructor
     Some(x: A)
@@ -38,6 +45,7 @@ fun
   max: (Int, Int) -> Int
 
 
+// *** implementation
 
 fun format(it) =
   if it is Itv(score, salary) then
@@ -83,17 +91,7 @@ fun select(interviewees, budget, results) =
           None then false
     get(dp, size, budget)
 
-// region r in
-//   let interviewees = empty(r)
-//   push(interviewees, Itv(20, 3000))
-//   push(interviewees, Itv(50, 1000))
-//   push(interviewees, Itv(30, 1000))
-//   let results = empty(r)
-//   let m = select(interviewees, 4000, results)
-//   printAll(results)
-//   m
-
-
+// *** wrong version
 // fun wrongSelect(interviewees, budget, results) =
 //   region r in
 //     let size = len(interviewees), let i = r.ref 1
@@ -136,7 +134,7 @@ fun select(interviewees, budget, results) =
 //     printAll(results)
 //     m
 
-
+// *** example
 region r in
   let interviewees = empty(r)
   push(interviewees, Itv(40, 10))

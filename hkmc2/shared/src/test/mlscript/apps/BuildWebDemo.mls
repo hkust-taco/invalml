@@ -225,5 +225,20 @@ build of
 //│ > Processing src/test/mlscript-compile/Str.mjs
 //│ > Processing src/test/mlscript-compile/Runtime.mjs
 //│ > Collected 13 files
-//│ > There are 0 files in the output folder.
+//│ > There are 15 files in the output folder.
+//│ > Removing Examples.mjs
+//│ > Removing Iter.mjs
+//│ > Removing MLscript.mjs
+//│ > Removing MutMap.mjs
+//│ > Removing Option.mjs
+//│ > Removing Predef.mjs
+//│ > Removing Rendering.mjs
+//│ > Removing Runtime.mjs
+//│ > Removing RuntimeJS.mjs
+//│ > Removing Stack.mjs
+//│ > Removing Str.mjs
+//│ > Removing XML.mjs
+//│ > Removing index.html
+//│ > Removing main.css
+//│ > Removing main.mjs
 
