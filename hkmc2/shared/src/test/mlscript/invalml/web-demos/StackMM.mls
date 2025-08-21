@@ -14,7 +14,7 @@ fun allocStack: [E, Res] -> ([S, R] -> Stack[S, R] ->{S | R | E} Res) ->{E} Res
 fun alloc: [S, R, A] -> (Stack[S, R], A) ->{S} StackRef[A, R]
 fun read: [R, A] -> StackRef[A, R] ->{R} A
 fun write: [R, A] -> (StackRef[A, R], A) ->{R} ()
-fun push: [Res, S, R, E extends ~S] -> (Stack[S, R], [U] -> Stack[U, R] -> {U | R | E} Res) ->{E | S} Res
+fun push: [Res, S, R, E extends ~S] -> (Stack[S, R], [U] -> Stack[U, R] -> {U | R | E} Res) ->{E | R | S} Res
 
 
 allocStack of s =>
