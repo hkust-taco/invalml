@@ -8,7 +8,7 @@ This artifact implements InvalML and the type inference algorithm based on the M
 
 1. The type checker, written in Scala, can be found in an `invalml` folder in the MLscript compiler source.
 2. The test cases for InvalML and the inference algorithm can be found in an `invalml` folder in the MLscript tests.
-3. The [web demo](https://anonymous8538.github.io/780/) offers a convenient way to compile and run InvalML programs directly in the browser, eliminating the need for the toolchain dependencies. The results of compilation, such as type checking, can be viewed in the web demo.
+3. The [web demo](https://hkust-taco.github.io/invalml-web-demo/) offers a convenient way to compile and run InvalML programs directly in the browser, eliminating the need for the toolchain dependencies. The results of compilation, such as type checking, can be viewed in the web demo.
 
 The type checker is our main contribution, while the web demo illustrates the reusability of our project. We do not provide a command-line tool specifically for compiling an MLscript file.
 
@@ -103,7 +103,7 @@ Then, you can download and unpack the artifact. Suppose that the artifact is unp
 
 ### 2.3 Running the Web Demo
 
-The web demo can be accessed via the link https://anonymous8538.github.io/780/. It is designed to work on desktop computers and laptops. Please ensure that JavaScript is enabled.
+The web demo can be accessed via the link https://hkust-taco.github.io/invalml-web-demo/. It is designed to work on desktop computers and laptops. Please ensure that JavaScript is enabled.
 
 If you have already compiled and executed the test from scratch/in Docker, you can also access the web demo locally. For example, if you are using VSCode, you can install the extension [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) to start a server on your device, or use [http-server](https://www.npmjs.com/package/http-server) if you are using another editor. In the Docker image, the http-server is already installed. You can run the command `cd /home/ubuntu/web-demo && http-server .` to start the server. If you create the container by using the command `docker run -it -p 8080:x --rm mlscript/invalml`, you should be able to access the web demo via the link `http://127.0.0.1:x/`, where x is the port number you pick.
 
